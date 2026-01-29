@@ -142,11 +142,29 @@ namespace SortResort
         }
 
         /// <summary>
-        /// Get the world position for an item in a slot
+        /// Get the world position for an item in a slot (centered)
         /// </summary>
         public Vector3 GetItemWorldPosition(int slotIndex, int row)
         {
             Vector3 localPos = GetSlotLocalPosition(slotIndex, row);
+            return slotsParent.TransformPoint(localPos);
+        }
+
+        /// <summary>
+        /// Get the world position for an item sitting at the bottom of a slot
+        /// </summary>
+        public Vector3 GetItemWorldPositionBottomAligned(int slotIndex, int row, float itemHeight)
+        {
+            Vector3 localPos = GetSlotLocalPosition(slotIndex, row);
+
+            // Offset to place item at bottom of slot
+            // slotSize.y is the slot height in pixels, convert to units
+            float slotHeightUnits = slotSize.y / 100f;
+            float slotBottom = -slotHeightUnits / 2f;
+            float yOffset = slotBottom + (itemHeight / 2f);
+
+            localPos.y += yOffset;
+
             return slotsParent.TransformPoint(localPos);
         }
 
@@ -162,19 +180,24 @@ namespace SortResort
 
             // Check if slot is available
             if (!forcePlace && !IsSlotEmpty(slotIndex, 0))
+            {
+                Debug.Log($"[ItemContainer] Cannot place {item.ItemId} in slot {slotIndex} - slot not empty");
                 return false;
+            }
 
             // Check if container is locked
             if (!forcePlace && isLocked)
                 return false;
 
-            // Place the item
+            // Place the item in data structure
             slots[slotIndex][0] = item;
 
             // Update item references
             item.SetSlot(slotComponents[slotIndex], this);
-            item.transform.SetParent(slotsParent);
-            item.transform.position = GetItemWorldPosition(slotIndex, 0);
+
+            // Position item in world space at bottom of slot
+            float itemHeight = GetItemHeight(item);
+            item.transform.position = GetItemWorldPositionBottomAligned(slotIndex, 0, itemHeight);
             item.SetRowDepth(0, maxRowsPerSlot);
 
             Debug.Log($"[ItemContainer] Placed item {item.ItemId} in slot {slotIndex}");
@@ -183,6 +206,20 @@ namespace SortResort
             CheckForMatches();
 
             return true;
+        }
+
+        /// <summary>
+        /// Get the rendered height of an item in world units
+        /// </summary>
+        private float GetItemHeight(Item item)
+        {
+            var sr = item.GetComponent<SpriteRenderer>();
+            if (sr != null && sr.sprite != null)
+            {
+                // Get bounds in world space (accounts for scale)
+                return sr.bounds.size.y;
+            }
+            return 1f; // Default fallback
         }
 
         /// <summary>
@@ -208,7 +245,8 @@ namespace SortResort
             }
 
             item.transform.SetParent(slotsParent);
-            item.transform.position = GetItemWorldPosition(slotIndex, row);
+            float itemHeight = GetItemHeight(item);
+            item.transform.position = GetItemWorldPositionBottomAligned(slotIndex, row, itemHeight);
             item.SetRowDepth(row, maxRowsPerSlot);
 
             return true;
@@ -219,6 +257,15 @@ namespace SortResort
         /// </summary>
         public void RemoveItemFromSlot(Item item)
         {
+            Debug.Log($"[ItemContainer] RemoveItemFromSlot called for {item?.ItemId ?? "null"} in container {containerId}");
+
+            if (item == null)
+            {
+                Debug.LogWarning("[ItemContainer] RemoveItemFromSlot called with null item!");
+                return;
+            }
+
+            bool found = false;
             for (int s = 0; s < slots.Count; s++)
             {
                 for (int r = 0; r < slots[s].Count; r++)
@@ -227,10 +274,23 @@ namespace SortResort
                     {
                         slots[s][r] = null;
                         item.ClearSlot();
-                        Debug.Log($"[ItemContainer] Removed item {item.ItemId} from slot {s}, row {r}");
+                        Debug.Log($"[ItemContainer] Successfully removed item {item.ItemId} from slot {s}, row {r}");
+                        found = true;
                         return;
                     }
                 }
+            }
+
+            if (!found)
+            {
+                Debug.LogWarning($"[ItemContainer] Item {item.ItemId} NOT FOUND in any slot of container {containerId}!");
+                // Debug: print current slot contents
+                for (int s = 0; s < slots.Count; s++)
+                {
+                    var slotItem = slots[s][0];
+                    Debug.Log($"[ItemContainer] Slot {s}: {(slotItem != null ? slotItem.ItemId : "empty")} (ref: {(slotItem != null ? slotItem.GetInstanceID().ToString() : "null")})");
+                }
+                Debug.Log($"[ItemContainer] Looking for item ref: {item.GetInstanceID()}");
             }
         }
 
@@ -356,7 +416,7 @@ namespace SortResort
             Debug.Log($"[ItemContainer] Match found! {matchedItems.Count}x {itemId}");
 
             // Play match sound
-            AudioManager.Instance?.PlaySFX("match");
+            AudioManager.Instance?.PlayMatchSound();
 
             // Mark items as matched and remove from slots
             int matchedCount = 0;
@@ -459,8 +519,9 @@ namespace SortResort
                     var item = slots[s][r];
                     if (item != null)
                     {
-                        // Animate to new position
-                        Vector3 targetPos = GetItemWorldPosition(s, r);
+                        // Animate to new position (bottom-aligned)
+                        float itemHeight = GetItemHeight(item);
+                        Vector3 targetPos = GetItemWorldPositionBottomAligned(s, r, itemHeight);
                         LeanTween.move(item.gameObject, targetPos, 0.2f)
                             .setEase(LeanTweenType.easeOutQuad);
 
@@ -541,7 +602,7 @@ namespace SortResort
             Debug.Log($"[ItemContainer] Container {containerId} unlocked!");
 
             // Play unlock sound
-            AudioManager.Instance?.PlaySFX("unlock_sound");
+            AudioManager.Instance?.PlayUnlockSound();
 
             // Animate lock overlay
             if (lockOverlay != null)

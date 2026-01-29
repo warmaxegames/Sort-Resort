@@ -78,7 +78,9 @@ namespace SortResort
                 boxCollider = GetComponent<BoxCollider2D>();
 
             originalScale = transform.localScale;
-            originalSortingOrder = spriteRenderer.sortingOrder;
+            originalSortingOrder = spriteRenderer != null ? spriteRenderer.sortingOrder : 0;
+
+            Debug.Log($"[Item] Awake - {gameObject.name} originalScale captured: {originalScale}");
         }
 
         private void OnEnable()
@@ -100,6 +102,15 @@ namespace SortResort
             }
 
             gameObject.name = $"Item_{id}";
+        }
+
+        /// <summary>
+        /// Recapture the original scale (call after external scale changes)
+        /// </summary>
+        public void RecaptureOriginalScale()
+        {
+            originalScale = transform.localScale;
+            Debug.Log($"[Item] RecaptureOriginalScale - {itemId} new originalScale: {originalScale}");
         }
 
         /// <summary>
@@ -161,8 +172,10 @@ namespace SortResort
             if (spriteRenderer != null)
                 spriteRenderer.color = normalColor;
 
+            Debug.Log($"[Item] ApplyIdleVisuals - {itemId} resetting scale from {transform.localScale} to {originalScale}");
             transform.localScale = originalScale;
-            spriteRenderer.sortingOrder = originalSortingOrder;
+            if (spriteRenderer != null)
+                spriteRenderer.sortingOrder = originalSortingOrder;
 
             if (selectionIndicator != null)
                 selectionIndicator.SetActive(false);
@@ -203,6 +216,8 @@ namespace SortResort
             if (!IsInteractive) return false;
             if (currentState == ItemState.Dragging) return false;
 
+            Debug.Log($"[Item] StartDrag - {itemId} from container: {CurrentContainer?.ContainerId ?? "null"}, slot: {CurrentSlot?.SlotIndex.ToString() ?? "null"}");
+
             // Store original state for potential cancel
             originalPosition = transform.position;
             originalParent = transform.parent;
@@ -215,7 +230,12 @@ namespace SortResort
             // Clear from current slot (but keep references for cancel)
             if (CurrentContainer != null)
             {
+                Debug.Log($"[Item] StartDrag - Removing {itemId} from container {CurrentContainer.ContainerId}");
                 CurrentContainer.RemoveItemFromSlot(this);
+            }
+            else
+            {
+                Debug.LogWarning($"[Item] StartDrag - {itemId} has no CurrentContainer!");
             }
 
             SetState(ItemState.Dragging);
@@ -262,15 +282,23 @@ namespace SortResort
             var container = slot.ParentContainer;
             if (container == null)
             {
+                Debug.Log($"[Item] DropOnSlot FAILED - slot {slot.name} has no ParentContainer!");
                 CancelDrag();
                 return;
             }
+
+            Debug.Log($"[Item] DropOnSlot - {itemId} dropping on container {container.ContainerId}, slot {slot.SlotIndex}");
 
             // Place in new slot
             bool success = container.PlaceItemInSlot(this, slot.SlotIndex);
 
             if (success)
             {
+                Debug.Log($"[Item] DropOnSlot - {itemId} placed successfully. Resetting scale from {transform.localScale} to {originalScale}");
+
+                // Force reset scale before setting state (in case parenting changed it)
+                transform.localScale = originalScale;
+
                 SetState(ItemState.Idle);
                 GameEvents.InvokeItemDropped(gameObject);
                 OnDragEnded?.Invoke(this);
@@ -280,6 +308,7 @@ namespace SortResort
             }
             else
             {
+                Debug.Log($"[Item] DropOnSlot - {itemId} placement FAILED, canceling drag");
                 CancelDrag();
             }
         }

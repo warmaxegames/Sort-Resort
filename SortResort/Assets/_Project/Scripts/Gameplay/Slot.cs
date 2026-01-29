@@ -82,20 +82,33 @@ namespace SortResort
         {
             // Must be interactive
             if (!isInteractive)
+            {
+                Debug.Log($"[Slot] {gameObject.name} - CanAcceptDrop FALSE: not interactive");
                 return false;
+            }
 
             // Must be front row
             if (!isFrontRow)
+            {
+                Debug.Log($"[Slot] {gameObject.name} - CanAcceptDrop FALSE: not front row");
                 return false;
+            }
 
             // Must be empty
             if (!IsEmpty())
+            {
+                Debug.Log($"[Slot] {gameObject.name} - CanAcceptDrop FALSE: not empty");
                 return false;
+            }
 
             // Container must not be locked
             if (parentContainer != null && parentContainer.IsLocked)
+            {
+                Debug.Log($"[Slot] {gameObject.name} - CanAcceptDrop FALSE: container locked");
                 return false;
+            }
 
+            Debug.Log($"[Slot] {gameObject.name} - CanAcceptDrop TRUE");
             return true;
         }
 

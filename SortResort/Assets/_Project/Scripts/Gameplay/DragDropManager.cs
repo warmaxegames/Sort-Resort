@@ -327,12 +327,18 @@ namespace SortResort
         {
             int hitCount = Physics2D.RaycastNonAlloc(worldPos, Vector2.zero, raycastHits, 0f, slotLayerMask);
 
+            if (debugMode)
+                Debug.Log($"[DragDrop] RaycastForSlot at {worldPos}, hits: {hitCount}, layerMask: {slotLayerMask.value}");
+
             Slot closestSlot = null;
             float closestDistance = float.MaxValue;
 
             for (int i = 0; i < hitCount; i++)
             {
                 var slot = raycastHits[i].collider.GetComponent<Slot>();
+                if (debugMode)
+                    Debug.Log($"[DragDrop] Hit {i}: {raycastHits[i].collider.name}, has Slot: {slot != null}");
+
                 if (slot != null)
                 {
                     float distance = Vector3.Distance(worldPos, slot.transform.position);
