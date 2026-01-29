@@ -43,7 +43,7 @@
 	  "unlock_animation": "fade_in",
 	  "initial_items": [
 		{"id": "sandals", "row": 0, "slot": 0},
-		{"id": "greencoconut", "row": 0, "slot": 1},
+		{"id": "greencoconut", "row": 0, "slot": 1}
 	]
 	},
 	{
@@ -65,7 +65,7 @@
 	  "unlock_animation": "fade_out",
 	  "initial_items": [
 		{"id": "sandals", "row": 0, "slot": 0}
-	]
+	  ]
 	}
   ]
 }

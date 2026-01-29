@@ -279,19 +279,33 @@ namespace SortResort
             Vector3 worldPos = gameCamera.ScreenToWorldPoint(screenPos);
             worldPos.z = 0;
 
+            Debug.Log($"[DragDropManager] FindBestDropSlot at world pos: {worldPos}, currentHovered: {currentHoveredSlot?.name ?? "none"}");
+
             // First check current hovered slot
-            if (currentHoveredSlot != null && currentHoveredSlot.CanAcceptDrop())
+            if (currentHoveredSlot != null)
             {
-                return currentHoveredSlot;
+                bool canAccept = currentHoveredSlot.CanAcceptDrop();
+                Debug.Log($"[DragDropManager] Hovered slot {currentHoveredSlot.name} CanAcceptDrop: {canAccept}");
+                if (canAccept)
+                {
+                    return currentHoveredSlot;
+                }
             }
 
             // Raycast for slots
             Slot slot = RaycastForSlot(worldPos);
-            if (slot != null && slot.CanAcceptDrop())
+            Debug.Log($"[DragDropManager] Raycast found slot: {slot?.name ?? "none"}");
+            if (slot != null)
             {
-                return slot;
+                bool canAccept = slot.CanAcceptDrop();
+                Debug.Log($"[DragDropManager] Raycast slot {slot.name} CanAcceptDrop: {canAccept}");
+                if (canAccept)
+                {
+                    return slot;
+                }
             }
 
+            Debug.Log($"[DragDropManager] No valid drop slot found");
             return null;
         }
 

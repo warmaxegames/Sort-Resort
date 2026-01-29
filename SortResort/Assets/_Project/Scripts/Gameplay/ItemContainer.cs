@@ -36,7 +36,7 @@ namespace SortResort
 
         [Header("Slot Configuration")]
         [SerializeField] private float slotSpacing = 128f;
-        [SerializeField] private float rowDepthOffset = 10f;
+        [SerializeField] private float rowDepthOffset = 40f; // Vertical offset for back row items (in pixels)
 
         // Slot data structure: slots[slotIndex][row] = Item
         private List<List<Item>> slots = new List<List<Item>>();
@@ -80,10 +80,10 @@ namespace SortResort
 
             // Set position - convert from Godot pixel coords to Unity world units
             // Godot uses top-left origin with Y increasing downward
-            // Assume Godot viewport ~1024x768, convert to Unity centered coords
+            // Portrait phone layout: center around (540, 600) for typical level layouts
             Vector3 godotPos = definition.position.ToVector3();
-            float unityX = (godotPos.x - 512f) / 100f;  // Center X, 100 pixels per unit
-            float unityY = (400f - godotPos.y) / 100f;  // Flip Y axis, offset for center
+            float unityX = (godotPos.x - 540f) / 100f;  // Center X (portrait phone center ~540)
+            float unityY = (600f - godotPos.y) / 100f;  // Flip Y axis, center around 600 for portrait
             transform.position = new Vector3(unityX, unityY, 0f);
             Debug.Log($"[ItemContainer] {definition.id} position: Godot({godotPos.x}, {godotPos.y}) -> Unity({unityX:F2}, {unityY:F2})");
 
@@ -93,8 +93,19 @@ namespace SortResort
             // Load container sprite
             LoadContainerSprite(definition.container_image);
 
-            // Setup lock overlay
+            // Create and setup lock overlay if container is locked
+            if (isLocked)
+            {
+                CreateLockOverlay(definition.lock_overlay_image);
+            }
             UpdateLockVisuals();
+
+            // Setup movement if needed
+            if (definition.is_moving || definition.is_falling)
+            {
+                var movement = gameObject.AddComponent<ContainerMovement>();
+                movement.Initialize(definition);
+            }
 
             gameObject.name = $"Container_{containerId}";
         }
@@ -323,7 +334,7 @@ namespace SortResort
         /// <summary>
         /// Remove an item from its slot
         /// </summary>
-        public void RemoveItemFromSlot(Item item)
+        public void RemoveItemFromSlot(Item item, bool triggerRowAdvance = true)
         {
             Debug.Log($"[ItemContainer] RemoveItemFromSlot called for {item?.ItemId ?? "null"} in container {containerId}");
 
@@ -334,6 +345,7 @@ namespace SortResort
             }
 
             bool found = false;
+            int removedFromSlot = -1;
             for (int s = 0; s < slots.Count; s++)
             {
                 for (int r = 0; r < slots[s].Count; r++)
@@ -344,9 +356,11 @@ namespace SortResort
                         item.ClearSlot();
                         Debug.Log($"[ItemContainer] Successfully removed item {item.ItemId} from slot {s}, row {r}");
                         found = true;
-                        return;
+                        removedFromSlot = s;
+                        break;
                     }
                 }
+                if (found) break;
             }
 
             if (!found)
@@ -359,6 +373,16 @@ namespace SortResort
                     Debug.Log($"[ItemContainer] Slot {s}: {(slotItem != null ? slotItem.ItemId : "empty")} (ref: {(slotItem != null ? slotItem.GetInstanceID().ToString() : "null")})");
                 }
                 Debug.Log($"[ItemContainer] Looking for item ref: {item.GetInstanceID()}");
+            }
+
+            // Check if we should trigger row advancement (only when ALL front slots are empty)
+            if (found && triggerRowAdvance)
+            {
+                // Delay slightly to allow drag to complete
+                LeanTween.delayedCall(0.1f, () =>
+                {
+                    CheckAndAdvanceAllRows();
+                });
             }
         }
 
@@ -501,8 +525,8 @@ namespace SortResort
                 {
                     Debug.Log($"[ItemContainer] Processing item {item.ItemId}, current state: {item.CurrentState}");
 
-                    // Clear from slot data
-                    RemoveItemFromSlot(item);
+                    // Clear from slot data (don't trigger row advance - we'll do it after animation)
+                    RemoveItemFromSlot(item, triggerRowAdvance: false);
 
                     // Play match animation
                     item.MarkAsMatched();
@@ -511,14 +535,8 @@ namespace SortResort
             }
 
             // Fire event and increment match count
+            // Note: LevelManager listens to OnItemsMatched and notifies ALL locked containers
             OnItemsMatched?.Invoke(this, itemId, matchedCount);
-            GameManager.Instance?.IncrementMatchCount(itemId);
-
-            // Update lock progress
-            if (isLocked)
-            {
-                IncrementUnlockProgress();
-            }
 
             // Advance rows after a short delay
             LeanTween.delayedCall(0.3f, () =>
@@ -538,50 +556,124 @@ namespace SortResort
         #region Row Advancement
 
         /// <summary>
-        /// Advance items from back rows to front
+        /// Check if ALL front row slots are empty, and if so, advance all items forward
         /// </summary>
-        public void AdvanceRows()
+        public void CheckAndAdvanceAllRows()
+        {
+            // Check if ALL front row slots are empty
+            bool allFrontEmpty = true;
+            bool anyBackItems = false;
+
+            for (int s = 0; s < slots.Count; s++)
+            {
+                if (slots[s][0] != null)
+                {
+                    allFrontEmpty = false;
+                    break;
+                }
+
+                // Check if there are any back row items
+                for (int r = 1; r < slots[s].Count; r++)
+                {
+                    if (slots[s][r] != null)
+                    {
+                        anyBackItems = true;
+                        break;
+                    }
+                }
+            }
+
+            // Only advance if ALL front slots are empty AND there are back items to advance
+            if (allFrontEmpty && anyBackItems)
+            {
+                Debug.Log($"[ItemContainer] All front slots empty - advancing all rows");
+                AdvanceAllRowsForward();
+            }
+        }
+
+        /// <summary>
+        /// Advance all items from row 1 to row 0 across all slots
+        /// </summary>
+        private void AdvanceAllRowsForward()
         {
             bool anyAdvanced = false;
 
             for (int s = 0; s < slots.Count; s++)
             {
-                // If front row is empty and there are back row items
-                if (slots[s][0] == null)
+                // Find first non-null row in this slot
+                for (int r = 1; r < slots[s].Count; r++)
                 {
-                    // Find first non-null item in back rows
-                    for (int r = 1; r < slots[s].Count; r++)
+                    if (slots[s][r] != null)
                     {
-                        if (slots[s][r] != null)
+                        // Move all items forward by r positions
+                        for (int moveRow = r; moveRow < slots[s].Count; moveRow++)
                         {
-                            // Move all items forward
-                            for (int moveRow = r; moveRow < slots[s].Count; moveRow++)
+                            int targetRow = moveRow - r;
+                            if (targetRow < slots[s].Count && moveRow < slots[s].Count)
                             {
-                                int targetRow = moveRow - r;
-                                if (targetRow < slots[s].Count && moveRow < slots[s].Count)
-                                {
-                                    slots[s][targetRow] = slots[s][moveRow];
-                                    if (moveRow != targetRow)
-                                        slots[s][moveRow] = null;
-                                }
+                                slots[s][targetRow] = slots[s][moveRow];
+                                if (moveRow != targetRow)
+                                    slots[s][moveRow] = null;
                             }
-                            anyAdvanced = true;
-                            break;
                         }
+                        anyAdvanced = true;
+                        break;
                     }
                 }
             }
 
             if (anyAdvanced)
             {
-                // Update all item positions and visuals
+                // Update all item positions with animation
                 UpdateAllItemPositions();
 
                 OnRowAdvanced?.Invoke(this);
 
-                // Check for new matches
-                LeanTween.delayedCall(0.2f, CheckForMatches);
+                // Check for new matches after animation
+                LeanTween.delayedCall(0.3f, CheckForMatches);
             }
+        }
+
+        /// <summary>
+        /// Update positions and visuals for items in a specific slot
+        /// </summary>
+        private void UpdateSlotItemPositions(int slotIndex)
+        {
+            for (int r = 0; r < slots[slotIndex].Count; r++)
+            {
+                var item = slots[slotIndex][r];
+                if (item != null)
+                {
+                    // Animate to new position (bottom-aligned)
+                    float itemHeight = GetItemHeight(item);
+                    Vector3 targetPos = GetItemWorldPositionBottomAligned(slotIndex, r, itemHeight);
+
+                    LeanTween.move(item.gameObject, targetPos, 0.25f)
+                        .setEase(LeanTweenType.easeOutQuad);
+
+                    // Update row depth visuals
+                    item.SetRowDepth(r, maxRowsPerSlot);
+
+                    // Update slot reference for front row
+                    if (r == 0 && slotIndex < slotComponents.Count)
+                    {
+                        item.SetSlot(slotComponents[slotIndex], this);
+                    }
+                    else
+                    {
+                        item.SetSlot(null, this);
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Advance items from back rows to front (all slots) - only if ALL front slots are empty
+        /// </summary>
+        public void AdvanceRows()
+        {
+            // Use the same logic as CheckAndAdvanceAllRows
+            CheckAndAdvanceAllRows();
         }
 
         /// <summary>
@@ -622,6 +714,92 @@ namespace SortResort
         #endregion
 
         #region Lock System
+
+        /// <summary>
+        /// Create the lock overlay GameObject with sprite and countdown
+        /// </summary>
+        private void CreateLockOverlay(string lockOverlayImage)
+        {
+            // Create lock overlay parent
+            lockOverlay = new GameObject("LockOverlay");
+            lockOverlay.transform.SetParent(transform);
+            lockOverlay.transform.localPosition = Vector3.zero;
+
+            // Create lock sprite
+            var lockSpriteGO = new GameObject("LockSprite");
+            lockSpriteGO.transform.SetParent(lockOverlay.transform);
+            lockSpriteGO.transform.localPosition = Vector3.zero;
+
+            var lockSpriteRenderer = lockSpriteGO.AddComponent<SpriteRenderer>();
+            lockSpriteRenderer.sortingOrder = 50; // Above items
+
+            // Try to load lock overlay sprite
+            string[] spritePaths = {
+                $"Sprites/Containers/{lockOverlayImage}",
+                $"Sprites/UI/Overlays/{lockOverlayImage}",
+                "Sprites/Containers/base_lockoverlay",
+                "Sprites/UI/Overlays/base_lockoverlay"
+            };
+
+            Sprite lockSprite = null;
+            foreach (var path in spritePaths)
+            {
+                lockSprite = Resources.Load<Sprite>(path);
+                if (lockSprite != null)
+                {
+                    Debug.Log($"[ItemContainer] Loaded lock overlay from: {path}");
+                    break;
+                }
+            }
+
+            if (lockSprite != null)
+            {
+                lockSpriteRenderer.sprite = lockSprite;
+
+                // Scale to fit container
+                float containerWidth = slotCount * slotSpacing / 100f * 1.2f;
+                float spriteWidth = lockSprite.bounds.size.x;
+                float scale = containerWidth / spriteWidth;
+                lockSpriteGO.transform.localScale = new Vector3(scale, scale, 1f);
+            }
+            else
+            {
+                // Fallback: create a semi-transparent dark overlay
+                Debug.LogWarning($"[ItemContainer] Lock overlay sprite not found, using fallback");
+                lockSpriteRenderer.color = new Color(0.1f, 0.1f, 0.1f, 0.85f);
+
+                // Create a simple square sprite
+                var tex = new Texture2D(1, 1);
+                tex.SetPixel(0, 0, Color.white);
+                tex.Apply();
+                lockSpriteRenderer.sprite = Sprite.Create(tex, new Rect(0, 0, 1, 1), new Vector2(0.5f, 0.5f), 1);
+
+                // Scale to cover container
+                float width = slotCount * slotSpacing / 100f * 1.3f;
+                float height = slotSize.y / 100f * 1.2f;
+                lockSpriteGO.transform.localScale = new Vector3(width, height, 1f);
+            }
+
+            // Create countdown text - positioned higher to center in lock overlay image
+            var countdownGO = new GameObject("CountdownText");
+            countdownGO.transform.SetParent(lockOverlay.transform);
+            countdownGO.transform.localPosition = new Vector3(0, 0.6f, -0.1f);
+
+            // Use TextMeshPro for the countdown
+            lockCountText = countdownGO.AddComponent<TMPro.TextMeshPro>();
+            lockCountText.text = unlockMatchesRequired.ToString();
+            lockCountText.fontSize = 4;
+            lockCountText.fontStyle = TMPro.FontStyles.Bold;
+            lockCountText.alignment = TMPro.TextAlignmentOptions.Center;
+            lockCountText.color = Color.black;
+            lockCountText.sortingOrder = 51; // Above lock sprite
+
+            // Add outline for readability
+            lockCountText.outlineWidth = 0.15f;
+            lockCountText.outlineColor = new Color(1f, 1f, 1f, 0.5f);
+
+            Debug.Log($"[ItemContainer] Created lock overlay for {containerId}, matches required: {unlockMatchesRequired}");
+        }
 
         /// <summary>
         /// Setup lock overlay visuals
@@ -681,11 +859,46 @@ namespace SortResort
             // Play unlock sound
             AudioManager.Instance?.PlayUnlockSound();
 
-            // Animate lock overlay
+            // Animate lock overlay with scale and fade
             if (lockOverlay != null)
             {
-                LeanTween.alpha(lockOverlay, 0f, 0.3f)
-                    .setOnComplete(() => lockOverlay.SetActive(false));
+                // Scale up and fade out animation
+                LeanTween.scale(lockOverlay, Vector3.one * 1.3f, 0.4f)
+                    .setEase(LeanTweenType.easeOutBack);
+
+                // Fade out all sprite renderers in lock overlay
+                var spriteRenderers = lockOverlay.GetComponentsInChildren<SpriteRenderer>();
+                foreach (var sr in spriteRenderers)
+                {
+                    LeanTween.value(sr.gameObject, sr.color.a, 0f, 0.4f)
+                        .setOnUpdate((float val) => {
+                            if (sr != null)
+                            {
+                                var c = sr.color;
+                                sr.color = new Color(c.r, c.g, c.b, val);
+                            }
+                        });
+                }
+
+                // Fade out text components
+                var textComponents = lockOverlay.GetComponentsInChildren<TMPro.TextMeshPro>();
+                foreach (var tmp in textComponents)
+                {
+                    LeanTween.value(tmp.gameObject, tmp.color.a, 0f, 0.4f)
+                        .setOnUpdate((float val) => {
+                            if (tmp != null)
+                            {
+                                var c = tmp.color;
+                                tmp.color = new Color(c.r, c.g, c.b, val);
+                            }
+                        });
+                }
+
+                // Disable after animation
+                LeanTween.delayedCall(0.5f, () => {
+                    if (lockOverlay != null)
+                        lockOverlay.SetActive(false);
+                });
             }
 
             // Enable slot interactivity

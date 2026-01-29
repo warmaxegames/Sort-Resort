@@ -268,10 +268,11 @@ namespace SortResort
             dragOffset = transform.position - pointerWorldPosition;
 
             // Clear from current slot (but keep references for cancel)
+            // Don't trigger row advance yet - wait until item is successfully placed elsewhere
             if (CurrentContainer != null)
             {
                 Debug.Log($"[Item] StartDrag - Removing {itemId} from container {CurrentContainer.ContainerId}");
-                CurrentContainer.RemoveItemFromSlot(this);
+                CurrentContainer.RemoveItemFromSlot(this, triggerRowAdvance: false);
             }
             else
             {
@@ -350,6 +351,13 @@ namespace SortResort
 
                 // Increment move count
                 GameManager.Instance?.IncrementMoveCount();
+
+                // Now that item is successfully placed, check if original container needs row advancement
+                // This only triggers if ALL front slots in the original container are now empty
+                if (originalContainer != null)
+                {
+                    originalContainer.CheckAndAdvanceAllRows();
+                }
             }
             else
             {

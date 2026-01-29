@@ -54,7 +54,35 @@ namespace SortResort
             DontDestroyOnLoad(gameObject);
 
             InitializeAudioSources();
+            LoadAudioClipsFromResources();
             LoadVolumeSettings();
+        }
+
+        /// <summary>
+        /// Auto-load audio clips from Resources if not assigned in inspector.
+        /// Audio files should be in Assets/_Project/Resources/Audio/
+        /// </summary>
+        private void LoadAudioClipsFromResources()
+        {
+            // SFX
+            if (itemDragClip == null)
+                itemDragClip = Resources.Load<AudioClip>("Audio/SFX/drag");
+            if (itemDropClip == null)
+                itemDropClip = Resources.Load<AudioClip>("Audio/SFX/drop");
+            if (matchClip == null)
+                matchClip = Resources.Load<AudioClip>("Audio/SFX/match");
+            if (unlockClip == null)
+                unlockClip = Resources.Load<AudioClip>("Audio/SFX/unlock_sound");
+            if (victoryClip == null)
+                victoryClip = Resources.Load<AudioClip>("Audio/SFX/victory");
+            if (starEarnedClip == null)
+                starEarnedClip = Resources.Load<AudioClip>("Audio/SFX/3star");
+
+            // UI
+            if (buttonClickClip == null)
+                buttonClickClip = Resources.Load<AudioClip>("Audio/UI/button_click");
+
+            Debug.Log($"[AudioManager] Audio clips loaded - match:{matchClip != null}, victory:{victoryClip != null}, button:{buttonClickClip != null}");
         }
 
         private void InitializeAudioSources()

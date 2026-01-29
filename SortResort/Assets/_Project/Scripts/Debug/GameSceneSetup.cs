@@ -10,6 +10,8 @@ namespace SortResort
     /// 1. Run Tools > Sort Resort > Generate Prefabs (creates prefabs in Assets/_Project/Prefabs/)
     /// 2. Move prefabs to Resources: Assets/_Project/Resources/Prefabs/
     /// 3. Sprites should be in: Assets/_Project/Resources/Sprites/Items/{World}/
+    /// 4. Audio should be in: Assets/_Project/Resources/Audio/{SFX|UI|Music}/
+    ///    (Copy from Assets/_Project/Audio/ to Assets/_Project/Resources/Audio/)
     /// </summary>
     public class GameSceneSetup : MonoBehaviour
     {
@@ -45,9 +47,19 @@ namespace SortResort
             }
 
             mainCamera.orthographic = true;
-            mainCamera.orthographicSize = 6f;
+
+            // Portrait phone aspect ratio (9:16 or similar)
+            // Increase orthographic size for taller viewport
+            mainCamera.orthographicSize = 8f;
             mainCamera.transform.position = new Vector3(0, 0, -10);
             mainCamera.backgroundColor = new Color(0.4f, 0.7f, 0.9f);
+
+            // Force portrait aspect ratio in editor for testing
+            // Target: 9:16 (1080x1920) phone resolution
+            #if UNITY_EDITOR
+            // Note: In editor, you can set Game view to a portrait resolution
+            // like 1080x1920 or 750x1334 (iPhone) for proper testing
+            #endif
 
             // Add URP camera data if needed
             var urpCameraData = mainCamera.GetComponent<UnityEngine.Rendering.Universal.UniversalAdditionalCameraData>();
@@ -69,6 +81,12 @@ namespace SortResort
             gmGO.AddComponent<GameManager>();
             Debug.Log("[GameSceneSetup] GameManager created");
 
+            // ScreenManager (for responsive scaling)
+            var screenMgrGO = new GameObject("ScreenManager");
+            screenMgrGO.transform.SetParent(managersRoot.transform);
+            screenMgrGO.AddComponent<ScreenManager>();
+            Debug.Log("[GameSceneSetup] ScreenManager created");
+
             // DragDropManager
             var ddGO = new GameObject("DragDropManager");
             ddGO.transform.SetParent(managersRoot.transform);
@@ -82,6 +100,25 @@ namespace SortResort
             var lm = lmGO.AddComponent<LevelManager>();
             ConfigureLevelManager(lm);
             Debug.Log("[GameSceneSetup] LevelManager created");
+
+            // UIManager
+            var uiGO = new GameObject("UIManager");
+            uiGO.transform.SetParent(managersRoot.transform);
+            var uim = uiGO.AddComponent<UIManager>();
+            uim.CreateRuntimeUI();
+            Debug.Log("[GameSceneSetup] UIManager created with runtime UI");
+
+            // AudioManager
+            var amGO = new GameObject("AudioManager");
+            amGO.transform.SetParent(managersRoot.transform);
+            amGO.AddComponent<AudioManager>();
+            Debug.Log("[GameSceneSetup] AudioManager created");
+
+            // SaveManager
+            var smGO = new GameObject("SaveManager");
+            smGO.transform.SetParent(managersRoot.transform);
+            smGO.AddComponent<SaveManager>();
+            Debug.Log("[GameSceneSetup] SaveManager created");
         }
 
         private void ConfigureDragDropManager(DragDropManager ddm)
@@ -135,63 +172,12 @@ namespace SortResort
         {
             yield return null; // Wait one frame
 
-            if (LevelManager.Instance != null)
-            {
-                GameManager.Instance?.SetState(GameState.Playing);
-                LevelManager.Instance.LoadLevel(worldId, levelNumber);
-                Debug.Log($"[GameSceneSetup] Loaded level: {worldId} #{levelNumber}");
-            }
-            else
-            {
-                Debug.LogError("[GameSceneSetup] LevelManager.Instance is null!");
-            }
+            // Don't auto-load a level - let the Level Select screen handle it
+            // The UIManager shows the level select screen by default
+            GameManager.Instance?.SetState(GameState.LevelSelection);
+            Debug.Log("[GameSceneSetup] Ready - showing level select screen");
         }
 
-        private void OnGUI()
-        {
-            GUILayout.BeginArea(new Rect(10, 10, 400, 250));
-
-            GUIStyle boxStyle = new GUIStyle(GUI.skin.box);
-            boxStyle.normal.background = MakeTex(2, 2, new Color(0, 0, 0, 0.7f));
-
-            GUILayout.BeginVertical(boxStyle);
-            GUILayout.Label($"<size=16><b>SORT RESORT - {worldId} Level {levelNumber}</b></size>",
-                new GUIStyle(GUI.skin.label) { richText = true });
-            GUILayout.Space(5);
-
-            if (GameManager.Instance != null)
-            {
-                GUILayout.Label($"Moves: {GameManager.Instance.CurrentMoveCount}");
-                GUILayout.Label($"Matches: {GameManager.Instance.CurrentMatchCount}");
-            }
-
-            if (LevelManager.Instance != null)
-            {
-                GUILayout.Label($"Items Remaining: {LevelManager.Instance.ItemsRemaining}");
-            }
-
-            GUILayout.Space(10);
-            GUILayout.Label("Drag items to match 3 of the same type!");
-
-            GUILayout.Space(10);
-            if (GUILayout.Button("Restart Level"))
-            {
-                LevelManager.Instance?.RestartLevel();
-            }
-
-            GUILayout.EndVertical();
-            GUILayout.EndArea();
-        }
-
-        private Texture2D MakeTex(int width, int height, Color col)
-        {
-            Color[] pix = new Color[width * height];
-            for (int i = 0; i < pix.Length; i++)
-                pix[i] = col;
-            Texture2D result = new Texture2D(width, height);
-            result.SetPixels(pix);
-            result.Apply();
-            return result;
-        }
+        // UI is now handled by UIManager - OnGUI removed
     }
 }

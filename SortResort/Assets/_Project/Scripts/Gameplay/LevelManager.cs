@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -66,17 +67,37 @@ namespace SortResort
             }
             Instance = this;
 
+            // Create game world parent for responsive scaling
+            var gameWorldGO = new GameObject("--- GAME WORLD ---");
+
             // Create parents if not assigned
             if (containersParent == null)
             {
                 var go = new GameObject("Containers");
+                go.transform.SetParent(gameWorldGO.transform);
                 containersParent = go.transform;
             }
 
             if (floatingItemsParent == null)
             {
                 var go = new GameObject("FloatingItems");
+                go.transform.SetParent(gameWorldGO.transform);
                 floatingItemsParent = go.transform;
+            }
+
+            // Register with ScreenManager for responsive scaling
+            StartCoroutine(RegisterWithScreenManager(gameWorldGO.transform));
+        }
+
+        private System.Collections.IEnumerator RegisterWithScreenManager(Transform gameWorldParent)
+        {
+            // Wait for ScreenManager to be available
+            yield return null;
+
+            if (ScreenManager.Instance != null)
+            {
+                ScreenManager.Instance.SetGameWorldParent(gameWorldParent);
+                Debug.Log("[LevelManager] Registered game world with ScreenManager");
             }
         }
 
@@ -377,12 +398,23 @@ namespace SortResort
         private void OnContainerItemsMatched(ItemContainer container, string itemId, int count)
         {
             matchesMade++;
-            UpdateItemsRemaining();
+            // NOTE: Don't call UpdateItemsRemaining() here - it's called from ReturnItemToPool()
+            // after the match animation completes. Calling it here triggers level complete
+            // while items are still animating on screen.
 
             Debug.Log($"[LevelManager] Match! {count}x {itemId}, total matches: {matchesMade}");
 
             // Increment match count in GameManager
             GameManager.Instance?.IncrementMatchCount(itemId);
+
+            // Notify ALL locked containers about the match (for unlock countdown)
+            foreach (var c in containers)
+            {
+                if (c != null && c.IsLocked)
+                {
+                    c.IncrementUnlockProgress();
+                }
+            }
         }
 
         private void OnContainerBecameEmpty(ItemContainer container)

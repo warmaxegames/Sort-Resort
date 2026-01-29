@@ -31,9 +31,22 @@ namespace SortResort
         public bool is_locked;
         public int unlock_matches_required;
         public string lock_overlay_image;
+        public string unlock_animation;
+
+        // Movement settings
         public bool is_moving;
         public string move_type; // "carousel", "back_and_forth"
+        public string move_direction; // "left", "right", "up", "down"
+        public float move_speed = 50f;
+        public float move_distance = 200f;
         public string track_id;
+
+        // Falling settings
+        public bool is_falling;
+        public float fall_speed = 100f;
+        public float fall_target_y;
+        public bool despawn_on_match;
+
         public List<ItemPlacement> initial_items;
     }
 

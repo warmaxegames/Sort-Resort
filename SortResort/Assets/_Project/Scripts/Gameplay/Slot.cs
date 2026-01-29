@@ -80,35 +80,38 @@ namespace SortResort
         /// </summary>
         public bool CanAcceptDrop()
         {
+            string containerName = parentContainer?.ContainerId ?? "unknown";
+
             // Must be interactive
             if (!isInteractive)
             {
-                Debug.Log($"[Slot] {gameObject.name} - CanAcceptDrop FALSE: not interactive");
+                Debug.Log($"[Slot] {containerName}/Slot_{slotIndex} - CanAcceptDrop FALSE: not interactive (collider enabled: {boxCollider?.enabled})");
                 return false;
             }
 
             // Must be front row
             if (!isFrontRow)
             {
-                Debug.Log($"[Slot] {gameObject.name} - CanAcceptDrop FALSE: not front row");
+                Debug.Log($"[Slot] {containerName}/Slot_{slotIndex} - CanAcceptDrop FALSE: not front row (row={row})");
                 return false;
             }
 
             // Must be empty
             if (!IsEmpty())
             {
-                Debug.Log($"[Slot] {gameObject.name} - CanAcceptDrop FALSE: not empty");
+                var itemInSlot = parentContainer?.GetItemInSlot(slotIndex, row);
+                Debug.Log($"[Slot] {containerName}/Slot_{slotIndex} - CanAcceptDrop FALSE: not empty (has item: {itemInSlot?.ItemId ?? "null"})");
                 return false;
             }
 
             // Container must not be locked
             if (parentContainer != null && parentContainer.IsLocked)
             {
-                Debug.Log($"[Slot] {gameObject.name} - CanAcceptDrop FALSE: container locked");
+                Debug.Log($"[Slot] {containerName}/Slot_{slotIndex} - CanAcceptDrop FALSE: container locked");
                 return false;
             }
 
-            Debug.Log($"[Slot] {gameObject.name} - CanAcceptDrop TRUE");
+            Debug.Log($"[Slot] {containerName}/Slot_{slotIndex} - CanAcceptDrop TRUE");
             return true;
         }
 
