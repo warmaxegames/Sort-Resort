@@ -163,6 +163,8 @@ namespace SortResort
             float slotBottom = -slotHeightUnits / 2f;
             float yOffset = slotBottom + (itemHeight / 2f);
 
+            Debug.Log($"[ItemContainer] GetItemWorldPositionBottomAligned: slotSize.y={slotSize.y}, slotHeightUnits={slotHeightUnits:F4}, slotBottom={slotBottom:F4}, itemHeight={itemHeight:F4}, yOffset={yOffset:F4}");
+
             localPos.y += yOffset;
 
             return slotsParent.TransformPoint(localPos);
@@ -197,7 +199,9 @@ namespace SortResort
 
             // Position item in world space at bottom of slot
             float itemHeight = GetItemHeight(item);
-            item.transform.position = GetItemWorldPositionBottomAligned(slotIndex, 0, itemHeight);
+            Vector3 newPos = GetItemWorldPositionBottomAligned(slotIndex, 0, itemHeight);
+            Debug.Log($"[ItemContainer] PlaceItemInSlot {item.ItemId}: itemHeight={itemHeight:F4}, oldPos={item.transform.position}, newPos={newPos}");
+            item.transform.position = newPos;
             item.SetRowDepth(0, maxRowsPerSlot);
 
             Debug.Log($"[ItemContainer] Placed item {item.ItemId} in slot {slotIndex}");
@@ -217,7 +221,9 @@ namespace SortResort
             if (sr != null && sr.sprite != null)
             {
                 // Get bounds in world space (accounts for scale)
-                return sr.bounds.size.y;
+                float height = sr.bounds.size.y;
+                Debug.Log($"[ItemContainer] GetItemHeight for {item.ItemId}: sr.bounds.size.y={height:F4}, sprite.bounds.size.y={sr.sprite.bounds.size.y:F4}, scale={item.transform.localScale.y:F4}");
+                return height;
             }
             return 1f; // Default fallback
         }
@@ -433,9 +439,9 @@ namespace SortResort
                 }
             }
 
-            // Fire event
+            // Fire event and increment match count
             OnItemsMatched?.Invoke(this, itemId, matchedCount);
-            GameEvents.InvokeMatchMade(itemId);
+            GameManager.Instance?.IncrementMatchCount(itemId);
 
             // Update lock progress
             if (isLocked)

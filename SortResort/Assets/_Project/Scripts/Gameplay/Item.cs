@@ -289,15 +289,15 @@ namespace SortResort
 
             Debug.Log($"[Item] DropOnSlot - {itemId} dropping on container {container.ContainerId}, slot {slot.SlotIndex}");
 
+            // Reset scale BEFORE placing so GetItemHeight returns correct value
+            transform.localScale = originalScale;
+
             // Place in new slot
             bool success = container.PlaceItemInSlot(this, slot.SlotIndex);
 
             if (success)
             {
-                Debug.Log($"[Item] DropOnSlot - {itemId} placed successfully. Resetting scale from {transform.localScale} to {originalScale}");
-
-                // Force reset scale before setting state (in case parenting changed it)
-                transform.localScale = originalScale;
+                Debug.Log($"[Item] DropOnSlot - {itemId} placed successfully");
 
                 SetState(ItemState.Idle);
                 GameEvents.InvokeItemDropped(gameObject);

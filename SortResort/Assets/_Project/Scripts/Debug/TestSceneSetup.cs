@@ -373,7 +373,10 @@ namespace SortResort
             Vector3 worldPos = container.GetItemWorldPositionBottomAligned(slotIndex, 0, finalItemHeight);
             itemGO.transform.position = worldPos;
 
-            Debug.Log($"[Setup] Placed {itemId} at {worldPos}, height={finalItemHeight}");
+            // Debug: also check what GetItemHeight would return
+            var srCheck = itemGO.GetComponent<SpriteRenderer>();
+            float srBoundsHeight = srCheck != null ? srCheck.bounds.size.y : 0f;
+            Debug.Log($"[Setup] Placed {itemId} at {worldPos}, finalItemHeight={finalItemHeight:F4}, sr.bounds.height={srBoundsHeight:F4}, diff={srBoundsHeight - finalItemHeight:F4}");
         }
 
         private Color GetColorForItem(string itemId)
