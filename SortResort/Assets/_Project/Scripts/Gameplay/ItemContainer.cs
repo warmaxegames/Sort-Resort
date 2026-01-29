@@ -47,6 +47,7 @@ namespace SortResort
         public ContainerType Type => containerType;
         public bool IsLocked => isLocked;
         public int SlotCount => slotCount;
+        public Vector2 SlotSizeUnits => slotSize / 100f; // Slot size in world units
 
         // Events
         public event Action<ItemContainer, string, int> OnItemsMatched; // container, itemId, count
@@ -77,16 +78,76 @@ namespace SortResort
             unlockMatchesRequired = definition.unlock_matches_required;
             currentUnlockProgress = 0;
 
-            // Set position
-            transform.position = definition.position.ToVector3();
+            // Set position - convert from Godot pixel coords to Unity world units
+            // Godot uses top-left origin with Y increasing downward
+            // Assume Godot viewport ~1024x768, convert to Unity centered coords
+            Vector3 godotPos = definition.position.ToVector3();
+            float unityX = (godotPos.x - 512f) / 100f;  // Center X, 100 pixels per unit
+            float unityY = (400f - godotPos.y) / 100f;  // Flip Y axis, offset for center
+            transform.position = new Vector3(unityX, unityY, 0f);
+            Debug.Log($"[ItemContainer] {definition.id} position: Godot({godotPos.x}, {godotPos.y}) -> Unity({unityX:F2}, {unityY:F2})");
 
             // Initialize slot structure
             InitializeSlots();
+
+            // Load container sprite
+            LoadContainerSprite(definition.container_image);
 
             // Setup lock overlay
             UpdateLockVisuals();
 
             gameObject.name = $"Container_{containerId}";
+        }
+
+        /// <summary>
+        /// Load and set the container sprite
+        /// </summary>
+        private void LoadContainerSprite(string imageName)
+        {
+            if (containerSprite == null)
+            {
+                // Try to find the SpriteRenderer in children (from prefab)
+                containerSprite = GetComponentInChildren<SpriteRenderer>();
+            }
+
+            if (containerSprite == null)
+            {
+                Debug.LogWarning($"[ItemContainer] No SpriteRenderer found for container {containerId}");
+                return;
+            }
+
+            // Try to load the specified sprite, with fallbacks
+            string[] paths = {
+                $"Sprites/Containers/{imageName}",
+                $"Sprites/Containers/base_shelf",
+                $"Sprites/Containers/supermarket_container"
+            };
+
+            Sprite sprite = null;
+            foreach (var path in paths)
+            {
+                sprite = Resources.Load<Sprite>(path);
+                if (sprite != null)
+                {
+                    Debug.Log($"[ItemContainer] Loaded container sprite from: {path}");
+                    break;
+                }
+            }
+
+            if (sprite != null)
+            {
+                containerSprite.sprite = sprite;
+
+                // Scale sprite to fit container width (3 slots * slotSpacing)
+                float targetWidth = slotCount * slotSpacing / 100f * 1.2f;  // Slightly wider than slots
+                float spriteWidth = sprite.bounds.size.x;
+                float scale = targetWidth / spriteWidth;
+                containerSprite.transform.localScale = new Vector3(scale, scale, 1f);
+            }
+            else
+            {
+                Debug.LogWarning($"[ItemContainer] Failed to load any container sprite for {containerId}");
+            }
         }
 
         /// <summary>
@@ -120,6 +181,7 @@ namespace SortResort
             var slotGO = new GameObject($"Slot_{slotIndex}");
             slotGO.transform.SetParent(slotsParent);
             slotGO.transform.localPosition = GetSlotLocalPosition(slotIndex, 0);
+            slotGO.layer = 7; // Slots layer for DragDropManager detection
 
             var slot = slotGO.AddComponent<Slot>();
             slot.Initialize(slotIndex, 0, this);
@@ -421,6 +483,13 @@ namespace SortResort
         {
             Debug.Log($"[ItemContainer] Match found! {matchedItems.Count}x {itemId}");
 
+            // Debug: log each item in the list
+            for (int i = 0; i < matchedItems.Count; i++)
+            {
+                var item = matchedItems[i];
+                Debug.Log($"[ItemContainer] ProcessMatch item {i}: {(item != null ? item.ItemId : "NULL")}, state: {(item != null ? item.CurrentState.ToString() : "N/A")}");
+            }
+
             // Play match sound
             AudioManager.Instance?.PlayMatchSound();
 
@@ -430,6 +499,8 @@ namespace SortResort
             {
                 if (item != null)
                 {
+                    Debug.Log($"[ItemContainer] Processing item {item.ItemId}, current state: {item.CurrentState}");
+
                     // Clear from slot data
                     RemoveItemFromSlot(item);
 

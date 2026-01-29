@@ -130,15 +130,25 @@ namespace SortResort
                 return cached;
             }
 
-            // Try to load from Resources
-            string path = $"Art/Items/{char.ToUpper(worldId[0]) + worldId.Substring(1)}/{itemId}";
-            var sprite = Resources.Load<Sprite>(path);
+            // Capitalize world name for folder (resort -> Resort)
+            string worldFolder = char.ToUpper(worldId[0]) + worldId.Substring(1).ToLower();
 
-            if (sprite == null)
+            // Try paths in order of likelihood
+            string[] paths = {
+                $"Sprites/Items/{worldFolder}/{itemId}",      // Resources/Sprites/Items/Resort/coconut
+                $"Art/Items/{worldFolder}/{itemId}",          // Resources/Art/Items/Resort/coconut
+                $"Items/{worldFolder}/{itemId}",              // Resources/Items/Resort/coconut
+            };
+
+            Sprite sprite = null;
+            foreach (var path in paths)
             {
-                // Try alternate path
-                path = $"Items/{worldId}/{itemId}";
                 sprite = Resources.Load<Sprite>(path);
+                if (sprite != null)
+                {
+                    Debug.Log($"[LevelManager] Loaded sprite from: {path}");
+                    break;
+                }
             }
 
             if (sprite != null)
@@ -147,7 +157,7 @@ namespace SortResort
             }
             else
             {
-                Debug.LogWarning($"[LevelManager] Failed to load sprite: {path}");
+                Debug.LogWarning($"[LevelManager] Failed to load sprite for {itemId} in world {worldId}. Tried paths: {string.Join(", ", paths)}");
             }
 
             return sprite;
@@ -197,6 +207,9 @@ namespace SortResort
             var sprite = GetItemSprite(itemId, worldId);
             item.Configure(itemId, sprite);
             item.SetPoolCallback(ReturnItemToPool);
+
+            // Ensure item is on correct layer for raycasting
+            item.gameObject.layer = 6; // Items layer
 
             return item;
         }
@@ -341,11 +354,16 @@ namespace SortResort
 
                 if (containerDef.initial_items == null) continue;
 
+                // Get slot size from container for scaling
+                var slotSize = container.SlotSizeUnits;
+
                 foreach (var placement in containerDef.initial_items)
                 {
                     var item = GetItemFromPool(placement.id, currentWorldId);
                     if (item != null)
                     {
+                        // Scale item to fit slot before placing
+                        item.ScaleToFitSlot(slotSize.x, slotSize.y);
                         container.PlaceItemInRow(item, placement.slot, placement.row);
                     }
                 }

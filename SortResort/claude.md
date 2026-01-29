@@ -49,34 +49,30 @@
   - ItemContainer.cs (slots, matching, row advancement, lock system)
   - DragDropManager.cs (input handling, raycasting)
   - LevelManager.cs (level loading, item spawning, completion)
-- **Test Scene Working:**
-  - Real sprites loading from Resources/Sprites/
-  - Drag-drop functional with visual feedback
-  - Triple-match detection working with animations
-  - Items positioned at bottom of slots
-  - Container scaling fixed (shelf sprite scaled, container at scale=1)
+- **GameSceneSetup.cs Working:**
+  - Loads real levels from JSON
+  - Sprites loading from Resources/Sprites/
+  - Containers and items spawn correctly
+  - Coordinate conversion from Godot to Unity working
+  - First triple-match works correctly
+  - **BUG: Second triple-match not animating correctly** (see Known Issues)
 
 ---
 
 ## Task List
 
 ### IMMEDIATE TODO (Next Session)
-1. **FIX: Vertical position offset after drag-drop**
-   - Items are slightly HIGHER after being dropped vs their initial position
-   - Compare `TestSceneSetup.CreateRealItem()` positioning vs `ItemContainer.GetItemWorldPositionBottomAligned()`
-   - Check if `GetItemHeight()` returns different value than `finalItemHeight` in TestSceneSetup
-   - May need to verify sprite bounds calculation is consistent
+1. **FIX: Second triple-match animation bug**
+   - First match works perfectly
+   - Second match: items get locked (isInteractive=false) but don't animate/disappear
+   - Debug logging added to ProcessMatch - check Console output
+   - Likely issue: some items already in Matched state, or same item reference appearing multiple times
+   - Check if items from first match are somehow still in the slot data
 
-2. **Create proper prefabs** (to replace TestSceneSetup reflection hacks)
-   - Item prefab with SpriteRenderer, BoxCollider2D, Item component
-   - Container prefab with ItemContainer, child Slots, shelf sprite
-   - Slot prefab with BoxCollider2D, Slot component
-
-3. **Test full match flow**
-   - Verify triple-match clears items correctly
-   - Verify row advancement works after match
-   - Verify move counter increments
-   - Verify match counter increments
+2. **After bug fix:**
+   - Test with more levels (002-006)
+   - Verify row advancement works
+   - Test locked containers
 
 ---
 
@@ -89,14 +85,15 @@
 - [x] **1.6** Create object pooling system for items - uses existing ObjectPool.cs
 - [x] **1.7** Create selection visual feedback (outline shader or sprite swap) - in Item.cs
 
-### Phase 2: Level & Data Systems (HIGH PRIORITY) - PARTIAL
+### Phase 2: Level & Data Systems (HIGH PRIORITY) - MOSTLY COMPLETE
 - [x] **2.1** Create ItemDatabase.cs - Load items.json, manage item definitions (in LevelManager.cs)
 - [ ] **2.2** Create WorldDatabase.cs - Load worlds.json, manage world configs
 - [x] **2.3** Create LevelLoader.cs - Parse level JSON files, instantiate containers (uses LevelData.cs + LevelManager.cs)
 - [x] **2.4** Create LevelManager.cs - Track moves, calculate stars, check completion
 - [x] **2.5** Set up JSON data files in Resources folder
-- [ ] **2.6** Create container prefabs (standard, single-slot variants)
-- [ ] **2.7** Create item prefab with sprite renderer and colliders
+- [x] **2.6** Create container prefabs (standard, single-slot variants) - PrefabGenerator.cs
+- [x] **2.7** Create item prefab with sprite renderer and colliders - PrefabGenerator.cs
+- [x] **2.8** GameSceneSetup.cs for proper level loading
 
 ### Phase 3: UI Implementation (MEDIUM PRIORITY)
 - [ ] **3.1** Implement MainMenuScreen fully
@@ -147,6 +144,30 @@
 
 ---
 
+## Known Issues
+
+### ACTIVE: Second Triple-Match Animation Bug
+**Symptoms:**
+- First triple-match works perfectly (items animate and disappear)
+- Second triple-match: items become non-interactive but don't animate/disappear
+- Level registers as complete (data is correct) but visuals are stuck
+
+**Debug info added:**
+- ProcessMatch now logs each item's state before processing
+- Check Console for: `[ItemContainer] ProcessMatch item X: {itemId}, state: {state}`
+
+**Possible causes to investigate:**
+1. Items already in Matched state when ProcessMatch runs
+2. Same item reference appearing multiple times in matchedItems list
+3. LeanTween animation not starting or completing
+4. Items from first match still referenced somewhere
+
+**Files involved:**
+- `ItemContainer.cs` - ProcessMatch(), CheckForMatches()
+- `Item.cs` - MarkAsMatched(), PlayMatchAnimation(), ResetState()
+
+---
+
 ## Completed Tasks
 
 ### Phase 1 - Core Gameplay (COMPLETE)
@@ -160,7 +181,8 @@
 - [x] Debug logging system for troubleshooting
 
 ### Testing & Sprites (COMPLETE)
-- [x] TestSceneSetup.cs for runtime testing
+- [x] TestSceneSetup.cs for runtime testing (manual containers)
+- [x] GameSceneSetup.cs for JSON level loading
 - [x] Real sprites loaded from Resources folder
 - [x] Sprite sizing normalized (fit within slots)
 - [x] Items positioned at bottom of slots
@@ -178,6 +200,13 @@
 - **Data-Driven**: JSON files for levels, items, worlds
 - **State Machine**: Game states (Loading, MainMenu, Playing, Paused, etc.)
 
+### Godot → Unity Coordinate Conversion
+Level JSON uses Godot pixel coordinates. Conversion in `ItemContainer.Initialize()`:
+```csharp
+float unityX = (godotPos.x - 512f) / 100f;  // Center X, 100 pixels per unit
+float unityY = (400f - godotPos.y) / 100f;  // Flip Y axis
+```
+
 ### Godot → Unity Mapping
 | Godot | Unity |
 |-------|-------|
@@ -188,21 +217,17 @@
 | PackedScene | Prefab |
 | res:// | Resources/ or Addressables |
 
-### Asset Locations (Godot)
-- Items: `sortresort/assets/images/items/{world}/`
-- Audio: `sortresort/assets/audio/`
-- UI: `sortresort/assets/images/ui/`
-- Levels: `sortresort/data/levels/{world}/`
-
-### Asset Locations (Unity)
-- Items: `Assets/_Project/Art/Items/{World}/`
-- Audio: `Assets/_Project/Audio/{Music|SFX|UI}/`
-- UI: `Assets/_Project/Art/UI/{Backgrounds|Buttons|Icons|Overlays|Worlds}/`
-- Containers: `Assets/_Project/Art/Containers/`
-- Animations: `Assets/_Project/Art/Animations/{ItemMatch|ContainerUnlock}/`
+### Asset Locations (Unity - Current)
+- Item Sprites: `Assets/_Project/Resources/Sprites/Items/{World}/`
+- Container Sprites: `Assets/_Project/Resources/Sprites/Containers/`
+- Prefabs: `Assets/_Project/Resources/Prefabs/`
 - Data: `Assets/_Project/Resources/Data/`
 - Levels: `Assets/_Project/Resources/Data/Levels/{World}/`
 - Scripts: `Assets/_Project/Scripts/`
+
+### Layer Configuration
+- Layer 6: "Items" - for item raycasting
+- Layer 7: "Slots" - for slot raycasting
 
 ---
 
@@ -229,93 +254,74 @@
 
 ### 2026-01-28 - Asset Import Complete
 - Imported 274 sprite files to `Assets/_Project/Art/`
-  - Items: Resort (50), Supermarket (48), Farm (45)
-  - UI: Backgrounds (10), Buttons (17), Icons (4), Overlays (6), Worlds (3)
-  - Containers (7), Mascots (4)
-  - Animations: ItemMatch (18 frames), ContainerUnlock (62 frames)
 - Imported 18 audio files to `Assets/_Project/Audio/`
-  - Music (8), SFX (8), UI (2)
 - Imported font (BENZIN-BOLD.TTF)
 - Imported 15 JSON data files to `Assets/_Project/Resources/Data/`
-  - items.json, worlds.json
-  - 6 level files (Resort 001-006)
-  - 7 dialogue files
 - Resolved technical decisions (Unity 6.2, LeanTween, Resources, New Input System)
 
 ### 2026-01-28 - Phase 1: Core Gameplay Systems Complete
 Created 5 new scripts in `Assets/_Project/Scripts/Gameplay/`:
-
-1. **Item.cs** (~350 lines)
-   - Visual states (Idle, Selected, Dragging, Matched, Returning)
-   - Drag-drop behavior with offset calculation
-   - Object pooling support with callbacks
-   - Row depth visualization for back-row items
-   - Match animation using LeanTween
-   - Trigger-based collision detection
-
-2. **Slot.cs** (~200 lines)
-   - Drop zone detection via BoxCollider2D trigger
-   - Visual feedback (highlight for valid/invalid drops)
-   - Tracks items currently in drop zone
-   - Validates drop acceptance (front row, empty, unlocked)
-
-3. **ItemContainer.cs** (~400 lines)
-   - Multi-slot management (configurable slot count)
-   - Row-based item storage (front row interactive, back rows visual)
-   - Triple match detection in front row
-   - Automatic row advancement on match
-   - Lock system with countdown unlock
-   - Events for match, unlock, empty
-
-4. **DragDropManager.cs** (~250 lines)
-   - Uses new Unity Input System
-   - Mouse and touch input support
-   - Raycasting for item/slot detection
-   - Manages drag state and hover feedback
-
-5. **LevelManager.cs** (~350 lines)
-   - Loads level JSON files
-   - Spawns containers and items
-   - Object pool for items
-   - Tracks matches and completion
-   - Calculates star ratings
+- Item.cs, Slot.cs, ItemContainer.cs, DragDropManager.cs, LevelManager.cs
 
 ### 2026-01-28 - Testing & Sprite Implementation (Session 2)
+- TestSceneSetup.cs created for manual testing
+- Sprite sizing and positioning implemented
+- Various bug fixes for drag-drop and slot management
 
-**TestSceneSetup.cs created** (~400 lines)
-- Runtime test scene creation without prefabs
-- Loads real sprites from `Resources/Sprites/Items/Resort/`
-- Creates containers with ItemContainer component
-- Creates slots with proper positioning and colliders
-- Initializes all references via reflection (temporary approach)
+### 2026-01-28 - Bug Fixes & Prefab System (Session 3)
+- Vertical offset bug fixed
+- Match counter bug fixed
+- PrefabGenerator updated with proper serialized field wiring
+- Item scaling system added
 
-**Sprite Analysis & Sizing:**
-- Analyzed source sprite dimensions via Unity meta files:
-  - coconut: 128x146px (nearly square)
-  - pineapple: 128x252px (very tall)
-  - beachball: 124x125px (square)
-  - sunhat: 128x173px (slightly tall)
-- Implemented proportional scaling to fit slots (80% height or 90% width)
-- Items now properly sized regardless of source dimensions
+### 2026-01-28 - GameSceneSetup & Level Loading (Session 4)
 
-**Item Positioning Improvements:**
-- Added `GetItemWorldPositionBottomAligned()` to ItemContainer
-- Items now sit at bottom of slots, not floating in center
-- Added `GetItemHeight()` helper using SpriteRenderer bounds
-- Updated all positioning methods (PlaceItemInSlot, PlaceItemInRow, UpdateAllItemPositions)
+**GameSceneSetup.cs Created:**
+- New script for proper level loading from JSON
+- Creates all managers at runtime (GameManager, DragDropManager, LevelManager)
+- Loads prefabs from Resources/Prefabs/
+- Loads level via LevelManager.LoadLevel()
+- Includes restart button and HUD display
 
-**Container Scaling Fix:**
-- Issue: Container scale affected slot/item positioning
-- Solution: Container stays at scale=1, shelf sprite is separate child object
-- ShelfSprite child is scaled, slots/items use unscaled container space
+**Setup Steps Documented:**
+1. Run `Tools > Sort Resort > Generate Prefabs`
+2. Move prefabs to `Assets/_Project/Resources/Prefabs/`
+3. Move sprites to `Assets/_Project/Resources/Sprites/Items/{World}/`
+4. Create new scene, add empty GameObject with GameSceneSetup component
+5. Press Play
 
-**Bug Fixes:**
-- Fixed: Items staying large after drop (RecaptureOriginalScale method)
-- Fixed: Slot not clearing properly (extensive debug logging added)
-- Fixed: slotsParent not being set (now passed to ItemContainer)
-- Fixed: Slot spacing mismatch (slotSpacing/slotSize now set properly)
-- Removed: Corrupted "nul" file causing Unity import loop
+**Coordinate Conversion Added:**
+- Godot uses pixel coords (e.g., 500, 400)
+- Unity uses world units centered at origin
+- Conversion: `unityX = (godotX - 512) / 100`, `unityY = (400 - godotY) / 100`
 
-**Known Issue (TO FIX NEXT):**
-- Items shift slightly HIGHER vertically after drag-drop vs initial position
-- Likely difference in height calculation between TestSceneSetup and ItemContainer
+**Container Sprite Loading Added:**
+- ItemContainer.LoadContainerSprite() method
+- Loads from Resources/Sprites/Containers/
+- Falls back to base_shelf if specific sprite not found
+- Scales sprite to fit container width
+
+**Bug Fixes This Session:**
+1. Fixed: GameSceneSetup compile error (removed ResetMoveCount call)
+2. Fixed: Level path in LevelDataLoader (Data/Levels/{World}/ with capitalization)
+3. Fixed: Slot layer not set (added layer 7 in CreateSlotComponent)
+4. Fixed: Item layer not set from pool (added layer 6 in GetItemFromPool)
+5. Fixed: Item collider too small (ScaleToFitSlot now updates collider size)
+6. Fixed: LeanTween.alpha not working with SpriteRenderer (use LeanTween.value instead)
+7. Fixed: ResetState not properly resetting (cancel tweens first, check for zero scale)
+8. Fixed: DropOnSlot overwriting Matched state with Idle (added state check)
+
+**Files Modified:**
+- `GameSceneSetup.cs` - New file for level loading
+- `LevelData.cs` - Fixed level path with capitalization
+- `ItemContainer.cs` - Added coordinate conversion, sprite loading, slot layer, debug logging
+- `LevelManager.cs` - Added item layer assignment
+- `Item.cs` - Fixed collider update, alpha animation, reset state, drop state check
+
+**Current State:**
+- Level 001 loads and displays correctly
+- Drag-drop works
+- First triple-match works perfectly
+- **BUG:** Second triple-match doesn't animate (items lock but don't disappear)
+- Debug logging added to investigate
+

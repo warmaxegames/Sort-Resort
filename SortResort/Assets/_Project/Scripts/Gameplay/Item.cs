@@ -114,6 +114,46 @@ namespace SortResort
         }
 
         /// <summary>
+        /// Scale the item to fit within slot dimensions while maintaining aspect ratio
+        /// </summary>
+        public void ScaleToFitSlot(float slotWidth, float slotHeight, float padding = 0.9f)
+        {
+            if (spriteRenderer == null || spriteRenderer.sprite == null)
+            {
+                Debug.LogWarning($"[Item] ScaleToFitSlot - {itemId} has no sprite!");
+                return;
+            }
+
+            var sprite = spriteRenderer.sprite;
+            float spriteWidth = sprite.bounds.size.x;
+            float spriteHeight = sprite.bounds.size.y;
+
+            // Calculate scale to fit within slot (with padding)
+            float targetWidth = slotWidth * padding;
+            float targetHeight = slotHeight * padding;
+
+            float scaleX = targetWidth / spriteWidth;
+            float scaleY = targetHeight / spriteHeight;
+
+            // Use the smaller scale to maintain aspect ratio
+            float scale = Mathf.Min(scaleX, scaleY);
+
+            transform.localScale = new Vector3(scale, scale, 1f);
+
+            // Update collider size to match sprite bounds
+            if (boxCollider != null)
+            {
+                boxCollider.size = sprite.bounds.size;
+                boxCollider.enabled = true;
+            }
+
+            // Recapture so drag/drop uses correct scale
+            RecaptureOriginalScale();
+
+            Debug.Log($"[Item] ScaleToFitSlot - {itemId} scaled to {scale:F3} (sprite: {spriteWidth:F2}x{spriteHeight:F2}, slot: {slotWidth:F2}x{slotHeight:F2})");
+        }
+
+        /// <summary>
         /// Set the slot this item occupies
         /// </summary>
         public void SetSlot(Slot slot, ItemContainer container)
@@ -299,7 +339,12 @@ namespace SortResort
             {
                 Debug.Log($"[Item] DropOnSlot - {itemId} placed successfully");
 
-                SetState(ItemState.Idle);
+                // Only set to Idle if not already Matched (match may have been triggered by PlaceItemInSlot)
+                if (currentState != ItemState.Matched)
+                {
+                    SetState(ItemState.Idle);
+                }
+
                 GameEvents.InvokeItemDropped(gameObject);
                 OnDragEnded?.Invoke(this);
 
@@ -367,11 +412,28 @@ namespace SortResort
 
         private void PlayMatchAnimation(Action onComplete)
         {
-            // Fade out and scale down
-            LeanTween.alpha(gameObject, 0f, 0.5f);
+            Debug.Log($"[Item] PlayMatchAnimation starting for {itemId}");
+
+            // Fade out using SpriteRenderer color (LeanTween.alpha doesn't work well with sprites)
+            if (spriteRenderer != null)
+            {
+                LeanTween.value(gameObject, spriteRenderer.color.a, 0f, 0.5f)
+                    .setOnUpdate((float val) => {
+                        if (spriteRenderer != null)
+                        {
+                            var c = spriteRenderer.color;
+                            spriteRenderer.color = new Color(c.r, c.g, c.b, val);
+                        }
+                    });
+            }
+
+            // Scale down
             LeanTween.scale(gameObject, Vector3.zero, 0.5f)
                 .setEase(LeanTweenType.easeInBack)
-                .setOnComplete(() => onComplete?.Invoke());
+                .setOnComplete(() => {
+                    Debug.Log($"[Item] PlayMatchAnimation complete for {itemId}");
+                    onComplete?.Invoke();
+                });
         }
 
         #endregion
@@ -409,6 +471,9 @@ namespace SortResort
         /// </summary>
         public void ResetState()
         {
+            // Cancel any active tweens FIRST
+            LeanTween.cancel(gameObject);
+
             currentState = ItemState.Idle;
             isInteractive = true;
 
@@ -420,17 +485,30 @@ namespace SortResort
             // Reset visuals
             if (spriteRenderer != null)
             {
-                spriteRenderer.color = normalColor;
+                spriteRenderer.color = normalColor; // This resets alpha to 1
                 spriteRenderer.sortingOrder = originalSortingOrder;
             }
 
-            transform.localScale = originalScale;
+            // Reset scale (use Vector3.one if originalScale is zero from match animation)
+            if (originalScale == Vector3.zero || originalScale.x < 0.01f)
+            {
+                transform.localScale = Vector3.one;
+            }
+            else
+            {
+                transform.localScale = originalScale;
+            }
+
+            // Re-enable collider
+            if (boxCollider != null)
+            {
+                boxCollider.enabled = true;
+            }
 
             if (selectionIndicator != null)
                 selectionIndicator.SetActive(false);
 
-            // Cancel any active tweens
-            LeanTween.cancel(gameObject);
+            Debug.Log($"[Item] ResetState - {itemId} scale: {transform.localScale}, interactive: {isInteractive}");
         }
 
         #endregion
