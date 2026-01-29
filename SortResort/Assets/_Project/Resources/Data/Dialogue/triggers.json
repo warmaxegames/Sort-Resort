@@ -1,0 +1,37 @@
+{
+	"level_start": [
+		{
+			"world_id": "resort",
+			"level_id": 1,
+			"dialogue_id": "dialogue_resort_001_start"
+		},
+		{
+			"world_id": "supermarket",
+			"level_id": 1,
+			"dialogue_id": "dialogue_supermarket_001_start"
+		}
+	],
+	"level_complete": [
+		{
+			"world_id": "resort",
+			"level_id": 1,
+			"dialogue_id": "dialogue_resort_001_complete"
+		},
+		{
+			"world_id": "resort",
+			"level_id": 2,
+			"dialogue_id": "dialogue_resort_002_complete"
+		}
+	],
+	"level_failed": [],
+	"world_unlock": [
+		{
+			"world_id": "supermarket",
+			"dialogue_id": "dialogue_shared_world_unlock_supermarket"
+		},
+		{
+			"world_id": "farm",
+			"dialogue_id": "dialogue_shared_world_unlock_farm"
+		}
+	]
+}

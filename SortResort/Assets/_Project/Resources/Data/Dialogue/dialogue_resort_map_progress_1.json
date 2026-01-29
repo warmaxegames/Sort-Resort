@@ -1,0 +1,21 @@
+{
+  "id": "dialogue_map_progress_1",
+  "world_id": "resort",
+  "name": "Test",
+  "background": "transparent",
+  "auto_advance": false,
+  "sequences": [
+	{
+	  "character": "cat_wave",
+	  "character_position": "center",
+	  "text": "Success!",
+	  "animation": "idle"
+	},
+	{
+	  "text": "We managed to force you back to level map"
+	}
+  ],
+  "on_complete": {
+	"action": "continue"
+  }
+}

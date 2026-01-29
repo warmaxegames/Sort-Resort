@@ -1,0 +1,62 @@
+{
+	"worlds": [
+		{
+			"id": "resort",
+			"name": "Resort World",
+			"display_order": 1,
+			"is_locked": false,
+			"unlock_requirement": {
+				"type": "none"
+			},
+			"background_image": "supermarket_background.png",
+			"level_background_image": "supermarket_background.png",
+			"world_sprite": "resort_world.png",
+			"item_path": "res://assets/images/items/resort/",
+			"level_count": 100,
+			"gameplay_music": "resort_gameplay_music.mp3",
+			"level_map_music": "resort_gameplay_music.mp3",
+			"background_music": "resort_background_music.mp3",
+			"background_music_crossfade": 3.0
+		},
+		{
+			"id": "supermarket",
+			"name": "Supermarket World",
+			"display_order": 2,
+			"is_locked": true,
+			"unlock_requirement": {
+				"type": "levels_completed",
+				"world_id": "resort", 
+				"count": 20
+			},
+			"background_image": "supermarket_background.png",
+			"level_background_image": "supermarket_background.png",
+			"world_sprite": "supermarket_world.png",
+			"item_path": "res://assets/images/items/",
+			"level_count": 100,
+			"gameplay_music": "supermarket_gameplay_music.mp3",
+			"level_map_music": "supermarket_gameplay_music.mp3",
+			"background_music": "supermarket_background_music.mp3",
+			"background_music_crossfade": 2.5
+		},
+		{
+			"id": "farm",
+			"name": "Farm World",
+			"display_order": 3,
+			"is_locked": true,
+			"unlock_requirement": {
+				"type": "levels_completed",
+				"world_id": "supermarket",
+				"count": 20
+			},
+			"background_image": "farm_background.png",
+			"level_background_image": "farm_background.png",
+			"world_sprite": "farm_world.png",
+			"item_path": "res://assets/images/items/farm/",
+			"level_count": 100,
+			"gameplay_music": "farm_gameplay_music.mp3",
+			"level_map_music": "farm_gameplay_music.mp3",
+			"background_music": "farm_background_music.mp3",
+			"background_music_crossfade": 2.0
+		}
+	]
+}

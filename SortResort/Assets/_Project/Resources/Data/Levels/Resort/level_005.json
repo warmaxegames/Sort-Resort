@@ -1,0 +1,142 @@
+{
+	"id": 5,
+	"world_id": "resort",
+	"name": "level_005",
+	"star_move_thresholds": [15, 18, 20],
+	"containers": [
+		{
+			"id": "static_container_1",
+			"position": {"x": 640, "y": 800},
+			"container_type": "standard",
+			"container_image": "base_shelf",
+			"initial_items": []
+		}
+	],
+	"moving_tracks": [
+		{
+			"id": "track_1",
+			"direction": "right",
+			"speed": 80.0,
+			"spawn_position": {"x": -200, "y": 100},
+			"track_length": 1500.0,
+			"container_gap": 120.0,
+			"containers": [
+				{
+					"type": "standard",
+					"image": "base_shelf",
+					"locked": false,
+					"initial_items": [
+						{"id": "coconut", "slot": 0, "row": 0},
+						{"id": "coconut", "slot": 2, "row": 0}
+					]
+				},
+				{
+					"type": "standard",
+					"image": "base_shelf",
+					"locked": false,
+					"initial_items": [
+						{"id": "bluesunglasses", "slot": 0, "row": 0},
+						{"id": "bluesunglasses", "slot": 1, "row": 0},
+						{"id": "coconut", "slot": 2, "row": 0}
+					]
+				},
+				{
+					"type": "standard",
+					"image": "base_shelf",
+					"locked": false,
+					"initial_items": [
+						{"id": "beachbag", "slot": 0, "row": 0},
+						{"id": "swimmask", "slot": 1, "row": 0},
+						{"id": "sunhat", "slot": 2, "row": 0}
+					]
+				},
+				{
+					"type": "single_slot",
+					"image": "base_single_slot_container",
+					"locked": true,
+					"unlock_matches": 1,
+					"initial_items": [
+						{"id": "bluesunglasses", "slot": 0, "row": 0},
+						{"id": "swimmask", "slot": 0, "row": 1},
+						{"id": "sunhat", "slot": 0, "row": 2}
+					]
+				}
+			]
+		},
+		{
+			"id": "track_2",
+			"direction": "left",
+			"speed": 70.0,
+			"spawn_position": {"x": 1280, "y": 260},
+			"track_length": 1500.0,
+			"container_gap": 100.0,
+			"containers": [
+				{
+					"type": "standard",
+					"image": "base_shelf",
+					"locked": false,
+					"initial_items": [
+						{"id": "pineapple", "slot": 1, "row": 0},
+						{"id": "maitai", "slot": 2, "row": 0}
+					]
+				},
+				{
+					"type": "single_slot",
+					"image": "base_single_slot_container",
+					"locked": false,
+					"initial_items": [
+						{"id": "pineapple", "slot": 0, "row": 0},
+						{"id": "vanillaicecreamcone", "slot": 0, "row": 1}
+					]
+				},
+				{
+					"type": "standard",
+					"image": "base_shelf",
+					"locked": false,
+					"initial_items": [
+						{"id": "swimmask", "slot": 0, "row": 0},
+						{"id": "pineapple", "slot": 1, "row": 0}
+					]
+				}
+			]
+		},
+		{
+			"id": "track_3",
+			"direction": "right",
+			"speed": 90.0,
+			"spawn_position": {"x": -200, "y": 420},
+			"track_length": 1500.0,
+			"container_gap": 140.0,
+			"containers": [
+				{
+					"type": "single_slot",
+					"image": "base_single_slot_container",
+					"locked": true,
+					"unlock_matches": 2,
+					"initial_items": [
+						{"id": "sunhat", "slot": 0, "row": 0}
+					]
+				},
+				{
+					"type": "standard",
+					"image": "base_shelf",
+					"locked": false,
+					"initial_items": [
+						{"id": "messageinabottle", "slot": 0, "row": 0},
+						{"id": "suitcaseyellow", "slot": 2, "row": 0}
+					]
+				},
+				{
+					"type": "standard",
+					"image": "base_shelf",
+					"locked": false,
+					"initial_items": [
+						{"id": "scubatanks", "slot": 0, "row": 0},
+						{"id": "strawberrydaiquiri", "slot": 1, "row": 0},
+						{"id": "messageinabottle", "slot": 2, "row": 0}
+					]
+				}
+			]
+		}
+	]
+}

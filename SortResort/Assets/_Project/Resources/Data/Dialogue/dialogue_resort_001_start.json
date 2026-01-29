@@ -1,0 +1,24 @@
+{
+	"id": "dialogue_001_start",
+	"world_id": "resort",
+	"name": "Level 1 Introduction",
+	"background": "transparent",
+	"auto_advance": false,
+	"sequences": [
+		{
+			"character": "cat_wave",
+			"character_position": "center",
+			"text": "Alright, here's an easy one to start your training.",
+			"animation": "idle"
+		},
+		{
+			"character": "cat_3match",
+			"character_position": "center",
+			"text": "Match three identical items to clear them from the board.",
+			"animation": "happy"
+		},
+	],
+	"on_complete": {
+		"action": "continue"
+	}
+}

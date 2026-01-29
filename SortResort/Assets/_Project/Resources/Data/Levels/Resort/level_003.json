@@ -1,0 +1,107 @@
+{
+  "id": 3,
+  "world_id": "supermarket",
+  "name": "level_003",
+  "star_move_thresholds": [15, 18, 20],
+  "containers": [
+	{
+	  "id": "container_1",
+	  "position": {"x": 320, "y": 320},
+	  "container_type": "standard",
+	  "container_image": "base_shelf",
+	  "slot_count": 3,
+	  "max_rows_per_slot": 4,
+	  "is_locked": false,
+	  "initial_items": [
+		{"id": "honey", "row": 0, "slot": 0},
+		{"id": "milk", "row": 1, "slot": 0}
+	  ]
+	},
+	{
+	  "id": "container_2", 
+	  "position": {"x": 320, "y": 625},
+	  "container_type": "single_slot",
+	  "container_image": "base_single_slot_container",
+	  "slot_count": 1,
+	  "max_rows_per_slot": 6,
+	  "is_locked": false,
+	  "initial_items": [
+		{"id": "chips", "row": 0, "slot": 0},
+		{"id": "soda", "row": 1, "slot": 0}
+	  ]
+	},
+	{
+	  "id": "container_3",
+	  "position": {"x": 320, "y": 930},
+	  "container_type": "standard",
+	  "container_image": "base_shelf",
+	  "slot_count": 3,
+	  "max_rows_per_slot": 4,
+	  "is_locked": true,
+	  "unlock_matches_required": 3,
+	  "lock_overlay_image": "base_lockoverlay",
+	  "unlock_animation": "fade_in",
+	  "initial_items": [
+		{"id": "ketchup", "row": 0, "slot": 0},
+		{"id": "ketchup", "row": 0, "slot": 1},
+		{"id": "ketchup", "row": 0, "slot": 2}
+	  ]
+	},
+	{
+	  "id": "container_4",
+	  "position": {"x": 745, "y": 320},
+	  "container_type": "standard",
+	  "container_image": "base_shelf",
+	  "slot_count": 3,
+	  "max_rows_per_slot": 4,
+	  "is_locked": false,
+	  "is_moving": true,
+	  "move_type": "carousel",
+	  "move_direction": "right",
+	  "move_speed": 50,
+	  "move_distance": 400,
+	  "initial_items": [
+		{"id": "eggs", "row": 0, "slot": 0}
+	  ]
+	},
+	{
+	  "id": "container_5",
+	  "position": {"x": 745, "y": 625},
+	  "container_type": "standard",
+	  "container_image": "base_shelf",
+	  "slot_count": 3,
+	  "max_rows_per_slot": 1,
+	  "is_locked": false,
+	  "is_falling": true,
+	  "fall_speed": 100,
+	  "fall_target_y": 400,
+	  "despawn_on_match": true,
+	  "initial_items": [
+		{"id": "pickles", "row": 0, "slot": 0},
+		{"id": "pickles", "row": 0, "slot": 1},
+		{"id": "pickles", "row": 0, "slot": 2}
+	  ]
+	},
+	{
+	  "id": "container_6",
+	  "position": {"x": 745, "y": 930},
+	  "container_type": "single_slot",
+	  "container_image": "base_single_slot_container",
+	  "slot_count": 1,
+	  "is_locked": true,
+	  "unlock_matches_required": 2,
+	  "lock_overlay_image": "base_single_slot_lockoverlay",
+	  "unlock_animation": "fade_out",
+	  "is_moving": true,
+	  "move_type": "back_and_forth",
+	  "move_direction": "down",
+	  "move_speed": 30,
+	  "move_distance": 200,
+	  "is_falling": false,
+	  "initial_items": [
+		{"id": "milk", "row": 0, "slot": 0},
+		{"id": "honey", "row": 1, "slot": 0}
+	  ]
+	}
+  ]
+}

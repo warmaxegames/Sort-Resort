@@ -1,39 +1,45 @@
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "New Container", menuName = "Sort Resort/Container Data")]
-public class ContainerData : ScriptableObject
+namespace SortResort
 {
-    [Header("Identity")]
-    public string containerID = "beach_basket";
-    public string containerName = "Beach Basket";
+    [CreateAssetMenu(fileName = "New Container", menuName = "Sort Resort/Container Data")]
+    public class ContainerData : ScriptableObject
+    {
+        [Header("Identity")]
+        public string containerID = "beach_basket";
+        public string containerName = "Beach Basket";
 
-    [Header("World Reference")]
-    [Tooltip("Which world this container belongs to")]
-    public WorldData parentWorld;
+        [Header("World Reference")]
+        [Tooltip("Which world this container belongs to")]
+        public WorldData parentWorld;
 
-    [Header("Configuration")]
-    [UnityEngine.Range(1, 3)]
-    [Tooltip("How many columns/slots this container has")]
-    public int numberOfSlots = 3;
+        [Header("Configuration")]
+        [Range(1, 3)]
+        [Tooltip("How many columns/slots this container has")]
+        public int numberOfSlots = 3;
 
-    [Header("Visuals")]
-    [Tooltip("The main container sprite")]
-    public Sprite containerSprite;
+        [Tooltip("Maximum number of rows per slot")]
+        public int maxRowsPerSlot = 4;
 
-    [Tooltip("Overlay shown when container is locked")]
-    public Sprite lockedOverlaySprite;
+        [Header("Visuals")]
+        [Tooltip("The main container sprite")]
+        public Sprite containerSprite;
 
-    [Tooltip("Lock icon shown on locked containers")]
-    public Sprite lockIconSprite;
+        [Tooltip("Overlay shown when container is locked")]
+        public Sprite lockedOverlaySprite;
 
-    [Header("Audio")]
-    [Tooltip("Sound played when container unlocks")]
-    public AudioClip unlockSound;
+        [Tooltip("Lock icon shown on locked containers")]
+        public Sprite lockIconSprite;
 
-    [Header("Special Behavior")]
-    [Tooltip("Can this container move across the screen?")]
-    public bool canMove = false;
+        [Header("Audio")]
+        [Tooltip("Sound played when container unlocks")]
+        public AudioClip unlockSound;
 
-    [Tooltip("Can this container rotate?")]
-    public bool canRotate = false;
+        [Header("Special Behavior")]
+        [Tooltip("Can this container move across the screen?")]
+        public bool canMove = false;
+
+        [Tooltip("Can this container rotate?")]
+        public bool canRotate = false;
+    }
 }

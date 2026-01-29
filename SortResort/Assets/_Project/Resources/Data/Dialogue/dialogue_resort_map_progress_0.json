@@ -1,0 +1,27 @@
+{
+  "id": "dialogue_map_progress_0",
+  "world_id": "resort",
+  "name": "Initial Map Introduction",
+  "background": "transparent",
+  "auto_advance": false,
+  "sequences": [
+	{
+	  "character": "cat_wave",
+	  "character_position": "center",
+	  "text": "Ah, you're awake! Splendid! I'm Professor Whiskers, welcome to Sort Resort.",
+	  "animation": "idle"
+	},
+	{
+	  "text": "I know this must seem strange, waking up on this tropical island with a talking cat."
+	},
+	{
+	  "text": "The multiverse has chosen YOU specifically to help with some rather... urgent inter-dimensional cleanup."
+	},
+	{
+	  "text": "Well, don't just stand there gawking! Science waits for no one!"
+	}
+  ],
+  "on_complete": {
+	"action": "continue"
+  }
+}

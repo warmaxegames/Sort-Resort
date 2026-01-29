@@ -1,0 +1,36 @@
+{
+  "id": "dialogue_001_complete",
+  "world_id": "resort",
+  "name": "Level 1 Completion",
+  "background": "transparent",
+  "auto_advance": false,
+  "star_variants": {
+	"failed": {
+	  "sequences": [
+		{
+		  "text": "It's important you learn the basics. Try again!",
+		  "animation": "thinking"
+		},
+		{
+		  "text": "Remember to match 3 identical items in a row to clear them.",
+		  "animation": "neutral"
+		}
+	  ]
+	},
+	"3": {
+	  "sequences": [
+		{
+		  "text": "Perfect! You're a natural!",
+		  "animation": "excited"
+		},
+		{
+		  "text": "Now let's start closing those portals!",
+		  "animation": "happy"
+		}
+	  ]
+	}
+  },
+  "on_complete": {
+	"action": "continue"
+  }
+}
