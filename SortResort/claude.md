@@ -22,7 +22,7 @@
 
 ## Current Status
 
-**Last Updated:** 2026-01-28
+**Last Updated:** 2026-01-29
 
 ### Godot Version (Complete)
 - 6 levels complete (Resort 001-006)
@@ -33,107 +33,104 @@
 - Dialogue system functional
 
 ### Unity Version (In Progress)
-- Basic folder structure created
-- Manager singletons scaffolded (GameManager, AudioManager, SaveManager, TransitionManager)
-- UI screen base classes created
-- GameState enum defined
-- Bootstrap system ready
-- **274 sprite assets imported** (items, UI, containers, animations)
-- **18 audio files imported** (8 music, 8 SFX, 2 UI)
-- **15 JSON data files imported** (items, worlds, levels, dialogue)
-- **Font imported** (BENZIN-BOLD.TTF)
-- **LeanTween animation library imported**
-- **Phase 1 Core Gameplay COMPLETE:**
-  - Item.cs (drag-drop, pooling, visual states)
-  - Slot.cs (drop zone detection, validation)
-  - ItemContainer.cs (slots, matching, row advancement, lock system)
-  - DragDropManager.cs (input handling, raycasting)
-  - LevelManager.cs (level loading, item spawning, completion)
-- **GameSceneSetup.cs Working:**
-  - Loads real levels from JSON
-  - Sprites loading from Resources/Sprites/
-  - Containers and items spawn correctly
-  - Coordinate conversion from Godot to Unity working
-  - First triple-match works correctly
-  - **BUG: Second triple-match not animating correctly** (see Known Issues)
+- **Phase 1 Core Gameplay: COMPLETE**
+- **Phase 2 Level & Data Systems: COMPLETE**
+- **Phase 3 UI Implementation: PARTIAL** (Level Select, HUD, Level Complete done)
+- **Lock System: COMPLETE** (visual overlay, countdown, unlock animation)
+- **Portrait Mode: COMPLETE** (ScreenManager for responsive scaling)
+
+#### Working Features:
+- Level selection screen with 100-level grid and world navigation
+- Full game flow: Level Select -> Play -> Complete -> Back to Levels
+- Drag-drop with visual feedback
+- Triple-match detection and animation
+- Row advancement (only when ALL front slots empty)
+- Locked containers with visual overlay and countdown
+- Unlock animation when matches reach threshold
+- Portrait phone aspect ratio support
+- Move counter, match counter, star preview
 
 ---
 
 ## Task List
 
 ### IMMEDIATE TODO (Next Session)
-1. **FIX: Second triple-match animation bug**
-   - First match works perfectly
-   - Second match: items get locked (isInteractive=false) but don't animate/disappear
-   - Debug logging added to ProcessMatch - check Console output
-   - Likely issue: some items already in Matched state, or same item reference appearing multiple times
-   - Check if items from first match are somehow still in the slot data
+1. **Copy lock overlay sprites to Resources**
+   - From: `Assets/_Project/Art/UI/Overlays/base_lockoverlay.png`
+   - To: `Assets/_Project/Resources/Sprites/UI/Overlays/`
+   - Same for `base_single_slot_lockoverlay.png`
 
-2. **After bug fix:**
-   - Test with more levels (002-006)
-   - Verify row advancement works
-   - Test locked containers
+2. **Test remaining levels (003-006)**
+   - Level 003 has moving containers (carousel, back_and_forth)
+   - Level 005-006 have moving tracks (more complex)
+
+3. **Implement SaveManager persistence**
+   - Save completed levels and star ratings
+   - Unlock next level on completion
+
+4. **Audio integration**
+   - Copy audio files to Resources/Audio/
+   - Wire up match sound, unlock sound, button clicks
 
 ---
 
-### Phase 1: Core Gameplay Systems (HIGH PRIORITY) - COMPLETE
-- [x] **1.1** Create Item.cs - Drag-drop behavior, pooling support, visual states
-- [x] **1.2** Create ItemContainer.cs - Multi-slot management, row advancement, lock system
-- [x] **1.3** Create Slot.cs - Drop zone validation, collider-based detection
-- [x] **1.4** Implement drag-drop input system (mouse + touch support) - DragDropManager.cs
-- [x] **1.5** Implement match detection logic (triple match identification) - in ItemContainer.cs
-- [x] **1.6** Create object pooling system for items - uses existing ObjectPool.cs
-- [x] **1.7** Create selection visual feedback (outline shader or sprite swap) - in Item.cs
+### Phase 1: Core Gameplay Systems - COMPLETE
+- [x] Item.cs - Drag-drop behavior, pooling support, visual states
+- [x] ItemContainer.cs - Multi-slot management, row advancement, lock system
+- [x] Slot.cs - Drop zone validation, collider-based detection
+- [x] DragDropManager.cs - Input handling with new Input System
+- [x] LevelManager.cs - Level loading, item spawning, completion
+- [x] Object pooling system for items
+- [x] Selection visual feedback
 
-### Phase 2: Level & Data Systems (HIGH PRIORITY) - MOSTLY COMPLETE
-- [x] **2.1** Create ItemDatabase.cs - Load items.json, manage item definitions (in LevelManager.cs)
-- [ ] **2.2** Create WorldDatabase.cs - Load worlds.json, manage world configs
-- [x] **2.3** Create LevelLoader.cs - Parse level JSON files, instantiate containers (uses LevelData.cs + LevelManager.cs)
-- [x] **2.4** Create LevelManager.cs - Track moves, calculate stars, check completion
-- [x] **2.5** Set up JSON data files in Resources folder
-- [x] **2.6** Create container prefabs (standard, single-slot variants) - PrefabGenerator.cs
-- [x] **2.7** Create item prefab with sprite renderer and colliders - PrefabGenerator.cs
-- [x] **2.8** GameSceneSetup.cs for proper level loading
+### Phase 2: Level & Data Systems - COMPLETE
+- [x] ItemDatabase loading from items.json
+- [x] LevelLoader parsing JSON files
+- [x] LevelManager tracking moves, stars, completion
+- [x] JSON data files in Resources folder
+- [x] Container prefabs (standard, single-slot)
+- [x] Item prefab with sprite renderer and colliders
+- [x] GameSceneSetup.cs for proper level loading
+- [ ] WorldDatabase.cs - Load worlds.json (optional)
 
-### Phase 3: UI Implementation (MEDIUM PRIORITY)
-- [ ] **3.1** Implement MainMenuScreen fully
-- [ ] **3.2** Implement WorldSelectionScreen with world gallery
-- [ ] **3.3** Implement LevelSelectionScreen with 100-level grid
-- [ ] **3.4** Implement GameHUDScreen (move counter, pause button, undo)
-- [ ] **3.5** Implement PauseMenuScreen
-- [ ] **3.6** Implement LevelCompleteScreen with star animation
-- [ ] **3.7** Implement LevelFailedScreen
-- [ ] **3.8** Implement SettingsScreen with volume sliders
-- [ ] **3.9** Create LevelNode prefab for level selection
+### Phase 3: UI Implementation - PARTIAL
+- [ ] **3.1** MainMenuScreen
+- [ ] **3.2** WorldSelectionScreen
+- [x] **3.3** LevelSelectionScreen with 100-level grid
+- [x] **3.4** GameHUDScreen (move counter, stars, pause/restart)
+- [ ] **3.5** PauseMenuScreen
+- [x] **3.6** LevelCompleteScreen with buttons
+- [ ] **3.7** LevelFailedScreen
+- [ ] **3.8** SettingsScreen with volume sliders
 
-### Phase 4: Audio System (MEDIUM PRIORITY)
-- [ ] **4.1** Implement AudioManager fully (music playback, crossfading)
-- [ ] **4.2** Implement SFX system (match, drag, drop, unlock sounds)
-- [ ] **4.3** Set up audio mixer with volume groups
-- [x] **4.4** Import all audio assets
-- [ ] **4.5** Add world-specific music switching
+### Phase 4: Audio System - NOT STARTED
+- [ ] **4.1** AudioManager music playback, crossfading
+- [ ] **4.2** SFX system (match, drag, drop, unlock)
+- [ ] **4.3** Audio mixer with volume groups
+- [x] **4.4** Audio assets imported (need to copy to Resources)
+- [ ] **4.5** World-specific music switching
 
-### Phase 5: Save & Progression (MEDIUM PRIORITY)
-- [ ] **5.1** Implement SaveManager (PlayerPrefs or JSON file)
+### Phase 5: Save & Progression - NOT STARTED
+- [ ] **5.1** SaveManager (PlayerPrefs or JSON file)
 - [ ] **5.2** Track completed levels per world
 - [ ] **5.3** Track star ratings per level
 - [ ] **5.4** Track world unlock status
-- [ ] **5.5** Implement settings persistence (audio volumes)
+- [ ] **5.5** Settings persistence (audio volumes)
 
-### Phase 6: Visual Polish (LOWER PRIORITY)
-- [ ] **6.1** Create match animation (18-frame explosion or particle effect)
-- [ ] **6.2** Create container unlock animation
-- [ ] **6.3** Implement row depth visualization (grayed back rows)
-- [ ] **6.4** Add tween animations (item scale, highlight effects)
-- [ ] **6.5** Implement scene transitions
-- [ ] **6.6** Add mascot reactions
+### Phase 6: Visual Polish - PARTIAL
+- [ ] **6.1** Match animation (use 18-frame sprites)
+- [x] **6.2** Container unlock animation (scale + fade)
+- [x] **6.3** Row depth visualization (grayed back rows, vertical offset)
+- [x] **6.4** Tween animations (item scale, highlight)
+- [ ] **6.5** Scene transitions
+- [ ] **6.6** Mascot reactions
 
-### Phase 7: Advanced Features (LOWER PRIORITY)
-- [ ] **7.1** Implement moving container system with path following
-- [ ] **7.2** Implement dialogue system
-- [ ] **7.3** Create undo system
-- [ ] **7.4** Profile customization system
-- [ ] **7.5** Leaderboard integration
+### Phase 7: Advanced Features - PARTIAL
+- [x] **7.1** ContainerMovement.cs (back_and_forth, carousel, falling)
+- [ ] **7.2** Moving tracks system (level 005-006)
+- [ ] **7.3** Dialogue system
+- [ ] **7.4** Undo system
+- [ ] **7.5** Profile customization
 
 ### Phase 8: Content & Testing
 - [x] **8.1** Import all sprite assets
@@ -146,182 +143,118 @@
 
 ## Known Issues
 
-### ACTIVE: Second Triple-Match Animation Bug
-**Symptoms:**
-- First triple-match works perfectly (items animate and disappear)
-- Second triple-match: items become non-interactive but don't animate/disappear
-- Level registers as complete (data is correct) but visuals are stuck
-
-**Debug info added:**
-- ProcessMatch now logs each item's state before processing
-- Check Console for: `[ItemContainer] ProcessMatch item X: {itemId}, state: {state}`
-
-**Possible causes to investigate:**
-1. Items already in Matched state when ProcessMatch runs
-2. Same item reference appearing multiple times in matchedItems list
-3. LeanTween animation not starting or completing
-4. Items from first match still referenced somewhere
-
-**Files involved:**
-- `ItemContainer.cs` - ProcessMatch(), CheckForMatches()
-- `Item.cs` - MarkAsMatched(), PlayMatchAnimation(), ResetState()
+### Slot Detection Debug Logging
+- Added verbose logging to `FindBestDropSlot()` and `CanAcceptDrop()`
+- If drops fail, check Console for exact reason (locked, not empty, not interactive)
+- Can be removed once stable
 
 ---
 
-## Completed Tasks
+## Completed Features (This Session)
 
-### Phase 1 - Core Gameplay (COMPLETE)
-- [x] Item.cs with drag-drop, pooling, visual states
-- [x] Slot.cs with drop zone detection
-- [x] ItemContainer.cs with matching and lock system
-- [x] DragDropManager.cs with raycasting
-- [x] LevelManager.cs with level loading
-- [x] Triple-match detection and match animation
-- [x] Row advancement after match
-- [x] Debug logging system for troubleshooting
+### UI System
+- **UIManager.cs** - Runtime UI creation, screen management
+- **LevelSelectScreen.cs** - 100-level grid, world navigation (< >), lock states
+- **Level Complete Screen** - Replay, Next, Levels buttons
+- **Game HUD** - Move counter, match counter, star preview, pause/restart
 
-### Testing & Sprites (COMPLETE)
-- [x] TestSceneSetup.cs for runtime testing (manual containers)
-- [x] GameSceneSetup.cs for JSON level loading
-- [x] Real sprites loaded from Resources folder
-- [x] Sprite sizing normalized (fit within slots)
-- [x] Items positioned at bottom of slots
-- [x] Container scaling isolated (shelf sprite only)
-- [x] Layer masks configured (Items=6, Slots=7)
+### Lock System (Matching Godot)
+- Visual lock overlay covering container
+- Countdown text showing matches remaining (black text, centered)
+- Matches anywhere in level decrement ALL locked containers
+- Unlock animation (scale up + fade out)
+- Slots become interactive after unlock
+
+### Row Advancement Fix
+- Items only advance when ALL front row slots are empty
+- Not per-slot advancement
+- Triggers after successful drop, not during drag
+- Prevents items advancing while player is still dragging
+
+### Portrait Mode Support
+- **ScreenManager.cs** - Responsive scaling based on aspect ratio
+- Camera orthographic size adjusted for portrait (9:16)
+- Game world scales to fit narrow screens
+- Coordinate conversion updated for portrait center point
+
+### Bug Fixes
+- JSON trailing commas in level_002.json and level_004.json
+- InputSystem compatibility (InputSystemUIInputModule)
+- Level complete timing (waits for match animation)
+- Button sizing in layout groups (LayoutElement)
 
 ---
 
 ## Technical Notes
 
-### Key Patterns to Follow
-- **Object Pooling**: Essential for mobile performance (50-60 item pool)
-- **Event System**: Use C# events/Actions for decoupled communication
-- **Singleton Managers**: GameManager, AudioManager, SaveManager, UIManager
+### Key Patterns
+- **Object Pooling**: 50-60 item pool for mobile performance
+- **Event System**: C# events/Actions for decoupled communication
+- **Singleton Managers**: GameManager, AudioManager, SaveManager, UIManager, ScreenManager
 - **Data-Driven**: JSON files for levels, items, worlds
-- **State Machine**: Game states (Loading, MainMenu, Playing, Paused, etc.)
+- **State Machine**: GameState enum (Playing, LevelSelection, Paused, etc.)
 
-### Godot → Unity Coordinate Conversion
-Level JSON uses Godot pixel coordinates. Conversion in `ItemContainer.Initialize()`:
+### Coordinate Conversion (Portrait)
 ```csharp
-float unityX = (godotPos.x - 512f) / 100f;  // Center X, 100 pixels per unit
-float unityY = (400f - godotPos.y) / 100f;  // Flip Y axis
+float unityX = (godotPos.x - 540f) / 100f;  // Center for portrait
+float unityY = (600f - godotPos.y) / 100f;  // Flip Y, portrait center
 ```
-
-### Godot → Unity Mapping
-| Godot | Unity |
-|-------|-------|
-| Area2D | Collider2D + trigger |
-| Signals | C# events/UnityEvents |
-| Tweens | DOTween or LeanTween |
-| Autoload | Singleton MonoBehaviour |
-| PackedScene | Prefab |
-| res:// | Resources/ or Addressables |
-
-### Asset Locations (Unity - Current)
-- Item Sprites: `Assets/_Project/Resources/Sprites/Items/{World}/`
-- Container Sprites: `Assets/_Project/Resources/Sprites/Containers/`
-- Prefabs: `Assets/_Project/Resources/Prefabs/`
-- Data: `Assets/_Project/Resources/Data/`
-- Levels: `Assets/_Project/Resources/Data/Levels/{World}/`
-- Scripts: `Assets/_Project/Scripts/`
 
 ### Layer Configuration
 - Layer 6: "Items" - for item raycasting
 - Layer 7: "Slots" - for slot raycasting
 
----
-
-## Questions & Decisions
-
-### Resolved
-1. **Unity version:** 6.2
-2. **Animation library:** LeanTween (free)
-3. **Asset loading:** Resources (simpler, sufficient for project scope)
-4. **Input system:** New Unity Input System (better cross-platform)
-
-### Open Questions
-*None currently*
+### Asset Locations
+- Item Sprites: `Resources/Sprites/Items/{World}/`
+- Container Sprites: `Resources/Sprites/Containers/`
+- Lock Overlays: `Resources/Sprites/UI/Overlays/` (need to copy)
+- Audio: `Resources/Audio/` (need to copy)
+- Prefabs: `Resources/Prefabs/`
+- Level Data: `Resources/Data/Levels/{World}/`
 
 ---
 
 ## Session Log
 
-### 2026-01-28 - Initial Review
-- Explored all three project folders
-- Documented Godot implementation
-- Created initial task list
-- Created this tracking document
+### 2026-01-29 - UI System, Locks, Portrait Mode
 
-### 2026-01-28 - Asset Import Complete
-- Imported 274 sprite files to `Assets/_Project/Art/`
-- Imported 18 audio files to `Assets/_Project/Audio/`
-- Imported font (BENZIN-BOLD.TTF)
-- Imported 15 JSON data files to `Assets/_Project/Resources/Data/`
-- Resolved technical decisions (Unity 6.2, LeanTween, Resources, New Input System)
+**New Files Created:**
+- `UIManager.cs` - Runtime UI creation and screen management
+- `LevelSelectScreen.cs` - Level selection with world navigation
+- `ScreenManager.cs` - Responsive scaling for different aspect ratios
+- `ContainerMovement.cs` - Moving/falling container support
 
-### 2026-01-28 - Phase 1: Core Gameplay Systems Complete
-Created 5 new scripts in `Assets/_Project/Scripts/Gameplay/`:
-- Item.cs, Slot.cs, ItemContainer.cs, DragDropManager.cs, LevelManager.cs
+**Major Features:**
+1. Complete UI flow (Level Select -> Play -> Complete -> Back)
+2. Lock system with visual overlay and countdown
+3. Portrait mode support with responsive scaling
+4. Row advancement fix (all slots must be empty)
 
-### 2026-01-28 - Testing & Sprite Implementation (Session 2)
-- TestSceneSetup.cs created for manual testing
-- Sprite sizing and positioning implemented
-- Various bug fixes for drag-drop and slot management
-
-### 2026-01-28 - Bug Fixes & Prefab System (Session 3)
-- Vertical offset bug fixed
-- Match counter bug fixed
-- PrefabGenerator updated with proper serialized field wiring
-- Item scaling system added
-
-### 2026-01-28 - GameSceneSetup & Level Loading (Session 4)
-
-**GameSceneSetup.cs Created:**
-- New script for proper level loading from JSON
-- Creates all managers at runtime (GameManager, DragDropManager, LevelManager)
-- Loads prefabs from Resources/Prefabs/
-- Loads level via LevelManager.LoadLevel()
-- Includes restart button and HUD display
-
-**Setup Steps Documented:**
-1. Run `Tools > Sort Resort > Generate Prefabs`
-2. Move prefabs to `Assets/_Project/Resources/Prefabs/`
-3. Move sprites to `Assets/_Project/Resources/Sprites/Items/{World}/`
-4. Create new scene, add empty GameObject with GameSceneSetup component
-5. Press Play
-
-**Coordinate Conversion Added:**
-- Godot uses pixel coords (e.g., 500, 400)
-- Unity uses world units centered at origin
-- Conversion: `unityX = (godotX - 512) / 100`, `unityY = (400 - godotY) / 100`
-
-**Container Sprite Loading Added:**
-- ItemContainer.LoadContainerSprite() method
-- Loads from Resources/Sprites/Containers/
-- Falls back to base_shelf if specific sprite not found
-- Scales sprite to fit container width
-
-**Bug Fixes This Session:**
-1. Fixed: GameSceneSetup compile error (removed ResetMoveCount call)
-2. Fixed: Level path in LevelDataLoader (Data/Levels/{World}/ with capitalization)
-3. Fixed: Slot layer not set (added layer 7 in CreateSlotComponent)
-4. Fixed: Item layer not set from pool (added layer 6 in GetItemFromPool)
-5. Fixed: Item collider too small (ScaleToFitSlot now updates collider size)
-6. Fixed: LeanTween.alpha not working with SpriteRenderer (use LeanTween.value instead)
-7. Fixed: ResetState not properly resetting (cancel tweens first, check for zero scale)
-8. Fixed: DropOnSlot overwriting Matched state with Idle (added state check)
+**Bug Fixes:**
+- JSON parse errors (trailing commas)
+- Input System compatibility
+- Level complete timing
+- Button layout in HorizontalLayoutGroup
 
 **Files Modified:**
-- `GameSceneSetup.cs` - New file for level loading
-- `LevelData.cs` - Fixed level path with capitalization
-- `ItemContainer.cs` - Added coordinate conversion, sprite loading, slot layer, debug logging
-- `LevelManager.cs` - Added item layer assignment
-- `Item.cs` - Fixed collider update, alpha animation, reset state, drop state check
+- `ItemContainer.cs` - Lock overlay creation, unlock animation, row advancement
+- `LevelManager.cs` - Global match notification to locked containers
+- `Item.cs` - Row advance after successful drop only
+- `DragDropManager.cs` - Debug logging for slot detection
+- `Slot.cs` - Enhanced CanAcceptDrop logging
+- `GameSceneSetup.cs` - Portrait camera, ScreenManager integration
 
-**Current State:**
-- Level 001 loads and displays correctly
-- Drag-drop works
-- First triple-match works perfectly
-- **BUG:** Second triple-match doesn't animate (items lock but don't disappear)
-- Debug logging added to investigate
+### Previous Sessions
+- 2026-01-28: Initial setup, asset import, Phase 1 core gameplay
+- See git history for detailed changes
 
+---
+
+## Next Steps Priority
+
+1. **Copy assets to Resources** (lock overlays, audio)
+2. **Test levels 003-006** (moving containers)
+3. **SaveManager** - Persist progress
+4. **Audio** - Wire up sounds
+5. **Main Menu** - Splash screen, start button
+6. **Mobile testing** - Touch input, performance
