@@ -1,4 +1,6 @@
 using UnityEngine;
+using System;
+using System.Collections.Generic;
 
 namespace SortResort
 {
@@ -34,6 +36,7 @@ namespace SortResort
         [SerializeField] private float fallSpeed = 100f;
         [SerializeField] private float fallTargetY;
         [SerializeField] private bool despawnOnMatch;
+        [SerializeField] private float stackFallDistance = 1.98f; // Height of one container in Unity units (198px)
 
         [Header("State")]
         [SerializeField] private bool isMoving = true;
@@ -46,9 +49,16 @@ namespace SortResort
         private int direction = 1; // 1 = forward, -1 = backward
         private bool hasFallen;
         private ItemContainer container;
+        private bool isStackFalling; // For chain-reaction falling
+        private float stackFallTargetY;
+
+        // Static tracking for stack-based falling
+        private static List<ContainerMovement> allStackContainers = new List<ContainerMovement>();
+        private static event Action<ContainerMovement> OnContainerDespawned;
 
         public bool IsMoving => isMoving && !isPaused;
         public bool IsFalling => isFalling && !hasFallen;
+        public bool DespawnOnMatch => despawnOnMatch;
 
         private void Awake()
         {
@@ -78,10 +88,17 @@ namespace SortResort
                 isFalling = true;
                 fallSpeed = definition.fall_speed > 0 ? definition.fall_speed : 100f;
                 // Convert Godot Y to Unity Y
-                fallTargetY = (400f - definition.fall_target_y) / 100f;
+                fallTargetY = (600f - definition.fall_target_y) / 100f;
                 despawnOnMatch = definition.despawn_on_match;
 
                 Debug.Log($"[ContainerMovement] {definition.id} falling: speed={fallSpeed}, targetY={fallTargetY}");
+            }
+
+            // For despawn-on-match containers, also check definition directly
+            if (definition.despawn_on_match)
+            {
+                despawnOnMatch = true;
+                fallSpeed = definition.fall_speed > 0 ? definition.fall_speed : 200f;
             }
         }
 
@@ -93,6 +110,10 @@ namespace SortResort
             if (container != null && despawnOnMatch)
             {
                 container.OnContainerEmpty += OnContainerEmpty;
+
+                // Register for stack-based falling
+                allStackContainers.Add(this);
+                OnContainerDespawned += HandleContainerDespawned;
             }
         }
 
@@ -120,6 +141,13 @@ namespace SortResort
         {
             if (isPaused) return;
 
+            // Stack falling takes priority (Tetris-like effect)
+            if (isStackFalling)
+            {
+                UpdateStackFalling();
+                return;
+            }
+
             if (isFalling && !hasFallen)
             {
                 UpdateFalling();
@@ -128,6 +156,60 @@ namespace SortResort
             {
                 UpdateMovement();
             }
+        }
+
+        private void UpdateStackFalling()
+        {
+            float unitySpeed = fallSpeed / 100f;
+            float step = unitySpeed * Time.deltaTime;
+
+            Vector3 pos = transform.position;
+            if (pos.y > stackFallTargetY)
+            {
+                pos.y -= step;
+                if (pos.y <= stackFallTargetY)
+                {
+                    pos.y = stackFallTargetY;
+                    isStackFalling = false;
+                    Debug.Log($"[ContainerMovement] {gameObject.name} finished stack falling to Y={stackFallTargetY}");
+                }
+                transform.position = pos;
+            }
+            else
+            {
+                isStackFalling = false;
+            }
+        }
+
+        /// <summary>
+        /// Called when another container in a stack despawns - check if we need to fall
+        /// </summary>
+        private void HandleContainerDespawned(ContainerMovement despawnedContainer)
+        {
+            if (despawnedContainer == this) return;
+            if (this == null || gameObject == null) return;
+
+            // Check if we're in the same column (same X position, within tolerance)
+            float xTolerance = 0.1f;
+            if (Mathf.Abs(transform.position.x - despawnedContainer.transform.position.x) > xTolerance)
+                return;
+
+            // Check if we're above the despawned container
+            if (transform.position.y <= despawnedContainer.transform.position.y)
+                return;
+
+            // We're above a despawned container in the same column - fall down!
+            Debug.Log($"[ContainerMovement] {gameObject.name} falling due to {despawnedContainer.gameObject.name} despawning");
+            TriggerStackFall(stackFallDistance);
+        }
+
+        /// <summary>
+        /// Start falling down by a specified distance
+        /// </summary>
+        public void TriggerStackFall(float distance)
+        {
+            stackFallTargetY = transform.position.y - distance;
+            isStackFalling = true;
         }
 
         private void UpdateMovement()
@@ -179,14 +261,53 @@ namespace SortResort
             Vector3 directionVector = GetDirectionVector();
             transform.position += directionVector * distanceThisFrame;
 
-            // Check if we've exceeded the distance (wrap around or stop)
-            float distanceFromStart = Vector3.Distance(transform.position, startPosition);
-            float totalDistance = moveDistance / 100f;
+            // For seamless train effect:
+            // - Detect wrap when container exits screen edge
+            // - Wrap BY the train length (moveDistance) to maintain spacing between containers
+            float screenLeftEdge = -6.5f;   // A bit past left edge
+            float screenRightEdge = 6.5f;   // A bit past right edge
+            float trainLength = moveDistance / 100f; // Use configured move_distance as train length
 
-            if (distanceFromStart >= totalDistance)
+            Vector3 pos = transform.position;
+
+            if (moveDirection == MoveDirection.Right)
             {
-                // Wrap back to start position
-                transform.position = startPosition;
+                // Moving right - when past right edge, wrap back by train length
+                if (pos.x > screenRightEdge)
+                {
+                    pos.x -= trainLength;
+                    transform.position = pos;
+                }
+            }
+            else if (moveDirection == MoveDirection.Left)
+            {
+                // Moving left - when past left edge, wrap forward by train length
+                if (pos.x < screenLeftEdge)
+                {
+                    pos.x += trainLength;
+                    transform.position = pos;
+                }
+            }
+            else if (moveDirection == MoveDirection.Down)
+            {
+                // Moving down - wrap by train length only (no extra offset)
+                // Position enough containers in JSON to cover visible area + buffer
+                float screenBottom = -10f;
+                if (pos.y < screenBottom)
+                {
+                    pos.y += trainLength;
+                    transform.position = pos;
+                }
+            }
+            else if (moveDirection == MoveDirection.Up)
+            {
+                // Moving up - wrap by train length only
+                float screenTop = 10f;
+                if (pos.y > screenTop)
+                {
+                    pos.y -= trainLength;
+                    transform.position = pos;
+                }
             }
         }
 
@@ -232,7 +353,11 @@ namespace SortResort
         {
             if (despawnOnMatch)
             {
-                Debug.Log($"[ContainerMovement] {gameObject.name} despawning after match");
+                Debug.Log($"[ContainerMovement] {gameObject.name} despawning after becoming empty");
+
+                // Notify other containers BEFORE we animate out
+                OnContainerDespawned?.Invoke(this);
+
                 // Animate out and destroy
                 LeanTween.scale(gameObject, Vector3.zero, 0.3f)
                     .setEase(LeanTweenType.easeInBack)
@@ -290,7 +415,21 @@ namespace SortResort
             {
                 container.OnContainerEmpty -= OnContainerEmpty;
             }
+
+            // Clean up stack tracking
+            allStackContainers.Remove(this);
+            OnContainerDespawned -= HandleContainerDespawned;
+
             LeanTween.cancel(gameObject);
+        }
+
+        /// <summary>
+        /// Clear all static references (call when loading a new level)
+        /// </summary>
+        public static void ClearAllStackContainers()
+        {
+            allStackContainers.Clear();
+            OnContainerDespawned = null;
         }
     }
 }

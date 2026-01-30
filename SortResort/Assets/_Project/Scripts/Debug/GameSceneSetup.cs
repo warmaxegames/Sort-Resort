@@ -101,24 +101,24 @@ namespace SortResort
             ConfigureLevelManager(lm);
             Debug.Log("[GameSceneSetup] LevelManager created");
 
-            // UIManager
-            var uiGO = new GameObject("UIManager");
-            uiGO.transform.SetParent(managersRoot.transform);
-            var uim = uiGO.AddComponent<UIManager>();
-            uim.CreateRuntimeUI();
-            Debug.Log("[GameSceneSetup] UIManager created with runtime UI");
-
-            // AudioManager
+            // AudioManager (before UIManager so music can play on level select)
             var amGO = new GameObject("AudioManager");
             amGO.transform.SetParent(managersRoot.transform);
             amGO.AddComponent<AudioManager>();
             Debug.Log("[GameSceneSetup] AudioManager created");
 
-            // SaveManager
+            // SaveManager (before UIManager so level unlocks are available)
             var smGO = new GameObject("SaveManager");
             smGO.transform.SetParent(managersRoot.transform);
             smGO.AddComponent<SaveManager>();
             Debug.Log("[GameSceneSetup] SaveManager created");
+
+            // UIManager (after AudioManager and SaveManager)
+            var uiGO = new GameObject("UIManager");
+            uiGO.transform.SetParent(managersRoot.transform);
+            var uim = uiGO.AddComponent<UIManager>();
+            uim.CreateRuntimeUI();
+            Debug.Log("[GameSceneSetup] UIManager created with runtime UI");
         }
 
         private void ConfigureDragDropManager(DragDropManager ddm)

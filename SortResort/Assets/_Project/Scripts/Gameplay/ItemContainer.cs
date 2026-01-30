@@ -21,7 +21,7 @@ namespace SortResort
         [SerializeField] private ContainerType containerType = ContainerType.Standard;
         [SerializeField] private int slotCount = 3;
         [SerializeField] private int maxRowsPerSlot = 4;
-        [SerializeField] private Vector2 slotSize = new Vector2(128f, 256f);
+        [SerializeField] private Vector2 slotSize = new Vector2(90f, 180f);
 
         [Header("Lock Settings")]
         [SerializeField] private bool isLocked;
@@ -35,8 +35,8 @@ namespace SortResort
         [SerializeField] private TMPro.TextMeshPro lockCountText;
 
         [Header("Slot Configuration")]
-        [SerializeField] private float slotSpacing = 128f;
-        [SerializeField] private float rowDepthOffset = 40f; // Vertical offset for back row items (in pixels)
+        [SerializeField] private float slotSpacing = 90f;
+        [SerializeField] private float rowDepthOffset = 28f; // Vertical offset for back row items (in pixels)
 
         // Slot data structure: slots[slotIndex][row] = Item
         private List<List<Item>> slots = new List<List<Item>>();
@@ -68,6 +68,13 @@ namespace SortResort
         /// </summary>
         public void Initialize(ContainerDefinition definition)
         {
+            // Force container sizing (override any prefab serialized values)
+            // These values allow 3 containers across screen width and ~6 vertically
+            // Container width = 3 slots × 83 = 249px, height = 166px (~7% smaller than original 90x180)
+            slotSize = new Vector2(83f, 166f);
+            slotSpacing = 83f;
+            rowDepthOffset = 4f;
+
             containerId = definition.id;
             containerType = definition.container_type == "single_slot"
                 ? ContainerType.SingleSlot
@@ -270,11 +277,14 @@ namespace SortResort
             // Update item references
             item.SetSlot(slotComponents[slotIndex], this);
 
-            // Position item in world space at bottom of slot
+            // Parent to this container (important for moving containers)
+            item.transform.SetParent(slotsParent);
+
+            // Position item using LOCAL position so it moves with container
             float itemHeight = GetItemHeight(item);
-            Vector3 newPos = GetItemWorldPositionBottomAligned(slotIndex, 0, itemHeight);
-            Debug.Log($"[ItemContainer] PlaceItemInSlot {item.ItemId}: itemHeight={itemHeight:F4}, oldPos={item.transform.position}, newPos={newPos}");
-            item.transform.position = newPos;
+            Vector3 localPos = GetItemLocalPositionBottomAligned(slotIndex, 0, itemHeight);
+            Debug.Log($"[ItemContainer] PlaceItemInSlot {item.ItemId}: itemHeight={itemHeight:F4}, localPos={localPos}");
+            item.transform.localPosition = localPos;
             item.SetRowDepth(0, maxRowsPerSlot);
 
             Debug.Log($"[ItemContainer] Placed item {item.ItemId} in slot {slotIndex}");
@@ -288,7 +298,7 @@ namespace SortResort
         /// <summary>
         /// Get the rendered height of an item in world units
         /// </summary>
-        private float GetItemHeight(Item item)
+        public float GetItemHeight(Item item)
         {
             var sr = item.GetComponent<SpriteRenderer>();
             if (sr != null && sr.sprite != null)
@@ -299,6 +309,41 @@ namespace SortResort
                 return height;
             }
             return 1f; // Default fallback
+        }
+
+        /// <summary>
+        /// Place item in slot (data + parenting only, no positioning) - used for cancel drag animation
+        /// </summary>
+        public void PlaceItemInSlotNoPosition(Item item, int slotIndex)
+        {
+            if (slotIndex < 0 || slotIndex >= slotCount) return;
+
+            // Place the item in data structure
+            slots[slotIndex][0] = item;
+
+            // Update item references
+            item.SetSlot(slotComponents[slotIndex], this);
+
+            // Parent to slots container (so item moves with container)
+            item.transform.SetParent(slotsParent);
+            item.SetRowDepth(0, maxRowsPerSlot);
+        }
+
+        /// <summary>
+        /// Get the LOCAL position for an item in a slot (relative to slotsParent)
+        /// </summary>
+        public Vector3 GetItemLocalPositionBottomAligned(int slotIndex, int row, float itemHeight)
+        {
+            Vector3 localPos = GetSlotLocalPosition(slotIndex, row);
+
+            // Offset to place item at bottom of slot
+            float slotHeightUnits = slotSize.y / 100f;
+            float slotBottom = -slotHeightUnits / 2f;
+            float yOffset = slotBottom + (itemHeight / 2f);
+
+            localPos.y += yOffset;
+
+            return localPos;
         }
 
         /// <summary>
@@ -323,10 +368,14 @@ namespace SortResort
                 item.SetSlot(null, this);
             }
 
+            // Parent first, then set LOCAL position so item moves with container
             item.transform.SetParent(slotsParent);
             float itemHeight = GetItemHeight(item);
-            item.transform.position = GetItemWorldPositionBottomAligned(slotIndex, row, itemHeight);
+            Vector3 localPos = GetItemLocalPositionBottomAligned(slotIndex, row, itemHeight);
+            item.transform.localPosition = localPos;
             item.SetRowDepth(row, maxRowsPerSlot);
+
+            Debug.Log($"[ItemContainer] PlaceItemInRow {item.ItemId}: slot={slotIndex}, row={row}, localPos={localPos}");
 
             return true;
         }
@@ -382,6 +431,13 @@ namespace SortResort
                 LeanTween.delayedCall(0.1f, () =>
                 {
                     CheckAndAdvanceAllRows();
+
+                    // Check if container is now empty (for despawn-on-match containers)
+                    if (IsEmpty())
+                    {
+                        Debug.Log($"[ItemContainer] Container {containerId} is now empty, invoking OnContainerEmpty");
+                        OnContainerEmpty?.Invoke(this);
+                    }
                 });
             }
         }
@@ -534,6 +590,9 @@ namespace SortResort
                 }
             }
 
+            // Play match sound
+            AudioManager.Instance?.PlayMatchSound();
+
             // Fire event and increment match count
             // Note: LevelManager listens to OnItemsMatched and notifies ALL locked containers
             OnItemsMatched?.Invoke(this, itemId, matchedCount);
@@ -644,11 +703,11 @@ namespace SortResort
                 var item = slots[slotIndex][r];
                 if (item != null)
                 {
-                    // Animate to new position (bottom-aligned)
+                    // Animate to new LOCAL position (so it moves correctly with moving containers)
                     float itemHeight = GetItemHeight(item);
-                    Vector3 targetPos = GetItemWorldPositionBottomAligned(slotIndex, r, itemHeight);
+                    Vector3 targetLocalPos = GetItemLocalPositionBottomAligned(slotIndex, r, itemHeight);
 
-                    LeanTween.move(item.gameObject, targetPos, 0.25f)
+                    LeanTween.moveLocal(item.gameObject, targetLocalPos, 0.25f)
                         .setEase(LeanTweenType.easeOutQuad);
 
                     // Update row depth visuals
@@ -688,10 +747,10 @@ namespace SortResort
                     var item = slots[s][r];
                     if (item != null)
                     {
-                        // Animate to new position (bottom-aligned)
+                        // Animate to new LOCAL position (so it moves correctly with moving containers)
                         float itemHeight = GetItemHeight(item);
-                        Vector3 targetPos = GetItemWorldPositionBottomAligned(s, r, itemHeight);
-                        LeanTween.move(item.gameObject, targetPos, 0.2f)
+                        Vector3 targetLocalPos = GetItemLocalPositionBottomAligned(s, r, itemHeight);
+                        LeanTween.moveLocal(item.gameObject, targetLocalPos, 0.2f)
                             .setEase(LeanTweenType.easeOutQuad);
 
                         // Update row depth visuals
@@ -780,15 +839,15 @@ namespace SortResort
                 lockSpriteGO.transform.localScale = new Vector3(width, height, 1f);
             }
 
-            // Create countdown text - positioned higher to center in lock overlay image
+            // Create countdown text - positioned to center in lock overlay image
             var countdownGO = new GameObject("CountdownText");
             countdownGO.transform.SetParent(lockOverlay.transform);
-            countdownGO.transform.localPosition = new Vector3(0, 0.6f, -0.1f);
+            countdownGO.transform.localPosition = new Vector3(0, 0.55f, -0.1f);
 
             // Use TextMeshPro for the countdown
             lockCountText = countdownGO.AddComponent<TMPro.TextMeshPro>();
             lockCountText.text = unlockMatchesRequired.ToString();
-            lockCountText.fontSize = 4;
+            lockCountText.fontSize = 3;
             lockCountText.fontStyle = TMPro.FontStyles.Bold;
             lockCountText.alignment = TMPro.TextAlignmentOptions.Center;
             lockCountText.color = Color.black;

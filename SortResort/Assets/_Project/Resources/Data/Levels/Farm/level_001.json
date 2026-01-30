@@ -1,0 +1,38 @@
+{
+  "id": 1,
+  "world_id": "farm",
+  "name": "level_001",
+  "star_move_thresholds": [3, 8, 12],
+  "containers": [
+	{
+	  "id": "container_1",
+	  "position": {"x": 500, "y": 400},
+	  "container_type": "standard",
+	  "container_image": "supermarket_container_4",
+	  "initial_items": [
+		{"id": "potato", "row": 0, "slot": 0},
+		{"id": "carrot", "row": 0, "slot": 2}
+	  ]
+	},
+	{
+	  "id": "container_2",
+	  "position": {"x": 300, "y": 710},
+	  "container_type": "standard",
+	  "container_image": "supermarket_container_4",
+	  "initial_items": [
+		{"id": "potato", "row": 0, "slot": 0},
+		{"id": "potato", "row": 0, "slot": 1}
+	  ]
+	},
+	{
+	  "id": "container_3",
+	  "position": {"x": 722, "y": 710},
+	  "container_type": "standard",
+	  "container_image": "supermarket_container_4",
+	  "initial_items": [
+		{"id": "carrot", "row": 0, "slot": 2},
+		{"id": "carrot", "row": 0, "slot": 1}
+	  ]
+	}
+  ]
+}

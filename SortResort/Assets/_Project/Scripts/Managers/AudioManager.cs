@@ -10,17 +10,19 @@ namespace SortResort
         [Header("Audio Sources")]
         [SerializeField] private AudioSource musicSourceA;
         [SerializeField] private AudioSource musicSourceB;
+        [SerializeField] private AudioSource ambientSource;  // For background/ambient loops
         [SerializeField] private AudioSource sfxSource;
         [SerializeField] private AudioSource uiSource;
 
         [Header("Volume Settings")]
         [SerializeField, Range(0f, 1f)] private float masterVolume = 1f;
         [SerializeField, Range(0f, 1f)] private float musicVolume = 0.7f;
+        [SerializeField, Range(0f, 1f)] private float ambientVolume = 0.5f;
         [SerializeField, Range(0f, 1f)] private float sfxVolume = 1f;
         [SerializeField, Range(0f, 1f)] private float uiVolume = 1f;
 
         [Header("Crossfade Settings")]
-        [SerializeField] private float crossfadeDuration = 2f;
+        [SerializeField] private float crossfadeDuration = 0.5f;
 
         [Header("Common Sound Effects")]
         [SerializeField] private AudioClip itemDragClip;
@@ -34,13 +36,20 @@ namespace SortResort
 
         private bool isUsingSourceA = true;
         private Coroutine crossfadeCoroutine;
+        private Coroutine ambientFadeCoroutine;
         private float saveDebounceTime = 0.5f;
         private Coroutine saveDebounceCoroutine;
 
+        // Track current world to avoid restarting music on next level
+        private string currentPlayingWorld = "";
+        private bool isPlayingGameplayAudio = false;
+
         public float MasterVolume => masterVolume;
         public float MusicVolume => musicVolume;
+        public float AmbientVolume => ambientVolume;
         public float SFXVolume => sfxVolume;
         public float UIVolume => uiVolume;
+        public string CurrentPlayingWorld => currentPlayingWorld;
 
         private void Awake()
         {
@@ -105,6 +114,15 @@ namespace SortResort
                 musicSourceB.playOnAwake = false;
             }
 
+            if (ambientSource == null)
+            {
+                var ambientObj = new GameObject("AmbientSource");
+                ambientObj.transform.SetParent(transform);
+                ambientSource = ambientObj.AddComponent<AudioSource>();
+                ambientSource.loop = true;
+                ambientSource.playOnAwake = false;
+            }
+
             if (sfxSource == null)
             {
                 var sfxObj = new GameObject("SFXSource");
@@ -136,7 +154,8 @@ namespace SortResort
             GameEvents.OnSFXVolumeChanged -= SetSFXVolume;
         }
 
-        // Volume Control
+        #region Volume Control
+
         public void SetMasterVolume(float volume)
         {
             masterVolume = Mathf.Clamp01(volume);
@@ -148,6 +167,13 @@ namespace SortResort
         {
             musicVolume = Mathf.Clamp01(volume);
             UpdateMusicVolume();
+            DebounceSaveSettings();
+        }
+
+        public void SetAmbientVolume(float volume)
+        {
+            ambientVolume = Mathf.Clamp01(volume);
+            UpdateAmbientVolume();
             DebounceSaveSettings();
         }
 
@@ -168,6 +194,7 @@ namespace SortResort
         private void UpdateAllVolumes()
         {
             UpdateMusicVolume();
+            UpdateAmbientVolume();
             UpdateSFXVolume();
             UpdateUIVolume();
         }
@@ -185,6 +212,14 @@ namespace SortResort
             }
         }
 
+        private void UpdateAmbientVolume()
+        {
+            if (ambientSource != null)
+            {
+                ambientSource.volume = masterVolume * ambientVolume;
+            }
+        }
+
         private void UpdateSFXVolume()
         {
             sfxSource.volume = masterVolume * sfxVolume;
@@ -195,7 +230,10 @@ namespace SortResort
             uiSource.volume = masterVolume * uiVolume;
         }
 
-        // Music Playback
+        #endregion
+
+        #region Music Playback
+
         public void PlayMusic(AudioClip clip, bool instant = false)
         {
             if (clip == null) return;
@@ -298,7 +336,221 @@ namespace SortResort
             return isUsingSourceA ? musicSourceA : musicSourceB;
         }
 
-        // SFX Playback
+        #endregion
+
+        #region Ambient/Background Sound Playback
+
+        public void PlayAmbient(AudioClip clip, bool fade = true)
+        {
+            if (clip == null) return;
+
+            if (ambientFadeCoroutine != null)
+            {
+                StopCoroutine(ambientFadeCoroutine);
+                ambientFadeCoroutine = null;
+            }
+
+            if (fade && ambientSource.isPlaying)
+            {
+                ambientFadeCoroutine = StartCoroutine(CrossfadeAmbient(clip));
+            }
+            else
+            {
+                ambientSource.clip = clip;
+                ambientSource.volume = masterVolume * ambientVolume;
+                ambientSource.Play();
+            }
+        }
+
+        private IEnumerator CrossfadeAmbient(AudioClip newClip)
+        {
+            float startVolume = ambientSource.volume;
+            float targetVolume = masterVolume * ambientVolume;
+            float elapsed = 0f;
+            float duration = crossfadeDuration * 0.5f;
+
+            // Fade out
+            while (elapsed < duration)
+            {
+                elapsed += Time.unscaledDeltaTime;
+                ambientSource.volume = Mathf.Lerp(startVolume, 0f, elapsed / duration);
+                yield return null;
+            }
+
+            // Switch clip
+            ambientSource.Stop();
+            ambientSource.clip = newClip;
+            ambientSource.Play();
+
+            // Fade in
+            elapsed = 0f;
+            while (elapsed < duration)
+            {
+                elapsed += Time.unscaledDeltaTime;
+                ambientSource.volume = Mathf.Lerp(0f, targetVolume, elapsed / duration);
+                yield return null;
+            }
+
+            ambientSource.volume = targetVolume;
+            ambientFadeCoroutine = null;
+        }
+
+        public void StopAmbient(bool fade = true)
+        {
+            if (ambientFadeCoroutine != null)
+            {
+                StopCoroutine(ambientFadeCoroutine);
+                ambientFadeCoroutine = null;
+            }
+
+            if (fade)
+            {
+                StartCoroutine(FadeOutAmbient());
+            }
+            else
+            {
+                ambientSource.Stop();
+            }
+        }
+
+        private IEnumerator FadeOutAmbient()
+        {
+            float startVolume = ambientSource.volume;
+            float elapsed = 0f;
+            float duration = crossfadeDuration * 0.5f;
+
+            while (elapsed < duration)
+            {
+                elapsed += Time.unscaledDeltaTime;
+                ambientSource.volume = Mathf.Lerp(startVolume, 0f, elapsed / duration);
+                yield return null;
+            }
+
+            ambientSource.Stop();
+            ambientSource.volume = 0f;
+        }
+
+        #endregion
+
+        #region World-Specific Audio
+
+        /// <summary>
+        /// Play worldmap music (for level select screen)
+        /// </summary>
+        public void PlayWorldmapMusic()
+        {
+            isPlayingGameplayAudio = false;
+            currentPlayingWorld = "";
+
+            var clip = Resources.Load<AudioClip>("Audio/Music/worldmap_music");
+            if (clip != null)
+            {
+                PlayMusic(clip);
+                Debug.Log("[AudioManager] Playing worldmap music");
+            }
+            else
+            {
+                Debug.LogWarning("[AudioManager] worldmap_music not found");
+            }
+
+            // Stop any ambient sounds from gameplay
+            StopAmbient();
+        }
+
+        /// <summary>
+        /// Play world-specific gameplay audio (music + ambient background)
+        /// Only restarts if world changes
+        /// </summary>
+        public void PlayWorldGameplayAudio(string worldId)
+        {
+            // Don't restart if already playing this world's audio
+            if (isPlayingGameplayAudio && currentPlayingWorld == worldId)
+            {
+                Debug.Log($"[AudioManager] Already playing {worldId} gameplay audio, continuing");
+                return;
+            }
+
+            currentPlayingWorld = worldId;
+            isPlayingGameplayAudio = true;
+
+            // Map world IDs (resort uses "island" prefix in audio files)
+            string audioWorldId = worldId == "resort" ? "island" : worldId;
+
+            // Load and play gameplay music
+            string[] musicPaths = new string[]
+            {
+                $"Audio/Music/{audioWorldId}_gameplay_music",
+                $"Audio/Music/{worldId}_gameplay_music",
+                "Audio/Music/island_gameplay_music" // Fallback
+            };
+
+            AudioClip musicClip = null;
+            foreach (var path in musicPaths)
+            {
+                musicClip = Resources.Load<AudioClip>(path);
+                if (musicClip != null)
+                {
+                    Debug.Log($"[AudioManager] Loaded gameplay music: {path}");
+                    break;
+                }
+            }
+
+            if (musicClip != null)
+            {
+                PlayMusic(musicClip);
+            }
+
+            // Load and play ambient/background sounds
+            string[] ambientPaths = new string[]
+            {
+                $"Audio/Music/{audioWorldId}_background",
+                $"Audio/Music/{worldId}_background",
+                $"Audio/Music/{audioWorldId}_background_music",
+                $"Audio/Music/{worldId}_background_music"
+            };
+
+            AudioClip ambientClip = null;
+            foreach (var path in ambientPaths)
+            {
+                ambientClip = Resources.Load<AudioClip>(path);
+                if (ambientClip != null)
+                {
+                    Debug.Log($"[AudioManager] Loaded ambient: {path}");
+                    break;
+                }
+            }
+
+            if (ambientClip != null)
+            {
+                PlayAmbient(ambientClip);
+            }
+        }
+
+        /// <summary>
+        /// Stop all gameplay audio (music and ambient) - call before victory
+        /// </summary>
+        public void StopGameplayAudio(bool fade = true)
+        {
+            isPlayingGameplayAudio = false;
+            StopMusic(fade);
+            StopAmbient(fade);
+        }
+
+        /// <summary>
+        /// Stop all audio immediately
+        /// </summary>
+        public void StopAllAudio()
+        {
+            isPlayingGameplayAudio = false;
+            currentPlayingWorld = "";
+            StopAllMusic();
+            ambientSource.Stop();
+        }
+
+        #endregion
+
+        #region SFX Playback
+
         public void PlaySFX(AudioClip clip, float volumeScale = 1f)
         {
             if (clip == null) return;
@@ -316,12 +568,24 @@ namespace SortResort
         public void PlayDropSound() => PlaySFX(itemDropClip);
         public void PlayMatchSound() => PlaySFX(matchClip);
         public void PlayUnlockSound() => PlaySFX(unlockClip);
-        public void PlayVictorySound() => PlaySFX(victoryClip);
         public void PlayFailureSound() => PlaySFX(failureClip);
         public void PlayButtonClick() => PlayUI(buttonClickClip);
         public void PlayStarEarned() => PlaySFX(starEarnedClip);
 
-        // Settings Persistence
+        /// <summary>
+        /// Play victory sound (stops gameplay audio first)
+        /// </summary>
+        public void PlayVictorySound()
+        {
+            // Stop gameplay music and ambient before victory
+            StopGameplayAudio(fade: false);
+            PlaySFX(victoryClip);
+        }
+
+        #endregion
+
+        #region Settings Persistence
+
         private void DebounceSaveSettings()
         {
             if (saveDebounceCoroutine != null)
@@ -342,6 +606,7 @@ namespace SortResort
         {
             PlayerPrefs.SetFloat("MasterVolume", masterVolume);
             PlayerPrefs.SetFloat("MusicVolume", musicVolume);
+            PlayerPrefs.SetFloat("AmbientVolume", ambientVolume);
             PlayerPrefs.SetFloat("SFXVolume", sfxVolume);
             PlayerPrefs.SetFloat("UIVolume", uiVolume);
             PlayerPrefs.Save();
@@ -351,9 +616,12 @@ namespace SortResort
         {
             masterVolume = PlayerPrefs.GetFloat("MasterVolume", 1f);
             musicVolume = PlayerPrefs.GetFloat("MusicVolume", 0.7f);
+            ambientVolume = PlayerPrefs.GetFloat("AmbientVolume", 0.5f);
             sfxVolume = PlayerPrefs.GetFloat("SFXVolume", 1f);
             uiVolume = PlayerPrefs.GetFloat("UIVolume", 1f);
             UpdateAllVolumes();
         }
+
+        #endregion
     }
 }

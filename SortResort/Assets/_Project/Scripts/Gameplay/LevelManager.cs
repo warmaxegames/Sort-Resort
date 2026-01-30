@@ -40,6 +40,9 @@ namespace SortResort
         private Dictionary<string, ItemDefinition> itemDatabase = new Dictionary<string, ItemDefinition>();
         private Dictionary<string, Sprite> itemSprites = new Dictionary<string, Sprite>();
 
+        // Background
+        private SpriteRenderer backgroundRenderer;
+
         // Tracking
         private int totalItemsAtStart;
         private int itemsRemaining;
@@ -84,6 +87,13 @@ namespace SortResort
                 go.transform.SetParent(gameWorldGO.transform);
                 floatingItemsParent = go.transform;
             }
+
+            // Create background sprite renderer (behind everything)
+            var backgroundGO = new GameObject("Background");
+            backgroundGO.transform.SetParent(gameWorldGO.transform);
+            backgroundGO.transform.localPosition = new Vector3(0, 0, 10f); // Behind everything
+            backgroundRenderer = backgroundGO.AddComponent<SpriteRenderer>();
+            backgroundRenderer.sortingOrder = -100; // Far back
 
             // Register with ScreenManager for responsive scaling
             StartCoroutine(RegisterWithScreenManager(gameWorldGO.transform));
@@ -269,6 +279,14 @@ namespace SortResort
                 return;
             }
 
+            // Load world background and music
+            string bgWorldId = !string.IsNullOrEmpty(currentLevel.world_id) ? currentLevel.world_id : worldId;
+            LoadWorldBackground(bgWorldId);
+
+            // Play world-specific gameplay audio (music + ambient)
+            // This will only restart if the world changes
+            AudioManager.Instance?.PlayWorldGameplayAudio(bgWorldId);
+
             // Store star thresholds
             starThresholds = currentLevel.star_move_thresholds;
 
@@ -290,10 +308,66 @@ namespace SortResort
         }
 
         /// <summary>
+        /// Load and display the background for a world
+        /// </summary>
+        private void LoadWorldBackground(string worldId)
+        {
+            if (backgroundRenderer == null) return;
+
+            // Try to load world-specific background, fall back to base
+            string[] backgroundPaths = new string[]
+            {
+                $"Sprites/Backgrounds/{worldId}_background",
+                "Sprites/Backgrounds/basebackground"
+            };
+
+            Sprite bgSprite = null;
+            foreach (var path in backgroundPaths)
+            {
+                bgSprite = Resources.Load<Sprite>(path);
+                if (bgSprite != null)
+                {
+                    Debug.Log($"[LevelManager] Loaded background: {path}");
+                    break;
+                }
+            }
+
+            if (bgSprite != null)
+            {
+                backgroundRenderer.sprite = bgSprite;
+
+                // Scale background to fill screen
+                // Get camera bounds and scale sprite to fit
+                if (Camera.main != null)
+                {
+                    float camHeight = Camera.main.orthographicSize * 2f;
+                    float camWidth = camHeight * Camera.main.aspect;
+
+                    float spriteHeight = bgSprite.bounds.size.y;
+                    float spriteWidth = bgSprite.bounds.size.x;
+
+                    // Scale to cover entire screen (use max scale to ensure no gaps)
+                    float scaleX = camWidth / spriteWidth;
+                    float scaleY = camHeight / spriteHeight;
+                    float scale = Mathf.Max(scaleX, scaleY) * 1.1f; // 10% extra to ensure coverage
+
+                    backgroundRenderer.transform.localScale = new Vector3(scale, scale, 1f);
+                }
+            }
+            else
+            {
+                Debug.LogWarning($"[LevelManager] No background found for world: {worldId}");
+            }
+        }
+
+        /// <summary>
         /// Clear current level
         /// </summary>
         public void ClearLevel()
         {
+            // Clear static stack container tracking
+            ContainerMovement.ClearAllStackContainers();
+
             // Return all items to pool
             foreach (var container in containers)
             {
@@ -352,6 +426,18 @@ namespace SortResort
             // Initialize
             container.Initialize(definition);
 
+            // Add ContainerMovement if needed (for moving, falling, or despawn-on-match containers)
+            if (definition.is_moving || definition.is_falling || definition.despawn_on_match)
+            {
+                var movement = go.GetComponent<ContainerMovement>();
+                if (movement == null)
+                {
+                    movement = go.AddComponent<ContainerMovement>();
+                }
+                movement.Initialize(definition);
+                Debug.Log($"[LevelManager] Added ContainerMovement to {definition.id}, despawn_on_match={definition.despawn_on_match}");
+            }
+
             // Subscribe to events
             container.OnItemsMatched += OnContainerItemsMatched;
             container.OnContainerEmpty += OnContainerBecameEmpty;
@@ -380,7 +466,12 @@ namespace SortResort
 
                 foreach (var placement in containerDef.initial_items)
                 {
-                    var item = GetItemFromPool(placement.id, currentWorldId);
+                    // Use the level's world_id for sprite loading (not the folder name)
+                    string spriteWorldId = !string.IsNullOrEmpty(currentLevel.world_id)
+                        ? currentLevel.world_id
+                        : currentWorldId;
+
+                    var item = GetItemFromPool(placement.id, spriteWorldId);
                     if (item != null)
                     {
                         // Scale item to fit slot before placing
@@ -420,7 +511,8 @@ namespace SortResort
         private void OnContainerBecameEmpty(ItemContainer container)
         {
             Debug.Log($"[LevelManager] Container {container.ContainerId} is now empty");
-            CheckLevelComplete();
+            // Update item count and check completion
+            UpdateItemsRemaining();
         }
 
         private void UpdateItemsRemaining()
@@ -461,6 +553,9 @@ namespace SortResort
 
             // All items cleared!
             Debug.Log("[LevelManager] Level complete!");
+
+            // Play victory sound
+            AudioManager.Instance?.PlayVictorySound();
 
             OnLevelCleared?.Invoke();
 

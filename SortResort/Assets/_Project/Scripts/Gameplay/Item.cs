@@ -281,6 +281,9 @@ namespace SortResort
 
             SetState(ItemState.Dragging);
 
+            // Play drag sound
+            AudioManager.Instance?.PlayDragSound();
+
             GameEvents.InvokeItemPickedUp(gameObject);
 
             return true;
@@ -340,6 +343,9 @@ namespace SortResort
             {
                 Debug.Log($"[Item] DropOnSlot - {itemId} placed successfully");
 
+                // Play drop sound
+                AudioManager.Instance?.PlayDropSound();
+
                 // Only set to Idle if not already Matched (match may have been triggered by PlaceItemInSlot)
                 if (currentState != ItemState.Matched)
                 {
@@ -382,18 +388,36 @@ namespace SortResort
             // Return to original container/slot
             if (originalContainer != null && originalSlot != null)
             {
-                originalContainer.PlaceItemInSlot(this, originalSlot.SlotIndex, forcePlace: true);
-            }
+                // Place in slot first (this parents the item to the container and sets up slot data)
+                // Use skipPositioning=true so we can animate to the position
+                originalContainer.PlaceItemInSlotNoPosition(this, originalSlot.SlotIndex);
 
-            // Animate back to original position using LeanTween
-            LeanTween.move(gameObject, originalPosition, 0.2f)
-                .setEase(LeanTweenType.easeOutQuad)
-                .setOnComplete(() =>
-                {
-                    SetState(ItemState.Idle);
-                    GameEvents.InvokeItemReturnedToOrigin(gameObject);
-                    OnDragEnded?.Invoke(this);
-                });
+                // Get local target position within the container
+                float itemHeight = originalContainer.GetItemHeight(this);
+                Vector3 targetLocalPos = originalContainer.GetItemLocalPositionBottomAligned(originalSlot.SlotIndex, 0, itemHeight);
+
+                // Animate LOCAL position (so item moves WITH the container if it's moving)
+                LeanTween.moveLocal(gameObject, targetLocalPos, 0.2f)
+                    .setEase(LeanTweenType.easeOutQuad)
+                    .setOnComplete(() =>
+                    {
+                        SetState(ItemState.Idle);
+                        GameEvents.InvokeItemReturnedToOrigin(gameObject);
+                        OnDragEnded?.Invoke(this);
+                    });
+            }
+            else
+            {
+                // No original container - just animate back to original position
+                LeanTween.move(gameObject, originalPosition, 0.2f)
+                    .setEase(LeanTweenType.easeOutQuad)
+                    .setOnComplete(() =>
+                    {
+                        SetState(ItemState.Idle);
+                        GameEvents.InvokeItemReturnedToOrigin(gameObject);
+                        OnDragEnded?.Invoke(this);
+                    });
+            }
         }
 
         #endregion

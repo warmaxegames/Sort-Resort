@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.InputSystem.UI;
@@ -100,7 +101,34 @@ namespace SortResort
             if (levelSelectPanel != null)
                 levelSelectPanel.SetActive(true);
 
+            // Play worldmap music on startup
+            if (AudioManager.Instance != null)
+            {
+                AudioManager.Instance.PlayWorldmapMusic();
+                Debug.Log("[UIManager] Started worldmap music");
+            }
+            else
+            {
+                // Fallback: wait a frame and try again
+                StartCoroutine(PlayWorldmapMusicDelayed());
+            }
+
             Debug.Log("[UIManager] Runtime UI created");
+        }
+
+        private IEnumerator PlayWorldmapMusicDelayed()
+        {
+            yield return null; // Wait one frame
+
+            if (AudioManager.Instance != null)
+            {
+                AudioManager.Instance.PlayWorldmapMusic();
+                Debug.Log("[UIManager] Started worldmap music (delayed)");
+            }
+            else
+            {
+                Debug.LogWarning("[UIManager] AudioManager not available for worldmap music");
+            }
         }
 
         /// <summary>
@@ -117,6 +145,9 @@ namespace SortResort
 
             // Refresh level select to show updated stars
             levelSelectScreen?.RefreshDisplay();
+
+            // Play worldmap music
+            AudioManager.Instance?.PlayWorldmapMusic();
         }
 
         /// <summary>
@@ -474,18 +505,15 @@ namespace SortResort
             rect.anchorMax = new Vector2(1, 1);
             rect.pivot = new Vector2(1, 1);
             rect.anchoredPosition = new Vector2(-20, -20);
-            rect.sizeDelta = new Vector2(150, 50);
+            rect.sizeDelta = new Vector2(100, 50);
 
             var layout = buttonsGO.AddComponent<HorizontalLayoutGroup>();
             layout.spacing = 10;
             layout.childAlignment = TextAnchor.MiddleRight;
             layout.childForceExpandWidth = false;
 
-            // Pause button
-            CreateButton(buttonsGO.transform, "Pause", "II", () => GameManager.Instance?.PauseGame());
-
-            // Restart button
-            CreateButton(buttonsGO.transform, "Restart", "R", () => LevelManager.Instance?.RestartLevel());
+            // Back button - exits level and returns to level select
+            CreateButton(buttonsGO.transform, "Back", "Back", OnBackToLevelsClicked, 80, 50);
         }
 
         private void CreateLevelCompletePanel()

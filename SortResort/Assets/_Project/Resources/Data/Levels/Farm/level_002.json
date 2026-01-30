@@ -1,0 +1,71 @@
+{
+  "id": 2,
+  "world_id": "farm",
+  "name": "level_002",
+  "star_move_thresholds": [15, 18, 20],
+  "containers": [
+	{
+	  "id": "container_1",
+	  "position": {"x": 300, "y": 300},
+	  "container_type": "standard",
+	  "container_image": "base_shelf",
+	  "initial_items": [
+		{"id": "turnip", "row": 0, "slot": 0},
+		{"id": "redtomato", "row": 1, "slot": 0},
+		{"id": "whiteonion", "row": 2, "slot": 0},
+		{"id": "romaine", "row": 3, "slot": 0},
+		{"id": "whiteonion", "row": 0, "slot": 1},
+		{"id": "whiteonion", "row": 0, "slot": 2},
+		{"id": "redtomato", "row": 1, "slot": 2}
+	  ]
+	},
+	{
+	  "id": "container_2",
+	  "position": {"x": 300, "y": 600},
+	  "container_type": "standard",
+	  "container_image": "base_shelf",
+	  "initial_items": [
+		{"id": "romaine", "row": 0, "slot": 0},
+		{"id": "turnip", "row": 1, "slot": 1},
+		{"id": "redtomato", "row": 0, "slot": 2},
+		{"id": "greentomato", "row": 1, "slot": 2},
+		{"id": "romaine", "row": 2, "slot": 1}
+	  ]
+	},
+	{
+	  "id": "container_3",
+	  "position": {"x": 300, "y": 900},
+	  "container_type": "standard",
+	  "container_image": "base_shelf",
+	  "is_locked": true,
+	  "unlock_matches_required": 3,
+	  "lock_overlay_image": "base_lockoverlay",
+	  "unlock_animation": "fade_in",
+	  "initial_items": [
+		{"id": "greentomato", "row": 0, "slot": 0},
+		{"id": "turnip", "row": 0, "slot": 1}
+	]
+	},
+	{
+	  "id": "container_4",
+	  "position": {"x": 800, "y": 300},
+	  "container_type": "standard",
+	  "container_image": "base_shelf",
+	  "initial_items": []
+	},
+	{
+	  "id": "container_5",
+	  "position": {"x": 800, "y": 600},
+	  "container_type": "single_slot",
+	  "container_image": "base_single_slot_container",
+	  "slot_count": 1,
+	  "is_locked": true,
+	  "unlock_matches_required": 2,
+	  "lock_overlay_image": "base_single_slot_lockoverlay",
+	  "unlock_animation": "fade_out",
+	  "initial_items": [
+		{"id": "greentomato", "row": 0, "slot": 0}
+	  ]
+	}
+  ]
+}

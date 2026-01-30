@@ -1,0 +1,188 @@
+{
+  "id": 3,
+  "world_id": "farm",
+  "name": "level_003",
+  "star_move_thresholds": [8, 12, 16],
+  "containers": [
+    {
+      "id": "train_top_1",
+      "position": {"x": -150, "y": 350},
+      "container_type": "standard",
+      "container_image": "base_shelf",
+      "slot_count": 3,
+      "max_rows_per_slot": 1,
+      "is_locked": false,
+      "is_moving": true,
+      "move_type": "carousel",
+      "move_direction": "right",
+      "move_speed": 80,
+      "move_distance": 1485,
+      "initial_items": [
+        {"id": "potato", "row": 0, "slot": 0},
+        {"id": "potato", "row": 0, "slot": 1}
+      ]
+    },
+    {
+      "id": "train_top_2",
+      "position": {"x": 147, "y": 350},
+      "container_type": "standard",
+      "container_image": "base_shelf",
+      "slot_count": 3,
+      "max_rows_per_slot": 1,
+      "is_locked": true,
+      "unlock_matches_required": 2,
+      "lock_overlay_image": "base_lockoverlay",
+      "is_moving": true,
+      "move_type": "carousel",
+      "move_direction": "right",
+      "move_speed": 80,
+      "move_distance": 1485,
+      "initial_items": [
+        {"id": "carrot", "row": 0, "slot": 0},
+        {"id": "carrot", "row": 0, "slot": 1},
+        {"id": "turnip", "row": 0, "slot": 2}
+      ]
+    },
+    {
+      "id": "train_top_3",
+      "position": {"x": 444, "y": 350},
+      "container_type": "standard",
+      "container_image": "base_shelf",
+      "slot_count": 3,
+      "max_rows_per_slot": 1,
+      "is_locked": false,
+      "is_moving": true,
+      "move_type": "carousel",
+      "move_direction": "right",
+      "move_speed": 80,
+      "move_distance": 1485,
+      "initial_items": [
+        {"id": "potato", "row": 0, "slot": 0},
+        {"id": "redtomato", "row": 0, "slot": 1},
+        {"id": "redtomato", "row": 0, "slot": 2}
+      ]
+    },
+    {
+      "id": "train_top_4",
+      "position": {"x": 741, "y": 350},
+      "container_type": "standard",
+      "container_image": "base_shelf",
+      "slot_count": 3,
+      "max_rows_per_slot": 1,
+      "is_locked": false,
+      "is_moving": true,
+      "move_type": "carousel",
+      "move_direction": "right",
+      "move_speed": 80,
+      "move_distance": 1485,
+      "initial_items": [
+        {"id": "redtomato", "row": 0, "slot": 0},
+        {"id": "whiteonion", "row": 0, "slot": 1}
+      ]
+    },
+    {
+      "id": "train_top_5",
+      "position": {"x": 1038, "y": 350},
+      "container_type": "standard",
+      "container_image": "base_shelf",
+      "slot_count": 3,
+      "max_rows_per_slot": 1,
+      "is_locked": false,
+      "is_moving": true,
+      "move_type": "carousel",
+      "move_direction": "right",
+      "move_speed": 80,
+      "move_distance": 1485,
+      "initial_items": []
+    },
+    {
+      "id": "train_bottom_1",
+      "position": {"x": 1185, "y": 650},
+      "container_type": "standard",
+      "container_image": "base_shelf",
+      "slot_count": 3,
+      "max_rows_per_slot": 1,
+      "is_locked": false,
+      "is_moving": true,
+      "move_type": "carousel",
+      "move_direction": "left",
+      "move_speed": 80,
+      "move_distance": 1485,
+      "initial_items": [
+        {"id": "whiteonion", "row": 0, "slot": 0},
+        {"id": "whiteonion", "row": 0, "slot": 1}
+      ]
+    },
+    {
+      "id": "train_bottom_2",
+      "position": {"x": 888, "y": 650},
+      "container_type": "standard",
+      "container_image": "base_shelf",
+      "slot_count": 3,
+      "max_rows_per_slot": 1,
+      "is_locked": true,
+      "unlock_matches_required": 2,
+      "lock_overlay_image": "base_lockoverlay",
+      "is_moving": true,
+      "move_type": "carousel",
+      "move_direction": "left",
+      "move_speed": 80,
+      "move_distance": 1485,
+      "initial_items": [
+        {"id": "turnip", "row": 0, "slot": 0},
+        {"id": "turnip", "row": 0, "slot": 1}
+      ]
+    },
+    {
+      "id": "train_bottom_3",
+      "position": {"x": 591, "y": 650},
+      "container_type": "standard",
+      "container_image": "base_shelf",
+      "slot_count": 3,
+      "max_rows_per_slot": 1,
+      "is_locked": false,
+      "is_moving": true,
+      "move_type": "carousel",
+      "move_direction": "left",
+      "move_speed": 80,
+      "move_distance": 1485,
+      "initial_items": [
+        {"id": "romaine", "row": 0, "slot": 0},
+        {"id": "romaine", "row": 0, "slot": 1}
+      ]
+    },
+    {
+      "id": "train_bottom_4",
+      "position": {"x": 294, "y": 650},
+      "container_type": "standard",
+      "container_image": "base_shelf",
+      "slot_count": 3,
+      "max_rows_per_slot": 1,
+      "is_locked": false,
+      "is_moving": true,
+      "move_type": "carousel",
+      "move_direction": "left",
+      "move_speed": 80,
+      "move_distance": 1485,
+      "initial_items": [
+        {"id": "romaine", "row": 0, "slot": 0},
+        {"id": "carrot", "row": 0, "slot": 1}
+      ]
+    },
+    {
+      "id": "train_bottom_5",
+      "position": {"x": -3, "y": 650},
+      "container_type": "standard",
+      "container_image": "base_shelf",
+      "slot_count": 3,
+      "max_rows_per_slot": 1,
+      "is_locked": false,
+      "is_moving": true,
+      "move_type": "carousel",
+      "move_direction": "left",
+      "move_speed": 80,
+      "move_distance": 1485,
+      "initial_items": []
+    }
+  ]
+}

@@ -140,15 +140,15 @@ MonoBehaviour:
   containerType: 0
   slotCount: 1
   maxRowsPerSlot: 4
-  slotSize: {x: 128, y: 256}
+  slotSize: {x: 90, y: 180}
   isLocked: 0
   unlockMatchesRequired: 0
   containerSprite: {fileID: 5293966716199183034}
   slotsParent: {fileID: 875417052668634855}
   lockOverlay: {fileID: 0}
   lockCountText: {fileID: 0}
-  slotSpacing: 128
-  rowDepthOffset: 10
+  slotSpacing: 90
+  rowDepthOffset: 28
 --- !u!1 &8188979753943983185
 GameObject:
   m_ObjectHideFlags: 0

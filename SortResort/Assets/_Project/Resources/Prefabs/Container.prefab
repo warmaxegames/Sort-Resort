@@ -171,12 +171,12 @@ MonoBehaviour:
   containerType: 0
   slotCount: 3
   maxRowsPerSlot: 4
-  slotSize: {x: 128, y: 256}
+  slotSize: {x: 90, y: 180}
   isLocked: 0
   unlockMatchesRequired: 0
   containerSprite: {fileID: 1502311935411379533}
   slotsParent: {fileID: 6717189017731001613}
   lockOverlay: {fileID: 0}
   lockCountText: {fileID: 0}
-  slotSpacing: 128
-  rowDepthOffset: 10
+  slotSpacing: 90
+  rowDepthOffset: 28
