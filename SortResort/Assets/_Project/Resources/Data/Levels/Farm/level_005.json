@@ -2,13 +2,13 @@
   "id": 5,
   "world_id": "farm",
   "name": "level_005",
-  "star_move_thresholds": [18, 24, 30],
+  "star_move_thresholds": [10, 15, 20],
   "containers": [
     {
       "id": "stack_left_1",
-      "position": {"x": 240, "y": 1300},
+      "position": {"x": 240, "y": 900},
       "container_type": "standard",
-      "container_image": "base_shelf",
+      "container_image": "farm_container",
       "slot_count": 3,
       "max_rows_per_slot": 2,
       "is_locked": false,
@@ -22,9 +22,9 @@
     },
     {
       "id": "stack_left_2",
-      "position": {"x": 240, "y": 1102},
+      "position": {"x": 240, "y": 702},
       "container_type": "standard",
-      "container_image": "base_shelf",
+      "container_image": "farm_container",
       "slot_count": 3,
       "max_rows_per_slot": 2,
       "is_locked": false,
@@ -37,9 +37,9 @@
     },
     {
       "id": "stack_left_3",
-      "position": {"x": 240, "y": 904},
+      "position": {"x": 240, "y": 504},
       "container_type": "standard",
-      "container_image": "base_shelf",
+      "container_image": "farm_container",
       "slot_count": 3,
       "max_rows_per_slot": 2,
       "is_locked": false,
@@ -47,59 +47,14 @@
       "fall_speed": 300,
       "initial_items": [
         {"id": "turnip", "row": 0, "slot": 0},
-        {"id": "carrot", "row": 1, "slot": 2}
-      ]
-    },
-    {
-      "id": "stack_left_4",
-      "position": {"x": 240, "y": 706},
-      "container_type": "standard",
-      "container_image": "base_shelf",
-      "slot_count": 3,
-      "max_rows_per_slot": 2,
-      "is_locked": false,
-      "despawn_on_match": true,
-      "fall_speed": 300,
-      "initial_items": [
-        {"id": "greentomato", "row": 0, "slot": 1},
-        {"id": "potato", "row": 1, "slot": 1}
-      ]
-    },
-    {
-      "id": "stack_left_5",
-      "position": {"x": 240, "y": 508},
-      "container_type": "standard",
-      "container_image": "base_shelf",
-      "slot_count": 3,
-      "max_rows_per_slot": 2,
-      "is_locked": false,
-      "despawn_on_match": true,
-      "fall_speed": 300,
-      "initial_items": [
-        {"id": "romaine", "row": 0, "slot": 2},
-        {"id": "whiteonion", "row": 1, "slot": 0}
-      ]
-    },
-    {
-      "id": "stack_left_6",
-      "position": {"x": 240, "y": 310},
-      "container_type": "standard",
-      "container_image": "base_shelf",
-      "slot_count": 3,
-      "max_rows_per_slot": 2,
-      "is_locked": false,
-      "despawn_on_match": true,
-      "fall_speed": 300,
-      "initial_items": [
-        {"id": "turnip", "row": 0, "slot": 1},
-        {"id": "carrot", "row": 1, "slot": 1}
+        {"id": "carrot", "row": 0, "slot": 2}
       ]
     },
     {
       "id": "stack_middle_1",
-      "position": {"x": 540, "y": 1300},
+      "position": {"x": 540, "y": 900},
       "container_type": "standard",
-      "container_image": "base_shelf",
+      "container_image": "farm_container",
       "slot_count": 3,
       "max_rows_per_slot": 2,
       "is_locked": false,
@@ -113,9 +68,9 @@
     },
     {
       "id": "stack_middle_2",
-      "position": {"x": 540, "y": 1102},
+      "position": {"x": 540, "y": 702},
       "container_type": "standard",
-      "container_image": "base_shelf",
+      "container_image": "farm_container",
       "slot_count": 3,
       "max_rows_per_slot": 2,
       "is_locked": false,
@@ -128,68 +83,23 @@
     },
     {
       "id": "stack_middle_3",
-      "position": {"x": 540, "y": 904},
+      "position": {"x": 540, "y": 504},
       "container_type": "standard",
-      "container_image": "base_shelf",
+      "container_image": "farm_container",
       "slot_count": 3,
       "max_rows_per_slot": 2,
       "is_locked": false,
       "despawn_on_match": true,
       "fall_speed": 300,
       "initial_items": [
-        {"id": "carrot", "row": 0, "slot": 0},
-        {"id": "greentomato", "row": 1, "slot": 1}
-      ]
-    },
-    {
-      "id": "stack_middle_4",
-      "position": {"x": 540, "y": 706},
-      "container_type": "standard",
-      "container_image": "base_shelf",
-      "slot_count": 3,
-      "max_rows_per_slot": 2,
-      "is_locked": false,
-      "despawn_on_match": true,
-      "fall_speed": 300,
-      "initial_items": [
-        {"id": "potato", "row": 0, "slot": 2},
-        {"id": "romaine", "row": 1, "slot": 0}
-      ]
-    },
-    {
-      "id": "stack_middle_5",
-      "position": {"x": 540, "y": 508},
-      "container_type": "standard",
-      "container_image": "base_shelf",
-      "slot_count": 3,
-      "max_rows_per_slot": 2,
-      "is_locked": false,
-      "despawn_on_match": true,
-      "fall_speed": 300,
-      "initial_items": [
-        {"id": "whiteonion", "row": 0, "slot": 1},
-        {"id": "turnip", "row": 1, "slot": 1}
-      ]
-    },
-    {
-      "id": "stack_middle_6",
-      "position": {"x": 540, "y": 310},
-      "container_type": "standard",
-      "container_image": "base_shelf",
-      "slot_count": 3,
-      "max_rows_per_slot": 2,
-      "is_locked": false,
-      "despawn_on_match": true,
-      "fall_speed": 300,
-      "initial_items": [
-        {"id": "carrot", "row": 0, "slot": 0}
+        {"id": "carrot", "row": 0, "slot": 1}
       ]
     },
     {
       "id": "stack_right_1",
-      "position": {"x": 840, "y": 1300},
+      "position": {"x": 840, "y": 900},
       "container_type": "standard",
-      "container_image": "base_shelf",
+      "container_image": "farm_container",
       "slot_count": 3,
       "max_rows_per_slot": 2,
       "is_locked": false,
@@ -202,9 +112,9 @@
     },
     {
       "id": "stack_right_2",
-      "position": {"x": 840, "y": 1102},
+      "position": {"x": 840, "y": 702},
       "container_type": "standard",
-      "container_image": "base_shelf",
+      "container_image": "farm_container",
       "slot_count": 3,
       "max_rows_per_slot": 2,
       "is_locked": false,
@@ -217,61 +127,16 @@
     },
     {
       "id": "stack_right_3",
-      "position": {"x": 840, "y": 904},
+      "position": {"x": 840, "y": 504},
       "container_type": "standard",
-      "container_image": "base_shelf",
+      "container_image": "farm_container",
       "slot_count": 3,
       "max_rows_per_slot": 2,
       "is_locked": false,
       "despawn_on_match": true,
       "fall_speed": 300,
       "initial_items": [
-        {"id": "carrot", "row": 0, "slot": 2},
-        {"id": "greentomato", "row": 1, "slot": 0}
-      ]
-    },
-    {
-      "id": "stack_right_4",
-      "position": {"x": 840, "y": 706},
-      "container_type": "standard",
-      "container_image": "base_shelf",
-      "slot_count": 3,
-      "max_rows_per_slot": 2,
-      "is_locked": false,
-      "despawn_on_match": true,
-      "fall_speed": 300,
-      "initial_items": [
-        {"id": "potato", "row": 0, "slot": 1},
-        {"id": "romaine", "row": 1, "slot": 2}
-      ]
-    },
-    {
-      "id": "stack_right_5",
-      "position": {"x": 840, "y": 508},
-      "container_type": "standard",
-      "container_image": "base_shelf",
-      "slot_count": 3,
-      "max_rows_per_slot": 2,
-      "is_locked": false,
-      "despawn_on_match": true,
-      "fall_speed": 300,
-      "initial_items": [
-        {"id": "whiteonion", "row": 0, "slot": 0},
-        {"id": "turnip", "row": 1, "slot": 1}
-      ]
-    },
-    {
-      "id": "stack_right_6",
-      "position": {"x": 840, "y": 310},
-      "container_type": "standard",
-      "container_image": "base_shelf",
-      "slot_count": 3,
-      "max_rows_per_slot": 2,
-      "is_locked": false,
-      "despawn_on_match": true,
-      "fall_speed": 300,
-      "initial_items": [
-        {"id": "greentomato", "row": 0, "slot": 1}
+        {"id": "greentomato", "row": 0, "slot": 2}
       ]
     }
   ]

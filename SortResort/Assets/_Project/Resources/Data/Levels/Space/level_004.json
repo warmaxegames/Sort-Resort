@@ -1,0 +1,60 @@
+{
+  "id": 4,
+  "world_id": "space",
+  "name": "level_004",
+  "star_move_thresholds": [6, 14, 20],
+  "containers": [
+	{
+	  "id": "container_1",
+	  "position": {"x": 300, "y": 350},
+	  "container_type": "standard",
+	  "container_image": "space_container",
+	  "initial_items": [
+		{"id": "mars", "row": 0, "slot": 0},
+		{"id": "jupiter", "row": 1, "slot": 0},
+		{"id": "saturn", "row": 0, "slot": 2}
+	  ]
+	},
+	{
+	  "id": "container_2",
+	  "position": {"x": 722, "y": 350},
+	  "container_type": "standard",
+	  "container_image": "space_container",
+	  "initial_items": [
+		{"id": "comet", "row": 0, "slot": 0},
+		{"id": "mars", "row": 0, "slot": 1},
+		{"id": "saturn", "row": 1, "slot": 1}
+	  ]
+	},
+	{
+	  "id": "container_3",
+	  "position": {"x": 300, "y": 660},
+	  "container_type": "standard",
+	  "container_image": "space_container",
+	  "initial_items": [
+		{"id": "jupiter", "row": 0, "slot": 0},
+		{"id": "comet", "row": 0, "slot": 1},
+		{"id": "mars", "row": 0, "slot": 2}
+	  ]
+	},
+	{
+	  "id": "container_4",
+	  "position": {"x": 722, "y": 660},
+	  "container_type": "standard",
+	  "container_image": "space_container",
+	  "initial_items": [
+		{"id": "jupiter", "row": 0, "slot": 1},
+		{"id": "comet", "row": 0, "slot": 2}
+	  ]
+	},
+	{
+	  "id": "container_5",
+	  "position": {"x": 511, "y": 505},
+	  "container_type": "standard",
+	  "container_image": "space_container",
+	  "initial_items": [
+		{"id": "saturn", "row": 0, "slot": 1}
+	  ]
+	}
+  ]
+}

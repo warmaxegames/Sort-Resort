@@ -1,0 +1,60 @@
+{
+  "id": 3,
+  "world_id": "tavern",
+  "name": "level_003",
+  "star_move_thresholds": [5, 12, 18],
+  "containers": [
+	{
+	  "id": "container_1",
+	  "position": {"x": 300, "y": 350},
+	  "container_type": "standard",
+	  "container_image": "tavern_container",
+	  "initial_items": [
+		{"id": "blue_potion", "row": 0, "slot": 0},
+		{"id": "green_potion", "row": 1, "slot": 0},
+		{"id": "ham", "row": 0, "slot": 2}
+	  ]
+	},
+	{
+	  "id": "container_2",
+	  "position": {"x": 722, "y": 350},
+	  "container_type": "standard",
+	  "container_image": "tavern_container",
+	  "initial_items": [
+		{"id": "blue_potion", "row": 0, "slot": 0},
+		{"id": "torch", "row": 0, "slot": 1},
+		{"id": "ham", "row": 1, "slot": 1}
+	  ]
+	},
+	{
+	  "id": "container_3",
+	  "position": {"x": 300, "y": 660},
+	  "container_type": "standard",
+	  "container_image": "tavern_container",
+	  "initial_items": [
+		{"id": "green_potion", "row": 0, "slot": 0},
+		{"id": "torch", "row": 0, "slot": 1},
+		{"id": "blue_potion", "row": 0, "slot": 2}
+	  ]
+	},
+	{
+	  "id": "container_4",
+	  "position": {"x": 722, "y": 660},
+	  "container_type": "standard",
+	  "container_image": "tavern_container",
+	  "initial_items": [
+		{"id": "green_potion", "row": 0, "slot": 1},
+		{"id": "torch", "row": 0, "slot": 2}
+	  ]
+	},
+	{
+	  "id": "container_5",
+	  "position": {"x": 511, "y": 505},
+	  "container_type": "standard",
+	  "container_image": "tavern_container",
+	  "initial_items": [
+		{"id": "ham", "row": 0, "slot": 1}
+	  ]
+	}
+  ]
+}

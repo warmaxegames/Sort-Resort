@@ -126,7 +126,7 @@ namespace SortResort
         public static LevelData LoadLevel(string worldId, int levelNumber)
         {
             string levelNum = levelNumber.ToString("D3");
-            // Capitalize world name for folder (resort -> Resort)
+            // Capitalize world name for folder (island -> Island)
             string worldFolder = char.ToUpper(worldId[0]) + worldId.Substring(1).ToLower();
             string path = $"Data/Levels/{worldFolder}/level_{levelNum}";
             return LoadFromResources(path);

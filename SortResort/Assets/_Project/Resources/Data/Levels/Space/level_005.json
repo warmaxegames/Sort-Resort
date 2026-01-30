@@ -1,0 +1,60 @@
+{
+  "id": 5,
+  "world_id": "space",
+  "name": "level_005",
+  "star_move_thresholds": [7, 16, 24],
+  "containers": [
+	{
+	  "id": "container_1",
+	  "position": {"x": 300, "y": 300},
+	  "container_type": "standard",
+	  "container_image": "space_container",
+	  "initial_items": [
+		{"id": "laser_gun_1", "row": 0, "slot": 0},
+		{"id": "robot_1", "row": 1, "slot": 0},
+		{"id": "space_helmet", "row": 0, "slot": 2}
+	  ]
+	},
+	{
+	  "id": "container_2",
+	  "position": {"x": 722, "y": 300},
+	  "container_type": "standard",
+	  "container_image": "space_container",
+	  "initial_items": [
+		{"id": "jetpack", "row": 0, "slot": 0},
+		{"id": "laser_gun_1", "row": 0, "slot": 1},
+		{"id": "robot_1", "row": 1, "slot": 1}
+	  ]
+	},
+	{
+	  "id": "container_3",
+	  "position": {"x": 300, "y": 600},
+	  "container_type": "standard",
+	  "container_image": "space_container",
+	  "initial_items": [
+		{"id": "space_helmet", "row": 0, "slot": 0},
+		{"id": "jetpack", "row": 0, "slot": 1},
+		{"id": "laser_gun_1", "row": 0, "slot": 2}
+	  ]
+	},
+	{
+	  "id": "container_4",
+	  "position": {"x": 722, "y": 600},
+	  "container_type": "standard",
+	  "container_image": "space_container",
+	  "initial_items": [
+		{"id": "space_helmet", "row": 0, "slot": 1},
+		{"id": "jetpack", "row": 0, "slot": 2}
+	  ]
+	},
+	{
+	  "id": "container_5",
+	  "position": {"x": 511, "y": 450},
+	  "container_type": "standard",
+	  "container_image": "space_container",
+	  "initial_items": [
+		{"id": "robot_1", "row": 0, "slot": 1}
+	  ]
+	}
+  ]
+}

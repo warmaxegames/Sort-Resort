@@ -33,6 +33,7 @@ namespace SortResort
         [SerializeField] private AudioClip failureClip;
         [SerializeField] private AudioClip buttonClickClip;
         [SerializeField] private AudioClip starEarnedClip;
+        [SerializeField] private AudioClip warpClip;
 
         private bool isUsingSourceA = true;
         private Coroutine crossfadeCoroutine;
@@ -90,8 +91,10 @@ namespace SortResort
             // UI
             if (buttonClickClip == null)
                 buttonClickClip = Resources.Load<AudioClip>("Audio/UI/button_click");
+            if (warpClip == null)
+                warpClip = Resources.Load<AudioClip>("Audio/UI/warp");
 
-            Debug.Log($"[AudioManager] Audio clips loaded - match:{matchClip != null}, victory:{victoryClip != null}, button:{buttonClickClip != null}");
+            Debug.Log($"[AudioManager] Audio clips loaded - match:{matchClip != null}, victory:{victoryClip != null}, button:{buttonClickClip != null}, warp:{warpClip != null}");
         }
 
         private void InitializeAudioSources()
@@ -473,8 +476,8 @@ namespace SortResort
             currentPlayingWorld = worldId;
             isPlayingGameplayAudio = true;
 
-            // Map world IDs (resort uses "island" prefix in audio files)
-            string audioWorldId = worldId == "resort" ? "island" : worldId;
+            // World ID is used directly for audio file paths
+            string audioWorldId = worldId;
 
             // Load and play gameplay music
             string[] musicPaths = new string[]
@@ -571,6 +574,7 @@ namespace SortResort
         public void PlayFailureSound() => PlaySFX(failureClip);
         public void PlayButtonClick() => PlayUI(buttonClickClip);
         public void PlayStarEarned() => PlaySFX(starEarnedClip);
+        public void PlayWarpSound() => PlayUI(warpClip);
 
         /// <summary>
         /// Play victory sound (stops gameplay audio first)

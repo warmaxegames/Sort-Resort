@@ -231,7 +231,7 @@ namespace SortResort
     {
         public string playerId;
         public int totalStars;
-        public List<string> unlockedWorlds = new List<string> { "resort" }; // Resort unlocked by default
+        public List<string> unlockedWorlds = new List<string> { "island" }; // Island unlocked by default
         public List<WorldProgress> worldProgress = new List<WorldProgress>();
         public List<string> seenDialogues = new List<string>();
         public DateTime lastPlayedTime;

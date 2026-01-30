@@ -161,14 +161,14 @@ namespace SortResort
                 return cached;
             }
 
-            // Capitalize world name for folder (resort -> Resort)
+            // Capitalize world name for folder (island -> Island)
             string worldFolder = char.ToUpper(worldId[0]) + worldId.Substring(1).ToLower();
 
             // Try paths in order of likelihood
             string[] paths = {
-                $"Sprites/Items/{worldFolder}/{itemId}",      // Resources/Sprites/Items/Resort/coconut
-                $"Art/Items/{worldFolder}/{itemId}",          // Resources/Art/Items/Resort/coconut
-                $"Items/{worldFolder}/{itemId}",              // Resources/Items/Resort/coconut
+                $"Sprites/Items/{worldFolder}/{itemId}",      // Resources/Sprites/Items/Island/coconut
+                $"Art/Items/{worldFolder}/{itemId}",          // Resources/Art/Items/Island/coconut
+                $"Items/{worldFolder}/{itemId}",              // Resources/Items/Island/coconut
             };
 
             Sprite sprite = null;

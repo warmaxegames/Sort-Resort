@@ -27,7 +27,7 @@ namespace SortResort.UI
         [SerializeField] private int gridColumns = 5;
 
         // Runtime data
-        private List<string> worldIds = new List<string> { "resort", "supermarket", "farm" };
+        private List<string> worldIds = new List<string> { "island", "supermarket", "farm", "tavern", "space" };
         private int currentWorldIndex = 0;
         private List<LevelButton> levelButtons = new List<LevelButton>();
 

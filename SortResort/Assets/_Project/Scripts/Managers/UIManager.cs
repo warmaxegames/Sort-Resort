@@ -24,6 +24,8 @@ namespace SortResort
         [SerializeField] private CanvasScaler canvasScaler;
 
         // Runtime created UI elements
+        private GameObject splashPanel;
+        private SplashScreen splashScreen;
         private GameObject hudPanel;
         private GameObject levelCompletePanel;
         private GameObject levelSelectPanel;
@@ -87,33 +89,24 @@ namespace SortResort
         public void CreateRuntimeUI()
         {
             CreateCanvas();
+            CreateSplashPanel();
             CreateLevelSelectPanel();
             CreateHUDPanel();
             CreateLevelCompletePanel();
 
-            // Hide panels initially
+            // Hide all panels initially
             if (levelCompletePanel != null)
                 levelCompletePanel.SetActive(false);
             if (hudPanel != null)
                 hudPanel.SetActive(false);
-
-            // Show level select first
             if (levelSelectPanel != null)
-                levelSelectPanel.SetActive(true);
+                levelSelectPanel.SetActive(false);
 
-            // Play worldmap music on startup
-            if (AudioManager.Instance != null)
-            {
-                AudioManager.Instance.PlayWorldmapMusic();
-                Debug.Log("[UIManager] Started worldmap music");
-            }
-            else
-            {
-                // Fallback: wait a frame and try again
-                StartCoroutine(PlayWorldmapMusicDelayed());
-            }
+            // Show splash screen first
+            if (splashPanel != null)
+                splashPanel.SetActive(true);
 
-            Debug.Log("[UIManager] Runtime UI created");
+            Debug.Log("[UIManager] Runtime UI created - showing splash screen");
         }
 
         private IEnumerator PlayWorldmapMusicDelayed()
@@ -132,10 +125,27 @@ namespace SortResort
         }
 
         /// <summary>
+        /// Show splash screen (called on game start)
+        /// </summary>
+        public void ShowSplash()
+        {
+            if (splashPanel != null)
+                splashPanel.SetActive(true);
+            if (levelSelectPanel != null)
+                levelSelectPanel.SetActive(false);
+            if (hudPanel != null)
+                hudPanel.SetActive(false);
+            if (levelCompletePanel != null)
+                levelCompletePanel.SetActive(false);
+        }
+
+        /// <summary>
         /// Show level select and hide gameplay UI
         /// </summary>
         public void ShowLevelSelect()
         {
+            if (splashPanel != null)
+                splashPanel.SetActive(false);
             if (levelSelectPanel != null)
                 levelSelectPanel.SetActive(true);
             if (hudPanel != null)
@@ -155,6 +165,8 @@ namespace SortResort
         /// </summary>
         public void ShowGameplay()
         {
+            if (splashPanel != null)
+                splashPanel.SetActive(false);
             if (levelSelectPanel != null)
                 levelSelectPanel.SetActive(false);
             if (hudPanel != null)
@@ -190,6 +202,168 @@ namespace SortResort
                 // Use InputSystemUIInputModule for new Input System
                 eventSystemGO.AddComponent<InputSystemUIInputModule>();
                 Debug.Log("[UIManager] Created EventSystem with InputSystemUIInputModule");
+            }
+        }
+
+        private void CreateSplashPanel()
+        {
+            splashPanel = new GameObject("Splash Panel");
+            splashPanel.transform.SetParent(mainCanvas.transform, false);
+
+            var rect = splashPanel.AddComponent<RectTransform>();
+            rect.anchorMin = Vector2.zero;
+            rect.anchorMax = Vector2.one;
+            rect.offsetMin = Vector2.zero;
+            rect.offsetMax = Vector2.zero;
+
+            // Add CanvasGroup for fading
+            var canvasGroup = splashPanel.AddComponent<CanvasGroup>();
+
+            // Load splash screen background sprite
+            var splashSprite = Resources.Load<Sprite>("Sprites/UI/Backgrounds/splashscreen");
+            if (splashSprite == null)
+            {
+                // Try alternate path
+                splashSprite = Resources.Load<Sprite>("Art/UI/Backgrounds/splashscreen");
+            }
+
+            // Background image
+            var bgImage = splashPanel.AddComponent<Image>();
+            if (splashSprite != null)
+            {
+                bgImage.sprite = splashSprite;
+                bgImage.preserveAspect = false; // Fill entire screen
+                bgImage.type = Image.Type.Simple;
+            }
+            else
+            {
+                // Fallback: solid color background
+                bgImage.color = new Color(0.3f, 0.5f, 0.8f, 1f);
+                Debug.LogWarning("[UIManager] Splash screen sprite not found, using fallback color");
+            }
+
+            // Load play button sprites
+            var playNormalSprite = Resources.Load<Sprite>("Sprites/UI/Buttons/play_button");
+            var playPressedSprite = Resources.Load<Sprite>("Sprites/UI/Buttons/play_button_pressed");
+            if (playNormalSprite == null)
+            {
+                playNormalSprite = Resources.Load<Sprite>("Art/UI/Buttons/play_button");
+                playPressedSprite = Resources.Load<Sprite>("Art/UI/Buttons/play_button_pressed");
+            }
+
+            // Play button container (for positioning)
+            var playBtnContainer = new GameObject("PlayButtonContainer");
+            playBtnContainer.transform.SetParent(splashPanel.transform, false);
+            var containerRect = playBtnContainer.AddComponent<RectTransform>();
+            containerRect.anchorMin = new Vector2(0.5f, 0);
+            containerRect.anchorMax = new Vector2(0.5f, 0);
+            containerRect.pivot = new Vector2(0.5f, 0);
+            containerRect.anchoredPosition = new Vector2(0, 200); // 200 pixels from bottom
+            containerRect.sizeDelta = new Vector2(366, 114); // Match Godot dimensions
+
+            // Play button
+            var playBtnGO = new GameObject("PlayButton");
+            playBtnGO.transform.SetParent(playBtnContainer.transform, false);
+            var playBtnRect = playBtnGO.AddComponent<RectTransform>();
+            playBtnRect.anchorMin = Vector2.zero;
+            playBtnRect.anchorMax = Vector2.one;
+            playBtnRect.offsetMin = Vector2.zero;
+            playBtnRect.offsetMax = Vector2.zero;
+
+            var playBtnImage = playBtnGO.AddComponent<Image>();
+            if (playNormalSprite != null)
+            {
+                playBtnImage.sprite = playNormalSprite;
+                playBtnImage.type = Image.Type.Simple;
+                playBtnImage.preserveAspect = true;
+            }
+            else
+            {
+                // Fallback: colored button
+                playBtnImage.color = new Color(0.4f, 0.8f, 0.9f, 1f);
+                Debug.LogWarning("[UIManager] Play button sprites not found, using fallback");
+
+                // Add text for fallback button
+                var textGO = new GameObject("Text");
+                textGO.transform.SetParent(playBtnGO.transform, false);
+                var textRect = textGO.AddComponent<RectTransform>();
+                textRect.anchorMin = Vector2.zero;
+                textRect.anchorMax = Vector2.one;
+                textRect.offsetMin = Vector2.zero;
+                textRect.offsetMax = Vector2.zero;
+                var tmp = textGO.AddComponent<TextMeshProUGUI>();
+                tmp.text = "PLAY";
+                tmp.fontSize = 48;
+                tmp.fontStyle = FontStyles.Bold;
+                tmp.alignment = TextAlignmentOptions.Center;
+                tmp.color = Color.white;
+            }
+
+            var playBtn = playBtnGO.AddComponent<Button>();
+            playBtn.targetGraphic = playBtnImage;
+
+            // Setup sprite swap for pressed state
+            if (playNormalSprite != null && playPressedSprite != null)
+            {
+                playBtn.transition = Selectable.Transition.SpriteSwap;
+                var spriteState = new SpriteState
+                {
+                    pressedSprite = playPressedSprite,
+                    highlightedSprite = playNormalSprite,
+                    selectedSprite = playNormalSprite,
+                    disabledSprite = playNormalSprite
+                };
+                playBtn.spriteState = spriteState;
+            }
+            else
+            {
+                // Fallback: color tint
+                playBtn.transition = Selectable.Transition.ColorTint;
+                var colors = playBtn.colors;
+                colors.normalColor = Color.white;
+                colors.highlightedColor = new Color(0.9f, 0.9f, 0.9f, 1f);
+                colors.pressedColor = new Color(0.7f, 0.7f, 0.7f, 1f);
+                playBtn.colors = colors;
+            }
+
+            // Add SplashScreen component and initialize it
+            splashScreen = splashPanel.AddComponent<SplashScreen>();
+
+            // Set canvasGroup via reflection (needed for BaseScreen)
+            var screenType = typeof(SplashScreen);
+            var baseType = typeof(BaseScreen);
+            var flags = System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance;
+            baseType.GetField("canvasGroup", flags)?.SetValue(splashScreen, canvasGroup);
+
+            // Use the Initialize method to properly set up the button
+            splashScreen.Initialize(playBtn, bgImage, playNormalSprite, playPressedSprite);
+
+            // Subscribe to play button click
+            splashScreen.OnPlayClicked += OnSplashPlayClicked;
+
+            Debug.Log($"[UIManager] Splash panel created - bgSprite:{splashSprite != null}, playNormal:{playNormalSprite != null}, playPressed:{playPressedSprite != null}");
+        }
+
+        private void OnSplashPlayClicked()
+        {
+            Debug.Log("[UIManager] Play clicked on splash screen");
+
+            // Update game state
+            GameManager.Instance?.SetState(GameState.LevelSelection);
+
+            // Use TransitionManager if available, otherwise just switch
+            if (TransitionManager.Instance != null)
+            {
+                TransitionManager.Instance.FadeOut(() =>
+                {
+                    ShowLevelSelect();
+                    TransitionManager.Instance.FadeIn();
+                });
+            }
+            else
+            {
+                // Simple immediate transition
+                ShowLevelSelect();
             }
         }
 
@@ -699,7 +873,7 @@ namespace SortResort
                 hudPanel.SetActive(true);
 
             // Update title with level info
-            string worldId = GameManager.Instance?.CurrentWorldId ?? "resort";
+            string worldId = GameManager.Instance?.CurrentWorldId ?? "island";
             string worldName = char.ToUpper(worldId[0]) + worldId.Substring(1);
             if (levelTitleText != null)
                 levelTitleText.text = $"{worldName} - Level {levelNumber}";
@@ -808,7 +982,7 @@ namespace SortResort
 
             // Load next level directly
             int currentLevel = GameManager.Instance?.CurrentLevelNumber ?? 1;
-            string worldId = GameManager.Instance?.CurrentWorldId ?? "resort";
+            string worldId = GameManager.Instance?.CurrentWorldId ?? "island";
             int nextLevel = currentLevel + 1;
 
             // Update GameManager state

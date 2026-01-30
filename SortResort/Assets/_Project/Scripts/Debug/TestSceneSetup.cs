@@ -10,7 +10,7 @@ namespace SortResort
     public class TestSceneSetup : MonoBehaviour
     {
         [Header("Test Configuration")]
-        [SerializeField] private string testWorldId = "resort";
+        [SerializeField] private string testWorldId = "island";
 
         [Header("Visual Settings")]
         [SerializeField] private float containerSpacing = 5f;

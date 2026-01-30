@@ -41,18 +41,18 @@ namespace SortResort
         {
             if (worldUnlockRequirements.Count == 0)
             {
-                // Resort is always unlocked (default world)
+                // Island is always unlocked (default world)
                 worldUnlockRequirements.Add(new WorldUnlockRequirement
                 {
-                    worldId = "resort",
+                    worldId = "island",
                     isDefaultUnlocked = true
                 });
 
-                // Supermarket unlocks after 20 Resort levels
+                // Supermarket unlocks after 20 Island levels
                 worldUnlockRequirements.Add(new WorldUnlockRequirement
                 {
                     worldId = "supermarket",
-                    requiredWorldId = "resort",
+                    requiredWorldId = "island",
                     requiredLevelsCompleted = 20
                 });
 
@@ -64,19 +64,19 @@ namespace SortResort
                     requiredLevelsCompleted = 20
                 });
 
-                // Medieval unlocks after 20 Farm levels
+                // Tavern unlocks after 20 Farm levels
                 worldUnlockRequirements.Add(new WorldUnlockRequirement
                 {
-                    worldId = "medieval",
+                    worldId = "tavern",
                     requiredWorldId = "farm",
                     requiredLevelsCompleted = 20
                 });
 
-                // Space unlocks after 20 Medieval levels
+                // Space unlocks after 20 Tavern levels
                 worldUnlockRequirements.Add(new WorldUnlockRequirement
                 {
                     worldId = "space",
-                    requiredWorldId = "medieval",
+                    requiredWorldId = "tavern",
                     requiredLevelsCompleted = 20
                 });
             }

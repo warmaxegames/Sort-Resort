@@ -1,9 +1,9 @@
 {
 	"level_start": [
 		{
-			"world_id": "resort",
+			"world_id": "island",
 			"level_id": 1,
-			"dialogue_id": "dialogue_resort_001_start"
+			"dialogue_id": "dialogue_island_001_start"
 		},
 		{
 			"world_id": "supermarket",
@@ -13,14 +13,14 @@
 	],
 	"level_complete": [
 		{
-			"world_id": "resort",
+			"world_id": "island",
 			"level_id": 1,
-			"dialogue_id": "dialogue_resort_001_complete"
+			"dialogue_id": "dialogue_island_001_complete"
 		},
 		{
-			"world_id": "resort",
+			"world_id": "island",
 			"level_id": 2,
-			"dialogue_id": "dialogue_resort_002_complete"
+			"dialogue_id": "dialogue_island_002_complete"
 		}
 	],
 	"level_failed": [],

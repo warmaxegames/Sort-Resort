@@ -16,7 +16,7 @@ namespace SortResort
     public class GameSceneSetup : MonoBehaviour
     {
         [Header("Level to Load")]
-        [SerializeField] private string worldId = "resort";
+        [SerializeField] private string worldId = "island";
         [SerializeField] private int levelNumber = 1;
 
         [Header("Layer Configuration")]
@@ -80,6 +80,12 @@ namespace SortResort
             gmGO.transform.SetParent(managersRoot.transform);
             gmGO.AddComponent<GameManager>();
             Debug.Log("[GameSceneSetup] GameManager created");
+
+            // TransitionManager (for fade transitions)
+            var tmGO = new GameObject("TransitionManager");
+            tmGO.transform.SetParent(managersRoot.transform);
+            tmGO.AddComponent<TransitionManager>();
+            Debug.Log("[GameSceneSetup] TransitionManager created");
 
             // ScreenManager (for responsive scaling)
             var screenMgrGO = new GameObject("ScreenManager");
@@ -172,10 +178,10 @@ namespace SortResort
         {
             yield return null; // Wait one frame
 
-            // Don't auto-load a level - let the Level Select screen handle it
-            // The UIManager shows the level select screen by default
-            GameManager.Instance?.SetState(GameState.LevelSelection);
-            Debug.Log("[GameSceneSetup] Ready - showing level select screen");
+            // Start at main menu (splash screen)
+            // The UIManager shows the splash screen first
+            GameManager.Instance?.SetState(GameState.MainMenu);
+            Debug.Log("[GameSceneSetup] Ready - showing splash screen");
         }
 
         // UI is now handled by UIManager - OnGUI removed

@@ -137,7 +137,7 @@ namespace SortResort
             // Try to load the specified sprite, with fallbacks
             string[] paths = {
                 $"Sprites/Containers/{imageName}",
-                $"Sprites/Containers/base_shelf",
+                $"Sprites/Containers/island_container",
                 $"Sprites/Containers/supermarket_container"
             };
 
@@ -147,7 +147,14 @@ namespace SortResort
                 sprite = Resources.Load<Sprite>(path);
                 if (sprite != null)
                 {
-                    Debug.Log($"[ItemContainer] Loaded container sprite from: {path}");
+                    if (path != $"Sprites/Containers/{imageName}")
+                    {
+                        Debug.LogWarning($"[ItemContainer] Using fallback sprite '{path}' instead of '{imageName}'");
+                    }
+                    else
+                    {
+                        Debug.Log($"[ItemContainer] Loaded container sprite: {imageName}");
+                    }
                     break;
                 }
             }

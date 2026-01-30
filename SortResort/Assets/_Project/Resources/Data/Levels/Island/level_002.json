@@ -1,0 +1,63 @@
+{
+  "id": 2,
+  "world_id": "island",
+  "name": "level_002",
+  "star_move_thresholds": [10, 15, 20],
+  "containers": [
+	{
+	  "id": "container_1",
+	  "position": {"x": 300, "y": 300},
+	  "container_type": "standard",
+	  "container_image": "island_container",
+	  "initial_items": [
+		{"id": "greencoconut", "row": 0, "slot": 0},
+		{"id": "pinkpolkadotbikini", "row": 1, "slot": 0},
+		{"id": "sunscreenspf50", "row": 0, "slot": 1},
+		{"id": "surfboardpalmtrees", "row": 0, "slot": 2}
+	  ]
+	},
+	{
+	  "id": "container_2",
+	  "position": {"x": 722, "y": 300},
+	  "container_type": "standard",
+	  "container_image": "island_container",
+	  "initial_items": [
+		{"id": "surfboardpalmtrees", "row": 0, "slot": 0},
+		{"id": "greencoconut", "row": 0, "slot": 1},
+		{"id": "pinkpolkadotbikini", "row": 0, "slot": 2}
+	  ]
+	},
+	{
+	  "id": "container_3",
+	  "position": {"x": 300, "y": 610},
+	  "container_type": "standard",
+	  "container_image": "island_container",
+	  "initial_items": [
+		{"id": "sandals", "row": 0, "slot": 0},
+		{"id": "sunscreenspf50", "row": 0, "slot": 1},
+		{"id": "sandals", "row": 1, "slot": 1}
+	  ]
+	},
+	{
+	  "id": "container_4",
+	  "position": {"x": 722, "y": 610},
+	  "container_type": "standard",
+	  "container_image": "island_container",
+	  "initial_items": [
+		{"id": "greencoconut", "row": 0, "slot": 0},
+		{"id": "surfboardpalmtrees", "row": 0, "slot": 2}
+	  ]
+	},
+	{
+	  "id": "container_5",
+	  "position": {"x": 511, "y": 455},
+	  "container_type": "standard",
+	  "container_image": "island_container",
+	  "initial_items": [
+		{"id": "pinkpolkadotbikini", "row": 0, "slot": 0},
+		{"id": "sunscreenspf50", "row": 0, "slot": 1},
+		{"id": "sandals", "row": 0, "slot": 2}
+	  ]
+	}
+  ]
+}
