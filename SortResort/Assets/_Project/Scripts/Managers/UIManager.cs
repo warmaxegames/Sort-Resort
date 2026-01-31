@@ -119,6 +119,8 @@ namespace SortResort
             GameEvents.OnMatchCountChanged += OnMatchCountChanged;
             GameEvents.OnLevelCompleted += OnLevelCompleted;
             GameEvents.OnLevelRestarted += OnLevelRestarted;
+            GameEvents.OnGamePaused += OnGamePausedUI;
+            GameEvents.OnGameResumed += OnGameResumedUI;
 
             if (LevelManager.Instance != null)
             {
@@ -133,11 +135,25 @@ namespace SortResort
             GameEvents.OnMatchCountChanged -= OnMatchCountChanged;
             GameEvents.OnLevelCompleted -= OnLevelCompleted;
             GameEvents.OnLevelRestarted -= OnLevelRestarted;
+            GameEvents.OnGamePaused -= OnGamePausedUI;
+            GameEvents.OnGameResumed -= OnGameResumedUI;
 
             if (LevelManager.Instance != null)
             {
                 LevelManager.Instance.OnItemsRemainingChanged -= OnItemsRemainingChanged;
             }
+        }
+
+        private void OnGamePausedUI()
+        {
+            Debug.Log("[UIManager] Game paused - showing pause menu");
+            ShowPauseMenu();
+        }
+
+        private void OnGameResumedUI()
+        {
+            Debug.Log("[UIManager] Game resumed - hiding pause menu");
+            HidePauseMenu();
         }
 
         private void Start()
@@ -2015,7 +2031,11 @@ Antonia and Joakim Engfors
             if (pauseMenuPanel != null)
             {
                 pauseMenuPanel.SetActive(true);
-                pauseMenuScreen?.Show();
+                if (pauseMenuScreen != null)
+                {
+                    pauseMenuScreen.Show(instant: true);
+                }
+                Debug.Log("[UIManager] Pause menu shown");
             }
         }
 
@@ -2026,12 +2046,13 @@ Antonia and Joakim Engfors
         {
             if (pauseMenuScreen != null)
             {
-                pauseMenuScreen.Hide();
+                pauseMenuScreen.Hide(instant: true);
             }
-            else if (pauseMenuPanel != null)
+            if (pauseMenuPanel != null)
             {
                 pauseMenuPanel.SetActive(false);
             }
+            Debug.Log("[UIManager] Pause menu hidden");
         }
 
         private GameObject CreateTextElement(Transform parent, string name, string text, int fontSize,
