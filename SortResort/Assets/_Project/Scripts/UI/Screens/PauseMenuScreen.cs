@@ -2,6 +2,9 @@ using System;
 using UnityEngine;
 using UnityEngine.UI;
 
+// Access parent namespace types
+using SortResort;
+
 namespace SortResort.UI
 {
     public class PauseMenuScreen : BaseScreen
@@ -91,7 +94,8 @@ namespace SortResort.UI
             PlayButtonSound();
             Hide(true);
             GameManager.Instance?.ResumeGame(); // Unpause first
-            GameManager.Instance?.RestartLevel();
+            GameManager.Instance?.SetState(GameState.Playing);
+            LevelManager.Instance?.RestartLevel();
         }
 
         private void OnSettingsClicked()
