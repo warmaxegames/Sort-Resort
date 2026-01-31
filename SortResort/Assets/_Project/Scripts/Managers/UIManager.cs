@@ -95,6 +95,8 @@ namespace SortResort
         private LevelSelectScreen levelSelectScreen;
         private GameObject settingsPanel;
         private SettingsScreen settingsScreen;
+        private GameObject pauseMenuPanel;
+        private PauseMenuScreen pauseMenuScreen;
         private TextMeshProUGUI levelTitleText;
         private TextMeshProUGUI moveCountText;
         private TextMeshProUGUI matchCountText;
@@ -159,6 +161,7 @@ namespace SortResort
             CreateHUDPanel();
             CreateLevelCompletePanel();
             CreateSettingsPanel();
+            CreatePauseMenuPanel();
 
             // Hide all panels initially
             if (levelCompletePanel != null)
@@ -169,6 +172,8 @@ namespace SortResort
                 levelSelectPanel.SetActive(false);
             if (settingsPanel != null)
                 settingsPanel.SetActive(false);
+            if (pauseMenuPanel != null)
+                pauseMenuPanel.SetActive(false);
 
             // Show splash screen first
             if (splashPanel != null)
@@ -964,15 +969,25 @@ namespace SortResort
             rect.anchorMax = new Vector2(1, 1);
             rect.pivot = new Vector2(1, 1);
             rect.anchoredPosition = new Vector2(-20, -20);
-            rect.sizeDelta = new Vector2(100, 50);
+            rect.sizeDelta = new Vector2(180, 50);
 
             var layout = buttonsGO.AddComponent<HorizontalLayoutGroup>();
             layout.spacing = 10;
             layout.childAlignment = TextAnchor.MiddleRight;
             layout.childForceExpandWidth = false;
 
+            // Pause button - opens pause menu
+            CreateButton(buttonsGO.transform, "Pause", "II", OnPauseClicked, 50, 50);
+
             // Back button - exits level and returns to level select
             CreateButton(buttonsGO.transform, "Back", "Back", OnBackToLevelsClicked, 80, 50);
+        }
+
+        private void OnPauseClicked()
+        {
+            Debug.Log("[UIManager] Pause button clicked");
+            AudioManager.Instance?.PlayButtonClick();
+            GameManager.Instance?.PauseGame();
         }
 
         private void CreateLevelCompletePanel()
@@ -1844,6 +1859,179 @@ Antonia and Joakim Engfors
             else if (settingsPanel != null)
             {
                 settingsPanel.SetActive(false);
+            }
+        }
+
+        private void CreatePauseMenuPanel()
+        {
+            pauseMenuPanel = new GameObject("Pause Menu Panel");
+            pauseMenuPanel.transform.SetParent(mainCanvas.transform, false);
+
+            var rect = pauseMenuPanel.AddComponent<RectTransform>();
+            rect.anchorMin = Vector2.zero;
+            rect.anchorMax = Vector2.one;
+            rect.offsetMin = Vector2.zero;
+            rect.offsetMax = Vector2.zero;
+
+            // Dark overlay/dim background
+            var dimBg = pauseMenuPanel.AddComponent<Image>();
+            dimBg.color = new Color(0, 0, 0, 0.5f);
+
+            // Add CanvasGroup for fading
+            var canvasGroup = pauseMenuPanel.AddComponent<CanvasGroup>();
+
+            // Load button sprites
+            var boardSprite = Resources.Load<Sprite>("Sprites/UI/Settings/board");
+
+            // Main content container (centered)
+            var contentGO = new GameObject("Content");
+            contentGO.transform.SetParent(pauseMenuPanel.transform, false);
+            var contentRect = contentGO.AddComponent<RectTransform>();
+            contentRect.anchorMin = new Vector2(0.5f, 0.5f);
+            contentRect.anchorMax = new Vector2(0.5f, 0.5f);
+            contentRect.sizeDelta = new Vector2(600, 700);
+
+            // Board background
+            var boardBg = contentGO.AddComponent<Image>();
+            if (boardSprite != null)
+            {
+                boardBg.sprite = boardSprite;
+                boardBg.type = Image.Type.Sliced;
+            }
+            else
+            {
+                boardBg.color = new Color(0.45f, 0.30f, 0.15f, 1f); // Brown fallback
+            }
+
+            // Title
+            var titleGO = new GameObject("Title");
+            titleGO.transform.SetParent(contentGO.transform, false);
+            var titleRect = titleGO.AddComponent<RectTransform>();
+            titleRect.anchorMin = new Vector2(0, 1);
+            titleRect.anchorMax = new Vector2(1, 1);
+            titleRect.pivot = new Vector2(0.5f, 1);
+            titleRect.anchoredPosition = new Vector2(0, -40);
+            titleRect.sizeDelta = new Vector2(0, 80);
+
+            var titleText = titleGO.AddComponent<TextMeshProUGUI>();
+            titleText.text = "PAUSED";
+            titleText.fontSize = 56;
+            titleText.fontStyle = FontStyles.Bold;
+            titleText.alignment = TextAlignmentOptions.Center;
+            titleText.color = Color.white;
+
+            // Buttons container
+            var buttonsContainer = new GameObject("Buttons");
+            buttonsContainer.transform.SetParent(contentGO.transform, false);
+            var buttonsRect = buttonsContainer.AddComponent<RectTransform>();
+            buttonsRect.anchorMin = new Vector2(0.5f, 0.5f);
+            buttonsRect.anchorMax = new Vector2(0.5f, 0.5f);
+            buttonsRect.sizeDelta = new Vector2(450, 450);
+
+            var buttonsLayout = buttonsContainer.AddComponent<VerticalLayoutGroup>();
+            buttonsLayout.spacing = 25;
+            buttonsLayout.childAlignment = TextAnchor.MiddleCenter;
+            buttonsLayout.childForceExpandWidth = false;
+            buttonsLayout.childForceExpandHeight = false;
+            buttonsLayout.padding = new RectOffset(0, 0, 20, 20);
+
+            // Create buttons
+            var resumeBtn = CreatePauseMenuButton(buttonsContainer.transform, "Resume", new Color(0.2f, 0.7f, 0.3f, 1f));
+            var restartBtn = CreatePauseMenuButton(buttonsContainer.transform, "Restart Level", new Color(0.3f, 0.5f, 0.8f, 1f));
+            var settingsBtn = CreatePauseMenuButton(buttonsContainer.transform, "Settings", new Color(0.5f, 0.5f, 0.5f, 1f));
+            var exitBtn = CreatePauseMenuButton(buttonsContainer.transform, "Quit to Menu", new Color(0.8f, 0.3f, 0.3f, 1f));
+
+            // Add PauseMenuScreen component
+            pauseMenuScreen = pauseMenuPanel.AddComponent<PauseMenuScreen>();
+
+            // Set canvasGroup via reflection
+            var baseType = typeof(BaseScreen);
+            var flags = System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance;
+            baseType.GetField("canvasGroup", flags)?.SetValue(pauseMenuScreen, canvasGroup);
+
+            // Initialize
+            pauseMenuScreen.Initialize(resumeBtn, restartBtn, settingsBtn, exitBtn, dimBg);
+
+            // When settings is requested from pause menu, show settings
+            pauseMenuScreen.OnSettingsRequested += () =>
+            {
+                ShowSettings();
+            };
+
+            Debug.Log("[UIManager] Pause menu panel created");
+        }
+
+        private Button CreatePauseMenuButton(Transform parent, string text, Color bgColor)
+        {
+            var btnGO = new GameObject(text + "Button");
+            btnGO.transform.SetParent(parent, false);
+            var btnLE = btnGO.AddComponent<LayoutElement>();
+            btnLE.preferredWidth = 400;
+            btnLE.preferredHeight = 80;
+
+            var btnImg = btnGO.AddComponent<Image>();
+            // Create rounded button
+            var roundedSprite = CreateRoundedRectSprite(256, 64, 20, bgColor);
+            if (roundedSprite != null)
+            {
+                btnImg.sprite = roundedSprite;
+                btnImg.type = Image.Type.Sliced;
+            }
+            else
+            {
+                btnImg.color = bgColor;
+            }
+
+            var btn = btnGO.AddComponent<Button>();
+            btn.targetGraphic = btnImg;
+            var colors = btn.colors;
+            colors.normalColor = Color.white;
+            colors.highlightedColor = new Color(0.95f, 0.95f, 0.95f, 1f);
+            colors.pressedColor = new Color(0.8f, 0.8f, 0.8f, 1f);
+            btn.colors = colors;
+
+            // Button text
+            var textGO = new GameObject("Text");
+            textGO.transform.SetParent(btnGO.transform, false);
+            var textRect = textGO.AddComponent<RectTransform>();
+            textRect.anchorMin = Vector2.zero;
+            textRect.anchorMax = Vector2.one;
+            textRect.offsetMin = Vector2.zero;
+            textRect.offsetMax = Vector2.zero;
+            var textTMP = textGO.AddComponent<TextMeshProUGUI>();
+            textTMP.text = text;
+            textTMP.fontSize = 36;
+            textTMP.fontStyle = FontStyles.Bold;
+            textTMP.alignment = TextAlignmentOptions.Center;
+            textTMP.color = Color.white;
+
+            return btn;
+        }
+
+        /// <summary>
+        /// Show the pause menu
+        /// </summary>
+        public void ShowPauseMenu()
+        {
+            if (pauseMenuPanel != null)
+            {
+                pauseMenuPanel.SetActive(true);
+                pauseMenuScreen?.Show();
+            }
+        }
+
+        /// <summary>
+        /// Hide the pause menu
+        /// </summary>
+        public void HidePauseMenu()
+        {
+            if (pauseMenuScreen != null)
+            {
+                pauseMenuScreen.Hide();
+            }
+            else if (pauseMenuPanel != null)
+            {
+                pauseMenuPanel.SetActive(false);
             }
         }
 

@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -13,7 +14,10 @@ namespace SortResort.UI
 
         [Header("Background")]
         [SerializeField] private Image dimBackground;
-        [SerializeField] private Color dimColor = new Color(0, 0, 0, 0.7f);
+        [SerializeField] private Color dimColor = new Color(0, 0, 0, 0.5f);
+
+        // Events
+        public event Action OnSettingsRequested;
 
         protected override void Awake()
         {
@@ -46,6 +50,7 @@ namespace SortResort.UI
             base.SubscribeToEvents();
             GameEvents.OnGamePaused += OnGamePaused;
             GameEvents.OnGameResumed += OnGameResumed;
+            GameEvents.OnSettingsClosed += OnSettingsClosed;
         }
 
         protected override void UnsubscribeFromEvents()
@@ -53,6 +58,7 @@ namespace SortResort.UI
             base.UnsubscribeFromEvents();
             GameEvents.OnGamePaused -= OnGamePaused;
             GameEvents.OnGameResumed -= OnGameResumed;
+            GameEvents.OnSettingsClosed -= OnSettingsClosed;
         }
 
         private void OnGamePaused()
@@ -65,6 +71,15 @@ namespace SortResort.UI
             Hide();
         }
 
+        private void OnSettingsClosed()
+        {
+            // Re-show pause menu when settings is closed (if game is still paused)
+            if (GameManager.Instance != null && GameManager.Instance.CurrentState == GameState.Paused)
+            {
+                Show();
+            }
+        }
+
         private void OnResumeClicked()
         {
             PlayButtonSound();
@@ -75,12 +90,15 @@ namespace SortResort.UI
         {
             PlayButtonSound();
             Hide(true);
+            GameManager.Instance?.ResumeGame(); // Unpause first
             GameManager.Instance?.RestartLevel();
         }
 
         private void OnSettingsClicked()
         {
             PlayButtonSound();
+            Hide(true); // Hide pause menu while settings is open
+            OnSettingsRequested?.Invoke();
             GameEvents.InvokeSettingsOpened();
         }
 
@@ -88,12 +106,32 @@ namespace SortResort.UI
         {
             PlayButtonSound();
             Hide(true);
-            GameManager.Instance?.GoToLevelSelection(GameManager.Instance.CurrentWorldId);
+            GameManager.Instance?.ResumeGame(); // Unpause first
+            GameManager.Instance?.GoToLevelSelection(GameManager.Instance?.CurrentWorldId ?? "island");
         }
 
         private void PlayButtonSound()
         {
             AudioManager.Instance?.PlayButtonClick();
+        }
+
+        /// <summary>
+        /// Initialize for runtime-created UI
+        /// </summary>
+        public void Initialize(Button resume, Button restart, Button settings, Button exit, Image dimBg)
+        {
+            resumeButton = resume;
+            restartButton = restart;
+            settingsButton = settings;
+            exitButton = exit;
+            dimBackground = dimBg;
+
+            SetupButtons();
+
+            if (dimBackground != null)
+            {
+                dimBackground.color = dimColor;
+            }
         }
 
         private void OnDestroy()
