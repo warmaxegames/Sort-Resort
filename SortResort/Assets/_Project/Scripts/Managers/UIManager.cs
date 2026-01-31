@@ -93,6 +93,8 @@ namespace SortResort
         private GameObject levelCompletePanel;
         private GameObject levelSelectPanel;
         private LevelSelectScreen levelSelectScreen;
+        private GameObject settingsPanel;
+        private SettingsScreen settingsScreen;
         private TextMeshProUGUI levelTitleText;
         private TextMeshProUGUI moveCountText;
         private TextMeshProUGUI matchCountText;
@@ -156,6 +158,7 @@ namespace SortResort
             CreateLevelSelectPanel();
             CreateHUDPanel();
             CreateLevelCompletePanel();
+            CreateSettingsPanel();
 
             // Hide all panels initially
             if (levelCompletePanel != null)
@@ -164,6 +167,8 @@ namespace SortResort
                 hudPanel.SetActive(false);
             if (levelSelectPanel != null)
                 levelSelectPanel.SetActive(false);
+            if (settingsPanel != null)
+                settingsPanel.SetActive(false);
 
             // Show splash screen first
             if (splashPanel != null)
@@ -504,6 +509,7 @@ namespace SortResort
             }
             var settingsBtn = settingsBtnGO.AddComponent<Button>();
             settingsBtn.targetGraphic = settingsBtnImg;
+            settingsBtn.onClick.AddListener(OnSettingsClicked);
 
             // Profile overlay - LARGER, positioned to hang OVER the topbar onto the background
             // Parent to levelSelectPanel so it can extend beyond topbar
@@ -787,6 +793,13 @@ namespace SortResort
             ShowSplash();
         }
 
+        private void OnSettingsClicked()
+        {
+            Debug.Log("[UIManager] Settings button clicked");
+            AudioManager.Instance?.PlayButtonClick();
+            ShowSettings();
+        }
+
         private void OnLevelSelectedFromMenu(string worldId, int levelNumber)
         {
             Debug.Log($"[UIManager] Level selected: {worldId} #{levelNumber}");
@@ -1045,6 +1058,793 @@ namespace SortResort
             CreateButton(buttonsContainer.transform, "Next", "Next", OnNextLevelFromCompleteClicked, 140, 60);
 
             Debug.Log("[UIManager] Level complete panel created with 3 buttons");
+        }
+
+        private void CreateSettingsPanel()
+        {
+            settingsPanel = new GameObject("Settings Panel");
+            settingsPanel.transform.SetParent(mainCanvas.transform, false);
+
+            var rect = settingsPanel.AddComponent<RectTransform>();
+            rect.anchorMin = Vector2.zero;
+            rect.anchorMax = Vector2.one;
+            rect.offsetMin = Vector2.zero;
+            rect.offsetMax = Vector2.zero;
+
+            // Dark overlay/dim background
+            var dimBg = settingsPanel.AddComponent<Image>();
+            dimBg.color = new Color(0, 0, 0, 0.7f);
+
+            // Add CanvasGroup for fading
+            var canvasGroup = settingsPanel.AddComponent<CanvasGroup>();
+
+            // Load sprites
+            var boardSprite = Resources.Load<Sprite>("Sprites/UI/Settings/board");
+            var headerSprite = Resources.Load<Sprite>("Sprites/UI/Settings/settings_header");
+            var audioPanelSprite = Resources.Load<Sprite>("Sprites/UI/Settings/audio_panel");
+            var backNormalSprite = Resources.Load<Sprite>("Sprites/UI/Settings/back_button");
+            var backPressedSprite = Resources.Load<Sprite>("Sprites/UI/Settings/back_button_pressed");
+            var checkboxSprite = Resources.Load<Sprite>("Sprites/UI/Settings/checkbox");
+
+            // Main content container (centered)
+            var contentGO = new GameObject("Content");
+            contentGO.transform.SetParent(settingsPanel.transform, false);
+            var contentRect = contentGO.AddComponent<RectTransform>();
+            contentRect.anchorMin = new Vector2(0.5f, 0.5f);
+            contentRect.anchorMax = new Vector2(0.5f, 0.5f);
+            contentRect.sizeDelta = new Vector2(900, 1400);
+
+            // Board background
+            var boardBg = contentGO.AddComponent<Image>();
+            if (boardSprite != null)
+            {
+                boardBg.sprite = boardSprite;
+                boardBg.type = Image.Type.Sliced;
+            }
+            else
+            {
+                boardBg.color = new Color(0.45f, 0.30f, 0.15f, 1f); // Brown fallback
+            }
+
+            // ============================================
+            // HEADER
+            // ============================================
+            var headerGO = new GameObject("Header");
+            headerGO.transform.SetParent(contentGO.transform, false);
+            var headerRect = headerGO.AddComponent<RectTransform>();
+            headerRect.anchorMin = new Vector2(0, 1);
+            headerRect.anchorMax = new Vector2(1, 1);
+            headerRect.pivot = new Vector2(0.5f, 1);
+            headerRect.anchoredPosition = new Vector2(0, 20);
+            headerRect.sizeDelta = new Vector2(0, 120);
+
+            var headerImg = headerGO.AddComponent<Image>();
+            if (headerSprite != null)
+            {
+                headerImg.sprite = headerSprite;
+                headerImg.preserveAspect = true;
+            }
+            else
+            {
+                headerImg.color = new Color(0.55f, 0.35f, 0.2f, 1f);
+
+                // Fallback header text
+                var headerTextGO = new GameObject("HeaderText");
+                headerTextGO.transform.SetParent(headerGO.transform, false);
+                var headerTextRect = headerTextGO.AddComponent<RectTransform>();
+                headerTextRect.anchorMin = Vector2.zero;
+                headerTextRect.anchorMax = Vector2.one;
+                headerTextRect.offsetMin = Vector2.zero;
+                headerTextRect.offsetMax = Vector2.zero;
+                var headerText = headerTextGO.AddComponent<TextMeshProUGUI>();
+                headerText.text = "SETTINGS";
+                headerText.fontSize = 48;
+                headerText.fontStyle = FontStyles.Bold;
+                headerText.alignment = TextAlignmentOptions.Center;
+                headerText.color = Color.white;
+            }
+
+            // ============================================
+            // AUDIO PANEL
+            // ============================================
+            var audioPanelGO = new GameObject("AudioPanel");
+            audioPanelGO.transform.SetParent(contentGO.transform, false);
+            var audioPanelRect = audioPanelGO.AddComponent<RectTransform>();
+            audioPanelRect.anchorMin = new Vector2(0.5f, 1);
+            audioPanelRect.anchorMax = new Vector2(0.5f, 1);
+            audioPanelRect.pivot = new Vector2(0.5f, 1);
+            audioPanelRect.anchoredPosition = new Vector2(0, -130);
+            audioPanelRect.sizeDelta = new Vector2(800, 450);
+
+            var audioPanelImg = audioPanelGO.AddComponent<Image>();
+            if (audioPanelSprite != null)
+            {
+                audioPanelImg.sprite = audioPanelSprite;
+                audioPanelImg.type = Image.Type.Sliced;
+            }
+            else
+            {
+                audioPanelImg.color = new Color(0.95f, 0.85f, 0.75f, 1f); // Beige fallback
+            }
+
+            // Audio sliders container
+            var slidersContainer = new GameObject("SlidersContainer");
+            slidersContainer.transform.SetParent(audioPanelGO.transform, false);
+            var slidersRect = slidersContainer.AddComponent<RectTransform>();
+            slidersRect.anchorMin = new Vector2(0, 0);
+            slidersRect.anchorMax = new Vector2(1, 1);
+            slidersRect.offsetMin = new Vector2(40, 40);
+            slidersRect.offsetMax = new Vector2(-40, -60);
+
+            var slidersLayout = slidersContainer.AddComponent<VerticalLayoutGroup>();
+            slidersLayout.spacing = 25;
+            slidersLayout.childAlignment = TextAnchor.MiddleCenter;
+            slidersLayout.childForceExpandWidth = true;
+            slidersLayout.childForceExpandHeight = false;
+            slidersLayout.padding = new RectOffset(20, 20, 20, 20);
+
+            // Create sliders with labels
+            var (masterSlider, masterLabel) = CreateVolumeSliderRow(slidersContainer.transform, "Master Volume");
+            var (musicSlider, musicLabel) = CreateVolumeSliderRow(slidersContainer.transform, "Music");
+            var (sfxSlider, sfxLabel) = CreateVolumeSliderRow(slidersContainer.transform, "Sound Effects");
+
+            // ============================================
+            // HAPTICS TOGGLE
+            // ============================================
+            var hapticsRowGO = new GameObject("HapticsRow");
+            hapticsRowGO.transform.SetParent(contentGO.transform, false);
+            var hapticsRowRect = hapticsRowGO.AddComponent<RectTransform>();
+            hapticsRowRect.anchorMin = new Vector2(0.5f, 1);
+            hapticsRowRect.anchorMax = new Vector2(0.5f, 1);
+            hapticsRowRect.pivot = new Vector2(0.5f, 1);
+            hapticsRowRect.anchoredPosition = new Vector2(0, -610);
+            hapticsRowRect.sizeDelta = new Vector2(700, 80);
+
+            var hapticsLayout = hapticsRowGO.AddComponent<HorizontalLayoutGroup>();
+            hapticsLayout.spacing = 20;
+            hapticsLayout.childAlignment = TextAnchor.MiddleCenter;
+            hapticsLayout.childForceExpandWidth = false;
+            hapticsLayout.childForceExpandHeight = false;
+
+            // Haptics label
+            var hapticsLabelGO = new GameObject("HapticsLabel");
+            hapticsLabelGO.transform.SetParent(hapticsRowGO.transform, false);
+            var hapticsLabelText = hapticsLabelGO.AddComponent<TextMeshProUGUI>();
+            hapticsLabelText.text = "Vibration";
+            hapticsLabelText.fontSize = 36;
+            hapticsLabelText.fontStyle = FontStyles.Bold;
+            hapticsLabelText.alignment = TextAlignmentOptions.MidlineLeft;
+            hapticsLabelText.color = Color.white;
+            var hapticsLabelLE = hapticsLabelGO.AddComponent<LayoutElement>();
+            hapticsLabelLE.preferredWidth = 400;
+            hapticsLabelLE.preferredHeight = 60;
+
+            // Haptics toggle (Google-style switch)
+            var (hapticsToggle, hapticsCheckmark) = CreateGoogleSwitch(hapticsRowGO.transform);
+
+            // ============================================
+            // BUTTONS (Reset Progress, Credits)
+            // ============================================
+            var buttonsContainer = new GameObject("ButtonsContainer");
+            buttonsContainer.transform.SetParent(contentGO.transform, false);
+            var buttonsContainerRect = buttonsContainer.AddComponent<RectTransform>();
+            buttonsContainerRect.anchorMin = new Vector2(0.5f, 1);
+            buttonsContainerRect.anchorMax = new Vector2(0.5f, 1);
+            buttonsContainerRect.pivot = new Vector2(0.5f, 1);
+            buttonsContainerRect.anchoredPosition = new Vector2(0, -730);
+            buttonsContainerRect.sizeDelta = new Vector2(700, 200);
+
+            var buttonsLayout = buttonsContainer.AddComponent<VerticalLayoutGroup>();
+            buttonsLayout.spacing = 20;
+            buttonsLayout.childAlignment = TextAnchor.MiddleCenter;
+            buttonsLayout.childForceExpandWidth = false;
+            buttonsLayout.childForceExpandHeight = false;
+
+            // Reset Progress button
+            var resetBtn = CreateSettingsButton(buttonsContainer.transform, "Reset Progress", new Color(0.8f, 0.3f, 0.3f, 1f));
+
+            // Credits button
+            var creditsBtn = CreateSettingsButton(buttonsContainer.transform, "Credits", new Color(0.3f, 0.5f, 0.8f, 1f));
+
+            // ============================================
+            // BACK BUTTON
+            // ============================================
+            var backBtnContainer = new GameObject("BackButtonContainer");
+            backBtnContainer.transform.SetParent(contentGO.transform, false);
+            var backBtnContainerRect = backBtnContainer.AddComponent<RectTransform>();
+            backBtnContainerRect.anchorMin = new Vector2(0.5f, 0);
+            backBtnContainerRect.anchorMax = new Vector2(0.5f, 0);
+            backBtnContainerRect.pivot = new Vector2(0.5f, 0);
+            backBtnContainerRect.anchoredPosition = new Vector2(0, 50);
+            backBtnContainerRect.sizeDelta = new Vector2(300, 80);
+
+            var backBtnGO = new GameObject("BackButton");
+            backBtnGO.transform.SetParent(backBtnContainer.transform, false);
+            var backBtnRect = backBtnGO.AddComponent<RectTransform>();
+            backBtnRect.anchorMin = Vector2.zero;
+            backBtnRect.anchorMax = Vector2.one;
+            backBtnRect.offsetMin = Vector2.zero;
+            backBtnRect.offsetMax = Vector2.zero;
+
+            var backBtnImg = backBtnGO.AddComponent<Image>();
+            if (backNormalSprite != null)
+            {
+                backBtnImg.sprite = backNormalSprite;
+                backBtnImg.preserveAspect = true;
+            }
+            else
+            {
+                backBtnImg.color = new Color(0.4f, 0.7f, 0.9f, 1f);
+
+                // Fallback text
+                var backTextGO = new GameObject("Text");
+                backTextGO.transform.SetParent(backBtnGO.transform, false);
+                var backTextRect = backTextGO.AddComponent<RectTransform>();
+                backTextRect.anchorMin = Vector2.zero;
+                backTextRect.anchorMax = Vector2.one;
+                backTextRect.offsetMin = Vector2.zero;
+                backTextRect.offsetMax = Vector2.zero;
+                var backText = backTextGO.AddComponent<TextMeshProUGUI>();
+                backText.text = "BACK";
+                backText.fontSize = 32;
+                backText.fontStyle = FontStyles.Bold;
+                backText.alignment = TextAlignmentOptions.Center;
+                backText.color = Color.white;
+            }
+
+            var backBtn = backBtnGO.AddComponent<Button>();
+            backBtn.targetGraphic = backBtnImg;
+            if (backNormalSprite != null && backPressedSprite != null)
+            {
+                backBtn.transition = Selectable.Transition.SpriteSwap;
+                var spriteState = new SpriteState { pressedSprite = backPressedSprite };
+                backBtn.spriteState = spriteState;
+            }
+
+            // ============================================
+            // CONFIRMATION DIALOG
+            // ============================================
+            var (confirmDialog, confirmYes, confirmNo) = CreateConfirmationDialog(settingsPanel.transform);
+
+            // ============================================
+            // CREDITS PANEL
+            // ============================================
+            var (creditsPanel, creditsClose) = CreateCreditsPanel(settingsPanel.transform);
+
+            // ============================================
+            // ADD SETTINGS SCREEN COMPONENT
+            // ============================================
+            settingsScreen = settingsPanel.AddComponent<SettingsScreen>();
+
+            // Set canvasGroup via reflection
+            var baseType = typeof(BaseScreen);
+            var flags = System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance;
+            baseType.GetField("canvasGroup", flags)?.SetValue(settingsScreen, canvasGroup);
+
+            // Initialize settings screen
+            settingsScreen.Initialize(
+                backBtn,
+                masterSlider, musicSlider, sfxSlider,
+                masterLabel, musicLabel, sfxLabel,
+                hapticsToggle, hapticsCheckmark,
+                resetBtn, creditsBtn,
+                confirmDialog, confirmYes, confirmNo,
+                creditsPanel, creditsClose,
+                dimBg
+            );
+
+            // Subscribe to progress reset to refresh level select
+            settingsScreen.OnResetConfirmed += () =>
+            {
+                levelSelectScreen?.RefreshDisplay();
+            };
+
+            Debug.Log("[UIManager] Settings panel created");
+        }
+
+        private (Slider slider, TextMeshProUGUI label) CreateVolumeSliderRow(Transform parent, string labelText)
+        {
+            var rowGO = new GameObject(labelText + "Row");
+            rowGO.transform.SetParent(parent, false);
+            var rowRect = rowGO.AddComponent<RectTransform>();
+            rowRect.sizeDelta = new Vector2(0, 80);
+
+            var rowLayout = rowGO.AddComponent<HorizontalLayoutGroup>();
+            rowLayout.spacing = 15;
+            rowLayout.childAlignment = TextAnchor.MiddleCenter;
+            rowLayout.childForceExpandWidth = false;
+            rowLayout.childForceExpandHeight = false;
+
+            var rowLE = rowGO.AddComponent<LayoutElement>();
+            rowLE.preferredHeight = 80;
+
+            // Label
+            var labelGO = new GameObject("Label");
+            labelGO.transform.SetParent(rowGO.transform, false);
+            var labelTMP = labelGO.AddComponent<TextMeshProUGUI>();
+            labelTMP.text = labelText;
+            labelTMP.fontSize = 28;
+            labelTMP.alignment = TextAlignmentOptions.MidlineLeft;
+            labelTMP.color = new Color(0.3f, 0.2f, 0.1f, 1f); // Dark brown
+            var labelLE = labelGO.AddComponent<LayoutElement>();
+            labelLE.preferredWidth = 220;
+            labelLE.preferredHeight = 50;
+
+            // Slider
+            var sliderGO = new GameObject("Slider");
+            sliderGO.transform.SetParent(rowGO.transform, false);
+            var sliderLE = sliderGO.AddComponent<LayoutElement>();
+            sliderLE.preferredWidth = 350;
+            sliderLE.preferredHeight = 40;
+
+            // Slider background
+            var sliderBgGO = new GameObject("Background");
+            sliderBgGO.transform.SetParent(sliderGO.transform, false);
+            var sliderBgRect = sliderBgGO.AddComponent<RectTransform>();
+            sliderBgRect.anchorMin = new Vector2(0, 0.25f);
+            sliderBgRect.anchorMax = new Vector2(1, 0.75f);
+            sliderBgRect.offsetMin = Vector2.zero;
+            sliderBgRect.offsetMax = Vector2.zero;
+            var sliderBgImg = sliderBgGO.AddComponent<Image>();
+            sliderBgImg.color = new Color(0.6f, 0.5f, 0.4f, 1f);
+
+            // Fill area
+            var fillAreaGO = new GameObject("Fill Area");
+            fillAreaGO.transform.SetParent(sliderGO.transform, false);
+            var fillAreaRect = fillAreaGO.AddComponent<RectTransform>();
+            fillAreaRect.anchorMin = new Vector2(0, 0.25f);
+            fillAreaRect.anchorMax = new Vector2(1, 0.75f);
+            fillAreaRect.offsetMin = new Vector2(5, 0);
+            fillAreaRect.offsetMax = new Vector2(-5, 0);
+
+            var fillGO = new GameObject("Fill");
+            fillGO.transform.SetParent(fillAreaGO.transform, false);
+            var fillRect = fillGO.AddComponent<RectTransform>();
+            fillRect.anchorMin = Vector2.zero;
+            fillRect.anchorMax = Vector2.one;
+            fillRect.offsetMin = Vector2.zero;
+            fillRect.offsetMax = Vector2.zero;
+            var fillImg = fillGO.AddComponent<Image>();
+            fillImg.color = new Color(0.3f, 0.7f, 0.9f, 1f); // Blue fill
+
+            // Handle
+            var handleAreaGO = new GameObject("Handle Slide Area");
+            handleAreaGO.transform.SetParent(sliderGO.transform, false);
+            var handleAreaRect = handleAreaGO.AddComponent<RectTransform>();
+            handleAreaRect.anchorMin = Vector2.zero;
+            handleAreaRect.anchorMax = Vector2.one;
+            handleAreaRect.offsetMin = new Vector2(10, 0);
+            handleAreaRect.offsetMax = new Vector2(-10, 0);
+
+            var handleGO = new GameObject("Handle");
+            handleGO.transform.SetParent(handleAreaGO.transform, false);
+            var handleRect = handleGO.AddComponent<RectTransform>();
+            handleRect.sizeDelta = new Vector2(30, 50);
+            var handleImg = handleGO.AddComponent<Image>();
+            handleImg.color = Color.white;
+
+            // Slider component
+            var slider = sliderGO.AddComponent<Slider>();
+            slider.fillRect = fillRect;
+            slider.handleRect = handleRect;
+            slider.targetGraphic = handleImg;
+            slider.minValue = 0f;
+            slider.maxValue = 1f;
+            slider.value = 0.7f;
+
+            // Value label
+            var valueLabelGO = new GameObject("Value");
+            valueLabelGO.transform.SetParent(rowGO.transform, false);
+            var valueTMP = valueLabelGO.AddComponent<TextMeshProUGUI>();
+            valueTMP.text = "70%";
+            valueTMP.fontSize = 28;
+            valueTMP.alignment = TextAlignmentOptions.MidlineRight;
+            valueTMP.color = new Color(0.3f, 0.2f, 0.1f, 1f);
+            var valueLE = valueLabelGO.AddComponent<LayoutElement>();
+            valueLE.preferredWidth = 80;
+            valueLE.preferredHeight = 50;
+
+            return (slider, valueTMP);
+        }
+
+        private (Toggle toggle, Image checkmark) CreateToggle(Transform parent, Sprite checkboxSprite)
+        {
+            var toggleGO = new GameObject("Toggle");
+            toggleGO.transform.SetParent(parent, false);
+            var toggleLE = toggleGO.AddComponent<LayoutElement>();
+            toggleLE.preferredWidth = 60;
+            toggleLE.preferredHeight = 60;
+
+            // Background
+            var bgGO = new GameObject("Background");
+            bgGO.transform.SetParent(toggleGO.transform, false);
+            var bgRect = bgGO.AddComponent<RectTransform>();
+            bgRect.anchorMin = Vector2.zero;
+            bgRect.anchorMax = Vector2.one;
+            bgRect.offsetMin = Vector2.zero;
+            bgRect.offsetMax = Vector2.zero;
+            var bgImg = bgGO.AddComponent<Image>();
+            if (checkboxSprite != null)
+            {
+                bgImg.sprite = checkboxSprite;
+            }
+            else
+            {
+                bgImg.color = new Color(0.9f, 0.9f, 0.9f, 1f);
+            }
+
+            // Checkmark
+            var checkGO = new GameObject("Checkmark");
+            checkGO.transform.SetParent(bgGO.transform, false);
+            var checkRect = checkGO.AddComponent<RectTransform>();
+            checkRect.anchorMin = new Vector2(0.1f, 0.1f);
+            checkRect.anchorMax = new Vector2(0.9f, 0.9f);
+            checkRect.offsetMin = Vector2.zero;
+            checkRect.offsetMax = Vector2.zero;
+            var checkImg = checkGO.AddComponent<Image>();
+            checkImg.color = new Color(0.2f, 0.7f, 0.3f, 1f); // Green checkmark
+
+            // Toggle component
+            var toggle = toggleGO.AddComponent<Toggle>();
+            toggle.targetGraphic = bgImg;
+            toggle.graphic = checkImg;
+            toggle.isOn = true;
+
+            return (toggle, checkImg);
+        }
+
+        private (Toggle toggle, Image handle) CreateGoogleSwitch(Transform parent)
+        {
+            var toggleGO = new GameObject("Switch");
+            toggleGO.transform.SetParent(parent, false);
+            var toggleLE = toggleGO.AddComponent<LayoutElement>();
+            toggleLE.preferredWidth = 100;
+            toggleLE.preferredHeight = 50;
+
+            // Track background (pill shape)
+            var trackGO = new GameObject("Track");
+            trackGO.transform.SetParent(toggleGO.transform, false);
+            var trackRect = trackGO.AddComponent<RectTransform>();
+            trackRect.anchorMin = Vector2.zero;
+            trackRect.anchorMax = Vector2.one;
+            trackRect.offsetMin = Vector2.zero;
+            trackRect.offsetMax = Vector2.zero;
+
+            var trackImg = trackGO.AddComponent<Image>();
+            // Create rounded pill shape for track
+            var trackSprite = CreateRoundedRectSprite(100, 50, 25, new Color(0.7f, 0.7f, 0.7f, 1f));
+            if (trackSprite != null)
+            {
+                trackImg.sprite = trackSprite;
+                trackImg.type = Image.Type.Sliced;
+            }
+            else
+            {
+                trackImg.color = new Color(0.7f, 0.7f, 0.7f, 1f);
+            }
+
+            // Handle (circular knob)
+            var handleGO = new GameObject("Handle");
+            handleGO.transform.SetParent(trackGO.transform, false);
+            var handleRect = handleGO.AddComponent<RectTransform>();
+            handleRect.anchorMin = new Vector2(0, 0.5f);
+            handleRect.anchorMax = new Vector2(0, 0.5f);
+            handleRect.pivot = new Vector2(0, 0.5f);
+            handleRect.anchoredPosition = new Vector2(4, 0);
+            handleRect.sizeDelta = new Vector2(42, 42);
+
+            var handleImg = handleGO.AddComponent<Image>();
+            // Create circular handle
+            var handleSprite = CreateRoundedRectSprite(42, 42, 21, Color.white);
+            if (handleSprite != null)
+            {
+                handleImg.sprite = handleSprite;
+            }
+            else
+            {
+                handleImg.color = Color.white;
+            }
+
+            // Add shadow effect to handle
+            var shadow = handleGO.AddComponent<Shadow>();
+            shadow.effectColor = new Color(0, 0, 0, 0.3f);
+            shadow.effectDistance = new Vector2(2, -2);
+
+            // Toggle component
+            var toggle = toggleGO.AddComponent<Toggle>();
+            toggle.targetGraphic = trackImg;
+            toggle.isOn = true;
+
+            // Add the switch behavior component
+            var switchBehavior = toggleGO.AddComponent<GoogleSwitchBehavior>();
+            switchBehavior.Initialize(trackImg, handleRect);
+
+            return (toggle, handleImg);
+        }
+
+        private Button CreateSettingsButton(Transform parent, string text, Color bgColor)
+        {
+            var btnGO = new GameObject(text + "Button");
+            btnGO.transform.SetParent(parent, false);
+            var btnLE = btnGO.AddComponent<LayoutElement>();
+            btnLE.preferredWidth = 500;
+            btnLE.preferredHeight = 70;
+
+            var btnImg = btnGO.AddComponent<Image>();
+            btnImg.color = bgColor;
+
+            // Add rounded corners effect
+            var roundedSprite = CreateRoundedRectSprite(256, 64, 20, bgColor);
+            if (roundedSprite != null)
+            {
+                btnImg.sprite = roundedSprite;
+                btnImg.type = Image.Type.Sliced;
+            }
+
+            var btn = btnGO.AddComponent<Button>();
+            btn.targetGraphic = btnImg;
+            var colors = btn.colors;
+            colors.normalColor = Color.white;
+            colors.highlightedColor = new Color(0.95f, 0.95f, 0.95f, 1f);
+            colors.pressedColor = new Color(0.8f, 0.8f, 0.8f, 1f);
+            btn.colors = colors;
+
+            // Button text
+            var textGO = new GameObject("Text");
+            textGO.transform.SetParent(btnGO.transform, false);
+            var textRect = textGO.AddComponent<RectTransform>();
+            textRect.anchorMin = Vector2.zero;
+            textRect.anchorMax = Vector2.one;
+            textRect.offsetMin = Vector2.zero;
+            textRect.offsetMax = Vector2.zero;
+            var textTMP = textGO.AddComponent<TextMeshProUGUI>();
+            textTMP.text = text;
+            textTMP.fontSize = 32;
+            textTMP.fontStyle = FontStyles.Bold;
+            textTMP.alignment = TextAlignmentOptions.Center;
+            textTMP.color = Color.white;
+
+            return btn;
+        }
+
+        private (GameObject dialog, Button yesBtn, Button noBtn) CreateConfirmationDialog(Transform parent)
+        {
+            var dialogGO = new GameObject("ConfirmationDialog");
+            dialogGO.transform.SetParent(parent, false);
+            var dialogRect = dialogGO.AddComponent<RectTransform>();
+            dialogRect.anchorMin = Vector2.zero;
+            dialogRect.anchorMax = Vector2.one;
+            dialogRect.offsetMin = Vector2.zero;
+            dialogRect.offsetMax = Vector2.zero;
+
+            // Dark overlay
+            var overlayImg = dialogGO.AddComponent<Image>();
+            overlayImg.color = new Color(0, 0, 0, 0.8f);
+
+            // Dialog box
+            var boxGO = new GameObject("DialogBox");
+            boxGO.transform.SetParent(dialogGO.transform, false);
+            var boxRect = boxGO.AddComponent<RectTransform>();
+            boxRect.anchorMin = new Vector2(0.5f, 0.5f);
+            boxRect.anchorMax = new Vector2(0.5f, 0.5f);
+            boxRect.sizeDelta = new Vector2(700, 400);
+
+            var boxImg = boxGO.AddComponent<Image>();
+            boxImg.color = new Color(0.95f, 0.9f, 0.85f, 1f);
+
+            var boxLayout = boxGO.AddComponent<VerticalLayoutGroup>();
+            boxLayout.padding = new RectOffset(40, 40, 40, 40);
+            boxLayout.spacing = 30;
+            boxLayout.childAlignment = TextAnchor.MiddleCenter;
+            boxLayout.childForceExpandWidth = true;
+            boxLayout.childForceExpandHeight = false;
+
+            // Title
+            var titleGO = new GameObject("Title");
+            titleGO.transform.SetParent(boxGO.transform, false);
+            var titleTMP = titleGO.AddComponent<TextMeshProUGUI>();
+            titleTMP.text = "Reset Progress?";
+            titleTMP.fontSize = 40;
+            titleTMP.fontStyle = FontStyles.Bold;
+            titleTMP.alignment = TextAlignmentOptions.Center;
+            titleTMP.color = new Color(0.3f, 0.2f, 0.1f, 1f);
+            var titleLE = titleGO.AddComponent<LayoutElement>();
+            titleLE.preferredHeight = 60;
+
+            // Message
+            var msgGO = new GameObject("Message");
+            msgGO.transform.SetParent(boxGO.transform, false);
+            var msgTMP = msgGO.AddComponent<TextMeshProUGUI>();
+            msgTMP.text = "This will delete all your progress.\nThis action cannot be undone!";
+            msgTMP.fontSize = 28;
+            msgTMP.alignment = TextAlignmentOptions.Center;
+            msgTMP.color = new Color(0.4f, 0.3f, 0.2f, 1f);
+            var msgLE = msgGO.AddComponent<LayoutElement>();
+            msgLE.preferredHeight = 100;
+
+            // Buttons container
+            var btnContainerGO = new GameObject("Buttons");
+            btnContainerGO.transform.SetParent(boxGO.transform, false);
+            var btnContainerLE = btnContainerGO.AddComponent<LayoutElement>();
+            btnContainerLE.preferredHeight = 80;
+
+            var btnLayout = btnContainerGO.AddComponent<HorizontalLayoutGroup>();
+            btnLayout.spacing = 40;
+            btnLayout.childAlignment = TextAnchor.MiddleCenter;
+            btnLayout.childForceExpandWidth = false;
+            btnLayout.childForceExpandHeight = false;
+
+            // No button (Cancel)
+            var noBtn = CreateDialogButton(btnContainerGO.transform, "Cancel", new Color(0.5f, 0.5f, 0.5f, 1f));
+
+            // Yes button (Confirm)
+            var yesBtn = CreateDialogButton(btnContainerGO.transform, "Reset", new Color(0.8f, 0.3f, 0.3f, 1f));
+
+            dialogGO.SetActive(false);
+            return (dialogGO, yesBtn, noBtn);
+        }
+
+        private Button CreateDialogButton(Transform parent, string text, Color bgColor)
+        {
+            var btnGO = new GameObject(text + "Button");
+            btnGO.transform.SetParent(parent, false);
+            var btnLE = btnGO.AddComponent<LayoutElement>();
+            btnLE.preferredWidth = 200;
+            btnLE.preferredHeight = 60;
+
+            var btnImg = btnGO.AddComponent<Image>();
+            btnImg.color = bgColor;
+
+            var btn = btnGO.AddComponent<Button>();
+            btn.targetGraphic = btnImg;
+
+            var textGO = new GameObject("Text");
+            textGO.transform.SetParent(btnGO.transform, false);
+            var textRect = textGO.AddComponent<RectTransform>();
+            textRect.anchorMin = Vector2.zero;
+            textRect.anchorMax = Vector2.one;
+            textRect.offsetMin = Vector2.zero;
+            textRect.offsetMax = Vector2.zero;
+            var textTMP = textGO.AddComponent<TextMeshProUGUI>();
+            textTMP.text = text;
+            textTMP.fontSize = 28;
+            textTMP.fontStyle = FontStyles.Bold;
+            textTMP.alignment = TextAlignmentOptions.Center;
+            textTMP.color = Color.white;
+
+            return btn;
+        }
+
+        private (GameObject panel, Button closeBtn) CreateCreditsPanel(Transform parent)
+        {
+            var panelGO = new GameObject("CreditsPanel");
+            panelGO.transform.SetParent(parent, false);
+            var panelRect = panelGO.AddComponent<RectTransform>();
+            panelRect.anchorMin = Vector2.zero;
+            panelRect.anchorMax = Vector2.one;
+            panelRect.offsetMin = Vector2.zero;
+            panelRect.offsetMax = Vector2.zero;
+
+            // Dark overlay
+            var overlayImg = panelGO.AddComponent<Image>();
+            overlayImg.color = new Color(0, 0, 0, 0.85f);
+
+            // Credits content box
+            var boxGO = new GameObject("CreditsBox");
+            boxGO.transform.SetParent(panelGO.transform, false);
+            var boxRect = boxGO.AddComponent<RectTransform>();
+            boxRect.anchorMin = new Vector2(0.5f, 0.5f);
+            boxRect.anchorMax = new Vector2(0.5f, 0.5f);
+            boxRect.sizeDelta = new Vector2(800, 1000);
+
+            var boxImg = boxGO.AddComponent<Image>();
+            boxImg.color = new Color(0.2f, 0.15f, 0.1f, 0.95f);
+
+            var boxLayout = boxGO.AddComponent<VerticalLayoutGroup>();
+            boxLayout.padding = new RectOffset(50, 50, 50, 50);
+            boxLayout.spacing = 25;
+            boxLayout.childAlignment = TextAnchor.UpperCenter;
+            boxLayout.childForceExpandWidth = true;
+            boxLayout.childForceExpandHeight = false;
+
+            // Title
+            var titleGO = new GameObject("Title");
+            titleGO.transform.SetParent(boxGO.transform, false);
+            var titleTMP = titleGO.AddComponent<TextMeshProUGUI>();
+            titleTMP.text = "CREDITS";
+            titleTMP.fontSize = 48;
+            titleTMP.fontStyle = FontStyles.Bold;
+            titleTMP.alignment = TextAlignmentOptions.Center;
+            titleTMP.color = new Color(1f, 0.85f, 0.5f, 1f); // Gold
+            var titleLE = titleGO.AddComponent<LayoutElement>();
+            titleLE.preferredHeight = 70;
+
+            // Credits content
+            var contentGO = new GameObject("Content");
+            contentGO.transform.SetParent(boxGO.transform, false);
+            var contentTMP = contentGO.AddComponent<TextMeshProUGUI>();
+            contentTMP.text = @"<size=48><b>Sort Resort</b></size>
+<size=36>A Casual Puzzle Game</size>
+
+
+<b>Game Design & Development</b>
+Wilson Warmack
+
+<b>Art & Graphics</b>
+Filipe Sabino
+
+<b>Music & Sound</b>
+Filipe Sabino
+
+
+<b>Special Thanks</b>
+Antonia and Joakim Engfors
+
+<size=20>Version 1.0</size>";
+            contentTMP.fontSize = 28;
+            contentTMP.alignment = TextAlignmentOptions.Center;
+            contentTMP.color = Color.white;
+            contentTMP.richText = true;
+            var contentLE = contentGO.AddComponent<LayoutElement>();
+            contentLE.preferredHeight = 650;
+
+            // Close button
+            var closeBtnGO = new GameObject("CloseButton");
+            closeBtnGO.transform.SetParent(boxGO.transform, false);
+            var closeBtnLE = closeBtnGO.AddComponent<LayoutElement>();
+            closeBtnLE.preferredWidth = 200;
+            closeBtnLE.preferredHeight = 60;
+
+            var closeBtnImg = closeBtnGO.AddComponent<Image>();
+            closeBtnImg.color = new Color(0.4f, 0.6f, 0.8f, 1f);
+
+            var closeBtn = closeBtnGO.AddComponent<Button>();
+            closeBtn.targetGraphic = closeBtnImg;
+
+            var closeTextGO = new GameObject("Text");
+            closeTextGO.transform.SetParent(closeBtnGO.transform, false);
+            var closeTextRect = closeTextGO.AddComponent<RectTransform>();
+            closeTextRect.anchorMin = Vector2.zero;
+            closeTextRect.anchorMax = Vector2.one;
+            closeTextRect.offsetMin = Vector2.zero;
+            closeTextRect.offsetMax = Vector2.zero;
+            var closeTextTMP = closeTextGO.AddComponent<TextMeshProUGUI>();
+            closeTextTMP.text = "Close";
+            closeTextTMP.fontSize = 28;
+            closeTextTMP.fontStyle = FontStyles.Bold;
+            closeTextTMP.alignment = TextAlignmentOptions.Center;
+            closeTextTMP.color = Color.white;
+
+            panelGO.SetActive(false);
+            return (panelGO, closeBtn);
+        }
+
+        /// <summary>
+        /// Show the settings screen
+        /// </summary>
+        public void ShowSettings()
+        {
+            if (settingsPanel != null)
+            {
+                settingsPanel.SetActive(true);
+                settingsScreen?.Show();
+            }
+            GameEvents.InvokeSettingsOpened();
+        }
+
+        /// <summary>
+        /// Hide the settings screen
+        /// </summary>
+        public void HideSettings()
+        {
+            if (settingsScreen != null)
+            {
+                settingsScreen.Hide();
+            }
+            else if (settingsPanel != null)
+            {
+                settingsPanel.SetActive(false);
+            }
         }
 
         private GameObject CreateTextElement(Transform parent, string name, string text, int fontSize,

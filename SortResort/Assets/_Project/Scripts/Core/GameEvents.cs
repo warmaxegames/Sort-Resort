@@ -26,6 +26,7 @@ namespace SortResort
         public static event Action<string> OnWorldUnlocked; // worldId
         public static event Action<int> OnStarsEarned; // totalStars
         public static event Action<string, int> OnWorldSelected; // worldId, levelNumber
+        public static event Action OnProgressReset; // when all progress is reset
 
         // UI Events
         public static event Action OnSettingsOpened;
@@ -65,6 +66,7 @@ namespace SortResort
         public static void InvokeWorldUnlocked(string worldId) => OnWorldUnlocked?.Invoke(worldId);
         public static void InvokeStarsEarned(int totalStars) => OnStarsEarned?.Invoke(totalStars);
         public static void InvokeWorldSelected(string worldId, int levelNumber) => OnWorldSelected?.Invoke(worldId, levelNumber);
+        public static void InvokeProgressReset() => OnProgressReset?.Invoke();
 
         // Invoke Methods - UI
         public static void InvokeSettingsOpened() => OnSettingsOpened?.Invoke();
@@ -100,6 +102,7 @@ namespace SortResort
             OnWorldUnlocked = null;
             OnStarsEarned = null;
             OnWorldSelected = null;
+            OnProgressReset = null;
             OnSettingsOpened = null;
             OnSettingsClosed = null;
             OnMasterVolumeChanged = null;

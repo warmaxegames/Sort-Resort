@@ -196,6 +196,27 @@ namespace SortResort
             return currentSaveData.seenDialogues.Contains(dialogueId);
         }
 
+        // Haptics Setting
+        public bool IsHapticsEnabled()
+        {
+            return currentSaveData.hapticsEnabled;
+        }
+
+        public void SetHapticsEnabled(bool enabled)
+        {
+            currentSaveData.hapticsEnabled = enabled;
+            SaveGame();
+        }
+
+        // Reset All Progress
+        public void ResetAllProgress()
+        {
+            currentSaveData = new SaveData();
+            SaveGame();
+            Debug.Log("[SaveManager] All progress has been reset");
+            GameEvents.InvokeProgressReset();
+        }
+
         // Helper Methods
         private WorldProgress GetWorldProgress(string worldId)
         {
@@ -236,10 +257,14 @@ namespace SortResort
         public List<string> seenDialogues = new List<string>();
         public DateTime lastPlayedTime;
 
+        // Settings
+        public bool hapticsEnabled = true;
+
         public SaveData()
         {
             playerId = System.Guid.NewGuid().ToString();
             lastPlayedTime = DateTime.Now;
+            hapticsEnabled = true;
         }
     }
 
