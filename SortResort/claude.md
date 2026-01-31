@@ -475,6 +475,21 @@ Levels 1-5 are identical in structure across all worlds, with item swaps:
 - `UIManager.cs` - Added rounded rect generation methods, updated scroll area/scrollbar sprites
 - `LevelSelectScreen.cs` - Adjusted star and text positioning in portal buttons
 
+**Level Complete Screen Planning:**
+- Reviewed animation video showing full sequence
+- Identified modular assets needed for animated level complete screen:
+  - Purple sunrays background (rotating)
+  - Left/right curtains (drop down animation)
+  - Wood stage bar (pop up from bottom)
+  - Yellow circle + gold laurels (fade in)
+  - Mascot sprites (per world - cat, alpaca, etc.)
+  - Blue "LEVEL" bar with white circle
+  - Red ribbon with 3 star slots
+  - Gray star (sad face) and Gold star (happy face)
+  - Star burst effect for lighting animation
+- Animation sequence: sunrays rotate → curtains/laurels/stage appear → mascot pops up → level bar → ribbon+stars → stars light up LEFT→RIGHT→CENTER → stars bounce
+- User will provide source files to extract modular assets
+
 ---
 
 ## Known Issues
@@ -489,8 +504,10 @@ None currently - all identified bugs have been fixed.
 4. [x] Fix HUD not resetting between levels
 5. [x] Fix items.json format for proper parsing
 6. [x] Update world map to match Godot version
-7. [ ] Test on mobile device (touch input)
-8. [ ] Create Pause Menu Screen
-9. [ ] Create Settings Screen with volume controls
-10. [ ] Add match explosion animation
-11. [ ] Implement dialogue/mascot system
+7. [x] Polish level select screen (rounded corners, star alignment, text positioning)
+8. [ ] **Animated Level Complete Screen** - Awaiting modular assets from source files
+9. [ ] Test on mobile device (touch input)
+10. [ ] Create Pause Menu Screen
+11. [ ] Create Settings Screen with volume controls
+12. [ ] Add match explosion animation
+13. [ ] Implement dialogue/mascot system
