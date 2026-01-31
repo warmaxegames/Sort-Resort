@@ -12,6 +12,69 @@ namespace SortResort
     /// </summary>
     public class UIManager : MonoBehaviour
     {
+        /// <summary>
+        /// Creates a rounded rectangle texture at runtime.
+        /// </summary>
+        private static Texture2D CreateRoundedRectTexture(int width, int height, int cornerRadius, Color fillColor)
+        {
+            var texture = new Texture2D(width, height, TextureFormat.RGBA32, false);
+            texture.filterMode = FilterMode.Bilinear;
+            texture.wrapMode = TextureWrapMode.Clamp;
+
+            Color[] pixels = new Color[width * height];
+            Color transparent = new Color(0, 0, 0, 0);
+
+            for (int y = 0; y < height; y++)
+            {
+                for (int x = 0; x < width; x++)
+                {
+                    // Check if pixel is inside the rounded rectangle
+                    bool inside = true;
+
+                    // Check corners
+                    if (x < cornerRadius && y < cornerRadius)
+                    {
+                        // Bottom-left corner
+                        float dist = Vector2.Distance(new Vector2(x, y), new Vector2(cornerRadius, cornerRadius));
+                        inside = dist <= cornerRadius;
+                    }
+                    else if (x >= width - cornerRadius && y < cornerRadius)
+                    {
+                        // Bottom-right corner
+                        float dist = Vector2.Distance(new Vector2(x, y), new Vector2(width - cornerRadius - 1, cornerRadius));
+                        inside = dist <= cornerRadius;
+                    }
+                    else if (x < cornerRadius && y >= height - cornerRadius)
+                    {
+                        // Top-left corner
+                        float dist = Vector2.Distance(new Vector2(x, y), new Vector2(cornerRadius, height - cornerRadius - 1));
+                        inside = dist <= cornerRadius;
+                    }
+                    else if (x >= width - cornerRadius && y >= height - cornerRadius)
+                    {
+                        // Top-right corner
+                        float dist = Vector2.Distance(new Vector2(x, y), new Vector2(width - cornerRadius - 1, height - cornerRadius - 1));
+                        inside = dist <= cornerRadius;
+                    }
+
+                    pixels[y * width + x] = inside ? fillColor : transparent;
+                }
+            }
+
+            texture.SetPixels(pixels);
+            texture.Apply();
+            return texture;
+        }
+
+        /// <summary>
+        /// Creates a sprite from a rounded rectangle texture.
+        /// </summary>
+        private static Sprite CreateRoundedRectSprite(int width, int height, int cornerRadius, Color fillColor)
+        {
+            var texture = CreateRoundedRectTexture(width, height, cornerRadius, fillColor);
+            return Sprite.Create(texture, new Rect(0, 0, width, height), new Vector2(0.5f, 0.5f), 100f);
+        }
+
         public static UIManager Instance { get; private set; }
 
         [Header("Screen References")]
@@ -378,92 +441,232 @@ namespace SortResort
             rect.offsetMin = Vector2.zero;
             rect.offsetMax = Vector2.zero;
 
-            // Background
+            // Background - use base_world_background sprite
             var bg = levelSelectPanel.AddComponent<Image>();
-            bg.color = new Color(0.15f, 0.4f, 0.6f, 1f);
+            var bgSprite = Resources.Load<Sprite>("Sprites/UI/Backgrounds/base_world_background");
+            if (bgSprite != null)
+            {
+                bg.sprite = bgSprite;
+                bg.type = Image.Type.Simple;
+                bg.preserveAspect = false;
+            }
+            else
+            {
+                bg.color = new Color(0.64f, 0.87f, 0.87f, 1f); // Fallback cyan
+            }
 
-            // Header
-            var header = new GameObject("Header");
-            header.transform.SetParent(levelSelectPanel.transform, false);
-            var headerRect = header.AddComponent<RectTransform>();
-            headerRect.anchorMin = new Vector2(0, 0.85f);
-            headerRect.anchorMax = new Vector2(1, 1);
-            headerRect.offsetMin = Vector2.zero;
-            headerRect.offsetMax = Vector2.zero;
+            // ============================================
+            // TOP BAR - Wood plank background with settings button
+            // ============================================
+            var topBar = new GameObject("TopBar");
+            topBar.transform.SetParent(levelSelectPanel.transform, false);
+            var topBarRect = topBar.AddComponent<RectTransform>();
+            topBarRect.anchorMin = new Vector2(0, 1);
+            topBarRect.anchorMax = new Vector2(1, 1);
+            topBarRect.pivot = new Vector2(0.5f, 1);
+            topBarRect.anchoredPosition = Vector2.zero;
+            topBarRect.sizeDelta = new Vector2(0, 120);
 
-            var headerBg = header.AddComponent<Image>();
-            headerBg.color = new Color(0.1f, 0.3f, 0.5f, 1f);
+            // Wood plank background (blank_topbar)
+            var topBarBg = topBar.AddComponent<Image>();
+            var topBarSprite = Resources.Load<Sprite>("Sprites/UI/Overlays/blank_topbar");
+            if (topBarSprite != null)
+            {
+                topBarBg.sprite = topBarSprite;
+                topBarBg.type = Image.Type.Sliced;
+                topBarBg.preserveAspect = false;
+            }
+            else
+            {
+                topBarBg.color = new Color(0.55f, 0.35f, 0.2f, 1f);
+            }
 
-            // Title
-            var titleGO = new GameObject("Title");
-            titleGO.transform.SetParent(header.transform, false);
-            var titleRect = titleGO.AddComponent<RectTransform>();
-            titleRect.anchorMin = new Vector2(0.3f, 0);
-            titleRect.anchorMax = new Vector2(0.7f, 1);
-            titleRect.offsetMin = Vector2.zero;
-            titleRect.offsetMax = Vector2.zero;
+            // Settings button - centered vertically in topbar
+            var settingsBtnGO = new GameObject("SettingsButton");
+            settingsBtnGO.transform.SetParent(topBar.transform, false);
+            var settingsBtnRect = settingsBtnGO.AddComponent<RectTransform>();
+            settingsBtnRect.anchorMin = new Vector2(1, 0.5f);
+            settingsBtnRect.anchorMax = new Vector2(1, 0.5f);
+            settingsBtnRect.pivot = new Vector2(1, 0.5f);
+            settingsBtnRect.anchoredPosition = new Vector2(-15, 0); // Centered vertically (no Y offset)
+            settingsBtnRect.sizeDelta = new Vector2(100, 100);
 
-            var titleText = titleGO.AddComponent<TextMeshProUGUI>();
-            titleText.text = "SELECT LEVEL";
-            titleText.fontSize = 42;
-            titleText.fontStyle = FontStyles.Bold;
-            titleText.alignment = TextAlignmentOptions.Center;
-            titleText.color = Color.white;
+            var settingsBtnImg = settingsBtnGO.AddComponent<Image>();
+            var settingsSprite = Resources.Load<Sprite>("Sprites/UI/Buttons/settings_button");
+            if (settingsSprite != null)
+            {
+                settingsBtnImg.sprite = settingsSprite;
+                settingsBtnImg.preserveAspect = true;
+            }
+            else
+            {
+                settingsBtnImg.color = new Color(0.5f, 0.5f, 0.5f, 1f);
+            }
+            var settingsBtn = settingsBtnGO.AddComponent<Button>();
+            settingsBtn.targetGraphic = settingsBtnImg;
 
-            // World navigation container
-            var worldNav = new GameObject("WorldNav");
-            worldNav.transform.SetParent(header.transform, false);
-            var worldNavRect = worldNav.AddComponent<RectTransform>();
-            worldNavRect.anchorMin = new Vector2(0, 0);
-            worldNavRect.anchorMax = new Vector2(1, 0.5f);
-            worldNavRect.offsetMin = new Vector2(20, 10);
-            worldNavRect.offsetMax = new Vector2(-20, -10);
+            // Profile overlay - LARGER, positioned to hang OVER the topbar onto the background
+            // Parent to levelSelectPanel so it can extend beyond topbar
+            var profileGO = new GameObject("ProfileOverlay");
+            profileGO.transform.SetParent(levelSelectPanel.transform, false);
+            var profileRect = profileGO.AddComponent<RectTransform>();
+            profileRect.anchorMin = new Vector2(0, 1);
+            profileRect.anchorMax = new Vector2(0, 1);
+            profileRect.pivot = new Vector2(0, 1);
+            profileRect.anchoredPosition = new Vector2(5, -15); // Move right and down from edge
+            profileRect.sizeDelta = new Vector2(580, 200); // Even larger
 
-            var worldNavLayout = worldNav.AddComponent<HorizontalLayoutGroup>();
-            worldNavLayout.spacing = 20;
-            worldNavLayout.childAlignment = TextAnchor.MiddleCenter;
-            worldNavLayout.childForceExpandWidth = false;
-            worldNavLayout.childForceExpandHeight = true;
+            var profileImg = profileGO.AddComponent<Image>();
+            var profileSprite = Resources.Load<Sprite>("Sprites/UI/Overlays/profile_overlay");
+            if (profileSprite != null)
+            {
+                profileImg.sprite = profileSprite;
+                profileImg.preserveAspect = true;
+            }
+            else
+            {
+                profileImg.color = new Color(0.9f, 0.7f, 0.5f, 1f);
+            }
 
-            // Prev world button
-            var prevBtn = CreateButton(worldNav.transform, "PrevWorld", "<", null, 60, 50);
+            // Player name text - moved right to not overlap mascot
+            var playerNameGO = new GameObject("PlayerName");
+            playerNameGO.transform.SetParent(profileGO.transform, false);
+            var playerNameRect = playerNameGO.AddComponent<RectTransform>();
+            playerNameRect.anchorMin = new Vector2(0.38f, 0.38f); // Moved further right
+            playerNameRect.anchorMax = new Vector2(0.95f, 0.62f);
+            playerNameRect.offsetMin = Vector2.zero;
+            playerNameRect.offsetMax = Vector2.zero;
 
-            // World name
-            var worldNameGO = new GameObject("WorldName");
-            worldNameGO.transform.SetParent(worldNav.transform, false);
-            var worldNameRect = worldNameGO.AddComponent<RectTransform>();
-            worldNameRect.sizeDelta = new Vector2(200, 50);
-            var worldNameText = worldNameGO.AddComponent<TextMeshProUGUI>();
-            worldNameText.text = "Resort";
-            worldNameText.fontSize = 32;
-            worldNameText.fontStyle = FontStyles.Bold;
-            worldNameText.alignment = TextAlignmentOptions.Center;
-            worldNameText.color = Color.white;
-            var worldNameLayout = worldNameGO.AddComponent<LayoutElement>();
-            worldNameLayout.minWidth = 200;
+            var playerNameText = playerNameGO.AddComponent<TextMeshProUGUI>();
+            playerNameText.text = "PLAYER";
+            playerNameText.fontSize = 32;
+            playerNameText.fontStyle = FontStyles.Bold;
+            playerNameText.alignment = TextAlignmentOptions.MidlineLeft;
+            playerNameText.color = Color.white;
 
-            // Next world button
-            var nextBtn = CreateButton(worldNav.transform, "NextWorld", ">", null, 60, 50);
+            // ============================================
+            // WORLD DISPLAY AREA - Large world image with navigation arrows
+            // ============================================
+            var worldArea = new GameObject("WorldArea");
+            worldArea.transform.SetParent(levelSelectPanel.transform, false);
+            var worldAreaRect = worldArea.AddComponent<RectTransform>();
+            worldAreaRect.anchorMin = new Vector2(0, 0.52f);
+            worldAreaRect.anchorMax = new Vector2(1, 0.92f);
+            worldAreaRect.offsetMin = Vector2.zero;
+            worldAreaRect.offsetMax = Vector2.zero;
 
-            // Level grid scroll area
+            // Prev world button (larger)
+            var prevBtnGO = new GameObject("PrevWorld Button");
+            prevBtnGO.transform.SetParent(worldArea.transform, false);
+            var prevBtnRect = prevBtnGO.AddComponent<RectTransform>();
+            prevBtnRect.anchorMin = new Vector2(0, 0.5f);
+            prevBtnRect.anchorMax = new Vector2(0, 0.5f);
+            prevBtnRect.pivot = new Vector2(0, 0.5f);
+            prevBtnRect.anchoredPosition = new Vector2(10, 0);
+            prevBtnRect.sizeDelta = new Vector2(130, 150);
+
+            var prevBtnImg = prevBtnGO.AddComponent<Image>();
+            var prevSprite = Resources.Load<Sprite>("Sprites/UI/Buttons/button_left");
+            var prevPressedSprite = Resources.Load<Sprite>("Sprites/UI/Buttons/button_left_pressed");
+            if (prevSprite != null)
+            {
+                prevBtnImg.sprite = prevSprite;
+                prevBtnImg.preserveAspect = true;
+            }
+            else
+            {
+                prevBtnImg.color = new Color(0.5f, 0.3f, 0.7f, 1f);
+            }
+
+            var prevBtn = prevBtnGO.AddComponent<Button>();
+            prevBtn.targetGraphic = prevBtnImg;
+            if (prevSprite != null && prevPressedSprite != null)
+            {
+                prevBtn.transition = Selectable.Transition.SpriteSwap;
+                var spriteState = new SpriteState { pressedSprite = prevPressedSprite };
+                prevBtn.spriteState = spriteState;
+            }
+
+            // World sprite display (center, large)
+            var worldSpriteGO = new GameObject("WorldSprite");
+            worldSpriteGO.transform.SetParent(worldArea.transform, false);
+            var worldSpriteRect = worldSpriteGO.AddComponent<RectTransform>();
+            worldSpriteRect.anchorMin = new Vector2(0.12f, 0);
+            worldSpriteRect.anchorMax = new Vector2(0.88f, 1);
+            worldSpriteRect.offsetMin = Vector2.zero;
+            worldSpriteRect.offsetMax = Vector2.zero;
+
+            var worldSpriteImg = worldSpriteGO.AddComponent<Image>();
+            worldSpriteImg.preserveAspect = true;
+            var defaultWorldSprite = Resources.Load<Sprite>("Sprites/UI/Worlds/island_world");
+            if (defaultWorldSprite != null)
+                worldSpriteImg.sprite = defaultWorldSprite;
+
+            // Next world button (larger)
+            var nextBtnGO = new GameObject("NextWorld Button");
+            nextBtnGO.transform.SetParent(worldArea.transform, false);
+            var nextBtnRect = nextBtnGO.AddComponent<RectTransform>();
+            nextBtnRect.anchorMin = new Vector2(1, 0.5f);
+            nextBtnRect.anchorMax = new Vector2(1, 0.5f);
+            nextBtnRect.pivot = new Vector2(1, 0.5f);
+            nextBtnRect.anchoredPosition = new Vector2(-10, 0);
+            nextBtnRect.sizeDelta = new Vector2(130, 150);
+
+            var nextBtnImg = nextBtnGO.AddComponent<Image>();
+            var nextSprite = Resources.Load<Sprite>("Sprites/UI/Buttons/button_right");
+            var nextPressedSprite = Resources.Load<Sprite>("Sprites/UI/Buttons/button_right_pressed");
+            if (nextSprite != null)
+            {
+                nextBtnImg.sprite = nextSprite;
+                nextBtnImg.preserveAspect = true;
+            }
+            else
+            {
+                nextBtnImg.color = new Color(0.5f, 0.3f, 0.7f, 1f);
+            }
+
+            var nextBtn = nextBtnGO.AddComponent<Button>();
+            nextBtn.targetGraphic = nextBtnImg;
+            if (nextSprite != null && nextPressedSprite != null)
+            {
+                nextBtn.transition = Selectable.Transition.SpriteSwap;
+                var spriteState = new SpriteState { pressedSprite = nextPressedSprite };
+                nextBtn.spriteState = spriteState;
+            }
+
+            // ============================================
+            // LEVEL GRID SCROLL AREA - Rounded corners, larger scrollbar
+            // ============================================
             var scrollArea = new GameObject("ScrollArea");
             scrollArea.transform.SetParent(levelSelectPanel.transform, false);
-            var scrollRect = scrollArea.AddComponent<RectTransform>();
-            scrollRect.anchorMin = new Vector2(0, 0);
-            scrollRect.anchorMax = new Vector2(1, 0.85f);
-            scrollRect.offsetMin = new Vector2(20, 20);
-            scrollRect.offsetMax = new Vector2(-20, -10);
+            var scrollAreaRect = scrollArea.AddComponent<RectTransform>();
+            scrollAreaRect.anchorMin = new Vector2(0, 0);
+            scrollAreaRect.anchorMax = new Vector2(1, 0.48f);
+            scrollAreaRect.offsetMin = new Vector2(15, 15);
+            scrollAreaRect.offsetMax = new Vector2(-15, 0);
 
-            var scrollView = scrollArea.AddComponent<ScrollRect>();
-            scrollView.horizontal = false;
-            scrollView.vertical = true;
-            scrollView.movementType = ScrollRect.MovementType.Elastic;
-
-            var scrollMask = scrollArea.AddComponent<Mask>();
+            // Dark gray/olive background with rounded corners
             var scrollBg = scrollArea.AddComponent<Image>();
-            scrollBg.color = new Color(0.1f, 0.25f, 0.4f, 1f);
+            var roundedBgSprite = CreateRoundedRectSprite(256, 256, 30, new Color(0.34f, 0.37f, 0.32f, 1f));
+            scrollBg.sprite = roundedBgSprite;
+            scrollBg.type = Image.Type.Sliced;
+            // Set 9-slice border for proper scaling
+            scrollBg.sprite = Sprite.Create(
+                roundedBgSprite.texture,
+                new Rect(0, 0, 256, 256),
+                new Vector2(0.5f, 0.5f),
+                100f,
+                0,
+                SpriteMeshType.FullRect,
+                new Vector4(35, 35, 35, 35) // Border for 9-slice (L, B, R, T)
+            );
+            scrollBg.type = Image.Type.Sliced;
 
-            // Content container
+            // Use RectMask2D for content clipping
+            var rectMask = scrollArea.AddComponent<RectMask2D>();
+            rectMask.softness = new Vector2Int(25, 25); // Slight softness for edge blending
+
+            // Content container - extra padding to prevent portal glow clipping
             var content = new GameObject("Content");
             content.transform.SetParent(scrollArea.transform, false);
             var contentRect = content.AddComponent<RectTransform>();
@@ -471,48 +674,117 @@ namespace SortResort
             contentRect.anchorMax = new Vector2(1, 1);
             contentRect.pivot = new Vector2(0.5f, 1);
             contentRect.anchoredPosition = Vector2.zero;
+            contentRect.sizeDelta = new Vector2(-40, 0); // Room for scrollbar
 
+            // Grid layout - 3 columns, cells sized to fit with glow padding
             var gridLayout = content.AddComponent<GridLayoutGroup>();
-            gridLayout.cellSize = new Vector2(120, 120);
-            gridLayout.spacing = new Vector2(15, 15);
+            gridLayout.cellSize = new Vector2(300, 300); // Larger cells for portal + glow
+            gridLayout.spacing = new Vector2(8, 8); // Minimal spacing since glow provides visual separation
+            gridLayout.padding = new RectOffset(25, 25, 25, 25); // Padding to prevent edge clipping
             gridLayout.startCorner = GridLayoutGroup.Corner.UpperLeft;
             gridLayout.startAxis = GridLayoutGroup.Axis.Horizontal;
             gridLayout.childAlignment = TextAnchor.UpperCenter;
             gridLayout.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
-            gridLayout.constraintCount = 5;
+            gridLayout.constraintCount = 3;
 
             var contentFitter = content.AddComponent<ContentSizeFitter>();
             contentFitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
 
+            // ScrollRect
+            var scrollView = scrollArea.AddComponent<ScrollRect>();
+            scrollView.horizontal = false;
+            scrollView.vertical = true;
+            scrollView.movementType = ScrollRect.MovementType.Elastic;
             scrollView.content = contentRect;
+            scrollView.viewport = scrollAreaRect;
+
+            // Vertical scrollbar - LARGER for touch, with rounded appearance
+            var scrollbarGO = new GameObject("Scrollbar");
+            scrollbarGO.transform.SetParent(scrollArea.transform, false);
+            var scrollbarRect = scrollbarGO.AddComponent<RectTransform>();
+            scrollbarRect.anchorMin = new Vector2(1, 0);
+            scrollbarRect.anchorMax = new Vector2(1, 1);
+            scrollbarRect.pivot = new Vector2(1, 0.5f);
+            scrollbarRect.anchoredPosition = new Vector2(-8, 0);
+            scrollbarRect.sizeDelta = new Vector2(30, -20); // Wider for touch
+
+            // Rounded scrollbar track
+            var scrollbarImg = scrollbarGO.AddComponent<Image>();
+            var scrollbarTrackSprite = CreateRoundedRectSprite(64, 256, 15, new Color(0.25f, 0.27f, 0.23f, 0.8f));
+            scrollbarImg.sprite = Sprite.Create(
+                scrollbarTrackSprite.texture,
+                new Rect(0, 0, 64, 256),
+                new Vector2(0.5f, 0.5f),
+                100f,
+                0,
+                SpriteMeshType.FullRect,
+                new Vector4(18, 18, 18, 18)
+            );
+            scrollbarImg.type = Image.Type.Sliced;
+
+            var scrollbar = scrollbarGO.AddComponent<Scrollbar>();
+            scrollbar.direction = Scrollbar.Direction.BottomToTop;
+
+            // Scrollbar handle - rounded
+            var handleArea = new GameObject("Handle Area");
+            handleArea.transform.SetParent(scrollbarGO.transform, false);
+            var handleAreaRect = handleArea.AddComponent<RectTransform>();
+            handleAreaRect.anchorMin = Vector2.zero;
+            handleAreaRect.anchorMax = Vector2.one;
+            handleAreaRect.offsetMin = new Vector2(3, 5);
+            handleAreaRect.offsetMax = new Vector2(-3, -5);
+
+            var handle = new GameObject("Handle");
+            handle.transform.SetParent(handleArea.transform, false);
+            var handleRect = handle.AddComponent<RectTransform>();
+            handleRect.anchorMin = Vector2.zero;
+            handleRect.anchorMax = Vector2.one;
+            handleRect.offsetMin = Vector2.zero;
+            handleRect.offsetMax = Vector2.zero;
+
+            // Rounded handle
+            var handleImg = handle.AddComponent<Image>();
+            var handleSprite = CreateRoundedRectSprite(48, 128, 12, new Color(0.85f, 0.85f, 0.85f, 1f));
+            handleImg.sprite = Sprite.Create(
+                handleSprite.texture,
+                new Rect(0, 0, 48, 128),
+                new Vector2(0.5f, 0.5f),
+                100f,
+                0,
+                SpriteMeshType.FullRect,
+                new Vector4(15, 15, 15, 15)
+            );
+            handleImg.type = Image.Type.Sliced;
+
+            scrollbar.handleRect = handleRect;
+            scrollbar.targetGraphic = handleImg;
+            scrollView.verticalScrollbar = scrollbar;
+            scrollView.verticalScrollbarVisibility = ScrollRect.ScrollbarVisibility.Permanent; // Always visible
 
             // Add LevelSelectScreen component
             levelSelectScreen = levelSelectPanel.AddComponent<LevelSelectScreen>();
 
-            // Wire up references using reflection (since we created UI at runtime)
+            // Wire up references using reflection
             var screenType = typeof(LevelSelectScreen);
             var flags = System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance;
 
-            var prevField = screenType.GetField("prevWorldButton", flags);
-            var nextField = screenType.GetField("nextWorldButton", flags);
-            var nameField = screenType.GetField("worldNameText", flags);
-            var gridField = screenType.GetField("levelGridParent", flags);
-            var scrollField = screenType.GetField("levelScrollRect", flags);
-
-            Debug.Log($"[UIManager] Reflection fields found - prev:{prevField != null}, next:{nextField != null}, name:{nameField != null}, grid:{gridField != null}, scroll:{scrollField != null}");
-
-            prevField?.SetValue(levelSelectScreen, prevBtn);
-            nextField?.SetValue(levelSelectScreen, nextBtn);
-            nameField?.SetValue(levelSelectScreen, worldNameText);
-            gridField?.SetValue(levelSelectScreen, content.transform);
-            scrollField?.SetValue(levelSelectScreen, scrollView);
-
-            Debug.Log($"[UIManager] References set - prevBtn:{prevBtn != null}, nextBtn:{nextBtn != null}, content:{content != null}");
+            screenType.GetField("prevWorldButton", flags)?.SetValue(levelSelectScreen, prevBtn);
+            screenType.GetField("nextWorldButton", flags)?.SetValue(levelSelectScreen, nextBtn);
+            screenType.GetField("worldImage", flags)?.SetValue(levelSelectScreen, worldSpriteImg);
+            screenType.GetField("levelGridParent", flags)?.SetValue(levelSelectScreen, content.transform);
+            screenType.GetField("levelScrollRect", flags)?.SetValue(levelSelectScreen, scrollView);
 
             // Connect level selected callback
             levelSelectScreen.OnLevelSelected += OnLevelSelectedFromMenu;
 
-            Debug.Log("[UIManager] Level select panel created");
+            Debug.Log("[UIManager] Level select panel created (Godot style)");
+        }
+
+        private void OnCloseFromLevelSelect()
+        {
+            Debug.Log("[UIManager] Close button clicked from level select");
+            // Return to splash screen
+            ShowSplash();
         }
 
         private void OnLevelSelectedFromMenu(string worldId, int levelNumber)

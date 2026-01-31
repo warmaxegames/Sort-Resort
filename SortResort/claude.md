@@ -22,7 +22,7 @@
 
 ## Current Status
 
-**Last Updated:** 2026-01-30 (Session 2)
+**Last Updated:** 2026-01-30 (Session 6)
 
 ### Godot Version (Complete)
 - 6 levels complete (Resort 001-006)
@@ -69,7 +69,7 @@
 3. ~~**Add Space & Tavern worlds**~~ DONE - All 5 worlds now have items, containers, backgrounds, icons, music
 4. **World-specific lock overlays** - Created placeholders for all worlds (copies of base), need custom designs
 5. ~~**Island custom containers**~~ DONE - Copied island_container.png and island_single_slot_container.png from Godot
-6. **Update world map** - Match the Godot version's world map implementation
+6. ~~**Update world map**~~ DONE - Level select screen now matches Godot version (light cyan background, top bar with mascot/settings/close, larger world image with side arrows, dark gray level grid with scrollbar)
 7. **Dialogue & Mascots system** - Each world has unique mascot. Pop-up dialogue at set points for story progression. Review Godot dialogue system.
 8. **Level Complete screen (animated)** - Rebuild with proper animations (Godot version was limited)
 9. **Mobile Testing** - Touch input validation on device
@@ -82,6 +82,12 @@
 7. **Dialogue System** - Tutorial and story dialogues
 8. **Undo System** - Allow undoing last move
 9. **Create Levels 7-100** - Complete level content for all worlds
+10. **Profile Customization** - Player profiles with customizable mascot/avatar:
+    - Choose mascot character
+    - Customize eye colors
+    - Select hats/headwear
+    - Choose outfit/clothing
+    - Player name editing
 
 ---
 
@@ -350,6 +356,127 @@ Levels 1-5 are identical in structure across all worlds, with item swaps:
 
 ---
 
+### 2026-01-30 (Session 3) - Critical Bug Fixes
+
+**HUD Reset Bug Fix:**
+- GameManager now subscribes to `GameEvents.OnLevelStarted` event
+- When any level starts, `currentMoveCount` and `currentMatchCount` are reset to 0
+- This ensures the HUD displays correctly when clicking "Next Level" or selecting levels
+
+**Items.json Format Fix:**
+- Fixed items.json format from dictionary to array format
+- Changed from: `{"potato": {"id": "potato", ...}}`
+- To: `{"items": [{"id": "potato", ...}]}`
+- This was causing the entire item database to fail to parse
+- Farm and Tavern items now load correctly
+
+**ObjectPool Null Reference Fix (Previous Session):**
+- Added null checks in `ObjectPool.Get()` to skip destroyed objects
+- Prevents MissingReferenceException when reusing pooled items
+
+**Level_002 Container Overlap Fix (Previous Session):**
+- Moved container_5 from y:455 to y:900 to prevent overlap with corner containers
+- Applied to Island, Farm, and Supermarket level_002 files
+
+**Files Modified:**
+- `GameManager.cs` - Added OnLevelStarted handler to reset counters
+- `items.json` - Converted from dictionary format to array format with "items" wrapper
+
+---
+
+### 2026-01-30 (Session 4) - Level Select Screen Godot-Style Redesign
+
+**Level Select Screen Overhaul:**
+- Redesigned to match Godot version's visual style
+- Added world sprite display (island_world.png, supermarket_world.png, etc.)
+- Navigation arrows now use button_left.png/button_right.png sprites
+- Level grid changed from 5 columns to 3 columns (like Godot)
+- Level buttons now use level_portal.png as background
+- Star ratings now use portal_1/2/3_stars.png overlay sprites
+- Scroll container has muted green background (RGB 0.403, 0.462, 0.388)
+- Background uses base_world_background.png
+
+**Assets Copied from Godot:**
+- `Sprites/UI/Worlds/`: island_world.png, supermarket_world.png, farm_world.png, tavern_world.png, space_world.png
+- `Sprites/UI/Buttons/`: button_left.png, button_right.png (with pressed states), back_button.png, replay_button.png, next_level_button.png, return_to_map_button.png, settings_button.png
+- `Sprites/UI/Icons/`: level_portal.png, portal_1_stars.png, portal_2_stars.png, portal_3_stars.png
+- `Sprites/UI/Backgrounds/`: base_world_background.png
+
+**Container Overlap Fixes:**
+- Fixed Tavern level_003, level_004, level_005 (container_5 y:505/450 → y:900)
+- Fixed Space level_003, level_004, level_005 (container_5 y:505/450 → y:900)
+
+**Sprite Import Fixes:**
+- Fixed 32 item sprites with incorrect spriteMode (Multiple → Single)
+- Items were sliced into multiple sub-sprites causing invisible/tiny sprites
+- Affected worlds: Tavern, Space, Island, Farm, Supermarket
+
+**Files Modified:**
+- `UIManager.cs` - Rewrote CreateLevelSelectPanel() with Godot-style layout
+- `LevelSelectScreen.cs` - Added portal sprite support, star overlay sprites, world image display
+
+---
+
+### 2026-01-30 (Session 5) - Level Select Screen Visual Matching
+
+**Screenshot Comparison Update:**
+- Compared Unity screenshot to Godot screenshot to identify visual differences
+- Updated layout to match Godot version more closely
+
+**Layout Changes:**
+- Background: Changed from base_world_background.png to light cyan solid color (#A4DEDE)
+- Added top bar with:
+  - Cat mascot avatar (cat_mascot.png - copied from Godot cat_smug.png)
+  - Player name panel (wood brown background)
+  - Settings button (right side)
+  - Close/Back button (far right)
+- World area: Expanded to ~38% of screen height (was 25%)
+- Navigation arrows: Larger (100x100), positioned at sides of world image
+- World image: Now spans 70% width (anchors 0.15-0.85) for larger display
+- Level grid: Darker gray background (#565D51), separate viewport and scrollbar
+- Added visible white scrollbar with handle
+
+**Level Button Improvements:**
+- Locked levels now show gray-tinted portal instead of dark overlay
+- Stars now always visible: gray when not earned, normal color when earned
+- Text color also dims for locked levels
+
+**Assets Copied:**
+- `Sprites/UI/Icons/cat_mascot.png` - copied from Godot mascots/cat_smug.png
+
+**Files Modified:**
+- `UIManager.cs` - Complete rewrite of CreateLevelSelectPanel() with new layout
+- `LevelSelectScreen.cs` - Updated LevelButton.UpdateState() for better locked level display
+
+---
+
+### 2026-01-30 (Session 6) - Level Select Screen Polish
+
+**Rounded Corners Implementation:**
+- Added `CreateRoundedRectTexture()` and `CreateRoundedRectSprite()` helper methods to UIManager
+- These create rounded rectangle textures at runtime for UI elements
+- Scroll area background now uses a 9-sliced rounded rect sprite (30px corner radius)
+- Scrollbar track uses rounded rect sprite (15px corner radius)
+- Scrollbar handle uses rounded rect sprite (12px corner radius)
+- All rounded elements properly scale using Image.Type.Sliced
+
+**Star Alignment Improvements:**
+- Adjusted star overlay positioning to better fit portal's dark circles
+- Stars now positioned at anchors (0.10, 0.02) to (0.90, 0.28)
+- Level number text repositioned higher in orb area: (0.10, 0.30) to (0.90, 0.90)
+- Text outline color changed to purple tint (80, 0, 80) for better visibility on pink portal
+
+**Visual Details:**
+- Scrollbar widened to 30px for better touch targets
+- RectMask2D softness reduced to 25px (was 40px)
+- Level number font size adjusted to 72 (was 80)
+
+**Files Modified:**
+- `UIManager.cs` - Added rounded rect generation methods, updated scroll area/scrollbar sprites
+- `LevelSelectScreen.cs` - Adjusted star and text positioning in portal buttons
+
+---
+
 ## Known Issues
 None currently - all identified bugs have been fixed.
 
@@ -359,9 +486,11 @@ None currently - all identified bugs have been fixed.
 1. [x] Create Main Menu / Splash Screen
 2. [x] Fix level data (item counts, container images)
 3. [x] Copy island container images from Godot
-4. [ ] Test on mobile device (touch input)
-5. [ ] Create Pause Menu Screen
-6. [ ] Create Settings Screen with volume controls
-7. [ ] Add match explosion animation
-8. [ ] Update world map to match Godot version
-9. [ ] Implement dialogue/mascot system
+4. [x] Fix HUD not resetting between levels
+5. [x] Fix items.json format for proper parsing
+6. [x] Update world map to match Godot version
+7. [ ] Test on mobile device (touch input)
+8. [ ] Create Pause Menu Screen
+9. [ ] Create Settings Screen with volume controls
+10. [ ] Add match explosion animation
+11. [ ] Implement dialogue/mascot system

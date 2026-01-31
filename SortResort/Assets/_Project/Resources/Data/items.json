@@ -1,386 +1,218 @@
 {
-  "bananayogurt": {
-	"id": "bananayogurt",
-	"sprite": "bananayogurt.png",
-	"world": "supermarket",
-	"unlock_level": 1
-  },
-  "beachbag": {
-	"id": "beachbag",
-	"sprite": "beachbag.png",
-	"world": "island",
-	"unlock_level": 1
-  },
-  "bluethermos": {
-	"id": "bluethermos",
-	"sprite": "bluethermos.png",
-	"world": "supermarket",
-	"unlock_level": 1
-  },
-  "bluesunglasses": {
-	"id": "bluesunglasses",
-	"sprite": "bluesunglasses.png",
-	"world": "island",
-	"unlock_level": 1
-  },
-  "cannedcorn": {
-	"id": "cannedcorn",
-	"sprite": "cannedcorn.png",
-	"world": "supermarket",
-	"unlock_level": 1
-  },
-  "cannedtomato": {
-	"id": "cannedtomato",
-	"sprite": "cannedtomato.png",
-	"world": "supermarket",
-	"unlock_level": 1
-  },
-  "carrotjuice": {
-	"id": "carrotjuice",
-	"sprite": "carrotjuice.png",
-	"world": "supermarket",
-	"unlock_level": 1
-  },
-  "chips": {
-	"id": "chips",
-	"sprite": "chips.png",
-	"world": "supermarket",
-	"unlock_level": 1
-  },
-  "chocolatebar": {
-	"id": "chocolatebar",
-	"sprite": "chocolatebar.png",
-	"world": "supermarket",
-	"unlock_level": 1
-  },
-  "cider": {
-	"id": "cider",
-	"sprite": "cider.png",
-	"world": "supermarket",
-	"unlock_level": 1
-  },
-  "coconut": {
-	"id": "coconut",
-	"sprite": "coconut.png",
-	"world": "island",
-	"unlock_level": 1
-  },
-  "coconutyogurt": {
-	"id": "coconutyogurt",
-	"sprite": "coconutyogurt.png",
-	"world": "supermarket",
-	"unlock_level": 1
-  },
-  "coffeebeans": {
-	"id": "coffeebeans",
-	"sprite": "coffeebeans.png",
-	"world": "supermarket",
-	"unlock_level": 1
-  },
-  "eggs": {
-	"id": "eggs",
-	"sprite": "eggs.png",
-	"world": "supermarket",
-	"unlock_level": 1
-  },
-  "energydrink": {
-	"id": "energydrink",
-	"sprite": "energydrink.png",
-	"world": "supermarket",
-	"unlock_level": 1
-  },
-  "garlicsauce": {
-	"id": "garlicsauce",
-	"sprite": "garlicsauce.png",
-	"world": "supermarket",
-	"unlock_level": 1
-  },
-  "grapesoda": {
-	"id": "grapesoda",
-	"sprite": "grapesoda.png",
-	"world": "supermarket",
-	"unlock_level": 1
-  },
-  "greencoconut": {
-	"id": "greencoconut",
-	"sprite": "greencoconut.png",
-	"world": "island",
-	"unlock_level": 1
-  },
-  "greenapplejuice": {
-	"id": "greenapplejuice",
-	"sprite": "greenapplejuice.png",
-	"world": "supermarket",
-	"unlock_level": 1
-  },
-  "greenthermosstraw": {
-	"id": "greenthermosstraw",
-	"sprite": "greenthermosstraw.png",
-	"world": "supermarket",
-	"unlock_level": 1
-  },
-  "greenwaterbottle": {
-	"id": "greenwaterbottle",
-	"sprite": "greenwaterbottle.png",
-	"world": "supermarket",
-	"unlock_level": 1
-  },
-  "honey": {
-	"id": "honey",
-	"sprite": "honey.png",
-	"world": "supermarket",
-	"unlock_level": 1
-  },
-  "hotsauce": {
-	"id": "hotsauce",
-	"sprite": "hotsauce.png",
-	"world": "supermarket",
-	"unlock_level": 1
-  },
-  "ketchup": {
-	"id": "ketchup",
-	"sprite": "ketchup.png",
-	"world": "supermarket",
-	"unlock_level": 1
-  },
-  "lemonjuice": {
-	"id": "lemonjuice",
-	"sprite": "lemonjuice.png",
-	"world": "supermarket",
-	"unlock_level": 1
-  },
-  "maitai": {
-	"id": "maitai",
-	"sprite": "maitai.png",
-	"world": "super",
-	"unlock_level": 1
-  },
-  "mayo": {
-	"id": "mayo",
-	"sprite": "mayo.png",
-	"world": "supermarket",
-	"unlock_level": 1
-  },
-  "messageinabottle": {
-	"id": "messageinabottle",
-	"sprite": "messageinabottle.png",
-	"world": "island",
-	"unlock_level": 1
-  },
-  "milk": {
-	"id": "milk",
-	"sprite": "milk.png",
-	"world": "supermarket",
-	"unlock_level": 1
-  },
-  "milkbottle": {
-	"id": "milkbottle",
-	"sprite": "milkbottle.png",
-	"world": "supermarket",
-	"unlock_level": 1
-  },
-  "mustard": {
-	"id": "mustard",
-	"sprite": "mustard.png",
-	"world": "supermarket",
-	"unlock_level": 1
-  },
-  "nutbar": {
-	"id": "nutbar",
-	"sprite": "nutbar.png",
-	"world": "supermarket",
-	"unlock_level": 1
-  },
-  "orangejuice": {
-	"id": "orangejuice",
-	"sprite": "orangejuice.png",
-	"world": "supermarket",
-	"unlock_level": 1
-  },
-  "orangewaterbottle": {
-	"id": "orangewaterbottle",
-	"sprite": "orangewaterbottle.png",
-	"world": "supermarket",
-	"unlock_level": 1
-  },
-  "peachjuice": {
-	"id": "peachjuice",
-	"sprite": "peachjuice.png",
-	"world": "supermarket",
-	"unlock_level": 1
-  },
-  "peanutbutter": {
-	"id": "peanutbutter",
-	"sprite": "peanutbutter.png",
-	"world": "supermarket",
-	"unlock_level": 1
-  },
-  "peas": {
-	"id": "peas",
-	"sprite": "peas.png",
-	"world": "supermarket",
-	"unlock_level": 1
-  },
-  "pickles": {
-	"id": "pickles",
-	"sprite": "pickles.png",
-	"world": "supermarket",
-	"unlock_level": 1
-  },
-  "pineapple": {
-	"id": "pineapple",
-	"sprite": "pineapple.png",
-	"world": "island",
-	"unlock_level": 1
-  },
-  "pinkflower": {
-	"id": "pinkflower",
-	"sprite": "pinkflower.png",
-	"world": "supermarket",
-	"unlock_level": 1
-  },
-  "pinkpolkadotbikini": {
-	"id": "pinkpolkadotbikini",
-	"sprite": "pinkpolkadotbikini.png",
-	"world": "island",
-	"unlock_level": 1
-  },
-  "pinkthermos": {
-	"id": "pinkthermos",
-	"sprite": "pinkthermos.png",
-	"world": "supermarket",
-	"unlock_level": 1
-  },
-  "pinkthermosstraw": {
-	"id": "pinkthermosstraw",
-	"sprite": "pinkthermosstraw.png",
-	"world": "supermarket",
-	"unlock_level": 1
-  },
-  "popcornbucket": {
-	"id": "popcornbucket",
-	"sprite": "popcornbucket.png",
-	"world": "supermarket",
-	"unlock_level": 1
-  },
-  "raspberryjam": {
-	"id": "raspberryjam",
-	"sprite": "raspberryjam.png",
-	"world": "supermarket",
-	"unlock_level": 1
-  },
-  "redapplejuice": {
-	"id": "redapplejuice",
-	"sprite": "redapplejuice.png",
-	"world": "supermarket",
-	"unlock_level": 1
-  },
-  "sandals": {
-	"id": "sandals",
-	"sprite": "sandals.png",
-	"world": "island",
-	"unlock_level": 1
-  },
-  "scubatanks": {
-	"id": "scubatanks",
-	"sprite": "scubatanks.png",
-	"world": "island",
-	"unlock_level": 1
-  },
-  "soda": {
-	"id": "soda",
-	"sprite": "soda.png",
-	"world": "supermarket",
-	"unlock_level": 1
-  },
-  "strawberrydaiquiri": {
-	"id": "strawberrydaiquiri",
-	"sprite": "strawberrydaiquiri.png",
-	"world": "island",
-	"unlock_level": 1
-  },
-  "strawberryjam": {
-	"id": "strawberryjam",
-	"sprite": "strawberryjam.png",
-	"world": "supermarket",
-	"unlock_level": 1
-  },
-  "strawberryjuice": {
-	"id": "strawberryjuice",
-	"sprite": "strawberryjuice.png",
-	"world": "supermarket",
-	"unlock_level": 1
-  },
-  "strawberryyogurt": {
-	"id": "strawberryyogurt",
-	"sprite": "strawberryyogurt.png",
-	"world": "supermarket",
-	"unlock_level": 1
-  },
-  "suitcaseyellow": {
-	"id": "suitcaseyellow",
-	"sprite": "suitcaseyellow.png",
-	"world": "island",
-	"unlock_level": 1
-  },
-  "sunscreenspf50": {
-	"id": "sunscreenspf50",
-	"sprite": "sunscreenspf50.png",
-	"world": "island",
-	"unlock_level": 1
-  },
-  "surfboardpalmtrees": {
-	"id": "surfboardpalmtrees",
-	"sprite": "surfboardpalmtrees.png",
-	"world": "island",
-	"unlock_level": 1
-  },
-  "swimmask": {
-	"id": "swimmask",
-	"sprite": "swimmask.png",
-	"world": "island",
-	"unlock_level": 1
-  },
-  "sunhat": {
-	"id": "sunhat",
-	"sprite": "sunhat.png",
-	"world": "island",
-	"unlock_level": 1
-  },
-  "togocoffeeblue": {
-	"id": "togocoffeeblue",
-	"sprite": "togocoffeeblue.png",
-	"world": "supermarket",
-	"unlock_level": 1
-  },
-  "togocoffeebrown": {
-	"id": "togocoffeebrown",
-	"sprite": "togocoffeebrown.png",
-	"world": "supermarket",
-	"unlock_level": 1
-  },
-  "togocoffeegreen": {
-	"id": "togocoffeegreen",
-	"sprite": "togocoffeegreen.png",
-	"world": "supermarket",
-	"unlock_level": 1
-  },
-  "vanillaicecreamcone": {
-	"id": "vanillaicecreamcone",
-	"sprite": "vanillaicecreamcone.png",
-	"world": "island",
-	"unlock_level": 1
-  },
-  "waterbottle": {
-	"id": "waterbottle",
-	"sprite": "waterbottle.png",
-	"world": "supermarket",
-	"unlock_level": 1
-  },
-  "whiteflower": {
-	"id": "whiteflower",
-	"sprite": "whiteflower.png",
-	"world": "supermarket",
-	"unlock_level": 1
-  }
+  "items": [
+    {"id": "beachball_mixed", "sprite": "beachball_mixed.png", "world": "island", "unlock_level": 1},
+    {"id": "beachball_redblue", "sprite": "beachball_redblue.png", "world": "island", "unlock_level": 1},
+    {"id": "beachball_yellowblue", "sprite": "beachball_yellowblue.png", "world": "island", "unlock_level": 1},
+    {"id": "sandpale_green", "sprite": "sandpale_green.png", "world": "island", "unlock_level": 1},
+    {"id": "sandpale_blue", "sprite": "sandpale_blue.png", "world": "island", "unlock_level": 1},
+    {"id": "sandpale_red", "sprite": "sandpale_red.png", "world": "island", "unlock_level": 1},
+    {"id": "coconut", "sprite": "coconut.png", "world": "island", "unlock_level": 1},
+    {"id": "greencoconut", "sprite": "greencoconut.png", "world": "island", "unlock_level": 1},
+    {"id": "pineapple", "sprite": "pineapple.png", "world": "island", "unlock_level": 1},
+    {"id": "sunscreen", "sprite": "sunscreen.png", "world": "island", "unlock_level": 1},
+    {"id": "margarita", "sprite": "margarita.png", "world": "island", "unlock_level": 1},
+    {"id": "maitai", "sprite": "maitai.png", "world": "island", "unlock_level": 1},
+    {"id": "strawberrydaiquiri", "sprite": "strawberrydaiquiri.png", "world": "island", "unlock_level": 1},
+    {"id": "lemonade", "sprite": "lemonade.png", "world": "island", "unlock_level": 1},
+    {"id": "orangedrink", "sprite": "orangedrink.png", "world": "island", "unlock_level": 1},
+    {"id": "watermelondrink", "sprite": "watermelondrink.png", "world": "island", "unlock_level": 1},
+    {"id": "icecreamcone", "sprite": "icecreamcone.png", "world": "island", "unlock_level": 1},
+    {"id": "vanillaicecreamcone", "sprite": "vanillaicecreamcone.png", "world": "island", "unlock_level": 1},
+    {"id": "sparkleicecreamcone", "sprite": "sparkleicecreamcone.png", "world": "island", "unlock_level": 1},
+    {"id": "piratepopsicle", "sprite": "piratepopsicle.png", "world": "island", "unlock_level": 1},
+    {"id": "sandals", "sprite": "sandals.png", "world": "island", "unlock_level": 1},
+    {"id": "surfboardblueyellow", "sprite": "surfboardblueyellow.png", "world": "island", "unlock_level": 1},
+    {"id": "surfboardbluepink", "sprite": "surfboardbluepink.png", "world": "island", "unlock_level": 1},
+    {"id": "surfboardpalmtrees", "sprite": "surfboardpalmtrees.png", "world": "island", "unlock_level": 1},
+    {"id": "pinkpolkadotbikini", "sprite": "pinkpolkadotbikini.png", "world": "island", "unlock_level": 1},
+    {"id": "bluesunglasses", "sprite": "bluesunglasses.png", "world": "island", "unlock_level": 1},
+    {"id": "scubatanks", "sprite": "scubatanks.png", "world": "island", "unlock_level": 1},
+    {"id": "swimmask", "sprite": "swimmask.png", "world": "island", "unlock_level": 1},
+    {"id": "sunscreenspf50", "sprite": "sunscreenspf50.png", "world": "island", "unlock_level": 1},
+    {"id": "icecreamparfait", "sprite": "icecreamparfait.png", "world": "island", "unlock_level": 1},
+    {"id": "surfboardbluewhitestripes", "sprite": "surfboardbluewhitestripes.png", "world": "island", "unlock_level": 1},
+    {"id": "surfboardredorange", "sprite": "surfboardredorange.png", "world": "island", "unlock_level": 1},
+    {"id": "surfboardbluewhitepeace", "sprite": "surfboardbluewhitepeace.png", "world": "island", "unlock_level": 1},
+    {"id": "icecreamconechocolate", "sprite": "icecreamconechocolate.png", "world": "island", "unlock_level": 1},
+    {"id": "popsiclemintchocolate", "sprite": "popsiclemintchocolate.png", "world": "island", "unlock_level": 1},
+    {"id": "flipflops", "sprite": "flipflops.png", "world": "island", "unlock_level": 1},
+    {"id": "oysterblue", "sprite": "oysterblue.png", "world": "island", "unlock_level": 1},
+    {"id": "camera", "sprite": "camera.png", "world": "island", "unlock_level": 1},
+    {"id": "sunhat", "sprite": "sunhat.png", "world": "island", "unlock_level": 1},
+    {"id": "sunglassespurple", "sprite": "sunglassespurple.png", "world": "island", "unlock_level": 1},
+    {"id": "sunglassesorange", "sprite": "sunglassesorange.png", "world": "island", "unlock_level": 1},
+    {"id": "hibiscusflower", "sprite": "hibiscusflower.png", "world": "island", "unlock_level": 1},
+    {"id": "watermelonslice", "sprite": "watermelonslice.png", "world": "island", "unlock_level": 1},
+    {"id": "messageinabottle", "sprite": "messageinabottle.png", "world": "island", "unlock_level": 1},
+    {"id": "suitcaseyellow", "sprite": "suitcaseyellow.png", "world": "island", "unlock_level": 1},
+    {"id": "lifepreserver", "sprite": "lifepreserver.png", "world": "island", "unlock_level": 1},
+    {"id": "flipflopsgreen", "sprite": "flipflopsgreen.png", "world": "island", "unlock_level": 1},
+    {"id": "beachbag", "sprite": "beachbag.png", "world": "island", "unlock_level": 1},
+    {"id": "vanilladrink", "sprite": "vanilladrink.png", "world": "island", "unlock_level": 1},
+    {"id": "lemonadepitcher", "sprite": "lemonadepitcher.png", "world": "island", "unlock_level": 1},
+
+    {"id": "greentomato", "sprite": "greentomato.png", "world": "farm", "unlock_level": 1},
+    {"id": "redtomato", "sprite": "redtomato.png", "world": "farm", "unlock_level": 1},
+    {"id": "potato", "sprite": "potato.png", "world": "farm", "unlock_level": 1},
+    {"id": "romaine", "sprite": "romaine.png", "world": "farm", "unlock_level": 1},
+    {"id": "whiteonion", "sprite": "whiteonion.png", "world": "farm", "unlock_level": 1},
+    {"id": "carrot", "sprite": "carrot.png", "world": "farm", "unlock_level": 1},
+    {"id": "turnip", "sprite": "turnip.png", "world": "farm", "unlock_level": 1},
+    {"id": "beet", "sprite": "beet.png", "world": "farm", "unlock_level": 1},
+    {"id": "broccoli", "sprite": "broccoli.png", "world": "farm", "unlock_level": 1},
+    {"id": "whiteradish", "sprite": "whiteradish.png", "world": "farm", "unlock_level": 1},
+    {"id": "radish", "sprite": "radish.png", "world": "farm", "unlock_level": 1},
+    {"id": "pumpkin", "sprite": "pumpkin.png", "world": "farm", "unlock_level": 1},
+    {"id": "garlic", "sprite": "garlic.png", "world": "farm", "unlock_level": 1},
+    {"id": "eggplant", "sprite": "eggplant.png", "world": "farm", "unlock_level": 1},
+    {"id": "redpepper", "sprite": "redpepper.png", "world": "farm", "unlock_level": 1},
+    {"id": "lettuce", "sprite": "lettuce.png", "world": "farm", "unlock_level": 1},
+    {"id": "redapple", "sprite": "redapple.png", "world": "farm", "unlock_level": 1},
+    {"id": "greenapple", "sprite": "greenapple.png", "world": "farm", "unlock_level": 1},
+    {"id": "pear", "sprite": "pear.png", "world": "farm", "unlock_level": 1},
+    {"id": "chickinegg", "sprite": "chickinegg.png", "world": "farm", "unlock_level": 1},
+    {"id": "bellpepperyellow", "sprite": "bellpepperyellow.png", "world": "farm", "unlock_level": 1},
+    {"id": "bellpepperred", "sprite": "bellpepperred.png", "world": "farm", "unlock_level": 1},
+    {"id": "bellpeppergreen", "sprite": "bellpeppergreen.png", "world": "farm", "unlock_level": 1},
+    {"id": "haystack", "sprite": "haystack.png", "world": "farm", "unlock_level": 1},
+    {"id": "celery", "sprite": "celery.png", "world": "farm", "unlock_level": 1},
+    {"id": "peapod", "sprite": "peapod.png", "world": "farm", "unlock_level": 1},
+    {"id": "cucumber", "sprite": "cucumber.png", "world": "farm", "unlock_level": 1},
+    {"id": "lemon", "sprite": "lemon.png", "world": "farm", "unlock_level": 1},
+    {"id": "leek", "sprite": "leek.png", "world": "farm", "unlock_level": 1},
+    {"id": "rooster", "sprite": "rooster.png", "world": "farm", "unlock_level": 1},
+    {"id": "pitchfork", "sprite": "pitchfork.png", "world": "farm", "unlock_level": 1},
+    {"id": "cauliflower", "sprite": "cauliflower.png", "world": "farm", "unlock_level": 1},
+    {"id": "sheep", "sprite": "sheep.png", "world": "farm", "unlock_level": 1},
+    {"id": "strawberry", "sprite": "strawberry.png", "world": "farm", "unlock_level": 1},
+    {"id": "sunflower", "sprite": "sunflower.png", "world": "farm", "unlock_level": 1},
+    {"id": "jalapeno", "sprite": "jalapeno.png", "world": "farm", "unlock_level": 1},
+    {"id": "mushroom", "sprite": "mushroom.png", "world": "farm", "unlock_level": 1},
+    {"id": "ginger", "sprite": "ginger.png", "world": "farm", "unlock_level": 1},
+    {"id": "mandarin", "sprite": "mandarin.png", "world": "farm", "unlock_level": 1},
+    {"id": "celery2", "sprite": "celery2.png", "world": "farm", "unlock_level": 1},
+    {"id": "lime", "sprite": "lime.png", "world": "farm", "unlock_level": 1},
+    {"id": "avocado", "sprite": "avocado.png", "world": "farm", "unlock_level": 1},
+    {"id": "raspberry", "sprite": "raspberry.png", "world": "farm", "unlock_level": 1},
+    {"id": "tallpumpkin", "sprite": "tallpumpkin.png", "world": "farm", "unlock_level": 1},
+    {"id": "persimmon", "sprite": "persimmon.png", "world": "farm", "unlock_level": 1},
+
+    {"id": "chips", "sprite": "chips.png", "world": "supermarket", "unlock_level": 1},
+    {"id": "honey", "sprite": "honey.png", "world": "supermarket", "unlock_level": 1},
+    {"id": "eggs", "sprite": "eggs.png", "world": "supermarket", "unlock_level": 1},
+    {"id": "ketchup", "sprite": "ketchup.png", "world": "supermarket", "unlock_level": 1},
+    {"id": "mustard", "sprite": "mustard.png", "world": "supermarket", "unlock_level": 1},
+    {"id": "milk", "sprite": "milk.png", "world": "supermarket", "unlock_level": 1},
+    {"id": "soda", "sprite": "soda.png", "world": "supermarket", "unlock_level": 1},
+    {"id": "orangejuice", "sprite": "orangejuice.png", "world": "supermarket", "unlock_level": 1},
+    {"id": "grapesoda", "sprite": "grapesoda.png", "world": "supermarket", "unlock_level": 1},
+    {"id": "chocolatebar", "sprite": "chocolatebar.png", "world": "supermarket", "unlock_level": 1},
+    {"id": "pickles", "sprite": "pickles.png", "world": "supermarket", "unlock_level": 1},
+    {"id": "peanutbutter", "sprite": "peanutbutter.png", "world": "supermarket", "unlock_level": 1},
+    {"id": "mayo", "sprite": "mayo.png", "world": "supermarket", "unlock_level": 1},
+    {"id": "popcornbucket", "sprite": "popcornbucket.png", "world": "supermarket", "unlock_level": 1},
+    {"id": "cider", "sprite": "cider.png", "world": "supermarket", "unlock_level": 1},
+    {"id": "coffeebeans", "sprite": "coffeebeans.png", "world": "supermarket", "unlock_level": 1},
+
+    {"id": "ale_cup_1", "sprite": "ale_cup_1.png", "world": "tavern", "unlock_level": 1},
+    {"id": "ale_cup_2", "sprite": "ale_cup_2.png", "world": "tavern", "unlock_level": 1},
+    {"id": "ale_cup_3", "sprite": "ale_cup_3.png", "world": "tavern", "unlock_level": 1},
+    {"id": "ale_cup_4", "sprite": "ale_cup_4.png", "world": "tavern", "unlock_level": 1},
+    {"id": "ale_cup_5", "sprite": "ale_cup_5.png", "world": "tavern", "unlock_level": 1},
+    {"id": "ale_cup_6", "sprite": "ale_cup_6.png", "world": "tavern", "unlock_level": 1},
+    {"id": "ale_cup_7", "sprite": "ale_cup_7.png", "world": "tavern", "unlock_level": 1},
+    {"id": "anvil", "sprite": "anvil.png", "world": "tavern", "unlock_level": 1},
+    {"id": "axe", "sprite": "axe.png", "world": "tavern", "unlock_level": 1},
+    {"id": "barrel", "sprite": "barrel.png", "world": "tavern", "unlock_level": 1},
+    {"id": "blue_potion", "sprite": "blue_potion.png", "world": "tavern", "unlock_level": 1},
+    {"id": "bow", "sprite": "bow.png", "world": "tavern", "unlock_level": 1},
+    {"id": "candle", "sprite": "candle.png", "world": "tavern", "unlock_level": 1},
+    {"id": "cepter", "sprite": "cepter.png", "world": "tavern", "unlock_level": 1},
+    {"id": "cheese", "sprite": "cheese.png", "world": "tavern", "unlock_level": 1},
+    {"id": "coin_purse", "sprite": "coin_purse.png", "world": "tavern", "unlock_level": 1},
+    {"id": "crown", "sprite": "crown.png", "world": "tavern", "unlock_level": 1},
+    {"id": "flute", "sprite": "flute.png", "world": "tavern", "unlock_level": 1},
+    {"id": "green_potion", "sprite": "green_potion.png", "world": "tavern", "unlock_level": 1},
+    {"id": "ham", "sprite": "ham.png", "world": "tavern", "unlock_level": 1},
+    {"id": "harp", "sprite": "harp.png", "world": "tavern", "unlock_level": 1},
+    {"id": "helmet_2", "sprite": "helmet_2.png", "world": "tavern", "unlock_level": 1},
+    {"id": "helmet", "sprite": "helmet.png", "world": "tavern", "unlock_level": 1},
+    {"id": "horn", "sprite": "horn.png", "world": "tavern", "unlock_level": 1},
+    {"id": "ink", "sprite": "ink.png", "world": "tavern", "unlock_level": 1},
+    {"id": "key", "sprite": "key.png", "world": "tavern", "unlock_level": 1},
+    {"id": "lamp", "sprite": "lamp.png", "world": "tavern", "unlock_level": 1},
+    {"id": "lute", "sprite": "lute.png", "world": "tavern", "unlock_level": 1},
+    {"id": "mace_2", "sprite": "mace_2.png", "world": "tavern", "unlock_level": 1},
+    {"id": "mace", "sprite": "mace.png", "world": "tavern", "unlock_level": 1},
+    {"id": "pies", "sprite": "pies.png", "world": "tavern", "unlock_level": 1},
+    {"id": "pink_potion", "sprite": "pink_potion.png", "world": "tavern", "unlock_level": 1},
+    {"id": "purple_potion", "sprite": "purple_potion.png", "world": "tavern", "unlock_level": 1},
+    {"id": "quivel", "sprite": "quivel.png", "world": "tavern", "unlock_level": 1},
+    {"id": "sausage", "sprite": "sausage.png", "world": "tavern", "unlock_level": 1},
+    {"id": "scroll_earth", "sprite": "scroll_earth.png", "world": "tavern", "unlock_level": 1},
+    {"id": "scroll_fire", "sprite": "scroll_fire.png", "world": "tavern", "unlock_level": 1},
+    {"id": "scroll_water", "sprite": "scroll_water.png", "world": "tavern", "unlock_level": 1},
+    {"id": "scroll_wind", "sprite": "scroll_wind.png", "world": "tavern", "unlock_level": 1},
+    {"id": "shield_1", "sprite": "shield_1.png", "world": "tavern", "unlock_level": 1},
+    {"id": "shield_2", "sprite": "shield_2.png", "world": "tavern", "unlock_level": 1},
+    {"id": "shield_3", "sprite": "shield_3.png", "world": "tavern", "unlock_level": 1},
+    {"id": "shield_4", "sprite": "shield_4.png", "world": "tavern", "unlock_level": 1},
+    {"id": "soup_calderon", "sprite": "soup_calderon.png", "world": "tavern", "unlock_level": 1},
+    {"id": "sword", "sprite": "sword.png", "world": "tavern", "unlock_level": 1},
+    {"id": "torch", "sprite": "torch.png", "world": "tavern", "unlock_level": 1},
+    {"id": "trumpet", "sprite": "trumpet.png", "world": "tavern", "unlock_level": 1},
+    {"id": "wine_jar", "sprite": "wine_jar.png", "world": "tavern", "unlock_level": 1},
+    {"id": "yellow_potion", "sprite": "yellow_potion.png", "world": "tavern", "unlock_level": 1},
+
+    {"id": "alien_2", "sprite": "alien_2.png", "world": "space", "unlock_level": 1},
+    {"id": "alien_ship_toy", "sprite": "alien_ship_toy.png", "world": "space", "unlock_level": 1},
+    {"id": "alien", "sprite": "alien.png", "world": "space", "unlock_level": 1},
+    {"id": "asteroid", "sprite": "asteroid.png", "world": "space", "unlock_level": 1},
+    {"id": "astronaut", "sprite": "astronaut.png", "world": "space", "unlock_level": 1},
+    {"id": "big_antenna", "sprite": "big_antenna.png", "world": "space", "unlock_level": 1},
+    {"id": "black_hole", "sprite": "black_hole.png", "world": "space", "unlock_level": 1},
+    {"id": "blue_rocket", "sprite": "blue_rocket.png", "world": "space", "unlock_level": 1},
+    {"id": "comet", "sprite": "comet.png", "world": "space", "unlock_level": 1},
+    {"id": "drone", "sprite": "drone.png", "world": "space", "unlock_level": 1},
+    {"id": "earth", "sprite": "earth.png", "world": "space", "unlock_level": 1},
+    {"id": "hologram", "sprite": "hologram.png", "world": "space", "unlock_level": 1},
+    {"id": "jetpack", "sprite": "jetpack.png", "world": "space", "unlock_level": 1},
+    {"id": "jupiter", "sprite": "jupiter.png", "world": "space", "unlock_level": 1},
+    {"id": "land_drone", "sprite": "land_drone.png", "world": "space", "unlock_level": 1},
+    {"id": "laser_gun_1", "sprite": "laser_gun_1.png", "world": "space", "unlock_level": 1},
+    {"id": "laser_gun_2", "sprite": "laser_gun_2.png", "world": "space", "unlock_level": 1},
+    {"id": "laser_gun_3", "sprite": "laser_gun_3.png", "world": "space", "unlock_level": 1},
+    {"id": "laser_gun_4", "sprite": "laser_gun_4.png", "world": "space", "unlock_level": 1},
+    {"id": "leika_toy", "sprite": "leika_toy.png", "world": "space", "unlock_level": 1},
+    {"id": "mars", "sprite": "mars.png", "world": "space", "unlock_level": 1},
+    {"id": "mercury", "sprite": "mercury.png", "world": "space", "unlock_level": 1},
+    {"id": "meteor", "sprite": "meteor.png", "world": "space", "unlock_level": 1},
+    {"id": "module", "sprite": "module.png", "world": "space", "unlock_level": 1},
+    {"id": "moon", "sprite": "moon.png", "world": "space", "unlock_level": 1},
+    {"id": "neptune", "sprite": "neptune.png", "world": "space", "unlock_level": 1},
+    {"id": "pluto", "sprite": "pluto.png", "world": "space", "unlock_level": 1},
+    {"id": "radar_monitor", "sprite": "radar_monitor.png", "world": "space", "unlock_level": 1},
+    {"id": "robot_1", "sprite": "robot_1.png", "world": "space", "unlock_level": 1},
+    {"id": "robot_2", "sprite": "robot_2.png", "world": "space", "unlock_level": 1},
+    {"id": "rocket_yellow", "sprite": "rocket_yellow.png", "world": "space", "unlock_level": 1},
+    {"id": "rocket_pink", "sprite": "rocket_pink.png", "world": "space", "unlock_level": 1},
+    {"id": "rocket_red", "sprite": "rocket_red.png", "world": "space", "unlock_level": 1},
+    {"id": "rocket1", "sprite": "rocket1.png", "world": "space", "unlock_level": 1},
+    {"id": "rocket3", "sprite": "rocket3.png", "world": "space", "unlock_level": 1},
+    {"id": "rover", "sprite": "rover.png", "world": "space", "unlock_level": 1},
+    {"id": "satellite", "sprite": "satellite.png", "world": "space", "unlock_level": 1},
+    {"id": "saturn", "sprite": "saturn.png", "world": "space", "unlock_level": 1},
+    {"id": "smoothie", "sprite": "smoothie.png", "world": "space", "unlock_level": 1},
+    {"id": "solar_satellite", "sprite": "solar_satellite.png", "world": "space", "unlock_level": 1},
+    {"id": "space_helmet", "sprite": "space_helmet.png", "world": "space", "unlock_level": 1},
+    {"id": "sputnik", "sprite": "sputnik.png", "world": "space", "unlock_level": 1},
+    {"id": "star", "sprite": "star.png", "world": "space", "unlock_level": 1},
+    {"id": "sun", "sprite": "sun.png", "world": "space", "unlock_level": 1},
+    {"id": "telecope", "sprite": "telecope.png", "world": "space", "unlock_level": 1},
+    {"id": "ufo_1", "sprite": "ufo_1.png", "world": "space", "unlock_level": 1},
+    {"id": "ufo_2", "sprite": "ufo_2.png", "world": "space", "unlock_level": 1},
+    {"id": "uranus", "sprite": "uranus.png", "world": "space", "unlock_level": 1},
+    {"id": "venus", "sprite": "venus.png", "world": "space", "unlock_level": 1},
+    {"id": "water", "sprite": "water.png", "world": "space", "unlock_level": 1}
+  ]
 }

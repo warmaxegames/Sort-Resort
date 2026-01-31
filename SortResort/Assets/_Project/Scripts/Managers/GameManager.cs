@@ -51,11 +51,22 @@ namespace SortResort
         private void OnEnable()
         {
             SceneManager.sceneLoaded += OnSceneLoaded;
+            GameEvents.OnLevelStarted += OnLevelStarted;
         }
 
         private void OnDisable()
         {
             SceneManager.sceneLoaded -= OnSceneLoaded;
+            GameEvents.OnLevelStarted -= OnLevelStarted;
+        }
+
+        private void OnLevelStarted(int levelNumber)
+        {
+            // Reset counters when any level starts (ensures HUD displays correctly)
+            currentLevelNumber = levelNumber;
+            currentMoveCount = 0;
+            currentMatchCount = 0;
+            Debug.Log($"[GameManager] Level started: {currentWorldId} #{levelNumber}, counters reset");
         }
 
         private void OnSceneLoaded(Scene scene, LoadSceneMode mode)

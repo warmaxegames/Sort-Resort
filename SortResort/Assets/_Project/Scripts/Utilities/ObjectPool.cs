@@ -42,20 +42,31 @@ namespace SortResort
 
         public T Get()
         {
-            T instance;
+            T instance = null;
 
-            if (available.Count > 0)
+            // Try to get a valid instance from available pool
+            while (available.Count > 0 && instance == null)
             {
-                instance = available.Dequeue();
+                var candidate = available.Dequeue();
+                // Check if the object was destroyed
+                if (candidate != null && candidate.gameObject != null)
+                {
+                    instance = candidate;
+                }
             }
-            else if (TotalCount < maxSize)
+
+            // If no valid instance found, create new one if under max
+            if (instance == null)
             {
-                instance = CreateInstance();
-            }
-            else
-            {
-                Debug.LogWarning($"[ObjectPool] Pool exhausted for {typeof(T).Name}");
-                return null;
+                if (TotalCount < maxSize)
+                {
+                    instance = CreateInstance();
+                }
+                else
+                {
+                    Debug.LogWarning($"[ObjectPool] Pool exhausted for {typeof(T).Name}");
+                    return null;
+                }
             }
 
             instance.gameObject.SetActive(true);
