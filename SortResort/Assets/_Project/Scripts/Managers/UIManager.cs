@@ -96,7 +96,6 @@ namespace SortResort
         private GameObject settingsPanel;
         private SettingsScreen settingsScreen;
         private GameObject pauseMenuPanel;
-        private PauseMenuScreen pauseMenuScreen;
         private TextMeshProUGUI levelTitleText;
         private TextMeshProUGUI moveCountText;
         private TextMeshProUGUI matchCountText;
