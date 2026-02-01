@@ -22,7 +22,7 @@
 
 ## Current Status
 
-**Last Updated:** 2026-01-30 (Session 6)
+**Last Updated:** 2026-01-31 (Session 9)
 
 ### Godot Version (Complete)
 - 6 levels complete (Resort 001-006)
@@ -58,6 +58,9 @@
 - Music continues across levels in same world
 - Save progress persisted across sessions
 - Back button in HUD to exit to level select
+- Undo move system with history tracking
+- **Timer system** - Optional countdown timer per level (can be disabled in settings)
+- **Achievement system** - 88 achievements (23 global + 13 per world) with progress tracking, notifications, UI page with tabs/groups, and rewards
 
 ---
 
@@ -80,7 +83,8 @@
 5. **Match Animation** - Use 18-frame explosion sprites
 6. **Scene Transitions** - Fade between screens
 7. **Dialogue System** - Tutorial and story dialogues
-8. **Undo System** - Allow undoing last move
+8. ~~**Undo System** - Allow undoing last move~~ DONE
+9. ~~**Timer System** - Countdown timer per level~~ DONE
 9. **Create Levels 7-100** - Complete level content for all worlds
 10. **Profile Customization** - Player profiles with customizable mascot/avatar:
     - Choose mascot character
@@ -114,11 +118,12 @@
 - [x] **3.1** MainMenuScreen / SplashScreen
 - [x] **3.2** WorldSelectionScreen - integrated in LevelSelectScreen
 - [x] **3.3** LevelSelectionScreen with 100-level grid
-- [x] **3.4** GameHUDScreen (move counter, stars, back button)
-- [ ] **3.5** PauseMenuScreen
+- [x] **3.4** GameHUDScreen (move counter, stars, back button, undo, timer)
+- [x] **3.5** PauseMenuScreen (Resume, Restart, Settings, Quit)
 - [x] **3.6** LevelCompleteScreen with buttons (Levels, Replay, Next)
-- [ ] **3.7** LevelFailedScreen
-- [ ] **3.8** SettingsScreen with volume sliders
+- [x] **3.7** LevelFailedScreen with buttons (Levels, Retry)
+- [x] **3.8** SettingsScreen with volume sliders & timer toggle
+- [x] **3.9** AchievementsScreen with tabs, groups, progress bars
 
 ### Phase 4: Audio System - COMPLETE ✅
 - [x] AudioManager with music playback and crossfading
@@ -137,7 +142,8 @@
 - [x] Settings persistence (audio volumes)
 
 ### Phase 6: Visual Polish - PARTIAL
-- [ ] **6.1** Match animation (18-frame explosion)
+- [x] **6.1** Match animation (15-frame pink glow effect)
+- [x] **6.1** Match animation (15-frame pink glow effect)
 - [x] **6.2** Container unlock animation (scale + fade)
 - [x] **6.3** Row depth visualization (grayed back rows, vertical offset)
 - [x] **6.4** Tween animations (item scale, highlight)
@@ -192,6 +198,14 @@ float unityY = (600f - godotPos.y) / 100f;  // Flip Y, portrait center
 ### Layer Configuration
 - Layer 6: "Items" - for item raycasting
 - Layer 7: "Slots" - for slot raycasting
+
+### Timer System
+- Levels can optionally have `time_limit_seconds` in their JSON (0 or omitted = no timer)
+- Timer can be disabled globally in settings via `SaveManager.IsTimerEnabled()`
+- Timer automatically pauses when game is paused (via Time.timeScale)
+- Timer expiration triggers `LevelManager.OnTimerExpired()` → `GameManager.FailLevel()`
+- Power-ups available: `LevelManager.FreezeTimer(duration)`, `LevelManager.AddTime(seconds)`
+- UI displays M:SS format, flashes red under 10s, cyan when frozen
 
 ### Asset Locations (Unity)
 - Item Sprites: `Resources/Sprites/Items/{World}/`
@@ -492,6 +506,167 @@ Levels 1-5 are identical in structure across all worlds, with item swaps:
 
 ---
 
+### 2026-01-31 (Session 7) - Undo System & Timer Feature
+
+**Undo Move System (Previous Session):**
+- Added `MoveRecord` struct tracking item, containers, slots, rows
+- Added `Stack<MoveRecord>` move history in LevelManager
+- `RecordMove()` called after successful drops (only if no match)
+- `UndoLastMove()` restores item to previous position
+- `ClearMoveHistory()` called on match and level restart
+- Undo button in HUD with proper enable/disable states (greyed out when unavailable)
+
+**Timer System:**
+- Added `time_limit_seconds` field to LevelData (optional per-level timer)
+- Added `timerEnabled` setting to SaveManager (can disable timer for relaxed gameplay)
+- Added timer events to GameEvents: `OnTimerUpdated`, `OnTimerExpired`, `OnTimerFrozen`
+- LevelManager handles timer logic:
+  - Countdown during gameplay
+  - Automatic pause when game is paused (via Time.timeScale)
+  - Timer expiration triggers level failure
+  - `FreezeTimer(duration)` for timer freeze power-up
+  - `AddTime(seconds)` for time bonus power-up
+- UIManager displays timer in HUD:
+  - Shows/hides based on level having time limit and setting enabled
+  - Formats as M:SS
+  - Flashes red when under 10 seconds remaining
+  - Shows cyan when timer is frozen
+
+**Files Modified:**
+- `LevelData.cs` - Added `time_limit_seconds` field and `HasTimeLimit` property
+- `SaveManager.cs` - Added `timerEnabled` setting with getter/setter
+- `GameEvents.cs` - Added timer events
+- `LevelManager.cs` - Added full timer system with freeze/add time support
+- `UIManager.cs` - Added timer display in HUD
+- `Island/level_001.json` - Added 15s timer for testing
+- `Island/level_002.json` - Added 30s timer (15 items × 2s)
+- `Island/level_003.json` - Added 36s timer (18 items × 2s)
+- `Island/level_004.json` - Added 36s timer (18 items × 2s)
+- `Island/level_005.json` - Added 36s timer (18 items × 2s)
+- `Island/level_006.json` - Added 28s timer (14 items × 2s)
+
+**Level Failed Screen:**
+- Created `CreateLevelFailedPanel()` - red/orange themed failure screen
+- Shows "Time's Up!" when timer expires, or "Level Failed" for other failures
+- Two buttons: "Levels" (back to level select) and "Retry" (restart with fade)
+- Subscribes to `OnLevelFailed` and `OnTimerExpired` events
+- HUD hides when failed screen appears
+
+**Timer Toggle in Settings:**
+- Added "Level Timer" toggle in Settings screen (Google-style switch)
+- Toggle position below Vibration toggle
+- Saves setting via `SaveManager.SetTimerEnabled()`
+- LevelManager checks `SaveManager.IsTimerEnabled()` when loading levels
+- Allows players to disable timer for relaxed gameplay
+- Changing timer during a level prompts confirmation and restarts the level
+
+**Match Effect Animation:**
+- Created `MatchEffect.cs` - frame-by-frame sprite animation component
+- 15-frame pink glowing ring effect plays at center of matched items
+- Sprites cached statically for performance
+- Spawned via `MatchEffect.SpawnAtCenter()` in `ItemContainer.ProcessMatch()`
+- Self-destructs when animation completes
+- Assets in `Resources/Sprites/Effects/`
+
+**Achievement System Design (Previous Session):**
+- Brainstormed ~175 achievements across 8 categories
+- Designed trophy room with 3D shelves
+- Planned functional rewards: +1 undo, skip level, unlock key, freeze conveyors, timer freeze
+- Timer-related achievements only available when timer is enabled
+- Premium currency from achievements and optional cash shop
+
+---
+
+### 2026-01-31 (Session 8) - Achievement System Implementation
+
+**Achievement System Core:**
+- Created `Achievement.cs` with data structures:
+  - `AchievementCategory` enum (Progression, Mastery, Speed, Efficiency, Exploration, Challenge, Collection, Milestone)
+  - `AchievementTier` enum (Bronze, Silver, Gold, Platinum)
+  - `RewardType` enum (Coins, UndoToken, SkipToken, UnlockKey, FreezeToken, TimerFreeze, Cosmetic, Trophy)
+  - `AchievementReward`, `Achievement`, `AchievementProgress` classes
+
+- Created `AchievementManager.cs` singleton:
+  - ~35 achievements defined across 8 categories
+  - Event subscriptions for automatic progress tracking (OnMatchMade, OnLevelCompleted, etc.)
+  - Progress tracking with IncrementProgress(), SetProgress(), ResetProgress()
+  - Reward granting system (coins, tokens, trophies)
+  - Save/Load to PlayerPrefs (separate from main save data)
+  - Resource management (coins, undoTokens, skipTokens, etc.)
+  - Win streak tracking (resets on failure)
+  - Comeback achievement tracking (win after 3 failures)
+  - World visit tracking for exploration achievements
+
+**Achievement Notification UI:**
+- Added `CreateAchievementNotificationPanel()` to UIManager
+- Slide-in banner from top of screen
+- Shows: "Achievement Unlocked!", achievement name, description, rewards
+- Tier-based background colors (Bronze/Silver/Gold/Platinum)
+- Trophy icon placeholder
+- Queue system for multiple achievements
+- Smooth animation using coroutines (0.4s slide in, 3.5s display, 0.3s slide out)
+- Uses Time.unscaledDeltaTime for pause-independent animations
+
+**Files Created:**
+- `Scripts/Achievements/Achievement.cs` - Data structures
+- `Scripts/Achievements/AchievementManager.cs` - Manager singleton
+
+**Files Modified:**
+- `GameSceneSetup.cs` - Added AchievementManager creation
+- `UIManager.cs` - Added achievement notification panel and handlers
+
+**Achievement Categories Implemented:**
+| Category | Count | Examples |
+|----------|-------|----------|
+| Progression | 12 | First Match, Complete 10/25/50/100 levels, World completions |
+| Mastery | 5 | First 3-star, 50/150/300 total stars, Perfectionist |
+| Speed | 4 | Lightning Fast (10s remaining), Close Call (<3s), Speed Demon |
+| Efficiency | 3 | No Wasted Moves, Efficient Sorter, Pure Skill (no undo) |
+| Milestone | 6 | 100/500/1000 matches, 1000 moves, 1hr/10hr playtime |
+| Exploration | 2 | World Traveler, New Horizons |
+| Challenge | 3 | Comeback King, On a Roll (5 streak), Unstoppable (10 streak) |
+
+---
+
+### 2026-01-31 (Session 9) - Achievement UI Page & Extensibility
+
+**Achievement UI Page:**
+- Created full achievements screen accessible from level select
+- Left sidebar with category tabs (All, General, Island, Supermarket, Farm, Tavern, Space)
+- Dynamic tab population from `AchievementManager.AvailableTabs`
+- String-based tab system for extensibility (replaced enum)
+- Header showing total points earned and unlock count
+
+**Grouped Achievements:**
+- Related achievements grouped together (e.g., "Complete 1, 5, 10, 25, 50, 100 levels")
+- Collapsible groups with expand/collapse arrows
+- Multi-tier progress bar with milestone markers
+- Milestone markers show tier color and checkmark when complete
+- Date labels above completed milestones (YYYY-MM-DD format)
+- Group headers show total points earned/available
+
+**Extensible World System:**
+- Added `RegisteredWorlds` array in AchievementManager
+- `CreateWorldAchievements(worldId)` generates 13 achievements per world:
+  - 6 level completion milestones (1, 5, 10, 25, 50, 100)
+  - 6 star collection milestones (10, 25, 50, 100, 150, 300)
+  - 1 "Perfect Start" achievement (first 3-star)
+- Adding a new world ID automatically generates all achievements
+- Total: 88 achievements (23 global + 5 worlds × 13 per world)
+
+**Bug Fixes:**
+- Fixed ungrouped achievements overlapping with expanded groups
+- Added explicit `RectTransform.sizeDelta` for group containers
+- VerticalLayoutGroup now properly positions all elements
+
+**Files Modified:**
+- `Achievement.cs` - String-based tabs, grouping fields, points system
+- `AchievementManager.cs` - World registry, dynamic achievement generation
+- `UIManager.cs` - Achievement page, tabs, groups, progress bars, overlap fix
+- `LevelManager.cs` - Added `CurrentWorldId` and `CurrentLevelNumber` properties
+
+---
+
 ## Known Issues
 None currently - all identified bugs have been fixed.
 
@@ -505,9 +680,16 @@ None currently - all identified bugs have been fixed.
 5. [x] Fix items.json format for proper parsing
 6. [x] Update world map to match Godot version
 7. [x] Polish level select screen (rounded corners, star alignment, text positioning)
-8. [ ] **Animated Level Complete Screen** - Awaiting modular assets from source files
-9. [ ] Test on mobile device (touch input)
-10. [ ] Create Pause Menu Screen
-11. [ ] Create Settings Screen with volume controls
-12. [ ] Add match explosion animation
-13. [ ] Implement dialogue/mascot system
+8. [x] Implement undo move system
+9. [x] Implement timer system (countdown per level, can disable in settings)
+10. [x] **Achievement System Core** - Manager, data structures, progress tracking, notification UI
+11. [x] **Achievement System UI** - Achievement page with tabs, groups, progress bars, milestone dates
+12. [ ] **Trophy Room** - 3D shelf display for earned trophies
+13. [ ] **Animated Level Complete Screen** - Awaiting modular assets from source files
+14. [ ] Test on mobile device (touch input)
+15. [x] Pause Menu Screen (Resume, Restart, Settings, Quit)
+16. [x] Settings Screen with volume controls + timer toggle
+17. [x] Match effect animation (15-frame pink glow)
+18. [ ] Implement dialogue/mascot system
+19. [x] Level Failed Screen (for timer expiration)
+20. [ ] Scene transitions (fade between screens)

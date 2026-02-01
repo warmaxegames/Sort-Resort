@@ -3,6 +3,7 @@
 	"world_id": "island",
 	"name": "level_006",
 	"star_move_thresholds": [8, 12, 15],
+	"time_limit_seconds": 28,
 	"containers": [
 		{
 			"id": "static_helper",

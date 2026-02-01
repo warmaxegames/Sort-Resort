@@ -45,6 +45,11 @@ namespace SortResort
         public static event Action<GameObject> OnItemDropped;
         public static event Action<GameObject> OnItemReturnedToOrigin;
 
+        // Timer Events
+        public static event Action<float> OnTimerUpdated; // timeRemaining
+        public static event Action OnTimerExpired;
+        public static event Action<bool> OnTimerFrozen; // isFrozen (for timer freeze power-up)
+
         // Invoke Methods - Game State
         public static void InvokeGameStateChanged(GameState newState) => OnGameStateChanged?.Invoke(newState);
         public static void InvokeGamePaused() => OnGamePaused?.Invoke();
@@ -85,6 +90,11 @@ namespace SortResort
         public static void InvokeItemDropped(GameObject item) => OnItemDropped?.Invoke(item);
         public static void InvokeItemReturnedToOrigin(GameObject item) => OnItemReturnedToOrigin?.Invoke(item);
 
+        // Invoke Methods - Timer
+        public static void InvokeTimerUpdated(float timeRemaining) => OnTimerUpdated?.Invoke(timeRemaining);
+        public static void InvokeTimerExpired() => OnTimerExpired?.Invoke();
+        public static void InvokeTimerFrozen(bool isFrozen) => OnTimerFrozen?.Invoke(isFrozen);
+
         // Cleanup - call when changing scenes or resetting
         public static void ClearAllListeners()
         {
@@ -114,6 +124,9 @@ namespace SortResort
             OnItemPickedUp = null;
             OnItemDropped = null;
             OnItemReturnedToOrigin = null;
+            OnTimerUpdated = null;
+            OnTimerExpired = null;
+            OnTimerFrozen = null;
         }
     }
 }

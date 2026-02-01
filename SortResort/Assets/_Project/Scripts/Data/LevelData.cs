@@ -11,12 +11,14 @@ namespace SortResort
         public string world_id;
         public string name;
         public int[] star_move_thresholds; // [3-star, 2-star, 1-star max moves]
+        public int time_limit_seconds; // 0 = no time limit (optional timer feature)
         public List<ContainerDefinition> containers;
         public List<MovingTrackDefinition> moving_tracks;
 
         public int ThreeStarThreshold => star_move_thresholds != null && star_move_thresholds.Length > 0 ? star_move_thresholds[0] : 5;
         public int TwoStarThreshold => star_move_thresholds != null && star_move_thresholds.Length > 1 ? star_move_thresholds[1] : 10;
         public int OneStarThreshold => star_move_thresholds != null && star_move_thresholds.Length > 2 ? star_move_thresholds[2] : 15;
+        public bool HasTimeLimit => time_limit_seconds > 0;
     }
 
     [Serializable]

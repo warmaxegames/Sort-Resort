@@ -119,7 +119,13 @@ namespace SortResort
             smGO.AddComponent<SaveManager>();
             Debug.Log("[GameSceneSetup] SaveManager created");
 
-            // UIManager (after AudioManager and SaveManager)
+            // AchievementManager (before UIManager for notifications)
+            var achGO = new GameObject("AchievementManager");
+            achGO.transform.SetParent(managersRoot.transform);
+            achGO.AddComponent<AchievementManager>();
+            Debug.Log("[GameSceneSetup] AchievementManager created");
+
+            // UIManager (after AudioManager, SaveManager, and AchievementManager)
             var uiGO = new GameObject("UIManager");
             uiGO.transform.SetParent(managersRoot.transform);
             var uim = uiGO.AddComponent<UIManager>();

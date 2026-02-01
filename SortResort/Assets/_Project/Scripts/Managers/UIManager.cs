@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.InputSystem.UI;
@@ -91,6 +92,8 @@ namespace SortResort
         private SplashScreen splashScreen;
         private GameObject hudPanel;
         private GameObject levelCompletePanel;
+        private GameObject levelFailedPanel;
+        private TextMeshProUGUI levelFailedReasonText;
         private GameObject levelSelectPanel;
         private LevelSelectScreen levelSelectScreen;
         private GameObject settingsPanel;
@@ -100,7 +103,42 @@ namespace SortResort
         private TextMeshProUGUI moveCountText;
         private TextMeshProUGUI matchCountText;
         private TextMeshProUGUI itemsRemainingText;
+        private TextMeshProUGUI timerText;
+        private GameObject timerContainer;
         private Image[] starImages;
+        private Button undoButton;
+        private CanvasGroup undoButtonCanvasGroup;
+
+        // Achievements screen
+        private GameObject achievementsPanel;
+        private Transform achievementsListContent;
+        private TextMeshProUGUI achievementsHeaderText;
+        private TextMeshProUGUI achievementsCountText;
+        private TextMeshProUGUI achievementsPointsText;
+        private string currentAchievementTab = Achievement.TAB_ALL;
+        private Dictionary<string, Button> achievementTabButtons = new Dictionary<string, Button>();
+        private Dictionary<string, Image> achievementTabImages = new Dictionary<string, Image>();
+        private Transform achievementTabsContainer;
+        private HashSet<string> expandedGroups = new HashSet<string>();
+
+        // Achievement notification
+        private GameObject achievementNotificationPanel;
+        private GameObject achievementDetailPanel;
+        private TextMeshProUGUI achievementNameText;
+        private TextMeshProUGUI achievementDescText;
+        private TextMeshProUGUI achievementRewardText;
+        private TextMeshProUGUI achievementDetailNameText;
+        private TextMeshProUGUI achievementDetailDescText;
+        private TextMeshProUGUI achievementDetailRewardText;
+        private TextMeshProUGUI achievementDetailTierText;
+        private Image achievementIconImage;
+        private Image achievementTierBg;
+        private Image achievementDetailTierBg;
+        private Queue<Achievement> achievementQueue = new Queue<Achievement>();
+        private bool isShowingAchievement = false;
+        private bool isShowingAchievementDetail = false;
+        private Coroutine achievementCoroutine;
+        private Achievement currentAchievement;
 
         private void Awake()
         {
@@ -121,10 +159,23 @@ namespace SortResort
             GameEvents.OnLevelRestarted += OnLevelRestarted;
             GameEvents.OnGamePaused += OnGamePausedUI;
             GameEvents.OnGameResumed += OnGameResumedUI;
+            GameEvents.OnSettingsClosed += OnSettingsClosedUI;
+            GameEvents.OnTimerUpdated += OnTimerUpdated;
+            GameEvents.OnTimerFrozen += OnTimerFrozen;
+            GameEvents.OnLevelFailed += OnLevelFailed;
+            GameEvents.OnTimerExpired += OnTimerExpiredUI;
 
             if (LevelManager.Instance != null)
             {
                 LevelManager.Instance.OnItemsRemainingChanged += OnItemsRemainingChanged;
+                LevelManager.Instance.OnUndoAvailableChanged += OnUndoAvailableChanged;
+            }
+
+            if (AchievementManager.Instance != null)
+            {
+                // Unsubscribe first to prevent duplicates
+                AchievementManager.Instance.OnAchievementUnlocked -= OnAchievementUnlocked;
+                AchievementManager.Instance.OnAchievementUnlocked += OnAchievementUnlocked;
             }
         }
 
@@ -137,10 +188,21 @@ namespace SortResort
             GameEvents.OnLevelRestarted -= OnLevelRestarted;
             GameEvents.OnGamePaused -= OnGamePausedUI;
             GameEvents.OnGameResumed -= OnGameResumedUI;
+            GameEvents.OnSettingsClosed -= OnSettingsClosedUI;
+            GameEvents.OnTimerUpdated -= OnTimerUpdated;
+            GameEvents.OnTimerFrozen -= OnTimerFrozen;
+            GameEvents.OnLevelFailed -= OnLevelFailed;
+            GameEvents.OnTimerExpired -= OnTimerExpiredUI;
 
             if (LevelManager.Instance != null)
             {
                 LevelManager.Instance.OnItemsRemainingChanged -= OnItemsRemainingChanged;
+                LevelManager.Instance.OnUndoAvailableChanged -= OnUndoAvailableChanged;
+            }
+
+            if (AchievementManager.Instance != null)
+            {
+                AchievementManager.Instance.OnAchievementUnlocked -= OnAchievementUnlocked;
             }
         }
 
@@ -156,12 +218,23 @@ namespace SortResort
             HidePauseMenu();
         }
 
+        private void OnSettingsClosedUI()
+        {
+            // Re-show pause menu if game is still paused when settings closes
+            if (GameManager.Instance != null && GameManager.Instance.CurrentState == GameState.Paused)
+            {
+                Debug.Log("[UIManager] Settings closed while paused - re-showing pause menu");
+                ShowPauseMenu();
+            }
+        }
+
         private void Start()
         {
             // Subscribe to LevelManager after it's initialized
             if (LevelManager.Instance != null)
             {
                 LevelManager.Instance.OnItemsRemainingChanged += OnItemsRemainingChanged;
+                LevelManager.Instance.OnUndoAvailableChanged += OnUndoAvailableChanged;
             }
         }
 
@@ -175,12 +248,17 @@ namespace SortResort
             CreateLevelSelectPanel();
             CreateHUDPanel();
             CreateLevelCompletePanel();
+            CreateLevelFailedPanel();
             CreateSettingsPanel();
             CreatePauseMenuPanel();
+            CreateAchievementNotificationPanel();
+            CreateAchievementsPanel();
 
             // Hide all panels initially
             if (levelCompletePanel != null)
                 levelCompletePanel.SetActive(false);
+            if (levelFailedPanel != null)
+                levelFailedPanel.SetActive(false);
             if (hudPanel != null)
                 hudPanel.SetActive(false);
             if (levelSelectPanel != null)
@@ -189,6 +267,12 @@ namespace SortResort
                 settingsPanel.SetActive(false);
             if (pauseMenuPanel != null)
                 pauseMenuPanel.SetActive(false);
+            if (achievementNotificationPanel != null)
+                achievementNotificationPanel.SetActive(false);
+            if (achievementDetailPanel != null)
+                achievementDetailPanel.SetActive(false);
+            if (achievementsPanel != null)
+                achievementsPanel.SetActive(false);
 
             // Show splash screen first
             if (splashPanel != null)
@@ -531,6 +615,70 @@ namespace SortResort
             settingsBtn.targetGraphic = settingsBtnImg;
             settingsBtn.onClick.AddListener(OnSettingsClicked);
 
+            // Reset Achievements button (for testing) - small button to left of settings
+            var resetAchBtnGO = new GameObject("ResetAchievementsButton");
+            resetAchBtnGO.transform.SetParent(topBar.transform, false);
+            var resetAchBtnRect = resetAchBtnGO.AddComponent<RectTransform>();
+            resetAchBtnRect.anchorMin = new Vector2(1, 0.5f);
+            resetAchBtnRect.anchorMax = new Vector2(1, 0.5f);
+            resetAchBtnRect.pivot = new Vector2(1, 0.5f);
+            resetAchBtnRect.anchoredPosition = new Vector2(-125, 0); // To the left of settings
+            resetAchBtnRect.sizeDelta = new Vector2(90, 50);
+
+            var resetAchBtnImg = resetAchBtnGO.AddComponent<Image>();
+            resetAchBtnImg.color = new Color(0.8f, 0.3f, 0.3f, 1f); // Red for danger/reset
+
+            var resetAchBtn = resetAchBtnGO.AddComponent<Button>();
+            resetAchBtn.targetGraphic = resetAchBtnImg;
+            resetAchBtn.onClick.AddListener(OnResetAchievementsClicked);
+
+            // Button text
+            var resetAchTextGO = new GameObject("Text");
+            resetAchTextGO.transform.SetParent(resetAchBtnGO.transform, false);
+            var resetAchTextRect = resetAchTextGO.AddComponent<RectTransform>();
+            resetAchTextRect.anchorMin = Vector2.zero;
+            resetAchTextRect.anchorMax = Vector2.one;
+            resetAchTextRect.offsetMin = new Vector2(3, 3);
+            resetAchTextRect.offsetMax = new Vector2(-3, -3);
+            var resetAchText = resetAchTextGO.AddComponent<TextMeshProUGUI>();
+            resetAchText.text = "RST\nACH";
+            resetAchText.fontSize = 16;
+            resetAchText.fontStyle = FontStyles.Bold;
+            resetAchText.alignment = TextAlignmentOptions.Center;
+            resetAchText.color = Color.white;
+
+            // Achievements/Trophy button - to the left of reset button
+            var trophyBtnGO = new GameObject("AchievementsButton");
+            trophyBtnGO.transform.SetParent(topBar.transform, false);
+            var trophyBtnRect = trophyBtnGO.AddComponent<RectTransform>();
+            trophyBtnRect.anchorMin = new Vector2(1, 0.5f);
+            trophyBtnRect.anchorMax = new Vector2(1, 0.5f);
+            trophyBtnRect.pivot = new Vector2(1, 0.5f);
+            trophyBtnRect.anchoredPosition = new Vector2(-225, 0); // To the left of reset button
+            trophyBtnRect.sizeDelta = new Vector2(90, 90);
+
+            var trophyBtnImg = trophyBtnGO.AddComponent<Image>();
+            trophyBtnImg.color = new Color(0.9f, 0.75f, 0.2f, 1f); // Gold color for trophy
+
+            var trophyBtn = trophyBtnGO.AddComponent<Button>();
+            trophyBtn.targetGraphic = trophyBtnImg;
+            trophyBtn.onClick.AddListener(OnAchievementsClicked);
+
+            // Trophy icon text (placeholder)
+            var trophyTextGO = new GameObject("Text");
+            trophyTextGO.transform.SetParent(trophyBtnGO.transform, false);
+            var trophyTextRect = trophyTextGO.AddComponent<RectTransform>();
+            trophyTextRect.anchorMin = Vector2.zero;
+            trophyTextRect.anchorMax = Vector2.one;
+            trophyTextRect.offsetMin = Vector2.zero;
+            trophyTextRect.offsetMax = Vector2.zero;
+            var trophyText = trophyTextGO.AddComponent<TextMeshProUGUI>();
+            trophyText.text = "\u2605"; // Star symbol as placeholder for trophy
+            trophyText.fontSize = 48;
+            trophyText.fontStyle = FontStyles.Bold;
+            trophyText.alignment = TextAlignmentOptions.Center;
+            trophyText.color = new Color(0.4f, 0.25f, 0f, 1f); // Dark brown
+
             // Profile overlay - LARGER, positioned to hang OVER the topbar onto the background
             // Parent to levelSelectPanel so it can extend beyond topbar
             var profileGO = new GameObject("ProfileOverlay");
@@ -820,6 +968,27 @@ namespace SortResort
             ShowSettings();
         }
 
+        private void OnResetAchievementsClicked()
+        {
+            Debug.Log("[UIManager] Reset Achievements button clicked");
+            AudioManager.Instance?.PlayButtonClick();
+
+            if (AchievementManager.Instance != null)
+            {
+                AchievementManager.Instance.ResetAllAchievements();
+                Debug.Log("[UIManager] All achievements have been reset!");
+                // Refresh achievements panel if open
+                RefreshAchievementsPanel();
+            }
+        }
+
+        private void OnAchievementsClicked()
+        {
+            Debug.Log("[UIManager] Achievements button clicked");
+            AudioManager.Instance?.PlayButtonClick();
+            ShowAchievements();
+        }
+
         private void OnLevelSelectedFromMenu(string worldId, int levelNumber)
         {
             Debug.Log($"[UIManager] Level selected: {worldId} #{levelNumber}");
@@ -896,6 +1065,9 @@ namespace SortResort
             // Items Remaining
             itemsRemainingText = CreateStatElement(statsGO.transform, "Items", "0");
 
+            // Timer (hidden by default, shown when level has time limit)
+            timerContainer = CreateTimerElement(statsGO.transform);
+
             // Star display
             CreateStarDisplay();
 
@@ -942,6 +1114,48 @@ namespace SortResort
             return valueText;
         }
 
+        private GameObject CreateTimerElement(Transform parent)
+        {
+            var container = new GameObject("Timer Stat");
+            container.transform.SetParent(parent, false);
+
+            var rect = container.AddComponent<RectTransform>();
+            rect.sizeDelta = new Vector2(150, 80);
+
+            var vlayout = container.AddComponent<VerticalLayoutGroup>();
+            vlayout.childAlignment = TextAnchor.MiddleCenter;
+            vlayout.childForceExpandHeight = false;
+            vlayout.spacing = 5;
+
+            // Label
+            var labelGO = new GameObject("Label");
+            labelGO.transform.SetParent(container.transform, false);
+            var labelText = labelGO.AddComponent<TextMeshProUGUI>();
+            labelText.text = "Time";
+            labelText.fontSize = 20;
+            labelText.alignment = TextAlignmentOptions.Center;
+            labelText.color = Color.gray;
+            var labelRect = labelGO.GetComponent<RectTransform>();
+            labelRect.sizeDelta = new Vector2(150, 25);
+
+            // Value (timer display)
+            var valueGO = new GameObject("Value");
+            valueGO.transform.SetParent(container.transform, false);
+            timerText = valueGO.AddComponent<TextMeshProUGUI>();
+            timerText.text = "0:00";
+            timerText.fontSize = 32;
+            timerText.fontStyle = FontStyles.Bold;
+            timerText.alignment = TextAlignmentOptions.Center;
+            timerText.color = Color.white;
+            var valueRect = valueGO.GetComponent<RectTransform>();
+            valueRect.sizeDelta = new Vector2(150, 40);
+
+            // Start hidden
+            container.SetActive(false);
+
+            return container;
+        }
+
         private void CreateStarDisplay()
         {
             var starsGO = new GameObject("Stars");
@@ -984,18 +1198,48 @@ namespace SortResort
             rect.anchorMax = new Vector2(1, 1);
             rect.pivot = new Vector2(1, 1);
             rect.anchoredPosition = new Vector2(-20, -20);
-            rect.sizeDelta = new Vector2(180, 50);
+            rect.sizeDelta = new Vector2(260, 50);
 
             var layout = buttonsGO.AddComponent<HorizontalLayoutGroup>();
             layout.spacing = 10;
             layout.childAlignment = TextAnchor.MiddleRight;
             layout.childForceExpandWidth = false;
 
+            // Undo button - undoes last move
+            undoButton = CreateButton(buttonsGO.transform, "Undo", "Undo", OnUndoClicked, 60, 50);
+            undoButtonCanvasGroup = undoButton.gameObject.AddComponent<CanvasGroup>();
+            // Start disabled (no moves to undo)
+            SetUndoButtonEnabled(false);
+
             // Pause button - opens pause menu
             CreateButton(buttonsGO.transform, "Pause", "II", OnPauseClicked, 50, 50);
 
             // Back button - exits level and returns to level select
             CreateButton(buttonsGO.transform, "Back", "Back", OnBackToLevelsClicked, 80, 50);
+        }
+
+        private void SetUndoButtonEnabled(bool enabled)
+        {
+            if (undoButton != null)
+            {
+                undoButton.interactable = enabled;
+            }
+            if (undoButtonCanvasGroup != null)
+            {
+                undoButtonCanvasGroup.alpha = enabled ? 1f : 0.4f;
+            }
+        }
+
+        private void OnUndoClicked()
+        {
+            Debug.Log("[UIManager] Undo button clicked");
+            AudioManager.Instance?.PlayButtonClick();
+            LevelManager.Instance?.UndoLastMove();
+        }
+
+        private void OnUndoAvailableChanged(bool available)
+        {
+            SetUndoButtonEnabled(available);
         }
 
         private void OnPauseClicked()
@@ -1088,6 +1332,75 @@ namespace SortResort
             CreateButton(buttonsContainer.transform, "Next", "Next", OnNextLevelFromCompleteClicked, 140, 60);
 
             Debug.Log("[UIManager] Level complete panel created with 3 buttons");
+        }
+
+        private void CreateLevelFailedPanel()
+        {
+            levelFailedPanel = new GameObject("Level Failed Panel");
+            levelFailedPanel.transform.SetParent(mainCanvas.transform, false);
+
+            var rect = levelFailedPanel.AddComponent<RectTransform>();
+            rect.anchorMin = Vector2.zero;
+            rect.anchorMax = Vector2.one;
+            rect.offsetMin = Vector2.zero;
+            rect.offsetMax = Vector2.zero;
+
+            // Dark overlay
+            var overlay = levelFailedPanel.AddComponent<Image>();
+            overlay.color = new Color(0, 0, 0, 0.8f);
+
+            // Content container
+            var content = new GameObject("Content");
+            content.transform.SetParent(levelFailedPanel.transform, false);
+            var contentRect = content.AddComponent<RectTransform>();
+            contentRect.anchorMin = new Vector2(0.5f, 0.5f);
+            contentRect.anchorMax = new Vector2(0.5f, 0.5f);
+            contentRect.sizeDelta = new Vector2(600, 450);
+
+            // Background panel (red/orange tint for failure)
+            var panelBg = content.AddComponent<Image>();
+            panelBg.color = new Color(0.8f, 0.3f, 0.2f, 1f);
+
+            var vlayout = content.AddComponent<VerticalLayoutGroup>();
+            vlayout.padding = new RectOffset(40, 40, 40, 40);
+            vlayout.spacing = 25;
+            vlayout.childAlignment = TextAnchor.MiddleCenter;
+            vlayout.childForceExpandWidth = true;
+            vlayout.childForceExpandHeight = false;
+
+            // Title
+            CreateTextElement(content.transform, "Title", "Level Failed", 48,
+                new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, 80);
+
+            // Reason text (will be updated dynamically)
+            var reasonGO = CreateTextElement(content.transform, "Reason", "Time's Up!", 32,
+                new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, 60);
+            levelFailedReasonText = reasonGO.GetComponent<TextMeshProUGUI>();
+
+            // Encouragement message
+            CreateTextElement(content.transform, "Message", "Try again!", 24,
+                new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, 40);
+
+            // Buttons container
+            var buttonsContainer = new GameObject("Buttons");
+            buttonsContainer.transform.SetParent(content.transform, false);
+            var buttonsRect = buttonsContainer.AddComponent<RectTransform>();
+            buttonsRect.sizeDelta = new Vector2(400, 70);
+            var buttonsLayout = buttonsContainer.AddComponent<HorizontalLayoutGroup>();
+            buttonsLayout.spacing = 20;
+            buttonsLayout.childAlignment = TextAnchor.MiddleCenter;
+            buttonsLayout.childForceExpandWidth = false;
+            buttonsLayout.childForceExpandHeight = false;
+
+            // Add layout element for proper sizing
+            var layoutElement = buttonsContainer.AddComponent<LayoutElement>();
+            layoutElement.preferredHeight = 70;
+            layoutElement.preferredWidth = 400;
+
+            CreateButton(buttonsContainer.transform, "Levels", "Levels", OnBackToLevelsFromFailedClicked, 160, 60);
+            CreateButton(buttonsContainer.transform, "Retry", "Retry", OnRetryFromFailedClicked, 160, 60);
+
+            Debug.Log("[UIManager] Level failed panel created");
         }
 
         private void CreateSettingsPanel()
@@ -1253,6 +1566,40 @@ namespace SortResort
             var (hapticsToggle, hapticsCheckmark) = CreateGoogleSwitch(hapticsRowGO.transform);
 
             // ============================================
+            // TIMER TOGGLE
+            // ============================================
+            var timerRowGO = new GameObject("TimerRow");
+            timerRowGO.transform.SetParent(contentGO.transform, false);
+            var timerRowRect = timerRowGO.AddComponent<RectTransform>();
+            timerRowRect.anchorMin = new Vector2(0.5f, 1);
+            timerRowRect.anchorMax = new Vector2(0.5f, 1);
+            timerRowRect.pivot = new Vector2(0.5f, 1);
+            timerRowRect.anchoredPosition = new Vector2(0, -700);
+            timerRowRect.sizeDelta = new Vector2(700, 80);
+
+            var timerLayout = timerRowGO.AddComponent<HorizontalLayoutGroup>();
+            timerLayout.spacing = 20;
+            timerLayout.childAlignment = TextAnchor.MiddleCenter;
+            timerLayout.childForceExpandWidth = false;
+            timerLayout.childForceExpandHeight = false;
+
+            // Timer label
+            var timerLabelGO = new GameObject("TimerLabel");
+            timerLabelGO.transform.SetParent(timerRowGO.transform, false);
+            var timerLabelText = timerLabelGO.AddComponent<TextMeshProUGUI>();
+            timerLabelText.text = "Level Timer";
+            timerLabelText.fontSize = 36;
+            timerLabelText.fontStyle = FontStyles.Bold;
+            timerLabelText.alignment = TextAlignmentOptions.MidlineLeft;
+            timerLabelText.color = Color.white;
+            var timerLabelLE = timerLabelGO.AddComponent<LayoutElement>();
+            timerLabelLE.preferredWidth = 400;
+            timerLabelLE.preferredHeight = 60;
+
+            // Timer toggle (Google-style switch)
+            var (timerToggle, timerCheckmark) = CreateGoogleSwitch(timerRowGO.transform);
+
+            // ============================================
             // BUTTONS (Reset Progress, Credits)
             // ============================================
             var buttonsContainer = new GameObject("ButtonsContainer");
@@ -1261,7 +1608,7 @@ namespace SortResort
             buttonsContainerRect.anchorMin = new Vector2(0.5f, 1);
             buttonsContainerRect.anchorMax = new Vector2(0.5f, 1);
             buttonsContainerRect.pivot = new Vector2(0.5f, 1);
-            buttonsContainerRect.anchoredPosition = new Vector2(0, -730);
+            buttonsContainerRect.anchoredPosition = new Vector2(0, -820);
             buttonsContainerRect.sizeDelta = new Vector2(700, 200);
 
             var buttonsLayout = buttonsContainer.AddComponent<VerticalLayoutGroup>();
@@ -1357,6 +1704,7 @@ namespace SortResort
                 masterSlider, musicSlider, sfxSlider,
                 masterLabel, musicLabel, sfxLabel,
                 hapticsToggle, hapticsCheckmark,
+                timerToggle, timerCheckmark,
                 resetBtn, creditsBtn,
                 confirmDialog, confirmYes, confirmNo,
                 creditsPanel, creditsClose,
@@ -2160,6 +2508,17 @@ Antonia and Joakim Engfors
 
             UpdateMoveDisplay(0);
             UpdateMatchDisplay(0);
+
+            // Reset undo button (no moves to undo at level start)
+            SetUndoButtonEnabled(false);
+
+            // Show/hide timer based on level settings
+            // Timer visibility is handled in OnTimerUpdated when first timer event comes in
+            // Hide timer initially - it will be shown when OnTimerUpdated fires if level has timer
+            if (timerContainer != null)
+            {
+                timerContainer.SetActive(false);
+            }
         }
 
         private void OnMoveUsed(int moveCount)
@@ -2188,13 +2547,136 @@ Antonia and Joakim Engfors
             }
         }
 
+        private void OnLevelFailed(int levelNumber)
+        {
+            ShowLevelFailedScreen("Level Failed");
+        }
+
+        private void OnTimerExpiredUI()
+        {
+            ShowLevelFailedScreen("Time's Up!");
+        }
+
+        private void ShowLevelFailedScreen(string reason)
+        {
+            // Hide HUD
+            if (hudPanel != null)
+                hudPanel.SetActive(false);
+
+            if (levelFailedPanel != null)
+            {
+                // Update reason text
+                if (levelFailedReasonText != null)
+                {
+                    levelFailedReasonText.text = reason;
+                }
+
+                levelFailedPanel.SetActive(true);
+                Debug.Log($"[UIManager] Showing level failed screen: {reason}");
+            }
+        }
+
+        private void OnBackToLevelsFromFailedClicked()
+        {
+            Debug.Log("[UIManager] Back to Levels from failed clicked");
+            AudioManager.Instance?.PlayButtonClick();
+            levelFailedPanel?.SetActive(false);
+
+            // Set state back to level selection
+            GameManager.Instance?.SetState(GameState.LevelSelection);
+
+            ShowLevelSelect();
+
+            // Clear the current level
+            LevelManager.Instance?.ClearLevel();
+        }
+
+        private void OnRetryFromFailedClicked()
+        {
+            Debug.Log("[UIManager] Retry from failed clicked");
+            AudioManager.Instance?.PlayButtonClick();
+            levelFailedPanel?.SetActive(false);
+
+            // Ensure state is Playing
+            GameManager.Instance?.SetState(GameState.Playing);
+
+            // Fade out, restart level, then fade in
+            if (TransitionManager.Instance != null)
+            {
+                TransitionManager.Instance.FadeOut(() =>
+                {
+                    LevelManager.Instance?.RestartLevel();
+                    TransitionManager.Instance.FadeIn();
+                });
+            }
+            else
+            {
+                LevelManager.Instance?.RestartLevel();
+            }
+        }
+
         private void OnLevelRestarted()
         {
             if (levelCompletePanel != null)
                 levelCompletePanel.SetActive(false);
+            if (levelFailedPanel != null)
+                levelFailedPanel.SetActive(false);
 
             UpdateMoveDisplay(0);
             UpdateMatchDisplay(0);
+
+            // Reset timer display (will be shown again via OnTimerUpdated if level has timer)
+            if (timerContainer != null)
+            {
+                timerContainer.SetActive(false);
+            }
+            if (timerText != null)
+            {
+                timerText.color = Color.white;
+            }
+        }
+
+        private void OnTimerUpdated(float timeRemaining)
+        {
+            UpdateTimerDisplay(timeRemaining);
+
+            // Show timer container if level has timer
+            if (timerContainer != null && !timerContainer.activeSelf && LevelManager.Instance?.IsTimerActive == true)
+            {
+                timerContainer.SetActive(true);
+            }
+        }
+
+        private void OnTimerFrozen(bool isFrozen)
+        {
+            // Visual feedback for frozen timer (e.g., color change)
+            if (timerText != null)
+            {
+                timerText.color = isFrozen ? Color.cyan : Color.white;
+            }
+        }
+
+        private void UpdateTimerDisplay(float timeRemaining)
+        {
+            if (timerText == null) return;
+
+            // Format as M:SS
+            int minutes = Mathf.FloorToInt(timeRemaining / 60f);
+            int seconds = Mathf.FloorToInt(timeRemaining % 60f);
+
+            timerText.text = $"{minutes}:{seconds:D2}";
+
+            // Change color when time is low (under 10 seconds)
+            if (timeRemaining <= 10f && !LevelManager.Instance?.IsTimerFrozen == true)
+            {
+                // Flash red when low on time
+                float flash = Mathf.PingPong(Time.unscaledTime * 4f, 1f);
+                timerText.color = Color.Lerp(Color.red, Color.white, flash);
+            }
+            else if (!LevelManager.Instance?.IsTimerFrozen == true)
+            {
+                timerText.color = Color.white;
+            }
         }
 
         private void UpdateMoveDisplay(int moves)
@@ -2280,8 +2762,1587 @@ Antonia and Joakim Engfors
             LevelManager.Instance?.LoadLevel(worldId, nextLevel);
         }
 
+        #region Achievement Notification
+
+        private void CreateAchievementNotificationPanel()
+        {
+            // ==========================================
+            // NOTIFICATION BANNER (clickable)
+            // ==========================================
+            achievementNotificationPanel = new GameObject("Achievement Notification Panel");
+            achievementNotificationPanel.transform.SetParent(mainCanvas.transform, false);
+
+            var rect = achievementNotificationPanel.AddComponent<RectTransform>();
+            rect.anchorMin = new Vector2(0.5f, 1f);
+            rect.anchorMax = new Vector2(0.5f, 1f);
+            rect.pivot = new Vector2(0.5f, 1f);
+            rect.anchoredPosition = new Vector2(0, 200); // Start off screen (will animate in)
+            rect.sizeDelta = new Vector2(700, 180);
+
+            var canvasGroup = achievementNotificationPanel.AddComponent<CanvasGroup>();
+            canvasGroup.alpha = 0f;
+
+            // Background with gradient-like appearance
+            var bgGO = new GameObject("Background");
+            bgGO.transform.SetParent(achievementNotificationPanel.transform, false);
+            var bgRect = bgGO.AddComponent<RectTransform>();
+            bgRect.anchorMin = Vector2.zero;
+            bgRect.anchorMax = Vector2.one;
+            bgRect.offsetMin = Vector2.zero;
+            bgRect.offsetMax = Vector2.zero;
+
+            achievementTierBg = bgGO.AddComponent<Image>();
+            achievementTierBg.color = new Color(0.2f, 0.15f, 0.4f, 0.95f); // Default purple
+
+            // Make the whole panel clickable
+            var notificationBtn = achievementNotificationPanel.AddComponent<Button>();
+            notificationBtn.targetGraphic = achievementTierBg;
+            notificationBtn.onClick.AddListener(OnAchievementNotificationClicked);
+
+            // Gold border
+            var borderGO = new GameObject("Border");
+            borderGO.transform.SetParent(achievementNotificationPanel.transform, false);
+            var borderRect = borderGO.AddComponent<RectTransform>();
+            borderRect.anchorMin = Vector2.zero;
+            borderRect.anchorMax = Vector2.one;
+            borderRect.offsetMin = Vector2.zero;
+            borderRect.offsetMax = Vector2.zero;
+            var borderOutline = borderGO.AddComponent<Outline>();
+            borderOutline.effectColor = new Color(1f, 0.85f, 0.3f, 1f); // Gold
+            borderOutline.effectDistance = new Vector2(4, -4);
+            var borderImg = borderGO.AddComponent<Image>();
+            borderImg.color = Color.clear;
+            borderImg.raycastTarget = false;
+
+            // Content layout
+            var contentGO = new GameObject("Content");
+            contentGO.transform.SetParent(achievementNotificationPanel.transform, false);
+            var contentRect = contentGO.AddComponent<RectTransform>();
+            contentRect.anchorMin = Vector2.zero;
+            contentRect.anchorMax = Vector2.one;
+            contentRect.offsetMin = new Vector2(20, 15);
+            contentRect.offsetMax = new Vector2(-20, -15);
+
+            var contentLayout = contentGO.AddComponent<HorizontalLayoutGroup>();
+            contentLayout.spacing = 20;
+            contentLayout.childAlignment = TextAnchor.MiddleLeft;
+            contentLayout.childForceExpandWidth = false;
+            contentLayout.childForceExpandHeight = false;
+            contentLayout.padding = new RectOffset(10, 10, 5, 5);
+
+            // Trophy/Icon placeholder
+            var iconContainer = new GameObject("IconContainer");
+            iconContainer.transform.SetParent(contentGO.transform, false);
+            var iconContainerLE = iconContainer.AddComponent<LayoutElement>();
+            iconContainerLE.preferredWidth = 100;
+            iconContainerLE.preferredHeight = 100;
+
+            var iconBg = new GameObject("IconBg");
+            iconBg.transform.SetParent(iconContainer.transform, false);
+            var iconBgRect = iconBg.AddComponent<RectTransform>();
+            iconBgRect.anchorMin = Vector2.zero;
+            iconBgRect.anchorMax = Vector2.one;
+            iconBgRect.offsetMin = Vector2.zero;
+            iconBgRect.offsetMax = Vector2.zero;
+            var iconBgImg = iconBg.AddComponent<Image>();
+            iconBgImg.color = new Color(1f, 0.85f, 0.3f, 0.3f); // Gold tint
+            iconBgImg.raycastTarget = false;
+
+            var iconGO = new GameObject("Icon");
+            iconGO.transform.SetParent(iconContainer.transform, false);
+            var iconRect = iconGO.AddComponent<RectTransform>();
+            iconRect.anchorMin = new Vector2(0.1f, 0.1f);
+            iconRect.anchorMax = new Vector2(0.9f, 0.9f);
+            iconRect.offsetMin = Vector2.zero;
+            iconRect.offsetMax = Vector2.zero;
+            achievementIconImage = iconGO.AddComponent<Image>();
+            achievementIconImage.raycastTarget = false;
+            // Load trophy sprite or use default
+            var trophySprite = Resources.Load<Sprite>("Sprites/UI/Icons/trophy");
+            if (trophySprite != null)
+                achievementIconImage.sprite = trophySprite;
+            else
+                achievementIconImage.color = new Color(1f, 0.85f, 0.3f, 1f); // Gold color as fallback
+
+            // Text container
+            var textContainer = new GameObject("TextContainer");
+            textContainer.transform.SetParent(contentGO.transform, false);
+            var textContainerLE = textContainer.AddComponent<LayoutElement>();
+            textContainerLE.flexibleWidth = 1;
+            textContainerLE.preferredHeight = 140;
+
+            var textLayout = textContainer.AddComponent<VerticalLayoutGroup>();
+            textLayout.spacing = 5;
+            textLayout.childAlignment = TextAnchor.MiddleLeft;
+            textLayout.childForceExpandWidth = true;
+            textLayout.childForceExpandHeight = false;
+
+            // "Achievement Unlocked!" header
+            var headerGO = new GameObject("Header");
+            headerGO.transform.SetParent(textContainer.transform, false);
+            var headerTMP = headerGO.AddComponent<TextMeshProUGUI>();
+            headerTMP.text = "Achievement Unlocked! (Tap for details)";
+            headerTMP.fontSize = 22;
+            headerTMP.fontStyle = FontStyles.Bold;
+            headerTMP.color = new Color(1f, 0.85f, 0.3f, 1f); // Gold
+            headerTMP.alignment = TextAlignmentOptions.MidlineLeft;
+            headerTMP.raycastTarget = false;
+            var headerLE = headerGO.AddComponent<LayoutElement>();
+            headerLE.preferredHeight = 30;
+
+            // Achievement name
+            var nameGO = new GameObject("Name");
+            nameGO.transform.SetParent(textContainer.transform, false);
+            achievementNameText = nameGO.AddComponent<TextMeshProUGUI>();
+            achievementNameText.text = "Achievement Name";
+            achievementNameText.fontSize = 32;
+            achievementNameText.fontStyle = FontStyles.Bold;
+            achievementNameText.color = Color.white;
+            achievementNameText.alignment = TextAlignmentOptions.MidlineLeft;
+            achievementNameText.raycastTarget = false;
+            var nameLE = nameGO.AddComponent<LayoutElement>();
+            nameLE.preferredHeight = 40;
+
+            // Achievement description
+            var descGO = new GameObject("Description");
+            descGO.transform.SetParent(textContainer.transform, false);
+            achievementDescText = descGO.AddComponent<TextMeshProUGUI>();
+            achievementDescText.text = "Achievement description goes here";
+            achievementDescText.fontSize = 20;
+            achievementDescText.color = new Color(0.8f, 0.8f, 0.9f, 1f);
+            achievementDescText.alignment = TextAlignmentOptions.MidlineLeft;
+            achievementDescText.raycastTarget = false;
+            var descLE = descGO.AddComponent<LayoutElement>();
+            descLE.preferredHeight = 25;
+
+            // Reward text
+            var rewardGO = new GameObject("Reward");
+            rewardGO.transform.SetParent(textContainer.transform, false);
+            achievementRewardText = rewardGO.AddComponent<TextMeshProUGUI>();
+            achievementRewardText.text = "+50 Coins";
+            achievementRewardText.fontSize = 22;
+            achievementRewardText.fontStyle = FontStyles.Bold;
+            achievementRewardText.color = new Color(0.5f, 1f, 0.5f, 1f); // Green
+            achievementRewardText.alignment = TextAlignmentOptions.MidlineLeft;
+            achievementRewardText.raycastTarget = false;
+            var rewardLE = rewardGO.AddComponent<LayoutElement>();
+            rewardLE.preferredHeight = 28;
+
+            // ==========================================
+            // DETAIL PANEL (shown when notification clicked)
+            // ==========================================
+            CreateAchievementDetailPanel();
+
+            Debug.Log("[UIManager] Achievement notification panel created");
+        }
+
+        private void CreateAchievementDetailPanel()
+        {
+            achievementDetailPanel = new GameObject("Achievement Detail Panel");
+            achievementDetailPanel.transform.SetParent(mainCanvas.transform, false);
+
+            var rect = achievementDetailPanel.AddComponent<RectTransform>();
+            rect.anchorMin = Vector2.zero;
+            rect.anchorMax = Vector2.one;
+            rect.offsetMin = Vector2.zero;
+            rect.offsetMax = Vector2.zero;
+
+            // Dark overlay background
+            var overlayImg = achievementDetailPanel.AddComponent<Image>();
+            overlayImg.color = new Color(0, 0, 0, 0.85f);
+
+            // Center card
+            var cardGO = new GameObject("Card");
+            cardGO.transform.SetParent(achievementDetailPanel.transform, false);
+            var cardRect = cardGO.AddComponent<RectTransform>();
+            cardRect.anchorMin = new Vector2(0.5f, 0.5f);
+            cardRect.anchorMax = new Vector2(0.5f, 0.5f);
+            cardRect.sizeDelta = new Vector2(800, 500);
+
+            achievementDetailTierBg = cardGO.AddComponent<Image>();
+            achievementDetailTierBg.color = new Color(0.3f, 0.25f, 0.5f, 1f);
+
+            // Gold border for card
+            var cardBorder = cardGO.AddComponent<Outline>();
+            cardBorder.effectColor = new Color(1f, 0.85f, 0.3f, 1f);
+            cardBorder.effectDistance = new Vector2(5, -5);
+
+            // Card content layout
+            var cardLayout = cardGO.AddComponent<VerticalLayoutGroup>();
+            cardLayout.padding = new RectOffset(40, 40, 30, 30);
+            cardLayout.spacing = 20;
+            cardLayout.childAlignment = TextAnchor.UpperCenter;
+            cardLayout.childForceExpandWidth = true;
+            cardLayout.childForceExpandHeight = false;
+
+            // Header "ACHIEVEMENT UNLOCKED"
+            var detailHeaderGO = new GameObject("Header");
+            detailHeaderGO.transform.SetParent(cardGO.transform, false);
+            var detailHeaderTMP = detailHeaderGO.AddComponent<TextMeshProUGUI>();
+            detailHeaderTMP.text = "ACHIEVEMENT UNLOCKED";
+            detailHeaderTMP.fontSize = 36;
+            detailHeaderTMP.fontStyle = FontStyles.Bold;
+            detailHeaderTMP.color = new Color(1f, 0.85f, 0.3f, 1f);
+            detailHeaderTMP.alignment = TextAlignmentOptions.Center;
+            var detailHeaderLE = detailHeaderGO.AddComponent<LayoutElement>();
+            detailHeaderLE.preferredHeight = 50;
+
+            // Tier label
+            var tierGO = new GameObject("Tier");
+            tierGO.transform.SetParent(cardGO.transform, false);
+            achievementDetailTierText = tierGO.AddComponent<TextMeshProUGUI>();
+            achievementDetailTierText.text = "GOLD";
+            achievementDetailTierText.fontSize = 24;
+            achievementDetailTierText.fontStyle = FontStyles.Bold;
+            achievementDetailTierText.color = new Color(1f, 0.85f, 0.3f, 1f);
+            achievementDetailTierText.alignment = TextAlignmentOptions.Center;
+            var tierLE = tierGO.AddComponent<LayoutElement>();
+            tierLE.preferredHeight = 35;
+
+            // Achievement name
+            var detailNameGO = new GameObject("Name");
+            detailNameGO.transform.SetParent(cardGO.transform, false);
+            achievementDetailNameText = detailNameGO.AddComponent<TextMeshProUGUI>();
+            achievementDetailNameText.text = "Achievement Name";
+            achievementDetailNameText.fontSize = 48;
+            achievementDetailNameText.fontStyle = FontStyles.Bold;
+            achievementDetailNameText.color = Color.white;
+            achievementDetailNameText.alignment = TextAlignmentOptions.Center;
+            var detailNameLE = detailNameGO.AddComponent<LayoutElement>();
+            detailNameLE.preferredHeight = 70;
+
+            // Description
+            var detailDescGO = new GameObject("Description");
+            detailDescGO.transform.SetParent(cardGO.transform, false);
+            achievementDetailDescText = detailDescGO.AddComponent<TextMeshProUGUI>();
+            achievementDetailDescText.text = "Description of the achievement goes here.";
+            achievementDetailDescText.fontSize = 28;
+            achievementDetailDescText.color = new Color(0.85f, 0.85f, 0.9f, 1f);
+            achievementDetailDescText.alignment = TextAlignmentOptions.Center;
+            var detailDescLE = detailDescGO.AddComponent<LayoutElement>();
+            detailDescLE.preferredHeight = 50;
+
+            // Rewards section header
+            var rewardsHeaderGO = new GameObject("RewardsHeader");
+            rewardsHeaderGO.transform.SetParent(cardGO.transform, false);
+            var rewardsHeaderTMP = rewardsHeaderGO.AddComponent<TextMeshProUGUI>();
+            rewardsHeaderTMP.text = "REWARDS";
+            rewardsHeaderTMP.fontSize = 24;
+            rewardsHeaderTMP.fontStyle = FontStyles.Bold;
+            rewardsHeaderTMP.color = new Color(0.7f, 0.7f, 0.8f, 1f);
+            rewardsHeaderTMP.alignment = TextAlignmentOptions.Center;
+            var rewardsHeaderLE = rewardsHeaderGO.AddComponent<LayoutElement>();
+            rewardsHeaderLE.preferredHeight = 35;
+
+            // Rewards text
+            var detailRewardGO = new GameObject("Reward");
+            detailRewardGO.transform.SetParent(cardGO.transform, false);
+            achievementDetailRewardText = detailRewardGO.AddComponent<TextMeshProUGUI>();
+            achievementDetailRewardText.text = "+50 Coins";
+            achievementDetailRewardText.fontSize = 36;
+            achievementDetailRewardText.fontStyle = FontStyles.Bold;
+            achievementDetailRewardText.color = new Color(0.5f, 1f, 0.5f, 1f);
+            achievementDetailRewardText.alignment = TextAlignmentOptions.Center;
+            var detailRewardLE = detailRewardGO.AddComponent<LayoutElement>();
+            detailRewardLE.preferredHeight = 50;
+
+            // Dismiss button
+            var dismissBtnGO = new GameObject("DismissButton");
+            dismissBtnGO.transform.SetParent(cardGO.transform, false);
+            var dismissBtnLE = dismissBtnGO.AddComponent<LayoutElement>();
+            dismissBtnLE.preferredWidth = 250;
+            dismissBtnLE.preferredHeight = 70;
+
+            var dismissBtnImg = dismissBtnGO.AddComponent<Image>();
+            dismissBtnImg.color = new Color(0.3f, 0.6f, 0.9f, 1f);
+
+            var dismissBtn = dismissBtnGO.AddComponent<Button>();
+            dismissBtn.targetGraphic = dismissBtnImg;
+            dismissBtn.onClick.AddListener(OnAchievementDetailDismissClicked);
+
+            var dismissTextGO = new GameObject("Text");
+            dismissTextGO.transform.SetParent(dismissBtnGO.transform, false);
+            var dismissTextRect = dismissTextGO.AddComponent<RectTransform>();
+            dismissTextRect.anchorMin = Vector2.zero;
+            dismissTextRect.anchorMax = Vector2.one;
+            dismissTextRect.offsetMin = Vector2.zero;
+            dismissTextRect.offsetMax = Vector2.zero;
+            var dismissTextTMP = dismissTextGO.AddComponent<TextMeshProUGUI>();
+            dismissTextTMP.text = "DISMISS";
+            dismissTextTMP.fontSize = 32;
+            dismissTextTMP.fontStyle = FontStyles.Bold;
+            dismissTextTMP.color = Color.white;
+            dismissTextTMP.alignment = TextAlignmentOptions.Center;
+
+            achievementDetailPanel.SetActive(false);
+        }
+
+        private void OnAchievementNotificationClicked()
+        {
+            if (currentAchievement == null || isShowingAchievementDetail)
+                return;
+
+            AudioManager.Instance?.PlayButtonClick();
+
+            // Stop the auto-dismiss coroutine
+            if (achievementCoroutine != null)
+            {
+                StopCoroutine(achievementCoroutine);
+                achievementCoroutine = null;
+            }
+
+            // Hide notification banner
+            achievementNotificationPanel.SetActive(false);
+
+            // Show detail panel
+            ShowAchievementDetail(currentAchievement);
+        }
+
+        private void ShowAchievementDetail(Achievement achievement)
+        {
+            isShowingAchievementDetail = true;
+
+            // Update detail panel content
+            if (achievementDetailNameText != null)
+                achievementDetailNameText.text = achievement.name;
+            if (achievementDetailDescText != null)
+                achievementDetailDescText.text = achievement.description;
+
+            // Tier text and color
+            if (achievementDetailTierText != null)
+            {
+                achievementDetailTierText.text = achievement.tier.ToString().ToUpper();
+                achievementDetailTierText.color = achievement.tier switch
+                {
+                    AchievementTier.Bronze => new Color(0.8f, 0.5f, 0.3f, 1f),
+                    AchievementTier.Silver => new Color(0.75f, 0.75f, 0.8f, 1f),
+                    AchievementTier.Gold => new Color(1f, 0.85f, 0.3f, 1f),
+                    AchievementTier.Platinum => new Color(0.6f, 0.9f, 0.95f, 1f),
+                    _ => Color.white
+                };
+            }
+
+            // Background color
+            if (achievementDetailTierBg != null)
+            {
+                achievementDetailTierBg.color = achievement.tier switch
+                {
+                    AchievementTier.Bronze => new Color(0.4f, 0.28f, 0.18f, 1f),
+                    AchievementTier.Silver => new Color(0.35f, 0.35f, 0.4f, 1f),
+                    AchievementTier.Gold => new Color(0.4f, 0.32f, 0.12f, 1f),
+                    AchievementTier.Platinum => new Color(0.2f, 0.4f, 0.45f, 1f),
+                    _ => new Color(0.3f, 0.25f, 0.5f, 1f)
+                };
+            }
+
+            // Format rewards
+            if (achievementDetailRewardText != null && achievement.rewards != null && achievement.rewards.Length > 0)
+            {
+                var rewardStrings = new List<string>();
+                foreach (var reward in achievement.rewards)
+                {
+                    string rewardStr = reward.type switch
+                    {
+                        RewardType.Coins => $"+{reward.amount} Coins",
+                        RewardType.UndoToken => $"+{reward.amount} Undo Token(s)",
+                        RewardType.SkipToken => $"+{reward.amount} Skip Token(s)",
+                        RewardType.UnlockKey => $"+{reward.amount} Unlock Key(s)",
+                        RewardType.FreezeToken => $"+{reward.amount} Freeze Token(s)",
+                        RewardType.TimerFreeze => $"+{reward.amount} Timer Freeze(s)",
+                        RewardType.Trophy => "Trophy Earned!",
+                        _ => $"+{reward.amount}"
+                    };
+                    rewardStrings.Add(rewardStr);
+                }
+                achievementDetailRewardText.text = string.Join("\n", rewardStrings);
+            }
+
+            achievementDetailPanel.SetActive(true);
+        }
+
+        private void OnAchievementDetailDismissClicked()
+        {
+            AudioManager.Instance?.PlayButtonClick();
+
+            // Hide both panels immediately
+            achievementDetailPanel.SetActive(false);
+            achievementNotificationPanel.SetActive(false);
+
+            isShowingAchievementDetail = false;
+            isShowingAchievement = false;
+            currentAchievement = null;
+
+            // Reset notification position for next time
+            var rect = achievementNotificationPanel.GetComponent<RectTransform>();
+            rect.anchoredPosition = new Vector2(0, 200);
+            var canvasGroup = achievementNotificationPanel.GetComponent<CanvasGroup>();
+            canvasGroup.alpha = 0f;
+
+            // Show next achievement if queued
+            StartCoroutine(ShowNextAchievementDelayed());
+        }
+
+        private IEnumerator ShowNextAchievementDelayed()
+        {
+            yield return new WaitForSecondsRealtime(0.3f);
+            ShowNextAchievement();
+        }
+
+        private void OnAchievementUnlocked(Achievement achievement)
+        {
+            achievementQueue.Enqueue(achievement);
+
+            if (!isShowingAchievement)
+            {
+                ShowNextAchievement();
+            }
+        }
+
+        private void ShowNextAchievement()
+        {
+            if (achievementQueue.Count == 0)
+            {
+                isShowingAchievement = false;
+                currentAchievement = null;
+                return;
+            }
+
+            isShowingAchievement = true;
+            currentAchievement = achievementQueue.Dequeue();
+
+            // Update UI
+            if (achievementNameText != null)
+                achievementNameText.text = currentAchievement.name;
+            if (achievementDescText != null)
+                achievementDescText.text = currentAchievement.description;
+
+            // Format reward text
+            if (achievementRewardText != null && currentAchievement.rewards != null && currentAchievement.rewards.Length > 0)
+            {
+                var rewardStrings = new List<string>();
+                foreach (var reward in currentAchievement.rewards)
+                {
+                    string rewardStr = reward.type switch
+                    {
+                        RewardType.Coins => $"+{reward.amount} Coins",
+                        RewardType.UndoToken => $"+{reward.amount} Undo",
+                        RewardType.SkipToken => $"+{reward.amount} Skip",
+                        RewardType.UnlockKey => $"+{reward.amount} Key",
+                        RewardType.FreezeToken => $"+{reward.amount} Freeze",
+                        RewardType.TimerFreeze => $"+{reward.amount} Timer Freeze",
+                        RewardType.Trophy => "Trophy Earned!",
+                        _ => $"+{reward.amount}"
+                    };
+                    rewardStrings.Add(rewardStr);
+                }
+                achievementRewardText.text = string.Join(" | ", rewardStrings);
+            }
+
+            // Set tier color
+            if (achievementTierBg != null)
+            {
+                achievementTierBg.color = currentAchievement.tier switch
+                {
+                    AchievementTier.Bronze => new Color(0.5f, 0.35f, 0.2f, 0.95f),
+                    AchievementTier.Silver => new Color(0.45f, 0.45f, 0.5f, 0.95f),
+                    AchievementTier.Gold => new Color(0.5f, 0.4f, 0.15f, 0.95f),
+                    AchievementTier.Platinum => new Color(0.3f, 0.5f, 0.55f, 0.95f),
+                    _ => new Color(0.2f, 0.15f, 0.4f, 0.95f)
+                };
+            }
+
+            // Show notification
+            if (achievementCoroutine != null)
+                StopCoroutine(achievementCoroutine);
+            achievementCoroutine = StartCoroutine(ShowAchievementAnimation());
+        }
+
+        private IEnumerator ShowAchievementAnimation()
+        {
+            if (achievementNotificationPanel == null)
+            {
+                isShowingAchievement = false;
+                yield break;
+            }
+
+            achievementNotificationPanel.SetActive(true);
+            var rect = achievementNotificationPanel.GetComponent<RectTransform>();
+            var canvasGroup = achievementNotificationPanel.GetComponent<CanvasGroup>();
+
+            // Play sound
+            AudioManager.Instance?.PlayMatchSound(); // Reuse match sound for now
+
+            // Slide in from top
+            float duration = 0.4f;
+            float elapsed = 0f;
+            Vector2 startPos = new Vector2(0, 200);
+            Vector2 endPos = new Vector2(0, -20);
+
+            while (elapsed < duration)
+            {
+                elapsed += Time.unscaledDeltaTime;
+                float t = Mathf.SmoothStep(0, 1, elapsed / duration);
+                rect.anchoredPosition = Vector2.Lerp(startPos, endPos, t);
+                canvasGroup.alpha = t;
+                yield return null;
+            }
+
+            rect.anchoredPosition = endPos;
+            canvasGroup.alpha = 1f;
+
+            // Stay visible for a few seconds (user can tap to see details)
+            yield return new WaitForSecondsRealtime(4f);
+
+            // Auto-dismiss: slide out
+            elapsed = 0f;
+            duration = 0.3f;
+
+            while (elapsed < duration)
+            {
+                elapsed += Time.unscaledDeltaTime;
+                float t = Mathf.SmoothStep(0, 1, elapsed / duration);
+                rect.anchoredPosition = Vector2.Lerp(endPos, startPos, t);
+                canvasGroup.alpha = 1f - t;
+                yield return null;
+            }
+
+            achievementNotificationPanel.SetActive(false);
+            rect.anchoredPosition = startPos;
+            canvasGroup.alpha = 0f;
+
+            isShowingAchievement = false;
+            currentAchievement = null;
+
+            // Show next achievement if queued
+            yield return new WaitForSecondsRealtime(0.3f);
+            ShowNextAchievement();
+        }
+
+        #endregion
+
+        #region Achievements Screen
+
+        private void CreateAchievementsPanel()
+        {
+            achievementsPanel = new GameObject("Achievements Panel");
+            achievementsPanel.transform.SetParent(mainCanvas.transform, false);
+
+            var rect = achievementsPanel.AddComponent<RectTransform>();
+            rect.anchorMin = Vector2.zero;
+            rect.anchorMax = Vector2.one;
+            rect.offsetMin = Vector2.zero;
+            rect.offsetMax = Vector2.zero;
+
+            // Dark overlay background
+            var dimBg = achievementsPanel.AddComponent<Image>();
+            dimBg.color = new Color(0, 0, 0, 0.9f);
+
+            // Main content container
+            var contentGO = new GameObject("Content");
+            contentGO.transform.SetParent(achievementsPanel.transform, false);
+            var contentRect = contentGO.AddComponent<RectTransform>();
+            contentRect.anchorMin = new Vector2(0.02f, 0.02f);
+            contentRect.anchorMax = new Vector2(0.98f, 0.98f);
+            contentRect.offsetMin = Vector2.zero;
+            contentRect.offsetMax = Vector2.zero;
+
+            // Content background
+            var contentBg = contentGO.AddComponent<Image>();
+            contentBg.sprite = CreateRoundedRectSprite(100, 100, 20, new Color(0.12f, 0.11f, 0.15f, 1f));
+            contentBg.type = Image.Type.Sliced;
+
+            // ============================================
+            // HEADER
+            // ============================================
+            var headerGO = new GameObject("Header");
+            headerGO.transform.SetParent(contentGO.transform, false);
+            var headerRect = headerGO.AddComponent<RectTransform>();
+            headerRect.anchorMin = new Vector2(0, 1);
+            headerRect.anchorMax = new Vector2(1, 1);
+            headerRect.pivot = new Vector2(0.5f, 1);
+            headerRect.anchoredPosition = Vector2.zero;
+            headerRect.sizeDelta = new Vector2(0, 100);
+
+            var headerBg = headerGO.AddComponent<Image>();
+            headerBg.color = new Color(0.08f, 0.07f, 0.1f, 1f);
+
+            // Header title
+            var titleGO = new GameObject("Title");
+            titleGO.transform.SetParent(headerGO.transform, false);
+            var titleRect = titleGO.AddComponent<RectTransform>();
+            titleRect.anchorMin = new Vector2(0, 0);
+            titleRect.anchorMax = new Vector2(0.4f, 1);
+            titleRect.offsetMin = new Vector2(20, 0);
+            titleRect.offsetMax = Vector2.zero;
+
+            achievementsHeaderText = titleGO.AddComponent<TextMeshProUGUI>();
+            achievementsHeaderText.text = "ACHIEVEMENTS";
+            achievementsHeaderText.fontSize = 40;
+            achievementsHeaderText.fontStyle = FontStyles.Bold;
+            achievementsHeaderText.alignment = TextAlignmentOptions.MidlineLeft;
+            achievementsHeaderText.color = new Color(0.95f, 0.8f, 0.2f, 1f);
+
+            // Points display (center)
+            var pointsGO = new GameObject("Points");
+            pointsGO.transform.SetParent(headerGO.transform, false);
+            var pointsRect = pointsGO.AddComponent<RectTransform>();
+            pointsRect.anchorMin = new Vector2(0.4f, 0);
+            pointsRect.anchorMax = new Vector2(0.7f, 1);
+            pointsRect.offsetMin = Vector2.zero;
+            pointsRect.offsetMax = Vector2.zero;
+
+            achievementsPointsText = pointsGO.AddComponent<TextMeshProUGUI>();
+            achievementsPointsText.text = "<size=24>POINTS</size>\n<color=#FFD700>0</color> / 0";
+            achievementsPointsText.fontSize = 32;
+            achievementsPointsText.fontStyle = FontStyles.Bold;
+            achievementsPointsText.alignment = TextAlignmentOptions.Center;
+            achievementsPointsText.color = Color.white;
+
+            // Count display
+            var countGO = new GameObject("Count");
+            countGO.transform.SetParent(headerGO.transform, false);
+            var countRect = countGO.AddComponent<RectTransform>();
+            countRect.anchorMin = new Vector2(0.7f, 0);
+            countRect.anchorMax = new Vector2(0.88f, 1);
+            countRect.offsetMin = Vector2.zero;
+            countRect.offsetMax = Vector2.zero;
+
+            achievementsCountText = countGO.AddComponent<TextMeshProUGUI>();
+            achievementsCountText.text = "<size=24>UNLOCKED</size>\n0 / 0";
+            achievementsCountText.fontSize = 32;
+            achievementsCountText.fontStyle = FontStyles.Bold;
+            achievementsCountText.alignment = TextAlignmentOptions.Center;
+            achievementsCountText.color = Color.white;
+
+            // Close button
+            var closeBtnGO = new GameObject("CloseButton");
+            closeBtnGO.transform.SetParent(headerGO.transform, false);
+            var closeBtnRect = closeBtnGO.AddComponent<RectTransform>();
+            closeBtnRect.anchorMin = new Vector2(1, 0.5f);
+            closeBtnRect.anchorMax = new Vector2(1, 0.5f);
+            closeBtnRect.pivot = new Vector2(1, 0.5f);
+            closeBtnRect.anchoredPosition = new Vector2(-15, 0);
+            closeBtnRect.sizeDelta = new Vector2(70, 70);
+
+            var closeBtnImg = closeBtnGO.AddComponent<Image>();
+            closeBtnImg.sprite = CreateRoundedRectSprite(70, 70, 35, new Color(0.5f, 0.15f, 0.15f, 1f));
+
+            var closeBtn = closeBtnGO.AddComponent<Button>();
+            closeBtn.targetGraphic = closeBtnImg;
+            closeBtn.onClick.AddListener(HideAchievements);
+
+            var closeTextGO = new GameObject("X");
+            closeTextGO.transform.SetParent(closeBtnGO.transform, false);
+            var closeTextRect = closeTextGO.AddComponent<RectTransform>();
+            closeTextRect.anchorMin = Vector2.zero;
+            closeTextRect.anchorMax = Vector2.one;
+            closeTextRect.offsetMin = Vector2.zero;
+            closeTextRect.offsetMax = Vector2.zero;
+            var closeText = closeTextGO.AddComponent<TextMeshProUGUI>();
+            closeText.text = "X";
+            closeText.fontSize = 36;
+            closeText.fontStyle = FontStyles.Bold;
+            closeText.alignment = TextAlignmentOptions.Center;
+            closeText.color = Color.white;
+
+            // ============================================
+            // LEFT SIDEBAR - Category Tabs
+            // ============================================
+            var sidebarGO = new GameObject("Sidebar");
+            sidebarGO.transform.SetParent(contentGO.transform, false);
+            var sidebarRect = sidebarGO.AddComponent<RectTransform>();
+            sidebarRect.anchorMin = new Vector2(0, 0);
+            sidebarRect.anchorMax = new Vector2(0, 1);
+            sidebarRect.pivot = new Vector2(0, 0.5f);
+            sidebarRect.anchoredPosition = Vector2.zero;
+            sidebarRect.sizeDelta = new Vector2(180, 0);
+            sidebarRect.offsetMin = new Vector2(0, 10);
+            sidebarRect.offsetMax = new Vector2(180, -110);
+
+            var sidebarBg = sidebarGO.AddComponent<Image>();
+            sidebarBg.color = new Color(0.08f, 0.07f, 0.1f, 1f);
+
+            // Tab buttons container
+            var tabsContainerGO = new GameObject("TabsContainer");
+            tabsContainerGO.transform.SetParent(sidebarGO.transform, false);
+            var tabsContainerRect = tabsContainerGO.AddComponent<RectTransform>();
+            tabsContainerRect.anchorMin = Vector2.zero;
+            tabsContainerRect.anchorMax = Vector2.one;
+            tabsContainerRect.offsetMin = new Vector2(5, 5);
+            tabsContainerRect.offsetMax = new Vector2(-5, -5);
+
+            var tabsLayout = tabsContainerGO.AddComponent<VerticalLayoutGroup>();
+            tabsLayout.spacing = 8;
+            tabsLayout.padding = new RectOffset(5, 5, 10, 10);
+            tabsLayout.childAlignment = TextAnchor.UpperCenter;
+            tabsLayout.childForceExpandWidth = true;
+            tabsLayout.childForceExpandHeight = false;
+
+            // Create tab buttons dynamically from AchievementManager
+            achievementTabButtons.Clear();
+            achievementTabImages.Clear();
+            achievementTabsContainer = tabsContainerGO.transform;
+            // Tabs will be populated in ShowAchievements when AchievementManager is ready
+
+            // ============================================
+            // MAIN CONTENT - Scrollable Achievement List
+            // ============================================
+            var scrollAreaGO = new GameObject("ScrollArea");
+            scrollAreaGO.transform.SetParent(contentGO.transform, false);
+            var scrollAreaRect = scrollAreaGO.AddComponent<RectTransform>();
+            scrollAreaRect.anchorMin = new Vector2(0, 0);
+            scrollAreaRect.anchorMax = new Vector2(1, 1);
+            scrollAreaRect.offsetMin = new Vector2(190, 10);
+            scrollAreaRect.offsetMax = new Vector2(-10, -110);
+
+            var scrollBg = scrollAreaGO.AddComponent<Image>();
+            scrollBg.sprite = CreateRoundedRectSprite(100, 100, 15, new Color(0.15f, 0.14f, 0.18f, 1f));
+            scrollBg.type = Image.Type.Sliced;
+
+            var scrollRect = scrollAreaGO.AddComponent<ScrollRect>();
+            scrollRect.horizontal = false;
+            scrollRect.vertical = true;
+            scrollRect.movementType = ScrollRect.MovementType.Elastic;
+            scrollRect.elasticity = 0.1f;
+            scrollRect.scrollSensitivity = 50f;
+
+            // Viewport
+            var viewportGO = new GameObject("Viewport");
+            viewportGO.transform.SetParent(scrollAreaGO.transform, false);
+            var viewportRect = viewportGO.AddComponent<RectTransform>();
+            viewportRect.anchorMin = Vector2.zero;
+            viewportRect.anchorMax = Vector2.one;
+            viewportRect.offsetMin = new Vector2(10, 10);
+            viewportRect.offsetMax = new Vector2(-30, -10);
+
+            var viewportMask = viewportGO.AddComponent<RectMask2D>();
+            viewportMask.softness = new Vector2Int(0, 15);
+
+            scrollRect.viewport = viewportRect;
+
+            // List content
+            var listContentGO = new GameObject("ListContent");
+            listContentGO.transform.SetParent(viewportGO.transform, false);
+            var listContentRect = listContentGO.AddComponent<RectTransform>();
+            listContentRect.anchorMin = new Vector2(0, 1);
+            listContentRect.anchorMax = new Vector2(1, 1);
+            listContentRect.pivot = new Vector2(0.5f, 1);
+            listContentRect.anchoredPosition = Vector2.zero;
+            listContentRect.sizeDelta = new Vector2(0, 0);
+
+            achievementsListContent = listContentGO.transform;
+
+            var contentSizeFitter = listContentGO.AddComponent<ContentSizeFitter>();
+            contentSizeFitter.horizontalFit = ContentSizeFitter.FitMode.Unconstrained;
+            contentSizeFitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+
+            var vertLayout = listContentGO.AddComponent<VerticalLayoutGroup>();
+            vertLayout.spacing = 12;
+            vertLayout.padding = new RectOffset(5, 5, 5, 5);
+            vertLayout.childAlignment = TextAnchor.UpperCenter;
+            vertLayout.childForceExpandWidth = true;
+            vertLayout.childForceExpandHeight = false;
+            vertLayout.childControlWidth = true;
+            vertLayout.childControlHeight = false;
+
+            scrollRect.content = listContentRect;
+
+            // Scrollbar
+            var scrollbarGO = new GameObject("Scrollbar");
+            scrollbarGO.transform.SetParent(scrollAreaGO.transform, false);
+            var scrollbarRect = scrollbarGO.AddComponent<RectTransform>();
+            scrollbarRect.anchorMin = new Vector2(1, 0);
+            scrollbarRect.anchorMax = new Vector2(1, 1);
+            scrollbarRect.pivot = new Vector2(1, 0.5f);
+            scrollbarRect.anchoredPosition = new Vector2(-5, 0);
+            scrollbarRect.sizeDelta = new Vector2(18, -20);
+            scrollbarRect.offsetMin = new Vector2(-23, 10);
+            scrollbarRect.offsetMax = new Vector2(-5, -10);
+
+            var scrollbarImg = scrollbarGO.AddComponent<Image>();
+            scrollbarImg.sprite = CreateRoundedRectSprite(18, 50, 9, new Color(0.1f, 0.1f, 0.12f, 1f));
+            scrollbarImg.type = Image.Type.Sliced;
+
+            var scrollbar = scrollbarGO.AddComponent<Scrollbar>();
+            scrollbar.direction = Scrollbar.Direction.BottomToTop;
+
+            var handleGO = new GameObject("Handle");
+            handleGO.transform.SetParent(scrollbarGO.transform, false);
+            var handleRect = handleGO.AddComponent<RectTransform>();
+            handleRect.anchorMin = Vector2.zero;
+            handleRect.anchorMax = Vector2.one;
+            handleRect.offsetMin = new Vector2(2, 2);
+            handleRect.offsetMax = new Vector2(-2, -2);
+
+            var handleImg = handleGO.AddComponent<Image>();
+            handleImg.sprite = CreateRoundedRectSprite(14, 40, 7, new Color(0.4f, 0.6f, 0.4f, 1f));
+            handleImg.type = Image.Type.Sliced;
+
+            scrollbar.targetGraphic = handleImg;
+            scrollbar.handleRect = handleRect;
+            scrollRect.verticalScrollbar = scrollbar;
+            scrollRect.verticalScrollbarVisibility = ScrollRect.ScrollbarVisibility.AutoHideAndExpandViewport;
+
+            Debug.Log("[UIManager] Achievements panel created with tabs");
+        }
+
+        private void CreateAchievementTab(Transform parent, string tabId, string label)
+        {
+            var tabGO = new GameObject($"Tab_{tabId}");
+            tabGO.transform.SetParent(parent, false);
+
+            var tabLayout = tabGO.AddComponent<LayoutElement>();
+            tabLayout.minHeight = 60;
+            tabLayout.preferredHeight = 60;
+
+            var tabImg = tabGO.AddComponent<Image>();
+            tabImg.sprite = CreateRoundedRectSprite(100, 60, 10, new Color(0.2f, 0.19f, 0.25f, 1f));
+            tabImg.type = Image.Type.Sliced;
+
+            var tabBtn = tabGO.AddComponent<Button>();
+            tabBtn.targetGraphic = tabImg;
+
+            // Capture tab value for closure
+            var capturedTab = tabId;
+            tabBtn.onClick.AddListener(() => OnAchievementTabClicked(capturedTab));
+
+            var tabTextGO = new GameObject("Text");
+            tabTextGO.transform.SetParent(tabGO.transform, false);
+            var tabTextRect = tabTextGO.AddComponent<RectTransform>();
+            tabTextRect.anchorMin = Vector2.zero;
+            tabTextRect.anchorMax = Vector2.one;
+            tabTextRect.offsetMin = new Vector2(10, 0);
+            tabTextRect.offsetMax = new Vector2(-10, 0);
+
+            var tabText = tabTextGO.AddComponent<TextMeshProUGUI>();
+            tabText.text = label;
+            tabText.fontSize = 22;
+            tabText.fontStyle = FontStyles.Bold;
+            tabText.alignment = TextAlignmentOptions.MidlineLeft;
+            tabText.color = Color.white;
+
+            achievementTabButtons[tabId] = tabBtn;
+            achievementTabImages[tabId] = tabImg;
+        }
+
+        private void OnAchievementTabClicked(string tab)
+        {
+            AudioManager.Instance?.PlayButtonClick();
+            currentAchievementTab = tab;
+            UpdateAchievementTabVisuals();
+            RefreshAchievementsPanel();
+        }
+
+        private void UpdateAchievementTabVisuals()
+        {
+            foreach (var kvp in achievementTabImages)
+            {
+                bool isSelected = kvp.Key == currentAchievementTab;
+                kvp.Value.color = isSelected
+                    ? new Color(0.3f, 0.5f, 0.3f, 1f)  // Green for selected
+                    : new Color(0.2f, 0.19f, 0.25f, 1f); // Dark for unselected
+            }
+        }
+
+        private void PopulateAchievementTabs()
+        {
+            if (achievementTabsContainer == null || AchievementManager.Instance == null) return;
+
+            // Clear existing tabs
+            foreach (Transform child in achievementTabsContainer)
+            {
+                Destroy(child.gameObject);
+            }
+            achievementTabButtons.Clear();
+            achievementTabImages.Clear();
+
+            // Create tabs from AchievementManager
+            foreach (var tabId in AchievementManager.Instance.AvailableTabs)
+            {
+                string displayName = Achievement.GetTabDisplayName(tabId);
+                CreateAchievementTab(achievementTabsContainer, tabId, displayName);
+            }
+        }
+
+        private void ShowAchievements()
+        {
+            if (achievementsPanel == null) return;
+
+            currentAchievementTab = Achievement.TAB_ALL;
+            expandedGroups.Clear();
+            PopulateAchievementTabs();
+            UpdateAchievementTabVisuals();
+            RefreshAchievementsPanel();
+            achievementsPanel.SetActive(true);
+            Debug.Log("[UIManager] Showing achievements panel");
+        }
+
+        private void HideAchievements()
+        {
+            if (achievementsPanel == null) return;
+
+            AudioManager.Instance?.PlayButtonClick();
+            achievementsPanel.SetActive(false);
+            Debug.Log("[UIManager] Hiding achievements panel");
+        }
+
+        private void RefreshAchievementsPanel()
+        {
+            if (achievementsListContent == null || AchievementManager.Instance == null) return;
+
+            // Clear existing items
+            foreach (Transform child in achievementsListContent)
+            {
+                Destroy(child.gameObject);
+            }
+
+            // Get filtered achievements
+            var achievements = AchievementManager.Instance.GetAchievementsByTab(currentAchievementTab);
+            int unlockedCount = AchievementManager.Instance.GetUnlockedCount();
+            int totalCount = AchievementManager.Instance.GetTotalCount();
+            int earnedPoints = AchievementManager.Instance.GetEarnedPoints();
+            int totalPoints = AchievementManager.Instance.GetTotalPoints();
+
+            // Update header texts
+            if (achievementsCountText != null)
+            {
+                achievementsCountText.text = $"<size=24>UNLOCKED</size>\n{unlockedCount} / {totalCount}";
+            }
+            if (achievementsPointsText != null)
+            {
+                achievementsPointsText.text = $"<size=24>POINTS</size>\n<color=#FFD700>{earnedPoints}</color> / {totalPoints}";
+            }
+
+            // Group achievements and track which groups we've processed
+            var processedGroups = new HashSet<string>();
+            var ungroupedAchievements = new List<Achievement>();
+
+            foreach (var achievement in achievements)
+            {
+                // Skip hidden achievements that aren't unlocked
+                if (achievement.isHidden)
+                {
+                    var prog = AchievementManager.Instance.GetProgress(achievement.id);
+                    if (prog == null || !prog.isUnlocked) continue;
+                }
+
+                if (!string.IsNullOrEmpty(achievement.groupId))
+                {
+                    if (!processedGroups.Contains(achievement.groupId))
+                    {
+                        processedGroups.Add(achievement.groupId);
+                        CreateAchievementGroup(achievement.groupId);
+                    }
+                }
+                else
+                {
+                    ungroupedAchievements.Add(achievement);
+                }
+            }
+
+            // Add ungrouped achievements
+            foreach (var achievement in ungroupedAchievements)
+            {
+                CreateAchievementEntry(achievement);
+            }
+
+            Debug.Log($"[UIManager] Refreshed achievements: {processedGroups.Count} groups, {ungroupedAchievements.Count} ungrouped");
+        }
+
+        private void CreateAchievementGroup(string groupId)
+        {
+            var groupAchievements = AchievementManager.Instance.GetAchievementsByGroup(groupId);
+            if (groupAchievements.Count == 0) return;
+
+            // Filter by current tab
+            groupAchievements = groupAchievements.FindAll(a =>
+                currentAchievementTab == Achievement.TAB_ALL || a.tab == currentAchievementTab);
+            if (groupAchievements.Count == 0) return;
+
+            string groupName = AchievementManager.Instance.GetGroupDisplayName(groupId);
+            bool isExpanded = expandedGroups.Contains(groupId);
+
+            // Calculate group progress
+            int completedInGroup = 0;
+            int totalPoints = 0;
+            int earnedPoints = 0;
+            int maxTarget = 0;
+            int currentProgress = 0;
+
+            foreach (var a in groupAchievements)
+            {
+                var prog = AchievementManager.Instance.GetProgress(a.id);
+                if (prog != null && prog.isUnlocked)
+                {
+                    completedInGroup++;
+                    earnedPoints += a.points;
+                }
+                totalPoints += a.points;
+                if (a.targetValue > maxTarget) maxTarget = a.targetValue;
+                if (prog != null && prog.currentValue > currentProgress)
+                    currentProgress = prog.currentValue;
+            }
+
+            // Get highest tier for display
+            var highestTier = groupAchievements[groupAchievements.Count - 1].tier;
+            Color tierColor = GetTierColor(highestTier);
+
+            // Group container
+            var groupGO = new GameObject($"Group_{groupId}");
+            groupGO.transform.SetParent(achievementsListContent, false);
+            var groupRect = groupGO.AddComponent<RectTransform>();
+
+            int baseHeight = 160; // Increased to fit date labels above milestones
+            int expandedHeight = baseHeight + (isExpanded ? groupAchievements.Count * 90 : 0);
+
+            // Set RectTransform size explicitly (required for VerticalLayoutGroup positioning)
+            groupRect.sizeDelta = new Vector2(0, expandedHeight);
+
+            var groupLayout = groupGO.AddComponent<LayoutElement>();
+            groupLayout.minHeight = expandedHeight;
+            groupLayout.preferredHeight = expandedHeight;
+
+            // Group header (clickable to expand/collapse)
+            var headerGO = new GameObject("Header");
+            headerGO.transform.SetParent(groupGO.transform, false);
+            var headerRect = headerGO.AddComponent<RectTransform>();
+            headerRect.anchorMin = new Vector2(0, 1);
+            headerRect.anchorMax = new Vector2(1, 1);
+            headerRect.pivot = new Vector2(0.5f, 1);
+            headerRect.anchoredPosition = Vector2.zero;
+            headerRect.sizeDelta = new Vector2(0, 160);
+
+            var headerBg = headerGO.AddComponent<Image>();
+            headerBg.sprite = CreateRoundedRectSprite(100, 100, 12, new Color(0.18f, 0.17f, 0.22f, 1f));
+            headerBg.type = Image.Type.Sliced;
+
+            var headerBtn = headerGO.AddComponent<Button>();
+            headerBtn.targetGraphic = headerBg;
+            var capturedGroupId = groupId;
+            headerBtn.onClick.AddListener(() => ToggleAchievementGroup(capturedGroupId));
+
+            // Expand/collapse indicator
+            var expandGO = new GameObject("ExpandIcon");
+            expandGO.transform.SetParent(headerGO.transform, false);
+            var expandRect = expandGO.AddComponent<RectTransform>();
+            expandRect.anchorMin = new Vector2(0, 0.5f);
+            expandRect.anchorMax = new Vector2(0, 0.5f);
+            expandRect.pivot = new Vector2(0, 0.5f);
+            expandRect.anchoredPosition = new Vector2(15, 0);
+            expandRect.sizeDelta = new Vector2(30, 30);
+
+            var expandText = expandGO.AddComponent<TextMeshProUGUI>();
+            expandText.text = isExpanded ? "\u25BC" : "\u25B6"; // Down or right arrow
+            expandText.fontSize = 24;
+            expandText.alignment = TextAlignmentOptions.Center;
+            expandText.color = Color.white;
+
+            // Group name
+            var nameGO = new GameObject("Name");
+            nameGO.transform.SetParent(headerGO.transform, false);
+            var nameRect = nameGO.AddComponent<RectTransform>();
+            nameRect.anchorMin = new Vector2(0, 0.55f);
+            nameRect.anchorMax = new Vector2(0.6f, 1);
+            nameRect.offsetMin = new Vector2(50, 0);
+            nameRect.offsetMax = Vector2.zero;
+
+            var nameText = nameGO.AddComponent<TextMeshProUGUI>();
+            nameText.text = groupName;
+            nameText.fontSize = 26;
+            nameText.fontStyle = FontStyles.Bold;
+            nameText.alignment = TextAlignmentOptions.MidlineLeft;
+            nameText.color = tierColor;
+
+            // Points badge
+            var pointsGO = new GameObject("Points");
+            pointsGO.transform.SetParent(headerGO.transform, false);
+            var pointsRect = pointsGO.AddComponent<RectTransform>();
+            pointsRect.anchorMin = new Vector2(1, 0.55f);
+            pointsRect.anchorMax = new Vector2(1, 1);
+            pointsRect.pivot = new Vector2(1, 0.5f);
+            pointsRect.anchoredPosition = new Vector2(-15, 0);
+            pointsRect.sizeDelta = new Vector2(120, 40);
+
+            var pointsText = pointsGO.AddComponent<TextMeshProUGUI>();
+            pointsText.text = $"<color=#FFD700>{earnedPoints}</color>/{totalPoints} pts";
+            pointsText.fontSize = 20;
+            pointsText.alignment = TextAlignmentOptions.MidlineRight;
+            pointsText.color = Color.white;
+
+            // Multi-tier progress bar with markers
+            var progressAreaGO = new GameObject("ProgressArea");
+            progressAreaGO.transform.SetParent(headerGO.transform, false);
+            var progressAreaRect = progressAreaGO.AddComponent<RectTransform>();
+            progressAreaRect.anchorMin = new Vector2(0, 0);
+            progressAreaRect.anchorMax = new Vector2(1, 0.55f);
+            progressAreaRect.offsetMin = new Vector2(50, 10);
+            progressAreaRect.offsetMax = new Vector2(-15, 0);
+
+            // Progress bar background - positioned in lower portion to leave room for date labels
+            var progressBgGO = new GameObject("ProgressBg");
+            progressBgGO.transform.SetParent(progressAreaGO.transform, false);
+            var progressBgRect = progressBgGO.AddComponent<RectTransform>();
+            progressBgRect.anchorMin = new Vector2(0, 0);
+            progressBgRect.anchorMax = new Vector2(1, 0.5f);
+            progressBgRect.offsetMin = Vector2.zero;
+            progressBgRect.offsetMax = Vector2.zero;
+
+            var progressBgImg = progressBgGO.AddComponent<Image>();
+            progressBgImg.sprite = CreateRoundedRectSprite(100, 20, 8, new Color(0.1f, 0.1f, 0.12f, 1f));
+            progressBgImg.type = Image.Type.Sliced;
+
+            // Progress fill (green)
+            float fillPercent = maxTarget > 0 ? Mathf.Clamp01((float)currentProgress / maxTarget) : 0;
+            var progressFillGO = new GameObject("ProgressFill");
+            progressFillGO.transform.SetParent(progressBgGO.transform, false);
+            var progressFillRect = progressFillGO.AddComponent<RectTransform>();
+            progressFillRect.anchorMin = Vector2.zero;
+            progressFillRect.anchorMax = new Vector2(fillPercent, 1);
+            progressFillRect.offsetMin = Vector2.zero;
+            progressFillRect.offsetMax = Vector2.zero;
+
+            var progressFillImg = progressFillGO.AddComponent<Image>();
+            progressFillImg.sprite = CreateRoundedRectSprite(100, 20, 8, new Color(0.3f, 0.7f, 0.3f, 1f));
+            progressFillImg.type = Image.Type.Sliced;
+
+            // Milestone markers
+            for (int i = 0; i < groupAchievements.Count; i++)
+            {
+                var a = groupAchievements[i];
+                float markerPos = maxTarget > 0 ? (float)a.targetValue / maxTarget : 0;
+
+                var markerGO = new GameObject($"Marker_{i}");
+                markerGO.transform.SetParent(progressBgGO.transform, false);
+                var markerRect = markerGO.AddComponent<RectTransform>();
+                markerRect.anchorMin = new Vector2(markerPos, 0);
+                markerRect.anchorMax = new Vector2(markerPos, 1);
+                markerRect.pivot = new Vector2(0.5f, 0.5f);
+                markerRect.anchoredPosition = Vector2.zero;
+                markerRect.sizeDelta = new Vector2(24, 24);
+
+                var prog = AchievementManager.Instance.GetProgress(a.id);
+                bool isComplete = prog != null && prog.isUnlocked;
+                Color markerTierColor = GetTierColor(a.tier);
+
+                var markerImg = markerGO.AddComponent<Image>();
+                markerImg.sprite = CreateRoundedRectSprite(24, 24, 12, isComplete ? markerTierColor : new Color(0.3f, 0.3f, 0.35f, 1f));
+
+                // Checkmark or number
+                var markerTextGO = new GameObject("Text");
+                markerTextGO.transform.SetParent(markerGO.transform, false);
+                var markerTextRect = markerTextGO.AddComponent<RectTransform>();
+                markerTextRect.anchorMin = Vector2.zero;
+                markerTextRect.anchorMax = Vector2.one;
+                markerTextRect.offsetMin = Vector2.zero;
+                markerTextRect.offsetMax = Vector2.zero;
+
+                var markerText = markerTextGO.AddComponent<TextMeshProUGUI>();
+                markerText.text = isComplete ? "\u2713" : a.targetValue.ToString();
+                markerText.fontSize = 14;
+                markerText.fontStyle = FontStyles.Bold;
+                markerText.alignment = TextAlignmentOptions.Center;
+                markerText.color = isComplete ? Color.white : new Color(0.6f, 0.6f, 0.6f, 1f);
+
+                // Date label above marker (only if completed)
+                if (isComplete && prog != null)
+                {
+                    var dateLabelGO = new GameObject("DateLabel");
+                    dateLabelGO.transform.SetParent(markerGO.transform, false);
+                    var dateLabelRect = dateLabelGO.AddComponent<RectTransform>();
+                    dateLabelRect.anchorMin = new Vector2(0.5f, 1);
+                    dateLabelRect.anchorMax = new Vector2(0.5f, 1);
+                    dateLabelRect.pivot = new Vector2(0.5f, 0);
+                    dateLabelRect.anchoredPosition = new Vector2(0, 6);
+                    dateLabelRect.sizeDelta = new Vector2(100, 30);
+
+                    var dateText = dateLabelGO.AddComponent<TextMeshProUGUI>();
+                    dateText.text = prog.unlockedAt.ToString("yyyy-MM-dd");
+                    dateText.fontSize = 16;
+                    dateText.fontStyle = FontStyles.Bold;
+                    dateText.alignment = TextAlignmentOptions.Center;
+                    dateText.color = markerTierColor;
+                    dateText.enableWordWrapping = false;
+                    dateText.overflowMode = TextOverflowModes.Overflow;
+                }
+            }
+
+            // Expanded content - individual achievements
+            if (isExpanded)
+            {
+                for (int i = 0; i < groupAchievements.Count; i++)
+                {
+                    var a = groupAchievements[i];
+                    CreateGroupedAchievementEntry(groupGO.transform, a, i, baseHeight);
+                }
+            }
+        }
+
+        private void CreateGroupedAchievementEntry(Transform parent, Achievement achievement, int index, int yOffset)
+        {
+            var progress = AchievementManager.Instance.GetProgress(achievement.id);
+            bool isUnlocked = progress != null && progress.isUnlocked;
+            Color tierColor = GetTierColor(achievement.tier);
+
+            var entryGO = new GameObject($"Entry_{achievement.id}");
+            entryGO.transform.SetParent(parent, false);
+            var entryRect = entryGO.AddComponent<RectTransform>();
+            entryRect.anchorMin = new Vector2(0, 1);
+            entryRect.anchorMax = new Vector2(1, 1);
+            entryRect.pivot = new Vector2(0.5f, 1);
+            entryRect.anchoredPosition = new Vector2(0, -(yOffset + index * 90));
+            entryRect.sizeDelta = new Vector2(-40, 85);
+
+            var entryBg = entryGO.AddComponent<Image>();
+            Color bgColor = isUnlocked ? new Color(tierColor.r * 0.2f, tierColor.g * 0.2f, tierColor.b * 0.2f, 0.8f)
+                                       : new Color(0.12f, 0.11f, 0.14f, 0.8f);
+            entryBg.sprite = CreateRoundedRectSprite(100, 80, 8, bgColor);
+            entryBg.type = Image.Type.Sliced;
+
+            // Tier indicator
+            var tierGO = new GameObject("Tier");
+            tierGO.transform.SetParent(entryGO.transform, false);
+            var tierRect = tierGO.AddComponent<RectTransform>();
+            tierRect.anchorMin = new Vector2(0, 0);
+            tierRect.anchorMax = new Vector2(0, 1);
+            tierRect.pivot = new Vector2(0, 0.5f);
+            tierRect.anchoredPosition = new Vector2(10, 0);
+            tierRect.sizeDelta = new Vector2(50, 50);
+            tierRect.offsetMin = new Vector2(10, 15);
+            tierRect.offsetMax = new Vector2(60, -15);
+
+            var tierImg = tierGO.AddComponent<Image>();
+            tierImg.sprite = CreateRoundedRectSprite(50, 50, 8, tierColor);
+
+            var tierTextGO = new GameObject("Text");
+            tierTextGO.transform.SetParent(tierGO.transform, false);
+            var tierTextRect = tierTextGO.AddComponent<RectTransform>();
+            tierTextRect.anchorMin = Vector2.zero;
+            tierTextRect.anchorMax = Vector2.one;
+            tierTextRect.offsetMin = Vector2.zero;
+            tierTextRect.offsetMax = Vector2.zero;
+
+            var tierText = tierTextGO.AddComponent<TextMeshProUGUI>();
+            tierText.text = isUnlocked ? "\u2713" : achievement.tier.ToString().Substring(0, 1);
+            tierText.fontSize = 24;
+            tierText.fontStyle = FontStyles.Bold;
+            tierText.alignment = TextAlignmentOptions.Center;
+            tierText.color = Color.white;
+
+            // Name and description
+            var textAreaGO = new GameObject("TextArea");
+            textAreaGO.transform.SetParent(entryGO.transform, false);
+            var textAreaRect = textAreaGO.AddComponent<RectTransform>();
+            textAreaRect.anchorMin = new Vector2(0, 0);
+            textAreaRect.anchorMax = new Vector2(1, 1);
+            textAreaRect.offsetMin = new Vector2(70, 5);
+            textAreaRect.offsetMax = new Vector2(-120, -5);
+
+            var nameGO = new GameObject("Name");
+            nameGO.transform.SetParent(textAreaGO.transform, false);
+            var nameRect = nameGO.AddComponent<RectTransform>();
+            nameRect.anchorMin = new Vector2(0, 0.5f);
+            nameRect.anchorMax = new Vector2(1, 1);
+            nameRect.offsetMin = Vector2.zero;
+            nameRect.offsetMax = Vector2.zero;
+
+            var nameText = nameGO.AddComponent<TextMeshProUGUI>();
+            nameText.text = achievement.name;
+            nameText.fontSize = 22;
+            nameText.fontStyle = FontStyles.Bold;
+            nameText.alignment = TextAlignmentOptions.MidlineLeft;
+            nameText.color = isUnlocked ? tierColor : new Color(0.6f, 0.6f, 0.6f, 1f);
+
+            var descGO = new GameObject("Desc");
+            descGO.transform.SetParent(textAreaGO.transform, false);
+            var descRect = descGO.AddComponent<RectTransform>();
+            descRect.anchorMin = new Vector2(0, 0);
+            descRect.anchorMax = new Vector2(1, 0.5f);
+            descRect.offsetMin = Vector2.zero;
+            descRect.offsetMax = Vector2.zero;
+
+            var descText = descGO.AddComponent<TextMeshProUGUI>();
+            descText.text = achievement.description;
+            descText.fontSize = 16;
+            descText.alignment = TextAlignmentOptions.MidlineLeft;
+            descText.color = new Color(0.5f, 0.5f, 0.5f, 1f);
+
+            // Points and date
+            var infoGO = new GameObject("Info");
+            infoGO.transform.SetParent(entryGO.transform, false);
+            var infoRect = infoGO.AddComponent<RectTransform>();
+            infoRect.anchorMin = new Vector2(1, 0);
+            infoRect.anchorMax = new Vector2(1, 1);
+            infoRect.pivot = new Vector2(1, 0.5f);
+            infoRect.anchoredPosition = new Vector2(-10, 0);
+            infoRect.sizeDelta = new Vector2(100, 0);
+
+            var infoText = infoGO.AddComponent<TextMeshProUGUI>();
+            if (isUnlocked)
+            {
+                string dateStr = progress.unlockedAt.ToString("yyyy-MM-dd");
+                infoText.text = $"<color=#FFD700>{achievement.points} pts</color>\n<size=14>{dateStr}</size>";
+            }
+            else
+            {
+                infoText.text = $"<color=#888888>{achievement.points} pts</color>";
+            }
+            infoText.fontSize = 18;
+            infoText.alignment = TextAlignmentOptions.MidlineRight;
+            infoText.color = Color.white;
+        }
+
+        private void ToggleAchievementGroup(string groupId)
+        {
+            AudioManager.Instance?.PlayButtonClick();
+            if (expandedGroups.Contains(groupId))
+                expandedGroups.Remove(groupId);
+            else
+                expandedGroups.Add(groupId);
+            RefreshAchievementsPanel();
+        }
+
+        private void CreateAchievementEntry(Achievement achievement)
+        {
+            var progress = AchievementManager.Instance.GetProgress(achievement.id);
+            bool isUnlocked = progress != null && progress.isUnlocked;
+            int currentValue = progress?.currentValue ?? 0;
+
+            Color tierColor = GetTierColor(achievement.tier);
+            Color bgColor = isUnlocked ? new Color(tierColor.r * 0.25f, tierColor.g * 0.25f, tierColor.b * 0.25f, 1f)
+                                       : new Color(0.14f, 0.13f, 0.17f, 1f);
+
+            var entryGO = new GameObject($"Achievement_{achievement.id}");
+            entryGO.transform.SetParent(achievementsListContent, false);
+            var entryRect = entryGO.AddComponent<RectTransform>();
+            entryRect.sizeDelta = new Vector2(0, 110);
+
+            var entryLayout = entryGO.AddComponent<LayoutElement>();
+            entryLayout.minHeight = 110;
+            entryLayout.preferredHeight = 110;
+
+            var entryBg = entryGO.AddComponent<Image>();
+            entryBg.sprite = CreateRoundedRectSprite(100, 100, 12, bgColor);
+            entryBg.type = Image.Type.Sliced;
+
+            // Tier accent
+            var accentGO = new GameObject("TierAccent");
+            accentGO.transform.SetParent(entryGO.transform, false);
+            var accentRect = accentGO.AddComponent<RectTransform>();
+            accentRect.anchorMin = new Vector2(0, 0);
+            accentRect.anchorMax = new Vector2(0, 1);
+            accentRect.pivot = new Vector2(0, 0.5f);
+            accentRect.anchoredPosition = Vector2.zero;
+            accentRect.sizeDelta = new Vector2(6, 0);
+            accentRect.offsetMin = new Vector2(0, 8);
+            accentRect.offsetMax = new Vector2(6, -8);
+
+            var accentImg = accentGO.AddComponent<Image>();
+            accentImg.color = tierColor;
+
+            // Icon
+            var iconGO = new GameObject("Icon");
+            iconGO.transform.SetParent(entryGO.transform, false);
+            var iconRect = iconGO.AddComponent<RectTransform>();
+            iconRect.anchorMin = new Vector2(0, 0.5f);
+            iconRect.anchorMax = new Vector2(0, 0.5f);
+            iconRect.pivot = new Vector2(0, 0.5f);
+            iconRect.anchoredPosition = new Vector2(18, 0);
+            iconRect.sizeDelta = new Vector2(60, 60);
+
+            var iconBg = iconGO.AddComponent<Image>();
+            iconBg.sprite = CreateRoundedRectSprite(60, 60, 8, tierColor);
+
+            var iconTextGO = new GameObject("IconText");
+            iconTextGO.transform.SetParent(iconGO.transform, false);
+            var iconTextRect = iconTextGO.AddComponent<RectTransform>();
+            iconTextRect.anchorMin = Vector2.zero;
+            iconTextRect.anchorMax = Vector2.one;
+            iconTextRect.offsetMin = Vector2.zero;
+            iconTextRect.offsetMax = Vector2.zero;
+
+            var iconText = iconTextGO.AddComponent<TextMeshProUGUI>();
+            iconText.text = isUnlocked ? "\u2713" : "\u2605";
+            iconText.fontSize = 32;
+            iconText.fontStyle = FontStyles.Bold;
+            iconText.alignment = TextAlignmentOptions.Center;
+            iconText.color = isUnlocked ? Color.white : new Color(0.2f, 0.15f, 0.1f, 1f);
+
+            // Text area
+            var textAreaGO = new GameObject("TextArea");
+            textAreaGO.transform.SetParent(entryGO.transform, false);
+            var textAreaRect = textAreaGO.AddComponent<RectTransform>();
+            textAreaRect.anchorMin = new Vector2(0, 0);
+            textAreaRect.anchorMax = new Vector2(1, 1);
+            textAreaRect.offsetMin = new Vector2(90, 8);
+            textAreaRect.offsetMax = new Vector2(-110, -8);
+
+            // Name
+            var nameGO = new GameObject("Name");
+            nameGO.transform.SetParent(textAreaGO.transform, false);
+            var nameRect = nameGO.AddComponent<RectTransform>();
+            nameRect.anchorMin = new Vector2(0, 0.6f);
+            nameRect.anchorMax = new Vector2(1, 1);
+            nameRect.offsetMin = Vector2.zero;
+            nameRect.offsetMax = Vector2.zero;
+
+            var nameText = nameGO.AddComponent<TextMeshProUGUI>();
+            nameText.text = achievement.name;
+            nameText.fontSize = 24;
+            nameText.fontStyle = FontStyles.Bold;
+            nameText.alignment = TextAlignmentOptions.MidlineLeft;
+            nameText.color = isUnlocked ? tierColor : new Color(0.7f, 0.7f, 0.7f, 1f);
+
+            // Description
+            var descGO = new GameObject("Description");
+            descGO.transform.SetParent(textAreaGO.transform, false);
+            var descRect = descGO.AddComponent<RectTransform>();
+            descRect.anchorMin = new Vector2(0, 0.3f);
+            descRect.anchorMax = new Vector2(1, 0.6f);
+            descRect.offsetMin = Vector2.zero;
+            descRect.offsetMax = Vector2.zero;
+
+            var descText = descGO.AddComponent<TextMeshProUGUI>();
+            descText.text = achievement.description;
+            descText.fontSize = 18;
+            descText.alignment = TextAlignmentOptions.MidlineLeft;
+            descText.color = new Color(0.55f, 0.55f, 0.55f, 1f);
+
+            // Progress or status
+            var statusGO = new GameObject("Status");
+            statusGO.transform.SetParent(textAreaGO.transform, false);
+            var statusRect = statusGO.AddComponent<RectTransform>();
+            statusRect.anchorMin = new Vector2(0, 0);
+            statusRect.anchorMax = new Vector2(1, 0.3f);
+            statusRect.offsetMin = Vector2.zero;
+            statusRect.offsetMax = Vector2.zero;
+
+            if (!isUnlocked)
+            {
+                // Progress bar (green)
+                var progressBgGO = new GameObject("ProgressBg");
+                progressBgGO.transform.SetParent(statusGO.transform, false);
+                var progressBgRect = progressBgGO.AddComponent<RectTransform>();
+                progressBgRect.anchorMin = new Vector2(0, 0.2f);
+                progressBgRect.anchorMax = new Vector2(0.7f, 0.8f);
+                progressBgRect.offsetMin = Vector2.zero;
+                progressBgRect.offsetMax = Vector2.zero;
+
+                var progressBgImg = progressBgGO.AddComponent<Image>();
+                progressBgImg.sprite = CreateRoundedRectSprite(100, 16, 6, new Color(0.1f, 0.1f, 0.12f, 1f));
+                progressBgImg.type = Image.Type.Sliced;
+
+                float fillPct = achievement.targetValue > 0 ? Mathf.Clamp01((float)currentValue / achievement.targetValue) : 0;
+                var progressFillGO = new GameObject("ProgressFill");
+                progressFillGO.transform.SetParent(progressBgGO.transform, false);
+                var progressFillRect = progressFillGO.AddComponent<RectTransform>();
+                progressFillRect.anchorMin = Vector2.zero;
+                progressFillRect.anchorMax = new Vector2(fillPct, 1);
+                progressFillRect.offsetMin = Vector2.zero;
+                progressFillRect.offsetMax = Vector2.zero;
+
+                var progressFillImg = progressFillGO.AddComponent<Image>();
+                progressFillImg.sprite = CreateRoundedRectSprite(100, 16, 6, new Color(0.3f, 0.7f, 0.3f, 1f));
+                progressFillImg.type = Image.Type.Sliced;
+
+                var progressTextGO = new GameObject("ProgressText");
+                progressTextGO.transform.SetParent(statusGO.transform, false);
+                var progressTextRect = progressTextGO.AddComponent<RectTransform>();
+                progressTextRect.anchorMin = new Vector2(0.72f, 0);
+                progressTextRect.anchorMax = new Vector2(1, 1);
+                progressTextRect.offsetMin = Vector2.zero;
+                progressTextRect.offsetMax = Vector2.zero;
+
+                var progressText = progressTextGO.AddComponent<TextMeshProUGUI>();
+                progressText.text = $"{currentValue}/{achievement.targetValue}";
+                progressText.fontSize = 16;
+                progressText.alignment = TextAlignmentOptions.MidlineLeft;
+                progressText.color = new Color(0.5f, 0.5f, 0.5f, 1f);
+            }
+
+            // Points and date (right side)
+            var infoGO = new GameObject("Info");
+            infoGO.transform.SetParent(entryGO.transform, false);
+            var infoRect = infoGO.AddComponent<RectTransform>();
+            infoRect.anchorMin = new Vector2(1, 0);
+            infoRect.anchorMax = new Vector2(1, 1);
+            infoRect.pivot = new Vector2(1, 0.5f);
+            infoRect.anchoredPosition = new Vector2(-12, 0);
+            infoRect.sizeDelta = new Vector2(90, 0);
+
+            var infoText = infoGO.AddComponent<TextMeshProUGUI>();
+            if (isUnlocked)
+            {
+                string dateStr = progress.unlockedAt.ToString("yyyy-MM-dd");
+                infoText.text = $"<color=#FFD700>{achievement.points}</color>\n<size=14>{dateStr}</size>";
+            }
+            else
+            {
+                infoText.text = $"<color=#666666>{achievement.points}</color>\n<size=14>pts</size>";
+            }
+            infoText.fontSize = 22;
+            infoText.fontStyle = FontStyles.Bold;
+            infoText.alignment = TextAlignmentOptions.Center;
+            infoText.color = Color.white;
+        }
+
+        private Color GetTierColor(AchievementTier tier)
+        {
+            switch (tier)
+            {
+                case AchievementTier.Bronze:
+                    return new Color(0.8f, 0.5f, 0.2f, 1f);
+                case AchievementTier.Silver:
+                    return new Color(0.7f, 0.72f, 0.78f, 1f);
+                case AchievementTier.Gold:
+                    return new Color(1f, 0.84f, 0f, 1f);
+                case AchievementTier.Platinum:
+                    return new Color(0.5f, 0.82f, 0.88f, 1f);
+                default:
+                    return Color.white;
+            }
+        }
+
+        private string GetRewardString(AchievementReward[] rewards)
+        {
+            if (rewards == null || rewards.Length == 0) return "";
+
+            var parts = new List<string>();
+            foreach (var reward in rewards)
+            {
+                switch (reward.type)
+                {
+                    case RewardType.Coins:
+                        parts.Add($"<color=#FFD700>{reward.amount} Coins</color>");
+                        break;
+                    case RewardType.UndoToken:
+                        parts.Add($"<color=#4FC3F7>+{reward.amount} Undo</color>");
+                        break;
+                    case RewardType.SkipToken:
+                        parts.Add($"<color=#81C784>+{reward.amount} Skip</color>");
+                        break;
+                    case RewardType.Trophy:
+                        parts.Add("<color=#E1BEE7>Trophy</color>");
+                        break;
+                    default:
+                        parts.Add($"+{reward.amount} {reward.type}");
+                        break;
+                }
+            }
+            return string.Join("  ", parts);
+        }
+
+        #endregion
+
         private void OnDestroy()
         {
+            if (achievementCoroutine != null)
+                StopCoroutine(achievementCoroutine);
+
+            if (AchievementManager.Instance != null)
+            {
+                AchievementManager.Instance.OnAchievementUnlocked -= OnAchievementUnlocked;
+            }
+
             if (Instance == this)
                 Instance = null;
         }

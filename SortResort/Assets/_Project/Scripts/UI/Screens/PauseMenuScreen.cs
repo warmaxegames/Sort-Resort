@@ -95,7 +95,21 @@ namespace SortResort.UI
             Hide(true);
             GameManager.Instance?.ResumeGame(); // Unpause first
             GameManager.Instance?.SetState(GameState.Playing);
-            LevelManager.Instance?.RestartLevel();
+
+            // Fade out, restart level, then fade back in for visual feedback
+            if (TransitionManager.Instance != null)
+            {
+                TransitionManager.Instance.FadeOut(() =>
+                {
+                    LevelManager.Instance?.RestartLevel();
+                    TransitionManager.Instance.FadeIn();
+                });
+            }
+            else
+            {
+                // Fallback if no TransitionManager
+                LevelManager.Instance?.RestartLevel();
+            }
         }
 
         private void OnSettingsClicked()
@@ -111,7 +125,24 @@ namespace SortResort.UI
             PlayButtonSound();
             Hide(true);
             GameManager.Instance?.ResumeGame(); // Unpause first
-            GameManager.Instance?.GoToLevelSelection(GameManager.Instance?.CurrentWorldId ?? "island");
+            GameManager.Instance?.SetState(GameState.LevelSelection);
+
+            // Fade out, switch to level select, then fade back in
+            if (TransitionManager.Instance != null)
+            {
+                TransitionManager.Instance.FadeOut(() =>
+                {
+                    UIManager.Instance?.ShowLevelSelect();
+                    LevelManager.Instance?.ClearLevel();
+                    TransitionManager.Instance.FadeIn();
+                });
+            }
+            else
+            {
+                // Fallback if no TransitionManager
+                UIManager.Instance?.ShowLevelSelect();
+                LevelManager.Instance?.ClearLevel();
+            }
         }
 
         private void PlayButtonSound()

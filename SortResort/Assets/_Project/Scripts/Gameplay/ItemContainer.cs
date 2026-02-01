@@ -577,6 +577,18 @@ namespace SortResort
                 Debug.Log($"[ItemContainer] ProcessMatch item {i}: {(item != null ? item.ItemId : "NULL")}, state: {(item != null ? item.CurrentState.ToString() : "N/A")}");
             }
 
+            // Spawn match effect at center of matched items
+            var transforms = new List<Transform>();
+            foreach (var item in matchedItems)
+            {
+                if (item != null)
+                    transforms.Add(item.transform);
+            }
+            if (transforms.Count > 0)
+            {
+                MatchEffect.SpawnAtCenter(transforms.ToArray());
+            }
+
             // Play match sound
             AudioManager.Instance?.PlayMatchSound();
 

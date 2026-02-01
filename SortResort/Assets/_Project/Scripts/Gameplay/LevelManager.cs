@@ -51,15 +51,35 @@ namespace SortResort
         // Star thresholds
         private int[] starThresholds;
 
+        // Undo system
+        private Stack<MoveRecord> moveHistory = new Stack<MoveRecord>();
+        private bool canUndo = false;
+
+        // Timer system
+        private float timeRemaining;
+        private float totalTimeLimit;
+        private bool timerActive = false;
+        private bool timerFrozen = false;
+        private bool timerEnabled = true;
+
         // Properties
         public LevelData CurrentLevel => currentLevel;
+        public string CurrentWorldId => currentWorldId;
+        public int CurrentLevelNumber => currentLevelNumber;
+        public float TimeRemaining => timeRemaining;
+        public float TotalTimeLimit => totalTimeLimit;
+        public bool IsTimerActive => timerActive && timerEnabled;
+        public bool IsTimerFrozen => timerFrozen;
         public int ItemsRemaining => itemsRemaining;
         public int MatchesMade => matchesMade;
+        public bool CanUndo => canUndo && moveHistory.Count > 0;
 
         // Events
         public event Action OnLevelLoaded;
         public event Action OnLevelCleared;
         public event Action<int> OnItemsRemainingChanged;
+        public event Action<bool> OnUndoAvailableChanged;
+        public event Action<float> OnTimerTick; // Fires every second with time remaining
 
         private void Awake()
         {
@@ -115,6 +135,26 @@ namespace SortResort
         {
             LoadItemDatabase();
             InitializeItemPool();
+
+            // Subscribe to game events for timer pause/resume
+            GameEvents.OnGamePaused += OnGamePaused;
+            GameEvents.OnGameResumed += OnGameResumed;
+        }
+
+        private void Update()
+        {
+            UpdateTimer();
+        }
+
+        private void OnGamePaused()
+        {
+            // Timer automatically pauses when Time.timeScale = 0
+            // but we track state for UI purposes
+        }
+
+        private void OnGameResumed()
+        {
+            // Timer automatically resumes when Time.timeScale = 1
         }
 
         #region Database Loading
@@ -301,10 +341,117 @@ namespace SortResort
             itemsRemaining = totalItemsAtStart;
             matchesMade = 0;
 
-            Debug.Log($"[LevelManager] Level loaded: {worldId} #{levelNumber}, {totalItemsAtStart} items");
+            // Initialize timer if level has time limit
+            InitializeTimer();
+
+            Debug.Log($"[LevelManager] Level loaded: {worldId} #{levelNumber}, {totalItemsAtStart} items, timer: {(timerActive ? $"{totalTimeLimit}s" : "disabled")}");
 
             OnLevelLoaded?.Invoke();
             GameEvents.InvokeLevelStarted(levelNumber);
+        }
+
+        /// <summary>
+        /// Initialize timer for current level
+        /// </summary>
+        private void InitializeTimer()
+        {
+            // Check if timer is enabled in settings
+            timerEnabled = SaveManager.Instance?.IsTimerEnabled() ?? true;
+
+            // Check if level has a time limit
+            if (currentLevel != null && currentLevel.HasTimeLimit && timerEnabled)
+            {
+                totalTimeLimit = currentLevel.time_limit_seconds;
+                timeRemaining = totalTimeLimit;
+                timerActive = true;
+                timerFrozen = false;
+
+                // Fire initial timer event
+                GameEvents.InvokeTimerUpdated(timeRemaining);
+            }
+            else
+            {
+                totalTimeLimit = 0;
+                timeRemaining = 0;
+                timerActive = false;
+                timerFrozen = false;
+            }
+        }
+
+        /// <summary>
+        /// Update timer countdown
+        /// </summary>
+        private void UpdateTimer()
+        {
+            if (!timerActive || timerFrozen || !timerEnabled) return;
+
+            // Only update if game is playing
+            if (GameManager.Instance?.CurrentState != GameState.Playing) return;
+
+            // Countdown
+            timeRemaining -= Time.deltaTime;
+
+            // Fire timer update event
+            GameEvents.InvokeTimerUpdated(timeRemaining);
+            OnTimerTick?.Invoke(timeRemaining);
+
+            // Check for timer expiration
+            if (timeRemaining <= 0)
+            {
+                timeRemaining = 0;
+                timerActive = false;
+                OnTimerExpired();
+            }
+        }
+
+        /// <summary>
+        /// Called when timer reaches zero
+        /// </summary>
+        private void OnTimerExpired()
+        {
+            Debug.Log("[LevelManager] Timer expired - level failed!");
+            GameEvents.InvokeTimerExpired();
+            GameManager.Instance?.FailLevel();
+        }
+
+        /// <summary>
+        /// Freeze the timer (for timer freeze power-up)
+        /// </summary>
+        public void FreezeTimer(float duration)
+        {
+            if (!timerActive) return;
+
+            StartCoroutine(FreezeTimerCoroutine(duration));
+        }
+
+        private System.Collections.IEnumerator FreezeTimerCoroutine(float duration)
+        {
+            timerFrozen = true;
+            GameEvents.InvokeTimerFrozen(true);
+            Debug.Log($"[LevelManager] Timer frozen for {duration}s");
+
+            yield return new WaitForSeconds(duration);
+
+            timerFrozen = false;
+            GameEvents.InvokeTimerFrozen(false);
+            Debug.Log("[LevelManager] Timer unfrozen");
+        }
+
+        /// <summary>
+        /// Add time to the timer (for time bonus power-up)
+        /// </summary>
+        public void AddTime(float seconds)
+        {
+            if (!timerActive) return;
+
+            timeRemaining += seconds;
+            if (timeRemaining > totalTimeLimit)
+            {
+                timeRemaining = totalTimeLimit; // Cap at original time
+            }
+
+            GameEvents.InvokeTimerUpdated(timeRemaining);
+            Debug.Log($"[LevelManager] Added {seconds}s to timer, now {timeRemaining}s");
         }
 
         /// <summary>
@@ -380,6 +527,16 @@ namespace SortResort
 
             // Release all pooled items
             itemPool?.ReleaseAll();
+
+            // Clear undo history
+            moveHistory.Clear();
+            UpdateUndoAvailable(false);
+
+            // Reset timer
+            timerActive = false;
+            timerFrozen = false;
+            timeRemaining = 0;
+            totalTimeLimit = 0;
 
             currentLevel = null;
             itemsRemaining = 0;
@@ -494,6 +651,9 @@ namespace SortResort
             // while items are still animating on screen.
 
             Debug.Log($"[LevelManager] Match! {count}x {itemId}, total matches: {matchesMade}");
+
+            // Clear undo history - can't undo after a match
+            ClearMoveHistory();
 
             // Increment match count in GameManager
             GameManager.Instance?.IncrementMatchCount(itemId);
@@ -629,6 +789,109 @@ namespace SortResort
 
         #endregion
 
+        #region Undo System
+
+        /// <summary>
+        /// Record a move for potential undo
+        /// </summary>
+        public void RecordMove(Item item, ItemContainer fromContainer, int fromSlot, int fromRow,
+                               ItemContainer toContainer, int toSlot, int toRow)
+        {
+            var record = new MoveRecord
+            {
+                item = item,
+                fromContainer = fromContainer,
+                fromSlot = fromSlot,
+                fromRow = fromRow,
+                toContainer = toContainer,
+                toSlot = toSlot,
+                toRow = toRow
+            };
+
+            moveHistory.Push(record);
+            UpdateUndoAvailable(true);
+
+            Debug.Log($"[LevelManager] Move recorded: {item.ItemId} from {fromContainer?.ContainerId}[{fromSlot},{fromRow}] to {toContainer?.ContainerId}[{toSlot},{toRow}]. History count: {moveHistory.Count}");
+        }
+
+        /// <summary>
+        /// Clear move history (after a match, items can't be undone)
+        /// </summary>
+        public void ClearMoveHistory()
+        {
+            moveHistory.Clear();
+            UpdateUndoAvailable(false);
+            Debug.Log("[LevelManager] Move history cleared (match occurred)");
+        }
+
+        /// <summary>
+        /// Undo the last move
+        /// </summary>
+        public bool UndoLastMove()
+        {
+            if (moveHistory.Count == 0)
+            {
+                Debug.Log("[LevelManager] No moves to undo");
+                return false;
+            }
+
+            var record = moveHistory.Pop();
+
+            // Check if item still exists and is valid
+            if (record.item == null || record.item.IsMatched)
+            {
+                Debug.Log("[LevelManager] Cannot undo - item is null or matched");
+                UpdateUndoAvailable(moveHistory.Count > 0);
+                return false;
+            }
+
+            // Check if source container still exists
+            if (record.fromContainer == null)
+            {
+                Debug.Log("[LevelManager] Cannot undo - source container is null");
+                UpdateUndoAvailable(moveHistory.Count > 0);
+                return false;
+            }
+
+            Debug.Log($"[LevelManager] Undoing move: {record.item.ItemId} back to {record.fromContainer.ContainerId}[{record.fromSlot},{record.fromRow}]");
+
+            // Remove item from current position
+            if (record.toContainer != null)
+            {
+                record.toContainer.RemoveItemFromSlot(record.item, triggerRowAdvance: false);
+            }
+
+            // Place item back in original position
+            bool success = record.fromContainer.PlaceItemInRow(record.item, record.fromSlot, record.fromRow);
+
+            if (success)
+            {
+                // Decrement move count
+                GameManager.Instance?.DecrementMoveCount();
+
+                // Play a sound for feedback
+                AudioManager.Instance?.PlayDropSound();
+
+                Debug.Log($"[LevelManager] Undo successful. Remaining history: {moveHistory.Count}");
+            }
+            else
+            {
+                Debug.LogWarning("[LevelManager] Undo failed - could not place item back");
+            }
+
+            UpdateUndoAvailable(moveHistory.Count > 0);
+            return success;
+        }
+
+        private void UpdateUndoAvailable(bool available)
+        {
+            canUndo = available;
+            // Always fire event to ensure UI stays in sync
+            OnUndoAvailableChanged?.Invoke(available);
+        }
+
+        #endregion
+
         private void OnDestroy()
         {
             // Unsubscribe from container events
@@ -640,6 +903,10 @@ namespace SortResort
                     container.OnContainerEmpty -= OnContainerBecameEmpty;
                 }
             }
+
+            // Unsubscribe from game events
+            GameEvents.OnGamePaused -= OnGamePaused;
+            GameEvents.OnGameResumed -= OnGameResumed;
 
             itemPool?.Clear();
 
@@ -664,5 +931,19 @@ namespace SortResort
         public string sprite;
         public string world;
         public int unlock_level;
+    }
+
+    /// <summary>
+    /// Record of a single move for undo functionality
+    /// </summary>
+    public struct MoveRecord
+    {
+        public Item item;
+        public ItemContainer fromContainer;
+        public int fromSlot;
+        public int fromRow;
+        public ItemContainer toContainer;
+        public int toSlot;
+        public int toRow;
     }
 }

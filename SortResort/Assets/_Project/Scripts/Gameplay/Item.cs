@@ -346,9 +346,20 @@ namespace SortResort
                 // Play drop sound
                 AudioManager.Instance?.PlayDropSound();
 
-                // Only set to Idle if not already Matched (match may have been triggered by PlaceItemInSlot)
+                // Only record move for undo if no match occurred
+                // (match is triggered inside PlaceItemInSlot, so check state here)
                 if (currentState != ItemState.Matched)
                 {
+                    LevelManager.Instance?.RecordMove(
+                        this,
+                        originalContainer,
+                        originalSlot?.SlotIndex ?? 0,
+                        originalSlot?.Row ?? 0,
+                        container,
+                        slot.SlotIndex,
+                        slot.Row
+                    );
+
                     SetState(ItemState.Idle);
                 }
 

@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 6cd69fc6b800943489aa940595300113
+guid: 17555a43aa5aa85439e83cd016c070d6
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 7188444569790963180
-    second: cat_mascot_0
+      213: 5614197907116071675
+    second: next_level_button_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -46,7 +46,7 @@ TextureImporter:
   nPOTScale: 0
   lightmap: 0
   compressionQuality: 50
-  spriteMode: 1
+  spriteMode: 2
   spriteExtrude: 1
   spriteMeshType: 1
   alignment: 0
@@ -139,13 +139,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: cat_mascot_0
+      name: next_level_button_0
       rect:
         serializedVersion: 2
         x: 0
-        y: 5
-        width: 570
-        height: 800
+        y: 0
+        width: 298
+        height: 190
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -154,8 +154,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: cedd9fd004c72c360800000000000000
-      internalID: 7188444569790963180
+      spriteID: bfa15605043a9ed40800000000000000
+      internalID: 5614197907116071675
       vertices: []
       indices: 
       edges: []
@@ -164,7 +164,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 5e97eb03825dee720800000000000000
+    spriteID: 
     internalID: 0
     vertices: []
     indices: 
@@ -174,7 +174,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      cat_mascot_0: 7188444569790963180
+      next_level_button_0: 5614197907116071675
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

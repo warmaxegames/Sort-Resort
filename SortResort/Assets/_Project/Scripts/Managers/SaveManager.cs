@@ -52,6 +52,15 @@ namespace SortResort
                 {
                     string json = PlayerPrefs.GetString(SAVE_KEY);
                     currentSaveData = JsonUtility.FromJson<SaveData>(json);
+
+                    // Migrate old save data - check if timerEnabled field existed
+                    // JsonUtility sets missing bools to false, but we want true as default
+                    if (!json.Contains("timerEnabled"))
+                    {
+                        currentSaveData.timerEnabled = true;
+                        Debug.Log("[SaveManager] Migrated old save: timerEnabled set to true");
+                    }
+
                     Debug.Log("[SaveManager] Game loaded successfully");
                 }
                 else
@@ -208,6 +217,18 @@ namespace SortResort
             SaveGame();
         }
 
+        // Timer Setting
+        public bool IsTimerEnabled()
+        {
+            return currentSaveData.timerEnabled;
+        }
+
+        public void SetTimerEnabled(bool enabled)
+        {
+            currentSaveData.timerEnabled = enabled;
+            SaveGame();
+        }
+
         // Reset All Progress
         public void ResetAllProgress()
         {
@@ -259,12 +280,14 @@ namespace SortResort
 
         // Settings
         public bool hapticsEnabled = true;
+        public bool timerEnabled = true; // Timer countdown feature (can be disabled for relaxed gameplay)
 
         public SaveData()
         {
             playerId = System.Guid.NewGuid().ToString();
             lastPlayedTime = DateTime.Now;
             hapticsEnabled = true;
+            timerEnabled = true;
         }
     }
 
