@@ -1,489 +1,293 @@
 {
-  "id": 4,
-  "world_id": "island",
-  "name": "level_004",
-  "star_move_thresholds": [12, 18, 24],
-  "time_limit_seconds": 36,
-  "containers": [
-    {
-      "id": "train_left_1",
-      "position": {"x": 240, "y": -396},
-      "container_type": "standard",
-      "container_image": "island_container",
-      "slot_count": 3,
-      "max_rows_per_slot": 1,
-      "is_locked": false,
-      "is_moving": true,
-      "move_type": "carousel",
-      "move_direction": "down",
-      "move_speed": 60,
-      "move_distance": 1980,
-      "initial_items": [
-        {"id": "coconut", "row": 0, "slot": 0},
-        {"id": "coconut", "row": 0, "slot": 1}
-      ]
-    },
-    {
-      "id": "train_left_2",
-      "position": {"x": 240, "y": -198},
-      "container_type": "standard",
-      "container_image": "island_container",
-      "slot_count": 3,
-      "max_rows_per_slot": 1,
-      "is_locked": false,
-      "is_moving": true,
-      "move_type": "carousel",
-      "move_direction": "down",
-      "move_speed": 60,
-      "move_distance": 1980,
-      "initial_items": [
-        {"id": "pineapple", "row": 0, "slot": 1}
-      ]
-    },
-    {
-      "id": "train_left_3",
-      "position": {"x": 240, "y": 0},
-      "container_type": "standard",
-      "container_image": "island_container",
-      "slot_count": 3,
-      "max_rows_per_slot": 1,
-      "is_locked": false,
-      "is_moving": true,
-      "move_type": "carousel",
-      "move_direction": "down",
-      "move_speed": 60,
-      "move_distance": 1980,
-      "initial_items": [
-        {"id": "coconut", "row": 0, "slot": 0},
-        {"id": "pineapple", "row": 0, "slot": 1}
-      ]
-    },
-    {
-      "id": "train_left_4",
-      "position": {"x": 240, "y": 198},
-      "container_type": "standard",
-      "container_image": "island_container",
-      "slot_count": 3,
-      "max_rows_per_slot": 1,
-      "is_locked": false,
-      "is_moving": true,
-      "move_type": "carousel",
-      "move_direction": "down",
-      "move_speed": 60,
-      "move_distance": 1980,
-      "initial_items": [
-        {"id": "pineapple", "row": 0, "slot": 0},
-        {"id": "sunscreen", "row": 0, "slot": 1}
-      ]
-    },
-    {
-      "id": "train_left_5",
-      "position": {"x": 240, "y": 396},
-      "container_type": "standard",
-      "container_image": "island_container",
-      "slot_count": 3,
-      "max_rows_per_slot": 1,
-      "is_locked": false,
-      "is_moving": true,
-      "move_type": "carousel",
-      "move_direction": "down",
-      "move_speed": 60,
-      "move_distance": 1980,
-      "initial_items": [
-        {"id": "sunscreen", "row": 0, "slot": 1}
-      ]
-    },
-    {
-      "id": "train_left_6",
-      "position": {"x": 240, "y": 594},
-      "container_type": "standard",
-      "container_image": "island_container",
-      "slot_count": 3,
-      "max_rows_per_slot": 1,
-      "is_locked": false,
-      "is_moving": true,
-      "move_type": "carousel",
-      "move_direction": "down",
-      "move_speed": 60,
-      "move_distance": 1980,
-      "initial_items": []
-    },
-    {
-      "id": "train_left_7",
-      "position": {"x": 240, "y": 792},
-      "container_type": "standard",
-      "container_image": "island_container",
-      "slot_count": 3,
-      "max_rows_per_slot": 1,
-      "is_locked": false,
-      "is_moving": true,
-      "move_type": "carousel",
-      "move_direction": "down",
-      "move_speed": 60,
-      "move_distance": 1980,
-      "initial_items": []
-    },
-    {
-      "id": "train_left_8",
-      "position": {"x": 240, "y": 990},
-      "container_type": "standard",
-      "container_image": "island_container",
-      "slot_count": 3,
-      "max_rows_per_slot": 1,
-      "is_locked": false,
-      "is_moving": true,
-      "move_type": "carousel",
-      "move_direction": "down",
-      "move_speed": 60,
-      "move_distance": 1980,
-      "initial_items": []
-    },
-    {
-      "id": "train_left_9",
-      "position": {"x": 240, "y": 1188},
-      "container_type": "standard",
-      "container_image": "island_container",
-      "slot_count": 3,
-      "max_rows_per_slot": 1,
-      "is_locked": false,
-      "is_moving": true,
-      "move_type": "carousel",
-      "move_direction": "down",
-      "move_speed": 60,
-      "move_distance": 1980,
-      "initial_items": []
-    },
-    {
-      "id": "train_left_10",
-      "position": {"x": 240, "y": 1386},
-      "container_type": "standard",
-      "container_image": "island_container",
-      "slot_count": 3,
-      "max_rows_per_slot": 1,
-      "is_locked": false,
-      "is_moving": true,
-      "move_type": "carousel",
-      "move_direction": "down",
-      "move_speed": 60,
-      "move_distance": 1980,
-      "initial_items": []
-    },
-    {
-      "id": "train_middle_1",
-      "position": {"x": 540, "y": -396},
-      "container_type": "standard",
-      "container_image": "island_container",
-      "slot_count": 3,
-      "max_rows_per_slot": 1,
-      "is_locked": false,
-      "is_moving": true,
-      "move_type": "carousel",
-      "move_direction": "up",
-      "move_speed": 60,
-      "move_distance": 1980,
-      "initial_items": [
-        {"id": "beachball_mixed", "row": 0, "slot": 0},
-        {"id": "beachball_mixed", "row": 0, "slot": 2}
-      ]
-    },
-    {
-      "id": "train_middle_2",
-      "position": {"x": 540, "y": -198},
-      "container_type": "standard",
-      "container_image": "island_container",
-      "slot_count": 3,
-      "max_rows_per_slot": 1,
-      "is_locked": false,
-      "is_moving": true,
-      "move_type": "carousel",
-      "move_direction": "up",
-      "move_speed": 60,
-      "move_distance": 1980,
-      "initial_items": [
-        {"id": "beachball_mixed", "row": 0, "slot": 1}
-      ]
-    },
-    {
-      "id": "train_middle_3",
-      "position": {"x": 540, "y": 0},
-      "container_type": "standard",
-      "container_image": "island_container",
-      "slot_count": 3,
-      "max_rows_per_slot": 1,
-      "is_locked": false,
-      "is_moving": true,
-      "move_type": "carousel",
-      "move_direction": "up",
-      "move_speed": 60,
-      "move_distance": 1980,
-      "initial_items": [
-        {"id": "flipflops", "row": 0, "slot": 0},
-        {"id": "flipflops", "row": 0, "slot": 2}
-      ]
-    },
-    {
-      "id": "train_middle_4",
-      "position": {"x": 540, "y": 198},
-      "container_type": "standard",
-      "container_image": "island_container",
-      "slot_count": 3,
-      "max_rows_per_slot": 1,
-      "is_locked": false,
-      "is_moving": true,
-      "move_type": "carousel",
-      "move_direction": "up",
-      "move_speed": 60,
-      "move_distance": 1980,
-      "initial_items": [
-        {"id": "flipflops", "row": 0, "slot": 1}
-      ]
-    },
-    {
-      "id": "train_middle_5",
-      "position": {"x": 540, "y": 396},
-      "container_type": "standard",
-      "container_image": "island_container",
-      "slot_count": 3,
-      "max_rows_per_slot": 1,
-      "is_locked": false,
-      "is_moving": true,
-      "move_type": "carousel",
-      "move_direction": "up",
-      "move_speed": 60,
-      "move_distance": 1980,
-      "initial_items": []
-    },
-    {
-      "id": "train_middle_6",
-      "position": {"x": 540, "y": 594},
-      "container_type": "standard",
-      "container_image": "island_container",
-      "slot_count": 3,
-      "max_rows_per_slot": 1,
-      "is_locked": false,
-      "is_moving": true,
-      "move_type": "carousel",
-      "move_direction": "up",
-      "move_speed": 60,
-      "move_distance": 1980,
-      "initial_items": []
-    },
-    {
-      "id": "train_middle_7",
-      "position": {"x": 540, "y": 792},
-      "container_type": "standard",
-      "container_image": "island_container",
-      "slot_count": 3,
-      "max_rows_per_slot": 1,
-      "is_locked": false,
-      "is_moving": true,
-      "move_type": "carousel",
-      "move_direction": "up",
-      "move_speed": 60,
-      "move_distance": 1980,
-      "initial_items": []
-    },
-    {
-      "id": "train_middle_8",
-      "position": {"x": 540, "y": 990},
-      "container_type": "standard",
-      "container_image": "island_container",
-      "slot_count": 3,
-      "max_rows_per_slot": 1,
-      "is_locked": false,
-      "is_moving": true,
-      "move_type": "carousel",
-      "move_direction": "up",
-      "move_speed": 60,
-      "move_distance": 1980,
-      "initial_items": []
-    },
-    {
-      "id": "train_middle_9",
-      "position": {"x": 540, "y": 1188},
-      "container_type": "standard",
-      "container_image": "island_container",
-      "slot_count": 3,
-      "max_rows_per_slot": 1,
-      "is_locked": false,
-      "is_moving": true,
-      "move_type": "carousel",
-      "move_direction": "up",
-      "move_speed": 60,
-      "move_distance": 1980,
-      "initial_items": []
-    },
-    {
-      "id": "train_middle_10",
-      "position": {"x": 540, "y": 1386},
-      "container_type": "standard",
-      "container_image": "island_container",
-      "slot_count": 3,
-      "max_rows_per_slot": 1,
-      "is_locked": false,
-      "is_moving": true,
-      "move_type": "carousel",
-      "move_direction": "up",
-      "move_speed": 60,
-      "move_distance": 1980,
-      "initial_items": []
-    },
-    {
-      "id": "train_right_1",
-      "position": {"x": 840, "y": -396},
-      "container_type": "standard",
-      "container_image": "island_container",
-      "slot_count": 3,
-      "max_rows_per_slot": 1,
-      "is_locked": false,
-      "is_moving": true,
-      "move_type": "carousel",
-      "move_direction": "down",
-      "move_speed": 60,
-      "move_distance": 1980,
-      "initial_items": [
-        {"id": "sunscreen", "row": 0, "slot": 1}
-      ]
-    },
-    {
-      "id": "train_right_2",
-      "position": {"x": 840, "y": -198},
-      "container_type": "standard",
-      "container_image": "island_container",
-      "slot_count": 3,
-      "max_rows_per_slot": 1,
-      "is_locked": false,
-      "is_moving": true,
-      "move_type": "carousel",
-      "move_direction": "down",
-      "move_speed": 60,
-      "move_distance": 1980,
-      "initial_items": [
-        {"id": "sunhat", "row": 0, "slot": 0},
-        {"id": "sunhat", "row": 0, "slot": 2}
-      ]
-    },
-    {
-      "id": "train_right_3",
-      "position": {"x": 840, "y": 0},
-      "container_type": "standard",
-      "container_image": "island_container",
-      "slot_count": 3,
-      "max_rows_per_slot": 1,
-      "is_locked": false,
-      "is_moving": true,
-      "move_type": "carousel",
-      "move_direction": "down",
-      "move_speed": 60,
-      "move_distance": 1980,
-      "initial_items": [
-        {"id": "sunhat", "row": 0, "slot": 1}
-      ]
-    },
-    {
-      "id": "train_right_4",
-      "position": {"x": 840, "y": 198},
-      "container_type": "standard",
-      "container_image": "island_container",
-      "slot_count": 3,
-      "max_rows_per_slot": 1,
-      "is_locked": false,
-      "is_moving": true,
-      "move_type": "carousel",
-      "move_direction": "down",
-      "move_speed": 60,
-      "move_distance": 1980,
-      "initial_items": []
-    },
-    {
-      "id": "train_right_5",
-      "position": {"x": 840, "y": 396},
-      "container_type": "standard",
-      "container_image": "island_container",
-      "slot_count": 3,
-      "max_rows_per_slot": 1,
-      "is_locked": false,
-      "is_moving": true,
-      "move_type": "carousel",
-      "move_direction": "down",
-      "move_speed": 60,
-      "move_distance": 1980,
-      "initial_items": []
-    },
-    {
-      "id": "train_right_6",
-      "position": {"x": 840, "y": 594},
-      "container_type": "standard",
-      "container_image": "island_container",
-      "slot_count": 3,
-      "max_rows_per_slot": 1,
-      "is_locked": false,
-      "is_moving": true,
-      "move_type": "carousel",
-      "move_direction": "down",
-      "move_speed": 60,
-      "move_distance": 1980,
-      "initial_items": []
-    },
-    {
-      "id": "train_right_7",
-      "position": {"x": 840, "y": 792},
-      "container_type": "standard",
-      "container_image": "island_container",
-      "slot_count": 3,
-      "max_rows_per_slot": 1,
-      "is_locked": false,
-      "is_moving": true,
-      "move_type": "carousel",
-      "move_direction": "down",
-      "move_speed": 60,
-      "move_distance": 1980,
-      "initial_items": []
-    },
-    {
-      "id": "train_right_8",
-      "position": {"x": 840, "y": 990},
-      "container_type": "standard",
-      "container_image": "island_container",
-      "slot_count": 3,
-      "max_rows_per_slot": 1,
-      "is_locked": false,
-      "is_moving": true,
-      "move_type": "carousel",
-      "move_direction": "down",
-      "move_speed": 60,
-      "move_distance": 1980,
-      "initial_items": []
-    },
-    {
-      "id": "train_right_9",
-      "position": {"x": 840, "y": 1188},
-      "container_type": "standard",
-      "container_image": "island_container",
-      "slot_count": 3,
-      "max_rows_per_slot": 1,
-      "is_locked": false,
-      "is_moving": true,
-      "move_type": "carousel",
-      "move_direction": "down",
-      "move_speed": 60,
-      "move_distance": 1980,
-      "initial_items": []
-    },
-    {
-      "id": "train_right_10",
-      "position": {"x": 840, "y": 1386},
-      "container_type": "standard",
-      "container_image": "island_container",
-      "slot_count": 3,
-      "max_rows_per_slot": 1,
-      "is_locked": false,
-      "is_moving": true,
-      "move_type": "carousel",
-      "move_direction": "down",
-      "move_speed": 60,
-      "move_distance": 1980,
-      "initial_items": []
-    }
-  ]
+    "id": 4,
+    "world_id": "island",
+    "name": "level_004",
+    "star_move_thresholds": [
+        9,
+        11,
+        14
+    ],
+    "time_limit_seconds": 72,
+    "containers": [
+        {
+            "id": "container_1",
+            "position": {
+                "x": 200.0,
+                "y": 230.0
+            },
+            "container_type": "standard",
+            "container_image": "island_container",
+            "slot_count": 3,
+            "max_rows_per_slot": 1,
+            "is_locked": false,
+            "unlock_matches_required": 0,
+            "lock_overlay_image": "",
+            "unlock_animation": "",
+            "is_moving": false,
+            "move_type": "",
+            "move_direction": "",
+            "move_speed": 50.0,
+            "move_distance": 200.0,
+            "track_id": "",
+            "is_falling": false,
+            "fall_speed": 100.0,
+            "fall_target_y": 0.0,
+            "despawn_on_match": false,
+            "initial_items": [
+                {
+                    "id": "surfboardpalmtrees",
+                    "row": 0,
+                    "slot": 0
+                },
+                {
+                    "id": "sandpale_red",
+                    "row": 0,
+                    "slot": 2
+                }
+            ]
+        },
+        {
+            "id": "container_2",
+            "position": {
+                "x": 540.0,
+                "y": 230.0
+            },
+            "container_type": "standard",
+            "container_image": "island_container",
+            "slot_count": 3,
+            "max_rows_per_slot": 1,
+            "is_locked": false,
+            "unlock_matches_required": 0,
+            "lock_overlay_image": "",
+            "unlock_animation": "",
+            "is_moving": false,
+            "move_type": "",
+            "move_direction": "",
+            "move_speed": 50.0,
+            "move_distance": 200.0,
+            "track_id": "",
+            "is_falling": false,
+            "fall_speed": 100.0,
+            "fall_target_y": 0.0,
+            "despawn_on_match": false,
+            "initial_items": [
+                {
+                    "id": "sunglassesorange",
+                    "row": 0,
+                    "slot": 0
+                },
+                {
+                    "id": "oysterblue",
+                    "row": 0,
+                    "slot": 1
+                }
+            ]
+        },
+        {
+            "id": "container_3",
+            "position": {
+                "x": 880.0,
+                "y": 230.0
+            },
+            "container_type": "standard",
+            "container_image": "island_container",
+            "slot_count": 3,
+            "max_rows_per_slot": 1,
+            "is_locked": false,
+            "unlock_matches_required": 0,
+            "lock_overlay_image": "",
+            "unlock_animation": "",
+            "is_moving": false,
+            "move_type": "",
+            "move_direction": "",
+            "move_speed": 50.0,
+            "move_distance": 200.0,
+            "track_id": "",
+            "is_falling": false,
+            "fall_speed": 100.0,
+            "fall_target_y": 0.0,
+            "despawn_on_match": false,
+            "initial_items": [
+                {
+                    "id": "oysterblue",
+                    "row": 0,
+                    "slot": 0
+                },
+                {
+                    "id": "strawberrydaiquiri",
+                    "row": 0,
+                    "slot": 2
+                },
+                {
+                    "id": "sandpale_red",
+                    "row": 0,
+                    "slot": 1
+                }
+            ]
+        },
+        {
+            "id": "container_4",
+            "position": {
+                "x": 200.0,
+                "y": 480.0
+            },
+            "container_type": "standard",
+            "container_image": "island_container",
+            "slot_count": 3,
+            "max_rows_per_slot": 1,
+            "is_locked": false,
+            "unlock_matches_required": 0,
+            "lock_overlay_image": "",
+            "unlock_animation": "",
+            "is_moving": false,
+            "move_type": "",
+            "move_direction": "",
+            "move_speed": 50.0,
+            "move_distance": 200.0,
+            "track_id": "",
+            "is_falling": false,
+            "fall_speed": 100.0,
+            "fall_target_y": 0.0,
+            "despawn_on_match": false,
+            "initial_items": [
+                {
+                    "id": "surfboardpalmtrees",
+                    "row": 0,
+                    "slot": 1
+                },
+                {
+                    "id": "surfboardpalmtrees",
+                    "row": 0,
+                    "slot": 0
+                },
+                {
+                    "id": "sandpale_red",
+                    "row": 0,
+                    "slot": 2
+                }
+            ]
+        },
+        {
+            "id": "container_5",
+            "position": {
+                "x": 540.0,
+                "y": 480.0
+            },
+            "container_type": "standard",
+            "container_image": "island_container",
+            "slot_count": 3,
+            "max_rows_per_slot": 1,
+            "is_locked": false,
+            "unlock_matches_required": 0,
+            "lock_overlay_image": "",
+            "unlock_animation": "",
+            "is_moving": false,
+            "move_type": "",
+            "move_direction": "",
+            "move_speed": 50.0,
+            "move_distance": 200.0,
+            "track_id": "",
+            "is_falling": false,
+            "fall_speed": 100.0,
+            "fall_target_y": 0.0,
+            "despawn_on_match": false,
+            "initial_items": [
+                {
+                    "id": "sunglassesorange",
+                    "row": 0,
+                    "slot": 1
+                },
+                {
+                    "id": "strawberrydaiquiri",
+                    "row": 0,
+                    "slot": 0
+                },
+                {
+                    "id": "sunglassesorange",
+                    "row": 0,
+                    "slot": 2
+                }
+            ]
+        },
+        {
+            "id": "container_6",
+            "position": {
+                "x": 880.0,
+                "y": 480.0
+            },
+            "container_type": "standard",
+            "container_image": "island_container",
+            "slot_count": 3,
+            "max_rows_per_slot": 1,
+            "is_locked": false,
+            "unlock_matches_required": 0,
+            "lock_overlay_image": "",
+            "unlock_animation": "",
+            "is_moving": false,
+            "move_type": "",
+            "move_direction": "",
+            "move_speed": 50.0,
+            "move_distance": 200.0,
+            "track_id": "",
+            "is_falling": false,
+            "fall_speed": 100.0,
+            "fall_target_y": 0.0,
+            "despawn_on_match": false,
+            "initial_items": [
+                {
+                    "id": "beachball_redblue",
+                    "row": 0,
+                    "slot": 1
+                },
+                {
+                    "id": "beachball_redblue",
+                    "row": 0,
+                    "slot": 0
+                }
+            ]
+        },
+        {
+            "id": "container_7",
+            "position": {
+                "x": 200.0,
+                "y": 730.0
+            },
+            "container_type": "standard",
+            "container_image": "island_container",
+            "slot_count": 3,
+            "max_rows_per_slot": 1,
+            "is_locked": false,
+            "unlock_matches_required": 0,
+            "lock_overlay_image": "",
+            "unlock_animation": "",
+            "is_moving": false,
+            "move_type": "",
+            "move_direction": "",
+            "move_speed": 50.0,
+            "move_distance": 200.0,
+            "track_id": "",
+            "is_falling": false,
+            "fall_speed": 100.0,
+            "fall_target_y": 0.0,
+            "despawn_on_match": false,
+            "initial_items": [
+                {
+                    "id": "strawberrydaiquiri",
+                    "row": 0,
+                    "slot": 1
+                },
+                {
+                    "id": "beachball_redblue",
+                    "row": 0,
+                    "slot": 0
+                },
+                {
+                    "id": "oysterblue",
+                    "row": 0,
+                    "slot": 2
+                }
+            ]
+        }
+    ],
+    "moving_tracks": []
 }

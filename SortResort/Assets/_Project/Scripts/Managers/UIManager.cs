@@ -92,6 +92,9 @@ namespace SortResort
         private SplashScreen splashScreen;
         private GameObject hudPanel;
         private GameObject levelCompletePanel;
+        private Image[] levelCompleteStarImages;
+        private TextMeshProUGUI levelCompleteMessageText;
+        private TextMeshProUGUI levelCompleteMoveCountText;
         private GameObject levelFailedPanel;
         private TextMeshProUGUI levelFailedReasonText;
         private GameObject levelSelectPanel;
@@ -108,6 +111,9 @@ namespace SortResort
         private Image[] starImages;
         private Button undoButton;
         private CanvasGroup undoButtonCanvasGroup;
+        private Button autoSolveButton;
+        private Button recordButton;
+        private bool isRecordingMoves = false;
 
         // Achievements screen
         private GameObject achievementsPanel;
@@ -1198,12 +1204,20 @@ namespace SortResort
             rect.anchorMax = new Vector2(1, 1);
             rect.pivot = new Vector2(1, 1);
             rect.anchoredPosition = new Vector2(-20, -20);
-            rect.sizeDelta = new Vector2(260, 50);
+            rect.sizeDelta = new Vector2(340, 50);
 
             var layout = buttonsGO.AddComponent<HorizontalLayoutGroup>();
             layout.spacing = 10;
             layout.childAlignment = TextAnchor.MiddleRight;
             layout.childForceExpandWidth = false;
+
+            // Record button (debug feature) - records moves for comparison with solver
+            recordButton = CreateButton(buttonsGO.transform, "Record", "Rec", OnRecordClicked, 50, 50);
+            recordButton.GetComponentInChildren<TextMeshProUGUI>().color = new Color(1f, 0.5f, 0.5f); // Red tint
+
+            // Auto-Solve button (debug feature) - solves level automatically
+            autoSolveButton = CreateButton(buttonsGO.transform, "AutoSolve", "Solve", OnAutoSolveClicked, 60, 50);
+            autoSolveButton.GetComponentInChildren<TextMeshProUGUI>().color = new Color(0.5f, 1f, 0.5f); // Green tint
 
             // Undo button - undoes last move
             undoButton = CreateButton(buttonsGO.transform, "Undo", "Undo", OnUndoClicked, 60, 50);
@@ -1249,6 +1263,84 @@ namespace SortResort
             GameManager.Instance?.PauseGame();
         }
 
+        private void OnRecordClicked()
+        {
+            Debug.Log("[UIManager] Record button clicked");
+            AudioManager.Instance?.PlayButtonClick();
+
+            isRecordingMoves = !isRecordingMoves;
+
+            if (isRecordingMoves)
+            {
+                // Start recording
+                LevelManager.Instance?.StartRecording();
+                if (recordButton != null)
+                {
+                    recordButton.GetComponentInChildren<TextMeshProUGUI>().text = "Stop";
+                    recordButton.GetComponentInChildren<TextMeshProUGUI>().color = new Color(1f, 0.3f, 0.3f); // Brighter red
+                }
+            }
+            else
+            {
+                // Stop recording and print moves
+                LevelManager.Instance?.StopRecording();
+                if (recordButton != null)
+                {
+                    recordButton.GetComponentInChildren<TextMeshProUGUI>().text = "Rec";
+                    recordButton.GetComponentInChildren<TextMeshProUGUI>().color = new Color(1f, 0.5f, 0.5f); // Normal red
+                }
+            }
+        }
+
+        private void OnAutoSolveClicked()
+        {
+            Debug.Log("[UIManager] Auto-Solve button clicked");
+            AudioManager.Instance?.PlayButtonClick();
+
+            // Disable button while solving
+            if (autoSolveButton != null)
+            {
+                autoSolveButton.interactable = false;
+            }
+
+            // Start the solver
+            if (LevelSolverRunner.Instance != null)
+            {
+                LevelSolverRunner.Instance.OnSolveCompleted += OnAutoSolveCompleted;
+                LevelSolverRunner.Instance.StartAutoSolve();
+            }
+            else
+            {
+                Debug.LogError("[UIManager] LevelSolverRunner not found!");
+                if (autoSolveButton != null)
+                {
+                    autoSolveButton.interactable = true;
+                }
+            }
+        }
+
+        private void OnAutoSolveCompleted(bool success, int moves, int matches, float timeMs)
+        {
+            Debug.Log($"[UIManager] Auto-Solve completed: success={success}, moves={moves}, matches={matches}, time={timeMs:F1}ms");
+
+            // Re-enable button
+            if (autoSolveButton != null)
+            {
+                autoSolveButton.interactable = true;
+            }
+
+            // Unsubscribe
+            if (LevelSolverRunner.Instance != null)
+            {
+                LevelSolverRunner.Instance.OnSolveCompleted -= OnAutoSolveCompleted;
+            }
+
+            if (!success)
+            {
+                Debug.LogWarning("[UIManager] Auto-Solve failed to complete the level!");
+            }
+        }
+
         private void CreateLevelCompletePanel()
         {
             levelCompletePanel = new GameObject("Level Complete Panel");
@@ -1291,25 +1383,43 @@ namespace SortResort
             var starsContainer = new GameObject("Stars");
             starsContainer.transform.SetParent(content.transform, false);
             var starsRect = starsContainer.AddComponent<RectTransform>();
-            starsRect.sizeDelta = new Vector2(300, 80);
+            starsRect.sizeDelta = new Vector2(300, 100);
             var starsLayout = starsContainer.AddComponent<HorizontalLayoutGroup>();
-            starsLayout.spacing = 20;
+            starsLayout.spacing = 10;
             starsLayout.childAlignment = TextAnchor.MiddleCenter;
             starsLayout.childForceExpandWidth = false;
+            starsLayout.childControlWidth = false;
+            starsLayout.childControlHeight = false;
 
+            // Load star sprite
+            var starSprite = Resources.Load<Sprite>("Sprites/UI/Icons/star");
+
+            // Create star image elements and store references
+            levelCompleteStarImages = new Image[3];
             for (int i = 0; i < 3; i++)
             {
-                var star = new GameObject($"CompleteStar_{i}");
-                star.transform.SetParent(starsContainer.transform, false);
-                var starRect = star.AddComponent<RectTransform>();
-                starRect.sizeDelta = new Vector2(60, 60);
-                var starImg = star.AddComponent<Image>();
-                starImg.color = Color.yellow;
+                var starGO = new GameObject($"CompleteStar_{i}");
+                starGO.transform.SetParent(starsContainer.transform, false);
+                var starRectTrans = starGO.AddComponent<RectTransform>();
+                starRectTrans.sizeDelta = new Vector2(80, 80);
+
+                var starImg = starGO.AddComponent<Image>();
+                starImg.sprite = starSprite;
+                starImg.preserveAspect = true;
+                starImg.color = new Color(0.4f, 0.4f, 0.4f, 1f); // Gray by default
+
+                levelCompleteStarImages[i] = starImg;
             }
 
+            // Move count display
+            var moveCountGO = CreateTextElement(content.transform, "MoveCount", "Completed in 0 moves", 24,
+                new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, 40);
+            levelCompleteMoveCountText = moveCountGO.GetComponent<TextMeshProUGUI>();
+
             // Message
-            CreateTextElement(content.transform, "Message", "Great job!", 28,
+            var messageGO = CreateTextElement(content.transform, "Message", "Great job!", 28,
                 new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, 50);
+            levelCompleteMessageText = messageGO.GetComponent<TextMeshProUGUI>();
 
             // Buttons container
             var buttonsContainer = new GameObject("Buttons");
@@ -2519,6 +2629,13 @@ Antonia and Joakim Engfors
             {
                 timerContainer.SetActive(false);
             }
+
+            // Reset record button text (recording is stopped when level changes)
+            if (recordButton != null)
+            {
+                recordButton.GetComponentInChildren<TextMeshProUGUI>().text = "Rec";
+                recordButton.GetComponentInChildren<TextMeshProUGUI>().color = new Color(1f, 0.5f, 0.5f); // Normal red
+            }
         }
 
         private void OnMoveUsed(int moveCount)
@@ -2543,7 +2660,39 @@ Antonia and Joakim Engfors
             if (levelCompletePanel != null)
             {
                 levelCompletePanel.SetActive(true);
-                // Update stars display, etc.
+
+                // Update stars display
+                if (levelCompleteStarImages != null)
+                {
+                    for (int i = 0; i < levelCompleteStarImages.Length; i++)
+                    {
+                        if (levelCompleteStarImages[i] != null)
+                        {
+                            // Full color for earned, gray for not earned
+                            levelCompleteStarImages[i].color = i < stars
+                                ? Color.white  // Full color (sprite is already yellow)
+                                : new Color(0.3f, 0.3f, 0.3f, 1f); // Gray tint
+                        }
+                    }
+                }
+
+                // Update move count
+                if (levelCompleteMoveCountText != null)
+                {
+                    int moveCount = GameManager.Instance?.CurrentMoveCount ?? 0;
+                    levelCompleteMoveCountText.text = $"Completed in {moveCount} moves";
+                }
+
+                // Update message based on stars
+                if (levelCompleteMessageText != null)
+                {
+                    levelCompleteMessageText.text = stars switch
+                    {
+                        3 => "Perfect!",
+                        2 => "Great work!",
+                        _ => "Good job!"
+                    };
+                }
             }
         }
 

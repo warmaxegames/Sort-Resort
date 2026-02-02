@@ -69,11 +69,13 @@ namespace SortResort
         public void Initialize(ContainerDefinition definition)
         {
             // Force container sizing (override any prefab serialized values)
-            // These values allow 3 containers across screen width and ~6 vertically
-            // Container width = 3 slots × 83 = 249px, height = 166px (~7% smaller than original 90x180)
-            slotSize = new Vector2(83f, 166f);
-            slotSpacing = 83f;
-            rowDepthOffset = 4f;
+            // Base slot size is 83x166, uniformly scaled by 1.14 to fill screen width
+            // Container sprite adds 1.2x border, giving 341px total width
+            // This maintains the original slot-to-container ratio (83% slots, 17% border)
+            const float uniformScale = 1.14f;
+            slotSize = new Vector2(83f * uniformScale, 166f * uniformScale);  // ~95 x 189
+            slotSpacing = 83f * uniformScale;  // ~95
+            rowDepthOffset = 4f * uniformScale;  // ~5
 
             containerId = definition.id;
             containerType = definition.container_type == "single_slot"
@@ -164,7 +166,7 @@ namespace SortResort
                 containerSprite.sprite = sprite;
 
                 // Scale sprite to fit container width (3 slots * slotSpacing)
-                float targetWidth = slotCount * slotSpacing / 100f * 1.2f;  // Slightly wider than slots
+                float targetWidth = slotCount * slotSpacing / 100f * 1.2f;  // 1.2x adds border around slots
                 float spriteWidth = sprite.bounds.size.x;
                 float scale = targetWidth / spriteWidth;
                 containerSprite.transform.localScale = new Vector3(scale, scale, 1f);
@@ -634,6 +636,99 @@ namespace SortResort
         #region Row Advancement
 
         /// <summary>
+        /// Check if row advancement would occur (all front slots empty with back row items)
+        /// </summary>
+        public bool WouldRowAdvancement()
+        {
+            bool allFrontEmpty = true;
+            bool anyBackItems = false;
+
+            for (int s = 0; s < slots.Count; s++)
+            {
+                if (slots[s][0] != null)
+                {
+                    allFrontEmpty = false;
+                    break;
+                }
+
+                for (int r = 1; r < slots[s].Count; r++)
+                {
+                    if (slots[s][r] != null)
+                    {
+                        anyBackItems = true;
+                        break;
+                    }
+                }
+            }
+
+            return allFrontEmpty && anyBackItems;
+        }
+
+        /// <summary>
+        /// Calculate the row advancement offsets that would be applied if rows advanced.
+        /// Returns an array where each element is the offset for that slot (how many rows items would shift forward).
+        /// </summary>
+        public int[] CalculateRowAdvancementOffsets()
+        {
+            int[] offsets = new int[slots.Count];
+
+            for (int s = 0; s < slots.Count; s++)
+            {
+                offsets[s] = 0;
+
+                // Find first non-null row in this slot (starting from row 1)
+                for (int r = 1; r < slots[s].Count; r++)
+                {
+                    if (slots[s][r] != null)
+                    {
+                        offsets[s] = r; // Items would shift forward by r rows
+                        break;
+                    }
+                }
+            }
+
+            return offsets;
+        }
+
+        /// <summary>
+        /// Reverse a previous row advancement by shifting items back to their original rows.
+        /// </summary>
+        public void ReverseRowAdvancement(int[] offsets)
+        {
+            if (offsets == null || offsets.Length != slots.Count)
+            {
+                Debug.LogWarning("[ItemContainer] ReverseRowAdvancement - invalid offsets array");
+                return;
+            }
+
+            Debug.Log($"[ItemContainer] ReverseRowAdvancement in container {containerId}");
+
+            for (int s = 0; s < slots.Count; s++)
+            {
+                int offset = offsets[s];
+                if (offset <= 0) continue; // No advancement occurred in this slot
+
+                // Move items BACKWARD by offset positions (from front to back)
+                // Start from the back to avoid overwriting
+                for (int r = slots[s].Count - 1; r >= 0; r--)
+                {
+                    int targetRow = r + offset;
+                    if (targetRow < slots[s].Count)
+                    {
+                        slots[s][targetRow] = slots[s][r];
+                        if (r != targetRow)
+                            slots[s][r] = null;
+                    }
+                }
+
+                Debug.Log($"[ItemContainer] Slot {s}: reversed advancement by {offset} rows");
+            }
+
+            // Update all item positions with animation
+            UpdateAllItemPositions();
+        }
+
+        /// <summary>
         /// Check if ALL front row slots are empty, and if so, advance all items forward
         /// </summary>
         public void CheckAndAdvanceAllRows()
@@ -835,7 +930,7 @@ namespace SortResort
                 lockSpriteRenderer.sprite = lockSprite;
 
                 // Scale to fit container
-                float containerWidth = slotCount * slotSpacing / 100f * 1.2f;
+                float containerWidth = slotCount * slotSpacing / 100f * 1.2f;  // Match container sprite scale
                 float spriteWidth = lockSprite.bounds.size.x;
                 float scale = containerWidth / spriteWidth;
                 lockSpriteGO.transform.localScale = new Vector3(scale, scale, 1f);
@@ -853,8 +948,8 @@ namespace SortResort
                 lockSpriteRenderer.sprite = Sprite.Create(tex, new Rect(0, 0, 1, 1), new Vector2(0.5f, 0.5f), 1);
 
                 // Scale to cover container
-                float width = slotCount * slotSpacing / 100f * 1.3f;
-                float height = slotSize.y / 100f * 1.2f;
+                float width = slotCount * slotSpacing / 100f * 1.3f;  // Slightly wider than container
+                float height = slotSize.y / 100f * 1.2f;  // Slightly taller than slots
                 lockSpriteGO.transform.localScale = new Vector3(width, height, 1f);
             }
 

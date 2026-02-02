@@ -125,6 +125,12 @@ namespace SortResort
             achGO.AddComponent<AchievementManager>();
             Debug.Log("[GameSceneSetup] AchievementManager created");
 
+            // LevelSolverRunner (debug tool for auto-solving levels)
+            var solverGO = new GameObject("LevelSolverRunner");
+            solverGO.transform.SetParent(managersRoot.transform);
+            solverGO.AddComponent<LevelSolverRunner>();
+            Debug.Log("[GameSceneSetup] LevelSolverRunner created");
+
             // UIManager (after AudioManager, SaveManager, and AchievementManager)
             var uiGO = new GameObject("UIManager");
             uiGO.transform.SetParent(managersRoot.transform);

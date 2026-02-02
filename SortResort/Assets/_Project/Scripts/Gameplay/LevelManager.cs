@@ -55,6 +55,14 @@ namespace SortResort
         private Stack<MoveRecord> moveHistory = new Stack<MoveRecord>();
         private bool canUndo = false;
 
+        // Move recording for comparison with solver
+        private bool isRecording = false;
+        private List<MoveRecord> recordedMoves = new List<MoveRecord>();
+        public bool IsRecording => isRecording;
+
+        // Track ALL moves for solver alert (separate from undo history which clears on match)
+        private List<SimpleMoveRecord> allMovesThisLevel = new List<SimpleMoveRecord>();
+
         // Timer system
         private float timeRemaining;
         private float totalTimeLimit;
@@ -528,9 +536,18 @@ namespace SortResort
             // Release all pooled items
             itemPool?.ReleaseAll();
 
-            // Clear undo history
+            // Clear undo history and move tracking
             moveHistory.Clear();
+            allMovesThisLevel.Clear();
             UpdateUndoAvailable(false);
+
+            // Reset recording state
+            if (isRecording)
+            {
+                Debug.Log("[LevelManager] Recording stopped due to level change");
+                isRecording = false;
+            }
+            recordedMoves.Clear();
 
             // Reset timer
             timerActive = false;
@@ -714,6 +731,12 @@ namespace SortResort
             // All items cleared!
             Debug.Log("[LevelManager] Level complete!");
 
+            // Stop recording and print moves if recording was active
+            if (isRecording)
+            {
+                StopRecording();
+            }
+
             // Play victory sound
             AudioManager.Instance?.PlayVictorySound();
 
@@ -722,6 +745,13 @@ namespace SortResort
             // Calculate stars
             int movesUsed = GameManager.Instance?.CurrentMoveCount ?? 0;
             int stars = CalculateStars(movesUsed);
+
+            // ALERT: Player beat the solver's score! This indicates the solver may not be optimal.
+            // The 3-star threshold (starThresholds[0]) is set to the solver's move count.
+            if (starThresholds != null && starThresholds.Length > 0 && movesUsed < starThresholds[0])
+            {
+                LogSolverAlert(movesUsed, starThresholds[0]);
+            }
 
             // Complete the level
             GameManager.Instance?.CompleteLevel(stars);
@@ -795,7 +825,8 @@ namespace SortResort
         /// Record a move for potential undo
         /// </summary>
         public void RecordMove(Item item, ItemContainer fromContainer, int fromSlot, int fromRow,
-                               ItemContainer toContainer, int toSlot, int toRow)
+                               ItemContainer toContainer, int toSlot, int toRow,
+                               bool rowAdvancementOccurred = false, int[] rowAdvancementOffsets = null)
         {
             var record = new MoveRecord
             {
@@ -805,13 +836,25 @@ namespace SortResort
                 fromRow = fromRow,
                 toContainer = toContainer,
                 toSlot = toSlot,
-                toRow = toRow
+                toRow = toRow,
+                rowAdvancementOccurred = rowAdvancementOccurred,
+                rowAdvancementOffsets = rowAdvancementOffsets
             };
 
             moveHistory.Push(record);
             UpdateUndoAvailable(true);
 
-            Debug.Log($"[LevelManager] Move recorded: {item.ItemId} from {fromContainer?.ContainerId}[{fromSlot},{fromRow}] to {toContainer?.ContainerId}[{toSlot},{toRow}]. History count: {moveHistory.Count}");
+            // Also track in allMovesThisLevel for solver comparison (uses string IDs, survives object destruction)
+            allMovesThisLevel.Add(new SimpleMoveRecord
+            {
+                itemId = item?.ItemId ?? "unknown",
+                fromContainerId = fromContainer?.ContainerId ?? "unknown",
+                fromSlot = fromSlot,
+                toContainerId = toContainer?.ContainerId ?? "unknown",
+                toSlot = toSlot
+            });
+
+            Debug.Log($"[LevelManager] Move recorded for undo: {item.ItemId} from {fromContainer?.ContainerId}[{fromSlot},{fromRow}] to {toContainer?.ContainerId}[{toSlot},{toRow}]. RowAdvanced: {rowAdvancementOccurred}. History count: {moveHistory.Count}");
         }
 
         /// <summary>
@@ -853,12 +896,19 @@ namespace SortResort
                 return false;
             }
 
-            Debug.Log($"[LevelManager] Undoing move: {record.item.ItemId} back to {record.fromContainer.ContainerId}[{record.fromSlot},{record.fromRow}]");
+            Debug.Log($"[LevelManager] Undoing move: {record.item.ItemId} back to {record.fromContainer.ContainerId}[{record.fromSlot},{record.fromRow}], rowAdvanced: {record.rowAdvancementOccurred}");
 
             // Remove item from current position
             if (record.toContainer != null)
             {
                 record.toContainer.RemoveItemFromSlot(record.item, triggerRowAdvance: false);
+            }
+
+            // If row advancement occurred, reverse it BEFORE placing item back
+            if (record.rowAdvancementOccurred && record.rowAdvancementOffsets != null)
+            {
+                Debug.Log($"[LevelManager] Reversing row advancement in container {record.fromContainer.ContainerId}");
+                record.fromContainer.ReverseRowAdvancement(record.rowAdvancementOffsets);
             }
 
             // Place item back in original position
@@ -888,6 +938,134 @@ namespace SortResort
             canUndo = available;
             // Always fire event to ensure UI stays in sync
             OnUndoAvailableChanged?.Invoke(available);
+        }
+
+        #endregion
+
+        #region Move Recording
+
+        /// <summary>
+        /// Start recording moves for comparison with solver
+        /// </summary>
+        public void StartRecording()
+        {
+            isRecording = true;
+            recordedMoves.Clear();
+            Debug.Log("[LevelManager] Recording started - make your moves!");
+        }
+
+        /// <summary>
+        /// Stop recording and output the move sequence
+        /// </summary>
+        public void StopRecording()
+        {
+            isRecording = false;
+            PrintRecordedMoves();
+        }
+
+        /// <summary>
+        /// Record a move for comparison purposes (called for ALL moves, including matches)
+        /// </summary>
+        public void RecordMoveForComparison(Item item, ItemContainer fromContainer, int fromSlot,
+                                            ItemContainer toContainer, int toSlot)
+        {
+            if (!isRecording) return;
+
+            var record = new MoveRecord
+            {
+                item = item,
+                fromContainer = fromContainer,
+                fromSlot = fromSlot,
+                fromRow = 0,
+                toContainer = toContainer,
+                toSlot = toSlot,
+                toRow = 0
+            };
+
+            recordedMoves.Add(record);
+        }
+
+        /// <summary>
+        /// Print recorded moves to console for comparison
+        /// </summary>
+        public void PrintRecordedMoves()
+        {
+            // Build entire output as single string for easy copying
+            var sb = new System.Text.StringBuilder();
+            sb.AppendLine("\n=== YOUR RECORDED MOVE SEQUENCE ===");
+            sb.AppendLine($"Total moves: {recordedMoves.Count}\n");
+
+            for (int i = 0; i < recordedMoves.Count; i++)
+            {
+                var move = recordedMoves[i];
+                string fromName = move.fromContainer != null ? move.fromContainer.ContainerId : "unknown";
+                string toName = move.toContainer != null ? move.toContainer.ContainerId : "unknown";
+
+                sb.AppendLine($"  {i + 1,2}. {move.item?.ItemId ?? "unknown",-16} : {fromName}[slot {move.fromSlot}] -> {toName}[slot {move.toSlot}]");
+            }
+
+            sb.AppendLine("\n=== END RECORDED SEQUENCE ===");
+
+            // Single log call - easy to copy from Unity console
+            Debug.Log(sb.ToString());
+        }
+
+        /// <summary>
+        /// Log detailed alert when player beats the solver, including move sequence.
+        /// Writes to both console and a log file for later review.
+        /// </summary>
+        private void LogSolverAlert(int playerMoves, int solverMoves)
+        {
+            var sb = new System.Text.StringBuilder();
+            string timestamp = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+            string levelId = $"{currentLevel.world_id}_level_{currentLevel.id:D3}";
+
+            sb.AppendLine("\n" + new string('=', 60));
+            sb.AppendLine("!!! SOLVER ALERT - PLAYER BEAT SOLVER !!!");
+            sb.AppendLine(new string('=', 60));
+            sb.AppendLine($"Timestamp: {timestamp}");
+            sb.AppendLine($"Level: {currentLevel.world_id} - Level {currentLevel.id}");
+            sb.AppendLine($"Player moves: {playerMoves}");
+            sb.AppendLine($"Solver moves: {solverMoves}");
+            sb.AppendLine($"Difference: {solverMoves - playerMoves} moves better!");
+            sb.AppendLine();
+            sb.AppendLine("=== PLAYER'S MOVE SEQUENCE ===");
+
+            for (int i = 0; i < allMovesThisLevel.Count; i++)
+            {
+                var move = allMovesThisLevel[i];
+                sb.AppendLine($"  {i + 1,2}. {move.itemId,-20} : {move.fromContainerId}[{move.fromSlot}] -> {move.toContainerId}[{move.toSlot}]");
+            }
+
+            sb.AppendLine();
+            sb.AppendLine("ACTION REQUIRED: Run the solver on this level to get its move sequence,");
+            sb.AppendLine("then compare to find where the solver missed an optimization.");
+            sb.AppendLine(new string('=', 60) + "\n");
+
+            string report = sb.ToString();
+
+            // Log to console with warning level (yellow in Unity)
+            Debug.LogWarning(report);
+
+            // Also write to file for later review
+            try
+            {
+                string logDir = System.IO.Path.Combine(Application.persistentDataPath, "SolverAlerts");
+                if (!System.IO.Directory.Exists(logDir))
+                {
+                    System.IO.Directory.CreateDirectory(logDir);
+                }
+
+                string filename = $"solver_alert_{levelId}_{timestamp.Replace(":", "-").Replace(" ", "_")}.txt";
+                string filepath = System.IO.Path.Combine(logDir, filename);
+                System.IO.File.WriteAllText(filepath, report);
+
+                Debug.Log($"[SOLVER ALERT] Report saved to: {filepath}");
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogError($"[SOLVER ALERT] Failed to write log file: {e.Message}");
+            }
         }
 
         #endregion
@@ -945,5 +1123,26 @@ namespace SortResort
         public ItemContainer toContainer;
         public int toSlot;
         public int toRow;
+
+        // Row advancement tracking - stores how many rows each slot advanced
+        public bool rowAdvancementOccurred;
+        public int[] rowAdvancementOffsets; // Per-slot offset (how many rows items shifted forward)
+    }
+
+    /// <summary>
+    /// Lightweight move record using string IDs (for solver comparison - survives object destruction)
+    /// </summary>
+    public struct SimpleMoveRecord
+    {
+        public string itemId;
+        public string fromContainerId;
+        public int fromSlot;
+        public string toContainerId;
+        public int toSlot;
+
+        public override string ToString()
+        {
+            return $"{itemId}: {fromContainerId}[{fromSlot}] -> {toContainerId}[{toSlot}]";
+        }
     }
 }

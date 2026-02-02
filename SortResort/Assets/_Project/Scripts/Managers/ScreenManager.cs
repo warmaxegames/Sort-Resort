@@ -13,7 +13,9 @@ namespace SortResort
         [Header("Reference Settings")]
         [SerializeField] private float referenceWidth = 1080f;
         [SerializeField] private float referenceHeight = 1920f;
-        [SerializeField] private float baseOrthoSize = 8f;
+        // OrthoSize calculated to show full 1080px width: 1080/100 / (2 * 0.5625) = 9.6
+        // This ensures Godot coordinates map correctly to visible screen area
+        [SerializeField] private float baseOrthoSize = 9.6f;
 
         [Header("Scaling")]
         [SerializeField] private Transform gameWorldParent;

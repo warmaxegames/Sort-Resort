@@ -333,6 +333,10 @@ namespace SortResort
 
             Debug.Log($"[Item] DropOnSlot - {itemId} dropping on container {container.ContainerId}, slot {slot.SlotIndex}");
 
+            // Check if item is being placed back in the same position
+            bool isSamePosition = (originalContainer == container) &&
+                                  (originalSlot != null && originalSlot.SlotIndex == slot.SlotIndex);
+
             // Reset scale BEFORE placing so GetItemHeight returns correct value
             transform.localScale = originalScale;
 
@@ -341,40 +345,70 @@ namespace SortResort
 
             if (success)
             {
-                Debug.Log($"[Item] DropOnSlot - {itemId} placed successfully");
+                Debug.Log($"[Item] DropOnSlot - {itemId} placed successfully (samePosition: {isSamePosition})");
 
                 // Play drop sound
                 AudioManager.Instance?.PlayDropSound();
 
-                // Only record move for undo if no match occurred
-                // (match is triggered inside PlaceItemInSlot, so check state here)
-                if (currentState != ItemState.Matched)
+                // Skip move tracking if placed back in same position
+                if (!isSamePosition)
                 {
-                    LevelManager.Instance?.RecordMove(
+                    // Record move for comparison (records ALL moves including matches)
+                    LevelManager.Instance?.RecordMoveForComparison(
                         this,
                         originalContainer,
                         originalSlot?.SlotIndex ?? 0,
-                        originalSlot?.Row ?? 0,
                         container,
-                        slot.SlotIndex,
-                        slot.Row
+                        slot.SlotIndex
                     );
 
+                    // Calculate row advancement info BEFORE it happens (for undo)
+                    bool rowAdvancementWillOccur = false;
+                    int[] rowAdvancementOffsets = null;
+                    if (originalContainer != null)
+                    {
+                        rowAdvancementWillOccur = originalContainer.WouldRowAdvancement();
+                        if (rowAdvancementWillOccur)
+                        {
+                            rowAdvancementOffsets = originalContainer.CalculateRowAdvancementOffsets();
+                            Debug.Log($"[Item] Row advancement will occur in {originalContainer.ContainerId}");
+                        }
+                    }
+
+                    // Only record move for undo if no match occurred
+                    // (match is triggered inside PlaceItemInSlot, so check state here)
+                    if (currentState != ItemState.Matched)
+                    {
+                        LevelManager.Instance?.RecordMove(
+                            this,
+                            originalContainer,
+                            originalSlot?.SlotIndex ?? 0,
+                            originalSlot?.Row ?? 0,
+                            container,
+                            slot.SlotIndex,
+                            slot.Row,
+                            rowAdvancementWillOccur,
+                            rowAdvancementOffsets
+                        );
+                    }
+
+                    // Increment move count only for actual moves
+                    GameManager.Instance?.IncrementMoveCount();
+
+                    // Now trigger row advancement (after recording the move)
+                    if (originalContainer != null)
+                    {
+                        originalContainer.CheckAndAdvanceAllRows();
+                    }
+                }
+
+                if (currentState != ItemState.Matched)
+                {
                     SetState(ItemState.Idle);
                 }
 
                 GameEvents.InvokeItemDropped(gameObject);
                 OnDragEnded?.Invoke(this);
-
-                // Increment move count
-                GameManager.Instance?.IncrementMoveCount();
-
-                // Now that item is successfully placed, check if original container needs row advancement
-                // This only triggers if ALL front slots in the original container are now empty
-                if (originalContainer != null)
-                {
-                    originalContainer.CheckAndAdvanceAllRows();
-                }
             }
             else
             {

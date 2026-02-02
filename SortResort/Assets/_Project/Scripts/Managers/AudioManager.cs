@@ -94,7 +94,7 @@ namespace SortResort
             if (warpClip == null)
                 warpClip = Resources.Load<AudioClip>("Audio/UI/warp");
 
-            Debug.Log($"[AudioManager] Audio clips loaded - match:{matchClip != null}, victory:{victoryClip != null}, button:{buttonClickClip != null}, warp:{warpClip != null}");
+            Debug.Log($"[AudioManager] Audio clips loaded - match:{matchClip != null}, unlock:{unlockClip != null}, victory:{victoryClip != null}, button:{buttonClickClip != null}, warp:{warpClip != null}");
         }
 
         private void InitializeAudioSources()
@@ -570,7 +570,11 @@ namespace SortResort
         public void PlayDragSound() => PlaySFX(itemDragClip);
         public void PlayDropSound() => PlaySFX(itemDropClip);
         public void PlayMatchSound() => PlaySFX(matchClip);
-        public void PlayUnlockSound() => PlaySFX(unlockClip);
+        public void PlayUnlockSound()
+        {
+            // Play at higher volume (2.5x) since unlock_sound.mp3 has low internal audio levels
+            PlaySFX(unlockClip, 2.5f);
+        }
         public void PlayFailureSound() => PlaySFX(failureClip);
         public void PlayButtonClick() => PlayUI(buttonClickClip);
         public void PlayStarEarned() => PlaySFX(starEarnedClip);

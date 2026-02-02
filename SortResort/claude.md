@@ -22,7 +22,7 @@
 
 ## Current Status
 
-**Last Updated:** 2026-01-31 (Session 9)
+**Last Updated:** 2026-02-02 (Session 11)
 
 ### Godot Version (Complete)
 - 6 levels complete (Resort 001-006)
@@ -67,20 +67,27 @@
 ## Task List
 
 ### IMMEDIATE TODO (Next Session)
-1. ~~**Main Menu / Splash Screen** - Start button, settings access~~ DONE
-2. ~~**Rename "resort" to "island"**~~ DONE - All references renamed
-3. ~~**Add Space & Tavern worlds**~~ DONE - All 5 worlds now have items, containers, backgrounds, icons, music
-4. **World-specific lock overlays** - Created placeholders for all worlds (copies of base), need custom designs
-5. ~~**Island custom containers**~~ DONE - Copied island_container.png and island_single_slot_container.png from Godot
-6. ~~**Update world map**~~ DONE - Level select screen now matches Godot version (light cyan background, top bar with mascot/settings/close, larger world image with side arrows, dark gray level grid with scrollbar)
-7. **Dialogue & Mascots system** - Each world has unique mascot. Pop-up dialogue at set points for story progression. Review Godot dialogue system.
+1. **Investigate Solver Optimization** - Player beat solver on Island levels 8, 9, 10:
+   - Level 8: Player 19 moves vs Solver 20 (1 better)
+   - Level 9: Player 21 moves vs Solver 24 (3 better)
+   - Level 10: Player 23 moves vs Solver 27 (4 better)
+   - Compare player move sequences (in solver alerts folder) with solver sequences
+   - Identify patterns the solver is missing
+   - Improve heuristics without breaking stability
+2. **World-specific lock overlays** - Created placeholders for all worlds (copies of base), need custom designs
+3. **Dialogue & Mascots system** - Each world has unique mascot. Pop-up dialogue at set points for story progression. Review Godot dialogue system.
+   - **Typewriter text reveal** - Letters appear one at a time to simulate speaking
+   - **Animal Crossing-style phonetic audio** - Record a sound for each letter (A="ah", B="beh", C="cuh", etc.). Play matching sound as each letter is revealed to mimic speech
+   - **Milestone triggers** - Trigger dialogue based on progress (e.g., completing X levels in a world)
+   - **Data-driven dialogue management** - Easy editing of dialogue moments: which character, which expression/sprite, what text to display
+   - **Tap to advance** - Players can tap screen to speed through dialogue faster
 8. **Level Complete screen (animated)** - Rebuild with proper animations (Godot version was limited)
 9. **Mobile Testing** - Touch input validation on device
 10. **Pause Menu Screen** - Resume, settings, quit options
 11. **Settings Screen** - Volume sliders for music/SFX
 
 ### Future Priorities
-5. **Match Animation** - Use 18-frame explosion sprites
+5. ~~**Match Animation** - Use 18-frame explosion sprites~~ DONE (15-frame pink glow effect)
 6. **Scene Transitions** - Fade between screens
 7. **Dialogue System** - Tutorial and story dialogues
 8. ~~**Undo System** - Allow undoing last move~~ DONE
@@ -92,6 +99,28 @@
     - Select hats/headwear
     - Choose outfit/clothing
     - Player name editing
+11. **Level Creator Tool** - GUI-based level editor for faster level creation
+    - Visual container placement with drag-and-drop
+    - World/theme selection with automatic item pool
+    - Slot configuration (rows, columns per container)
+    - Container properties: locked (with unlock threshold), movement type (static, carousel, back_and_forth), despawn-on-match
+    - Item assignment with validation (exactly 3 of each type for triple-match)
+    - Star thresholds configuration (moves for 1/2/3 stars)
+    - Timer setting (optional time limit)
+    - Play-test button to immediately test the level
+    - Export to JSON format matching existing level structure
+    - Import existing levels for editing
+12. **Leaderboard System** - Competitive rankings with social features
+    - **Total Achievement Points** - All-time leaderboard based on achievement points earned
+    - **Daily Challenge** - Fresh puzzle each day, ranked by completion time or moves
+    - **Weekly Stars** - Most stars earned in a week
+    - **World Speed Runs** - Fastest time to complete all levels in a world
+    - **Profile Pages** - Clicking a player shows their public profile:
+      - Customized mascot/avatar display
+      - Earned titles (from achievements)
+      - Trophy showcase (selected trophies from Trophy Room)
+      - Stats: total stars, levels completed, favorite world
+    - Requires backend service for online leaderboards (or local-only for MVP)
 
 ---
 
@@ -184,10 +213,83 @@ float unityX = (godotPos.x - 540f) / 100f;  // Center for portrait
 float unityY = (600f - godotPos.y) / 100f;  // Flip Y, portrait center
 ```
 
-### Container Dimensions (Godot pixels)
-- **Slot size**: 83×166 pixels
-- **Slot spacing**: 83 pixels horizontal
-- **Container visual**: ~297×198 pixels (includes border)
+### Container & Item Scaling System
+
+This section documents the complete scaling system for containers, slots, and items. **Reference this when making changes to avoid containers going off-screen, overlapping, or items appearing incorrectly sized.**
+
+#### Screen & Camera Configuration
+- **Screen resolution**: 1080×1920 (portrait)
+- **Screen center**: (540, 600) in Godot pixels
+- **Camera orthographic size**: 9.6 (shows full 1080px width)
+- **Reference aspect ratio**: 0.5625 (1080/1920)
+- **Coordinate divisor**: 100 (pixels to Unity units)
+- **Visible area**: 10.8 × 19.2 Unity units (1080 × 1920 pixels)
+
+```
+Key relationship: orthoSize = screenWidth / divisor / (2 × aspectRatio)
+                 9.6 = 1080 / 100 / (2 × 0.5625)
+```
+
+#### Container Scaling (Godot Pixels → Unity)
+```
+Base slot dimensions:     83 × 166 pixels
+Uniform scale factor:     1.14 (enlarges everything proportionally)
+Scaled slot size:         83 × 1.14 = ~95px wide, 166 × 1.14 = ~189px tall
+Container border scale:   1.2 (adds 17% border around slots)
+Final 3-slot container:   3 × 95 × 1.2 = 341px wide
+
+Slot-to-container ratio:  83% slots, 17% border (MUST maintain this ratio)
+```
+
+#### Standard 3-Column Layout
+| Position | Godot X | Unity X | Description |
+|----------|---------|---------|-------------|
+| Left     | 200     | -3.4    | ~30px from left edge |
+| Center   | 540     | 0       | Screen center |
+| Right    | 880     | +3.4    | ~30px from right edge |
+
+Container spacing: 340px (results in ~2px overlap between adjacent containers)
+
+#### Safe Position Bounds (Godot Pixels)
+For **3-slot containers** (341px wide):
+- **Min X**: ~186 (left edge safe)
+- **Max X**: ~894 (right edge safe)
+- **Min Y**: 150 (below HUD)
+- **Max Y**: ~1696 (above bottom safe area)
+
+For **1-slot containers** (~114px wide):
+- **Min X**: ~72
+- **Max X**: ~1008
+
+#### Key Files
+| File | Purpose |
+|------|---------|
+| `ScreenManager.cs` | Camera orthoSize (9.6), aspect ratio handling |
+| `ItemContainer.cs` | Slot sizing, container sprite scaling |
+| `LevelValidator.cs` | Position validation, safe bounds calculation |
+
+#### ItemContainer.cs Configuration
+```csharp
+// In SetupSlots() method:
+const float uniformScale = 1.14f;
+slotSize = new Vector2(83f * uniformScale, 166f * uniformScale);  // ~95 × 189
+slotSpacing = 83f * uniformScale;  // ~95
+rowDepthOffset = 4f * uniformScale;  // ~5
+
+// Container sprite scaling (in SetupContainerVisual):
+float targetWidth = slotCount * slotSpacing / 100f * 1.2f;  // 1.2x adds border
+```
+
+#### Troubleshooting
+| Problem | Likely Cause | Solution |
+|---------|--------------|----------|
+| Containers off-screen | Camera orthoSize wrong | Verify orthoSize = 9.6 in ScreenManager |
+| Containers overlapping | Positions too close | Use standard positions (200, 540, 880) |
+| Items too big/small | Uniform scale changed | Keep uniformScale = 1.14 |
+| Border ratio wrong | Border scale changed | Keep container sprite scale at 1.2x |
+
+#### Validation
+Run `Tools > Sort Resort > Validator > Validate [World] World` in Unity Editor to check all container positions. The validator uses the same calculations as the game to detect off-screen or overlapping containers.
 
 ### Carousel Train Configuration
 | Layout | Spacing | Containers | move_distance |
@@ -667,29 +769,119 @@ Levels 1-5 are identical in structure across all worlds, with item swaps:
 
 ---
 
+### 2026-02-01 (Session 10) - Level Solver System
+
+**Level Solver Core:**
+- Created `LevelSolver.cs` - greedy algorithm that finds solutions to levels
+- Works on level JSON data without needing to run the game
+- Algorithm: prioritizes matches requiring fewest moves (1-move first, then 2-move, etc.)
+- Handles: locked containers, row advancement, match detection
+- Returns: success/failure, move count, match count, move sequence, solve time
+
+**Solver Algorithm:**
+1. Find 1-move matches: Container has 2 matching items + empty slot, 3rd item accessible elsewhere
+2. Find 2-move matches: Simulate each possible move, check if 1-move match becomes available
+3. Strategic moves: Score moves by (a) advancing back rows, (b) grouping matching items
+4. Process matches after each move, unlock containers as matches are made
+
+**Verbose Debugging:**
+- `VerboseLogging` property enables detailed console output
+- Logs: initial state, each iteration, move search process, scoring reasons, match events
+- Helps identify when solver makes suboptimal decisions for algorithm improvement
+
+**In-Game Auto-Solve:**
+- Created `LevelSolverRunner.cs` - executes solver solution visually in-game
+- "Solve" button added to HUD (green tint)
+- Animates each move with drag-drop visual feedback
+- Shows solve result on completion
+- Button disabled while solving in progress
+
+**Editor Testing:**
+- Created `LevelSolverTests.cs` - static utility for batch testing
+- `TestAllLevels()` - tests all levels across all worlds
+- `TestWorld(worldId)` - tests all levels in one world
+- `TestLevel(worldId, levelNum)` - tests single level with verbose output
+- Created `LevelSolverMenu.cs` - Unity menu items under Tools > Sort Resort > Solver
+
+**Files Created:**
+- `Scripts/Tools/LevelSolver.cs` - Core solver algorithm
+- `Scripts/Tools/LevelSolverRunner.cs` - In-game visual solver execution
+- `Scripts/Tools/LevelSolverTests.cs` - Batch testing utilities
+- `Scripts/Editor/LevelSolverMenu.cs` - Editor menu integration
+
+**Files Modified:**
+- `UIManager.cs` - Added autoSolveButton, OnAutoSolveClicked handler
+- `GameSceneSetup.cs` - Added LevelSolverRunner creation
+
+---
+
+### 2026-02-02 (Session 11) - Solver UI & Stability Fixes
+
+**Solver UI Improvements:**
+- Added `LevelSolverWindow.cs` - Editor window for solving individual levels
+- World dropdown selector (Island, Supermarket, Farm, Tavern, Space)
+- Level number input field
+- "SOLVE LEVEL" button with results display
+- Shows: solver moves, current 3-star threshold, mismatch warnings
+- "UPDATE THRESHOLDS" button to fix JSON star thresholds based on solver
+- "Copy Move Sequence to Clipboard" button
+- Move sequence displayed with container names and slot indices
+
+**Cancelable Progress Bar:**
+- Added `OnProgressUpdate` callback to LevelSolver for external cancellation
+- Solver now shows Unity's cancelable progress bar during solving
+- Displays: current moves, items remaining, elapsed time
+- User can click Cancel to stop solver and return partial results
+- Works for both single level and batch "Solve All" operations
+
+**Solver Stability Fixes:**
+- Removed experimental "2-move match" detection that caused solver failures
+- Reverted to original simple pairing bonus (+80 for any pair)
+- Removed unused `CountTwoMoveMatches()` method
+- Solver now reliably solves all 10 Island levels
+
+**Solver Results (Island Levels 1-10):**
+| Level | Solver Moves | Player Best | Difference |
+|-------|--------------|-------------|------------|
+| 1 | 5 | - | - |
+| 2 | 7 | - | - |
+| 3 | 10 | - | - |
+| 4 | 9 | - | - |
+| 5 | 11 | - | - |
+| 6 | 19 | - | - |
+| 7 | 22 | - | - |
+| 8 | 20 | 19 | Player -1 |
+| 9 | 24 | 21 | Player -3 |
+| 10 | 27 | 23 | Player -4 |
+
+**Solver Alert System:**
+- Alerts logged when player beats solver score
+- Alert files saved to `{persistentDataPath}/SolverAlerts/`
+- Contains: timestamp, level info, player vs solver moves, player's move sequence
+- Helps identify where solver algorithm can be improved
+
+**Files Modified:**
+- `LevelSolver.cs` - Added OnProgressUpdate callback, removed 2-move match logic
+- `LevelSolverMenu.cs` - Added LevelSolverWindow class, cancelable progress bars
+
+**Known Solver Limitations:**
+- Player beat solver on levels 8, 9, 10 by 1-4 moves
+- Greedy algorithm doesn't always find optimal solution
+- Future: investigate player's move sequences to improve solver heuristics
+
+---
+
 ## Known Issues
-None currently - all identified bugs have been fixed.
+- **Solver suboptimal on complex levels** - Player found better solutions on Island levels 8-10
 
 ---
 
 ## Next Session Checklist
-1. [x] Create Main Menu / Splash Screen
-2. [x] Fix level data (item counts, container images)
-3. [x] Copy island container images from Godot
-4. [x] Fix HUD not resetting between levels
-5. [x] Fix items.json format for proper parsing
-6. [x] Update world map to match Godot version
-7. [x] Polish level select screen (rounded corners, star alignment, text positioning)
-8. [x] Implement undo move system
-9. [x] Implement timer system (countdown per level, can disable in settings)
-10. [x] **Achievement System Core** - Manager, data structures, progress tracking, notification UI
-11. [x] **Achievement System UI** - Achievement page with tabs, groups, progress bars, milestone dates
-12. [ ] **Trophy Room** - 3D shelf display for earned trophies
-13. [ ] **Animated Level Complete Screen** - Awaiting modular assets from source files
-14. [ ] Test on mobile device (touch input)
-15. [x] Pause Menu Screen (Resume, Restart, Settings, Quit)
-16. [x] Settings Screen with volume controls + timer toggle
-17. [x] Match effect animation (15-frame pink glow)
-18. [ ] Implement dialogue/mascot system
-19. [x] Level Failed Screen (for timer expiration)
-20. [ ] Scene transitions (fade between screens)
+1. [ ] **Investigate Solver Optimization** - Analyze player move sequences for levels 8-10, improve heuristics
+2. [ ] **Trophy Room** - 3D shelf display for earned trophies
+3. [ ] **Animated Level Complete Screen** - Awaiting modular assets from source files
+4. [ ] **World-specific lock overlays** - Custom designs for each world
+5. [ ] **Dialogue & Mascots system** - Typewriter text, phonetic audio, milestone triggers
+6. [ ] Test on mobile device (touch input)
+7. [ ] Scene transitions (fade between screens)
+8. [ ] Generate levels 11-100 for all worlds
