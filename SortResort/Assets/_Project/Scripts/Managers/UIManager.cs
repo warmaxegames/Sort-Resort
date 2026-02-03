@@ -4717,7 +4717,7 @@ Antonia and Joakim Engfors
             // Initialize after fields are set (hides the panel)
             dialogueUI.Initialize();
 
-            Debug.Log("[UIManager] Dialogue panel created");
+            Debug.Log($"[UIManager] Dialogue panel created, DialogueUI component: {dialogueUI != null}");
         }
 
         #endregion

@@ -55,30 +55,50 @@ namespace SortResort
 
         private void OnEnable()
         {
+            Debug.Log("[DialogueUI] OnEnable called!");
+
+            // Try to subscribe immediately, or wait for Start if DialogueManager isn't ready
+            TrySubscribe();
+        }
+
+        private void Start()
+        {
+            // Try again in Start in case DialogueManager wasn't ready in OnEnable
+            TrySubscribe();
+        }
+
+        private bool isSubscribed = false;
+
+        private void TrySubscribe()
+        {
+            if (isSubscribed) return;
+
             if (DialogueManager.Instance != null)
             {
-                Debug.Log("[DialogueUI] OnEnable - subscribing to DialogueManager events");
+                Debug.Log("[DialogueUI] Subscribing to DialogueManager events");
                 DialogueManager.Instance.OnTextUpdated += UpdateText;
                 DialogueManager.Instance.OnLineStarted += OnLineStarted;
                 DialogueManager.Instance.OnLineComplete += OnLineComplete;
                 DialogueManager.Instance.OnDialogueComplete += OnDialogueComplete;
                 DialogueManager.Instance.OnMascotChanged += OnMascotChanged;
+                isSubscribed = true;
             }
             else
             {
-                Debug.LogWarning("[DialogueUI] OnEnable - DialogueManager.Instance is NULL!");
+                Debug.LogWarning("[DialogueUI] DialogueManager.Instance is NULL - will retry in Start");
             }
         }
 
         private void OnDisable()
         {
-            if (DialogueManager.Instance != null)
+            if (isSubscribed && DialogueManager.Instance != null)
             {
                 DialogueManager.Instance.OnTextUpdated -= UpdateText;
                 DialogueManager.Instance.OnLineStarted -= OnLineStarted;
                 DialogueManager.Instance.OnLineComplete -= OnLineComplete;
                 DialogueManager.Instance.OnDialogueComplete -= OnDialogueComplete;
                 DialogueManager.Instance.OnMascotChanged -= OnMascotChanged;
+                isSubscribed = false;
             }
         }
 
