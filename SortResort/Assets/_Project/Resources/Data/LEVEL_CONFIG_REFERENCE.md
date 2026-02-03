@@ -399,10 +399,13 @@ greentomato, redtomato, potato, romaine, whiteonion, carrot, turnip
 
 3. **Train Configurations**: Space containers ~450px apart horizontally for a connected train look.
 
-4. **Star Thresholds**:
-   - 3-star: Minimum possible moves (perfect play)
-   - 2-star: ~30% more moves
-   - 1-star: ~50% more moves
+4. **Star Thresholds** (based on solver optimal):
+   - 3-star: solver moves (optimal)
+   - 2-star: solver × 1.15 (15% more moves)
+   - 1-star: solver × 1.30 (30% more moves)
+   - Fail: solver × 1.40 (40% more moves)
+
+   Use `Tools > Sort Resort > Solver > Update All Level Thresholds` to recalculate.
 
 5. **Locked Containers**: Place instant-match items (3 of same) in locked containers for satisfying unlocks.
 
