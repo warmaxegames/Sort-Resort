@@ -22,7 +22,7 @@
 
 ## Current Status
 
-**Last Updated:** 2026-02-02
+**Last Updated:** 2026-02-03
 
 ### Working Features (Unity)
 - Splash screen → Level select with fade transition
@@ -35,6 +35,7 @@
 - Save/load progress (PlayerPrefs), undo system, optional timer
 - Achievement system (88 achievements with UI, notifications, rewards)
 - Level solver tool (Editor window + in-game auto-solve button)
+- **Dialogue system** - Typewriter text, Animal Crossing-style voices, mascot portraits, triggered on level events
 
 ---
 
@@ -42,13 +43,12 @@
 
 ### High Priority
 1. **World-specific lock overlays** - Placeholders exist (copies of base), need custom designs
-2. **Dialogue & Mascots system** - Each world has unique mascot with pop-up dialogue:
-   - Typewriter text reveal (letters appear one at a time)
-   - Animal Crossing-style phonetic audio (sound per letter)
-   - Milestone triggers (dialogue on progress events)
-   - Data-driven dialogue management
-   - Tap to advance
-   - Settings toggle to disable mascot voices
+2. **Polish dialogue system** - Core system working, needs refinement:
+   - Fine-tune mascot positioning and sizing
+   - Add settings toggle to disable mascot voices
+   - Add more dialogue triggers (level milestones, achievements)
+   - Create mascot sprites for Supermarket (Tommy) world
+   - Test all world welcome dialogues
 3. **Level Complete screen (animated)** - Rays/curtains done, needs mascot, stars, ribbon
 4. **Mobile Testing** - Touch input validation on device
 
@@ -84,7 +84,7 @@
 - [x] ContainerMovement.cs (back_and_forth, carousel, falling)
 - [x] Despawn-on-match stacking containers
 - [x] Undo system
-- [ ] Dialogue system
+- [x] Dialogue system (core working, needs polish)
 - [ ] Profile customization
 
 ### Phase 8: Content & Testing

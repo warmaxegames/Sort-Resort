@@ -4577,7 +4577,7 @@ Antonia and Joakim Engfors
             // Add canvas group for fade animations
             var canvasGroup = dialoguePanel.AddComponent<CanvasGroup>();
 
-            // Semi-transparent overlay (optional - can be disabled)
+            // Semi-transparent overlay - blocks all clicks behind dialogue
             var overlay = new GameObject("Overlay");
             overlay.transform.SetParent(dialoguePanel.transform, false);
             var overlayRect = overlay.AddComponent<RectTransform>();
@@ -4587,8 +4587,25 @@ Antonia and Joakim Engfors
             overlayRect.offsetMax = Vector2.zero;
             var overlayImage = overlay.AddComponent<Image>();
             overlayImage.color = new Color(0, 0, 0, 0.3f);
+            overlayImage.raycastTarget = true; // Block clicks from reaching game elements
 
-            // Dialogue box container (bottom of screen)
+            // Mascot image - created BEFORE dialogue box so it renders behind
+            // Positioned so just feet/legs are behind box, most of body visible above
+            var mascotContainer = new GameObject("Mascot Container");
+            mascotContainer.transform.SetParent(dialoguePanel.transform, false);
+            var mascotRect = mascotContainer.AddComponent<RectTransform>();
+            mascotRect.anchorMin = new Vector2(0, 0);
+            mascotRect.anchorMax = new Vector2(0, 0);
+            mascotRect.pivot = new Vector2(0, 0);
+            mascotRect.anchoredPosition = new Vector2(30, 180); // Left side, positioned so feet overlap box
+            mascotRect.sizeDelta = new Vector2(320, 500); // Taller to show full mascot above box
+
+            dialogueMascotImage = mascotContainer.AddComponent<Image>();
+            dialogueMascotImage.preserveAspect = true;
+            dialogueMascotImage.raycastTarget = false; // Don't block clicks
+            dialogueMascotImage.enabled = false; // Hidden until mascot set
+
+            // Dialogue box container (bottom of screen) - renders ON TOP of mascot
             var dialogueBox = new GameObject("Dialogue Box");
             dialogueBox.transform.SetParent(dialoguePanel.transform, false);
             var boxRect = dialogueBox.AddComponent<RectTransform>();
@@ -4596,7 +4613,7 @@ Antonia and Joakim Engfors
             boxRect.anchorMax = new Vector2(1, 0);
             boxRect.pivot = new Vector2(0.5f, 0);
             boxRect.anchoredPosition = new Vector2(0, 50);
-            boxRect.sizeDelta = new Vector2(-60, 350); // Full width minus margins, 350px tall
+            boxRect.sizeDelta = new Vector2(-60, 300); // Full width minus margins, 300px tall
 
             // Dialogue box background
             dialogueBoxImage = dialogueBox.AddComponent<Image>();
@@ -4608,22 +4625,8 @@ Antonia and Joakim Engfors
             }
             else
             {
-                dialogueBoxImage.color = new Color(0.2f, 0.15f, 0.1f, 0.95f);
+                dialogueBoxImage.color = new Color(0.9f, 0.85f, 0.7f, 0.98f); // Light beige fallback
             }
-
-            // Mascot image (left side, overlapping box)
-            var mascotContainer = new GameObject("Mascot Container");
-            mascotContainer.transform.SetParent(dialogueBox.transform, false);
-            var mascotRect = mascotContainer.AddComponent<RectTransform>();
-            mascotRect.anchorMin = new Vector2(0, 0.5f);
-            mascotRect.anchorMax = new Vector2(0, 0.5f);
-            mascotRect.pivot = new Vector2(0, 0.5f);
-            mascotRect.anchoredPosition = new Vector2(20, 50);
-            mascotRect.sizeDelta = new Vector2(200, 280);
-
-            dialogueMascotImage = mascotContainer.AddComponent<Image>();
-            dialogueMascotImage.preserveAspect = true;
-            dialogueMascotImage.enabled = false; // Hidden until mascot set
 
             // Text content area (right side of mascot)
             var textArea = new GameObject("Text Area");
@@ -4676,7 +4679,7 @@ Antonia and Joakim Engfors
             dialogueText = dialogueTextGO.AddComponent<TextMeshProUGUI>();
             dialogueText.text = "";
             dialogueText.fontSize = 32;
-            dialogueText.color = Color.white;
+            dialogueText.color = new Color(0.1f, 0.1f, 0.1f, 1f); // Dark/black text
             dialogueText.alignment = TextAlignmentOptions.TopLeft;
             dialogueText.enableWordWrapping = true;
 
@@ -4691,9 +4694,9 @@ Antonia and Joakim Engfors
             continueRect.sizeDelta = new Vector2(150, 40);
 
             var continueText = continueGO.AddComponent<TextMeshProUGUI>();
-            continueText.text = "Tap to continue >";
+            continueText.text = "Tap to continue ▶";
             continueText.fontSize = 20;
-            continueText.color = new Color(1, 1, 1, 0.7f);
+            continueText.color = new Color(0.3f, 0.3f, 0.3f, 0.8f); // Dark gray
             continueText.alignment = TextAlignmentOptions.Right;
             continueText.fontStyle = FontStyles.Italic;
 

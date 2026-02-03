@@ -111,6 +111,12 @@ namespace SortResort
                 return;
             }
 
+            // Don't allow game interaction during dialogue
+            if (DialogueManager.Instance != null && DialogueManager.Instance.IsDialogueActive)
+            {
+                return;
+            }
+
             pointerDown = true;
             Vector2 screenPos = pointerPositionAction.ReadValue<Vector2>();
             Vector3 worldPos = gameCamera.ScreenToWorldPoint(screenPos);

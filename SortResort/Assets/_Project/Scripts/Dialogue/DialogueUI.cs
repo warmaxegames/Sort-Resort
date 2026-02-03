@@ -1,6 +1,7 @@
 using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.InputSystem;
 using TMPro;
 
 namespace SortResort
@@ -26,6 +27,10 @@ namespace SortResort
         private bool isVisible;
         private Coroutine animationCoroutine;
 
+        // Input System
+        private InputAction clickAction;
+        private InputAction submitAction;
+
         // Cached mascot sprites
         private string currentMascotFolder;
         private Sprite defaultMascotSprite;
@@ -50,13 +55,21 @@ namespace SortResort
                 }
             }
 
+            // Set up input actions for new Input System
+            clickAction = new InputAction("DialogueClick", InputActionType.Button, "<Pointer>/press");
+            submitAction = new InputAction("DialogueSubmit", InputActionType.Button, "<Keyboard>/space");
+
+            clickAction.Enable();
+            submitAction.Enable();
+
+            // Make sure we're subscribed to DialogueManager events
+            TrySubscribe();
+
             Hide(immediate: true);
         }
 
         private void OnEnable()
         {
-            Debug.Log("[DialogueUI] OnEnable called!");
-
             // Try to subscribe immediately, or wait for Start if DialogueManager isn't ready
             TrySubscribe();
         }
@@ -75,22 +88,34 @@ namespace SortResort
 
             if (DialogueManager.Instance != null)
             {
-                Debug.Log("[DialogueUI] Subscribing to DialogueManager events");
                 DialogueManager.Instance.OnTextUpdated += UpdateText;
                 DialogueManager.Instance.OnLineStarted += OnLineStarted;
                 DialogueManager.Instance.OnLineComplete += OnLineComplete;
                 DialogueManager.Instance.OnDialogueComplete += OnDialogueComplete;
                 DialogueManager.Instance.OnMascotChanged += OnMascotChanged;
                 isSubscribed = true;
-            }
-            else
-            {
-                Debug.LogWarning("[DialogueUI] DialogueManager.Instance is NULL - will retry in Start");
+
+                // Check if dialogue is already playing (we may have missed OnLineStarted)
+                if (DialogueManager.Instance.IsDialogueActive)
+                {
+                    Show();
+                }
             }
         }
 
         private void OnDisable()
         {
+            // Don't unsubscribe here - we want to stay subscribed even when hidden
+            // so we can receive events and show the panel when dialogue starts
+        }
+
+        private void OnDestroy()
+        {
+            // Clean up input actions
+            clickAction?.Dispose();
+            submitAction?.Dispose();
+
+            // Only unsubscribe when actually being destroyed
             if (isSubscribed && DialogueManager.Instance != null)
             {
                 DialogueManager.Instance.OnTextUpdated -= UpdateText;
@@ -104,8 +129,8 @@ namespace SortResort
 
         private void Update()
         {
-            // Handle player input to advance dialogue
-            if (isVisible && (Input.GetMouseButtonDown(0) || Input.GetKeyDown(KeyCode.Space) || Input.GetKeyDown(KeyCode.Return)))
+            // Handle player input to advance dialogue (using new Input System)
+            if (isVisible && (clickAction?.WasPressedThisFrame() == true || submitAction?.WasPressedThisFrame() == true))
             {
                 DialogueManager.Instance?.OnPlayerInput();
             }
@@ -113,9 +138,6 @@ namespace SortResort
 
         private void OnLineStarted(DialogueLine line)
         {
-            Debug.Log($"[DialogueUI] OnLineStarted: {line.text}");
-            Debug.Log($"[DialogueUI] dialoguePanel is {(dialoguePanel != null ? "SET" : "NULL")}");
-
             Show();
 
             // Update mascot expression
@@ -176,17 +198,22 @@ namespace SortResort
         {
             if (string.IsNullOrEmpty(currentMascotFolder)) return;
 
-            defaultMascotSprite = Resources.Load<Sprite>($"{currentMascotFolder}/default");
+            // Sprite format: {spriteFolder}_neutral (e.g., Sprites/Mascots/island_whiskers_neutral)
+            defaultMascotSprite = Resources.Load<Sprite>($"{currentMascotFolder}_neutral");
             if (defaultMascotSprite == null)
             {
-                // Try loading without "default" suffix
-                defaultMascotSprite = Resources.Load<Sprite>(currentMascotFolder);
+                // Try loading with "default" suffix as fallback
+                defaultMascotSprite = Resources.Load<Sprite>($"{currentMascotFolder}_default");
             }
 
             if (mascotImage != null && defaultMascotSprite != null)
             {
                 mascotImage.sprite = defaultMascotSprite;
                 mascotImage.enabled = true;
+            }
+            else if (mascotImage != null && defaultMascotSprite == null)
+            {
+                Debug.LogWarning($"[DialogueUI] Failed to load mascot sprite at {currentMascotFolder}_neutral");
             }
         }
 
@@ -196,12 +223,18 @@ namespace SortResort
 
             Sprite expressionSprite = null;
 
-            if (!string.IsNullOrEmpty(expression) && expression != "default")
+            // Map common expressions to file naming
+            string mappedExpression = expression;
+            if (expression == "default") mappedExpression = "neutral";
+
+            if (!string.IsNullOrEmpty(mappedExpression))
             {
-                expressionSprite = Resources.Load<Sprite>($"{currentMascotFolder}/{expression}");
+                // Sprite format: {spriteFolder}_{expression} (e.g., Sprites/Mascots/island_whiskers_happy)
+                expressionSprite = Resources.Load<Sprite>($"{currentMascotFolder}_{mappedExpression}");
             }
 
             mascotImage.sprite = expressionSprite ?? defaultMascotSprite;
+            mascotImage.enabled = true;
         }
 
         private void LoadDialogueBoxForWorld(string worldId)
@@ -217,13 +250,7 @@ namespace SortResort
 
         public void Show(bool immediate = false)
         {
-            Debug.Log($"[DialogueUI] Show called, dialoguePanel={dialoguePanel != null}, canvasGroup={canvasGroup != null}");
-
-            if (dialoguePanel == null)
-            {
-                Debug.LogError("[DialogueUI] Cannot show - dialoguePanel is null!");
-                return;
-            }
+            if (dialoguePanel == null) return;
 
             if (animationCoroutine != null)
             {
@@ -232,7 +259,6 @@ namespace SortResort
 
             dialoguePanel.SetActive(true);
             isVisible = true;
-            Debug.Log("[DialogueUI] Panel activated");
 
             if (immediate || showAnimationDuration <= 0)
             {

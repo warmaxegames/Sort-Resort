@@ -6,7 +6,7 @@
             "worldId": "island",
             "basePitch": 1.45,
             "speakSpeed": 20,
-            "spriteFolder": "Sprites/Mascots/Island"
+            "spriteFolder": "Sprites/Mascots/island_whiskers"
         },
         {
             "id": "tommy",
@@ -14,31 +14,31 @@
             "worldId": "supermarket",
             "basePitch": 1.35,
             "speakSpeed": 18,
-            "spriteFolder": "Sprites/Mascots/Supermarket"
+            "spriteFolder": "Sprites/Mascots/supermarket_tommy"
         },
         {
             "id": "chicken",
-            "displayName": "Clucky",
+            "displayName": "Mara",
             "worldId": "farm",
             "basePitch": 1.5,
             "speakSpeed": 22,
-            "spriteFolder": "Sprites/Mascots/Farm"
+            "spriteFolder": "Sprites/Mascots/farm_mara"
         },
         {
             "id": "bartender",
-            "displayName": "Barley",
+            "displayName": "Hog",
             "worldId": "tavern",
             "basePitch": 1.3,
             "speakSpeed": 16,
-            "spriteFolder": "Sprites/Mascots/Tavern"
+            "spriteFolder": "Sprites/Mascots/tavern_hog"
         },
         {
             "id": "alien",
-            "displayName": "Zyx",
+            "displayName": "Leika",
             "worldId": "space",
             "basePitch": 1.55,
             "speakSpeed": 25,
-            "spriteFolder": "Sprites/Mascots/Space"
+            "spriteFolder": "Sprites/Mascots/space_leika"
         }
     ],
     "dialogues": [
