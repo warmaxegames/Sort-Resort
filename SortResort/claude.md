@@ -41,34 +41,28 @@
 ## TODO List
 
 ### High Priority
-1. **Solver Optimization: COMPLETE** - Solver matches or nearly matches player:
-   - Level 8: Solver 19 = Player 19 ✓
-   - Level 9: Solver 22 vs Player 21 (1 behind - requires 4-move lookahead reveal combo)
-   - Level 10: Solver 23 = Player 23 ✓
-   - The Level 9 gap is a greedy algorithm limitation, not a heuristic issue
-2. **World-specific lock overlays** - Placeholders exist (copies of base), need custom designs
-3. **Dialogue & Mascots system** - Each world has unique mascot with pop-up dialogue:
+1. **World-specific lock overlays** - Placeholders exist (copies of base), need custom designs
+2. **Dialogue & Mascots system** - Each world has unique mascot with pop-up dialogue:
    - Typewriter text reveal (letters appear one at a time)
    - Animal Crossing-style phonetic audio (sound per letter)
    - Milestone triggers (dialogue on progress events)
    - Data-driven dialogue management
    - Tap to advance
-4. **Level Complete screen (animated)** - Rebuild with proper animations
-5. **Scene Transitions** - Fade between screens
-6. **Mobile Testing** - Touch input validation on device
+3. **Level Complete screen (animated)** - Rays/curtains done, needs mascot, stars, ribbon
+4. **Mobile Testing** - Touch input validation on device
 
 ### Medium Priority
-7. **Create Levels 7-100** - Complete level content for all worlds
-8. **Trophy Room** - 3D shelf display for earned trophies
-9. **Profile Customization** - Player profiles with customizable mascot/avatar (character, eye colors, hats, outfits, name)
+5. **Create Levels 7-100** - Complete level content for all worlds
+6. **Trophy Room** - 3D shelf display for earned trophies
+7. **Profile Customization** - Player profiles with customizable mascot/avatar (character, eye colors, hats, outfits, name)
 
 ### Lower Priority
-10. **Level Creator Tool** - GUI-based level editor:
+8. **Level Creator Tool** - GUI-based level editor:
     - Visual container placement, world/theme selection
     - Slot configuration, container properties (locked, movement, despawn)
     - Item assignment with validation, star thresholds, timer setting
     - Play-test, export/import JSON
-11. **Leaderboard System** - Competitive rankings:
+9. **Leaderboard System** - Competitive rankings:
     - Total achievement points, daily challenge, weekly stars, world speed runs
     - Profile pages with mascot, titles, trophy showcase, stats
     - Requires backend service
@@ -82,7 +76,7 @@
 - [x] Container unlock animation (scale + fade)
 - [x] Row depth visualization (grayed back rows, vertical offset)
 - [x] Tween animations (item scale, highlight)
-- [ ] Scene transitions
+- [x] Scene transitions (fade between screens)
 - [ ] Mascot reactions
 
 ### Phase 7: Advanced Features - PARTIAL
