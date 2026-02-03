@@ -822,29 +822,14 @@ namespace SortResort
         #region Undo System
 
         /// <summary>
-        /// Record a move for potential undo
+        /// Record a move for potential undo and solver comparison
         /// </summary>
         public void RecordMove(Item item, ItemContainer fromContainer, int fromSlot, int fromRow,
                                ItemContainer toContainer, int toSlot, int toRow,
-                               bool rowAdvancementOccurred = false, int[] rowAdvancementOffsets = null)
+                               bool rowAdvancementOccurred = false, int[] rowAdvancementOffsets = null,
+                               bool matchOccurred = false)
         {
-            var record = new MoveRecord
-            {
-                item = item,
-                fromContainer = fromContainer,
-                fromSlot = fromSlot,
-                fromRow = fromRow,
-                toContainer = toContainer,
-                toSlot = toSlot,
-                toRow = toRow,
-                rowAdvancementOccurred = rowAdvancementOccurred,
-                rowAdvancementOffsets = rowAdvancementOffsets
-            };
-
-            moveHistory.Push(record);
-            UpdateUndoAvailable(true);
-
-            // Also track in allMovesThisLevel for solver comparison (uses string IDs, survives object destruction)
+            // Always track in allMovesThisLevel for solver comparison (uses string IDs, survives object destruction)
             allMovesThisLevel.Add(new SimpleMoveRecord
             {
                 itemId = item?.ItemId ?? "unknown",
@@ -854,7 +839,27 @@ namespace SortResort
                 toSlot = toSlot
             });
 
-            Debug.Log($"[LevelManager] Move recorded for undo: {item.ItemId} from {fromContainer?.ContainerId}[{fromSlot},{fromRow}] to {toContainer?.ContainerId}[{toSlot},{toRow}]. RowAdvanced: {rowAdvancementOccurred}. History count: {moveHistory.Count}");
+            // Only add to undo history if no match occurred (can't undo matches)
+            if (!matchOccurred)
+            {
+                var record = new MoveRecord
+                {
+                    item = item,
+                    fromContainer = fromContainer,
+                    fromSlot = fromSlot,
+                    fromRow = fromRow,
+                    toContainer = toContainer,
+                    toSlot = toSlot,
+                    toRow = toRow,
+                    rowAdvancementOccurred = rowAdvancementOccurred,
+                    rowAdvancementOffsets = rowAdvancementOffsets
+                };
+
+                moveHistory.Push(record);
+                UpdateUndoAvailable(true);
+            }
+
+            Debug.Log($"[LevelManager] Move recorded: {item.ItemId} from {fromContainer?.ContainerId}[{fromSlot},{fromRow}] to {toContainer?.ContainerId}[{toSlot},{toRow}]. Match: {matchOccurred}. Undo history: {moveHistory.Count}. Total moves: {allMovesThisLevel.Count}");
         }
 
         /// <summary>

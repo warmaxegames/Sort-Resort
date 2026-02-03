@@ -375,22 +375,21 @@ namespace SortResort
                         }
                     }
 
-                    // Only record move for undo if no match occurred
-                    // (match is triggered inside PlaceItemInSlot, so check state here)
-                    if (currentState != ItemState.Matched)
-                    {
-                        LevelManager.Instance?.RecordMove(
-                            this,
-                            originalContainer,
-                            originalSlot?.SlotIndex ?? 0,
-                            originalSlot?.Row ?? 0,
-                            container,
-                            slot.SlotIndex,
-                            slot.Row,
-                            rowAdvancementWillOccur,
-                            rowAdvancementOffsets
-                        );
-                    }
+                    // Always record move for solver comparison tracking
+                    // Pass whether a match occurred so RecordMove can decide about undo history
+                    bool matchOccurred = currentState == ItemState.Matched;
+                    LevelManager.Instance?.RecordMove(
+                        this,
+                        originalContainer,
+                        originalSlot?.SlotIndex ?? 0,
+                        originalSlot?.Row ?? 0,
+                        container,
+                        slot.SlotIndex,
+                        slot.Row,
+                        rowAdvancementWillOccur,
+                        rowAdvancementOffsets,
+                        matchOccurred
+                    );
 
                     // Increment move count only for actual moves
                     GameManager.Instance?.IncrementMoveCount();
