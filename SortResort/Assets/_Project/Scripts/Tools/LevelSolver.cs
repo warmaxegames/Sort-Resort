@@ -278,6 +278,9 @@ namespace SortResort
 
             // Main solving loop
             int iteration = 0;
+            Move? lastMove = null; // Track last move to prevent oscillation
+            var recentMoves = new List<Move>(); // Track recent moves for pattern detection
+            const int PATTERN_WINDOW = 10; // Look for patterns in last N moves
             while (!state.IsComplete() && state.MoveCount < MAX_MOVES)
             {
                 // Check for cancellation via progress callback
@@ -299,7 +302,7 @@ namespace SortResort
                 iteration++;
                 Log($"--- Iteration {iteration}: {state.GetTotalItemCount()} items remaining ---");
 
-                var bestMove = FindBestMove(state);
+                var bestMove = FindBestMove(state, lastMove, recentMoves);
 
                 if (bestMove == null)
                 {
@@ -316,12 +319,22 @@ namespace SortResort
                 Log($"Executing: {bestMove.Value}");
                 ExecuteMove(state, bestMove.Value);
                 result.MoveSequence.Add(bestMove.Value);
+                lastMove = bestMove.Value; // Track for oscillation prevention
+
+                // Track recent moves for pattern detection
+                recentMoves.Add(bestMove.Value);
+                if (recentMoves.Count > PATTERN_WINDOW)
+                {
+                    recentMoves.RemoveAt(0);
+                }
 
                 // Process matches
                 int newMatches = ProcessAllMatches(state);
                 if (newMatches > 0)
                 {
                     Log($"Match! {newMatches} match(es) made. Total matches: {state.MatchCount}");
+                    lastMove = null; // Reset after match - new board state, oscillation less likely
+                    recentMoves.Clear(); // Clear pattern history after match
                 }
             }
 
@@ -339,6 +352,11 @@ namespace SortResort
             {
                 Log("FAILED: Max moves exceeded");
                 result.FailureReason = "Max moves exceeded";
+                result.TotalMoves = state.MoveCount;
+                result.TotalMatches = state.MatchCount;
+
+                // Print move sequence even on failure for debugging
+                PrintMoveSequence(result.MoveSequence, levelData, failed: true);
             }
 
             result.SolveTimeMs = (float)(DateTime.Now - startTime).TotalMilliseconds;
@@ -348,7 +366,7 @@ namespace SortResort
         /// <summary>
         /// Print a detailed move sequence for comparing with manual solutions
         /// </summary>
-        private void PrintMoveSequence(List<Move> moves, LevelData levelData)
+        private void PrintMoveSequence(List<Move> moves, LevelData levelData, bool failed = false)
         {
             // Get container names for readability
             var containerNames = new Dictionary<int, string>();
@@ -359,8 +377,16 @@ namespace SortResort
 
             // Build entire output as single string for easy copying
             var sb = new System.Text.StringBuilder();
-            sb.AppendLine("\n=== SOLVER MOVE SEQUENCE ===");
-            sb.AppendLine($"Total moves: {moves.Count}\n");
+            if (failed)
+            {
+                sb.AppendLine("\n=== SOLVER MOVE SEQUENCE (FAILED - Max moves exceeded) ===");
+                sb.AppendLine($"Moves before failure: {moves.Count}\n");
+            }
+            else
+            {
+                sb.AppendLine("\n=== SOLVER MOVE SEQUENCE ===");
+                sb.AppendLine($"Total moves: {moves.Count}\n");
+            }
 
             for (int i = 0; i < moves.Count; i++)
             {
@@ -464,7 +490,7 @@ namespace SortResort
         /// 1. Always take 1-move matches (always optimal)
         /// 2. Otherwise, score ALL candidate moves and pick the best
         /// </summary>
-        private Move? FindBestMove(GameState state)
+        private Move? FindBestMove(GameState state, Move? lastMove = null, List<Move> recentMoves = null)
         {
             Log("Searching for best move...");
 
@@ -488,12 +514,41 @@ namespace SortResort
                 return null;
             }
 
+            // Build set of recent move patterns to detect oscillation
+            var recentMoveSet = new HashSet<string>();
+            if (recentMoves != null)
+            {
+                foreach (var rm in recentMoves)
+                {
+                    // Track both the move and its reverse
+                    recentMoveSet.Add($"{rm.ItemId}:{rm.FromContainerIndex}->{rm.ToContainerIndex}");
+                }
+            }
+
             // RULE 4: Score all moves on unified scale and pick the best
             var scoredMoves = new List<(Move move, int score, string reason)>();
 
             foreach (var move in allMoves)
             {
                 var (score, reason) = ScoreMoveUnified(state, move, itemStatus);
+
+                // RULE 5: Heavily penalize moves that reverse the last move (prevents oscillation)
+                if (lastMove.HasValue && IsReversalMove(move, lastMove.Value))
+                {
+                    score -= 1000;
+                    reason += ", REVERSAL PENALTY";
+                }
+
+                // RULE 6: Penalize moves that are part of a recent oscillation pattern
+                string moveKey = $"{move.ItemId}:{move.FromContainerIndex}->{move.ToContainerIndex}";
+                string reverseMoveKey = $"{move.ItemId}:{move.ToContainerIndex}->{move.FromContainerIndex}";
+                if (recentMoveSet.Contains(reverseMoveKey))
+                {
+                    // This move reverses a recent move - likely part of oscillation
+                    score -= 500;
+                    reason += ", PATTERN PENALTY";
+                }
+
                 scoredMoves.Add((move, score, reason));
             }
 
@@ -681,8 +736,44 @@ namespace SortResort
 
             if (matchingAtDest == 1 && !alreadyCreditedPair)
             {
-                score += 80;
-                reasons.Add("creates pair");
+                // Check if 3rd item of this type is accessible BEFORE giving pair bonus
+                bool thirdIsAccessible = accessible >= 3; // All 3 copies are accessible
+
+                // Check if destination will have room for the 3rd item after this move
+                int emptyAtDest = toContainer.GetEmptyFrontSlotCount();
+                bool hasRoomForThird = emptyAtDest >= 2; // After this move fills 1 slot, still has 1+ empty
+
+                if (thirdIsAccessible && hasRoomForThird)
+                {
+                    // EXCELLENT PAIR: 3rd item accessible AND room to complete triple
+                    score += 180;
+                    reasons.Add("creates completable pair");
+                }
+                else if (thirdIsAccessible && !hasRoomForThird)
+                {
+                    // BLOCKED PAIR: 3rd is accessible but no room - need extra move to clear space
+                    score -= 50;
+                    reasons.Add("creates BLOCKED pair (no room for 3rd)");
+                }
+                else if (!thirdIsAccessible && hasRoomForThird)
+                {
+                    // WAITING PAIR: 3rd hidden but room exists - OK but low priority
+                    score += 20;
+                    reasons.Add("creates waiting pair (3rd hidden)");
+
+                    // PENALTY if this pair blocks back row items at destination
+                    if (toContainer.HasBackRowItems())
+                    {
+                        score -= 80;
+                        reasons.Add("pair blocks reveals");
+                    }
+                }
+                else
+                {
+                    // WORST PAIR: 3rd hidden AND no room - very bad
+                    score -= 100;
+                    reasons.Add("creates useless pair (hidden + blocked)");
+                }
             }
             else if (matchingAtDest == 0 && destItems.Count > 0 && !reasons.Contains("enables match (temp location)"))
             {
@@ -719,8 +810,29 @@ namespace SortResort
             }
             if (fromOccupiedCount == 1 && fromContainer.HasBackRowItems())
             {
-                score += 60;
-                reasons.Add("triggers row advance");
+                // Base bonus for revealing hidden items
+                var revealedItems = GetItemsThatWouldAdvance(fromContainer);
+                int revealCount = revealedItems.Count;
+                score += 80 + (revealCount * 20);
+                reasons.Add($"triggers row advance ({revealCount} items)");
+
+                // Extra bonus if revealed item completes a waiting pair (2 matching + empty slot)
+                foreach (var revealedItem in revealedItems)
+                {
+                    if (HasWaitingPairForItem(state, revealedItem))
+                    {
+                        score += 80;
+                        reasons.Add($"reveals {revealedItem} for waiting pair");
+                        break; // Only count bonus once
+                    }
+                }
+
+                // Extra bonus if this move ALSO creates a good pair (combo move)
+                if (matchingAtDest == 1 && accessible >= 3)
+                {
+                    score += 50;
+                    reasons.Add("combo: pair + reveal");
+                }
             }
 
             // === DESTINATION QUALITY ===
@@ -731,10 +843,32 @@ namespace SortResort
                 reasons.Add("fills container");
             }
 
+            // === STAGING MOVE BONUS ===
+            // When moving to empty container (staging), it's neutral unless it also reveals items
+            if (destItems.Count == 0 && matchingAtDest == 0)
+            {
+                // This is a staging move - check if it at least triggers row advance
+                if (fromOccupiedCount == 1 && fromContainer.HasBackRowItems())
+                {
+                    // Good staging - reveals items while staging
+                    score += 20;
+                    reasons.Add("productive staging");
+                }
+                else
+                {
+                    // Pure staging with no reveal - not great but sometimes necessary
+                    score -= 5;
+                    reasons.Add("staging move");
+                }
+            }
+
             // === MATCH-IN-PLACE CONSIDERATION ===
             // If source container has room and this item is actionable, prefer keeping it there
+            // BUT not if we're making a good pair or triggering reveals
             int fromEmptySlots = fromContainer.GetEmptyFrontSlotCount();
-            if (fromEmptySlots >= 2 && isActionable && matchingAtDest == 0)
+            bool makingGoodPair = matchingAtDest == 1 && accessible >= 3;
+            bool triggeringReveal = fromOccupiedCount == 1 && fromContainer.HasBackRowItems();
+            if (fromEmptySlots >= 2 && isActionable && matchingAtDest == 0 && !triggeringReveal)
             {
                 // We're evacuating an actionable item to a non-pairing destination
                 // This might disrupt a potential match-in-place
@@ -746,15 +880,17 @@ namespace SortResort
             // Prefer matching at containers with hidden back-row items because:
             // 1. It reveals those items (making them accessible)
             // 2. It empties the container for potential reuse as a collection point
-            if (toContainer.HasBackRowItems() && matchingAtDest >= 1)
+            // NOTE: Only give this bonus if the match will actually complete (not pairs with hidden 3rd)
+            bool willCompleteTriple = matchingAtDest >= 2 || (matchingAtDest == 1 && accessible >= 3);
+            if (toContainer.HasBackRowItems() && matchingAtDest >= 1 && willCompleteTriple)
             {
                 // Count how many items are hidden in the destination
                 int hiddenCount = toContainer.GetBackRowItemCount();
 
                 // Bonus scales with how many items we'll reveal
-                int revealBonus = 40 + (hiddenCount * 15);
+                int revealBonus = 50 + (hiddenCount * 20);
                 score += revealBonus;
-                reasons.Add($"match reveals {hiddenCount} hidden item(s)");
+                reasons.Add($"triple reveals {hiddenCount} hidden item(s)");
 
                 // Check if hidden items are different types that could use this container
                 var hiddenItems = toContainer.GetBackRowItemTypes();
@@ -763,7 +899,7 @@ namespace SortResort
                 {
                     // After matching, container is empty and reveals items of other types
                     // This container becomes a collection point for those types
-                    score += 25;
+                    score += 30;
                     reasons.Add("clears container for revealed items");
                 }
             }
@@ -775,10 +911,14 @@ namespace SortResort
         /// <summary>
         /// Find a move that immediately results in a match (1-move match)
         /// Condition: Container has 2 matching items + 1 empty slot, and a 3rd matching item exists elsewhere
+        /// IMPROVED: When multiple 1-move matches exist, prefer ones that reveal hidden items
         /// </summary>
         private Move? FindOneMoveMatch(GameState state)
         {
             Log("  Searching for 1-move matches...");
+
+            // Collect ALL possible 1-move matches, then pick the best one
+            var candidates = new List<(Move move, int revealScore, string reason)>();
 
             // For each unlocked container with at least 1 empty front slot
             for (int ci = 0; ci < state.Containers.Count; ci++)
@@ -817,7 +957,6 @@ namespace SortResort
                     {
                         // Found 2 matching items, look for a 3rd elsewhere
                         string targetItem = kvp.Key;
-                        Log($"    Container {container.Id} has 2x {targetItem}, searching for 3rd...");
 
                         for (int oci = 0; oci < state.Containers.Count; oci++)
                         {
@@ -830,9 +969,8 @@ namespace SortResort
                                 var item = otherContainer.GetFrontItem(os);
                                 if (item == targetItem)
                                 {
-                                    // Found the 3rd item!
-                                    Log($"    Found 3rd {targetItem} in {otherContainer.Id}[{os}]!");
-                                    return new Move
+                                    // Found a valid 1-move match!
+                                    var move = new Move
                                     {
                                         FromContainerIndex = oci,
                                         FromSlot = os,
@@ -840,16 +978,65 @@ namespace SortResort
                                         ToSlot = emptySlot,
                                         ItemId = targetItem
                                     };
+
+                                    // Score this move based on what it reveals
+                                    int revealScore = 0;
+                                    var reasons = new List<string>();
+
+                                    // Check if moving FROM this container triggers row advance
+                                    int fromOccupied = 0;
+                                    for (int s = 0; s < otherContainer.SlotCount; s++)
+                                    {
+                                        if (!otherContainer.IsFrontSlotEmpty(s)) fromOccupied++;
+                                    }
+                                    if (fromOccupied == 1 && otherContainer.HasBackRowItems())
+                                    {
+                                        // This move will reveal items!
+                                        var revealedItems = GetItemsThatWouldAdvance(otherContainer);
+                                        revealScore += 100 + (revealedItems.Count * 20);
+                                        reasons.Add($"reveals {revealedItems.Count} from source");
+
+                                        // Extra bonus if revealed item has a waiting pair
+                                        foreach (var revealed in revealedItems)
+                                        {
+                                            if (HasWaitingPairForItem(state, revealed))
+                                            {
+                                                revealScore += 50;
+                                                reasons.Add($"reveals {revealed} for waiting pair");
+                                            }
+                                        }
+                                    }
+
+                                    // Check if completing triple at destination reveals items
+                                    if (container.HasBackRowItems())
+                                    {
+                                        var destRevealed = GetItemsThatWouldAdvance(container);
+                                        revealScore += 50 + (destRevealed.Count * 15);
+                                        reasons.Add($"triple reveals {destRevealed.Count} at dest");
+                                    }
+
+                                    string reason = reasons.Count > 0 ? string.Join(", ", reasons) : "basic triple";
+                                    candidates.Add((move, revealScore, reason));
                                 }
                             }
                         }
-                        Log($"    No 3rd {targetItem} found accessible");
                     }
                 }
             }
 
-            Log("  No 1-move matches available");
-            return null;
+            if (candidates.Count == 0)
+            {
+                Log("  No 1-move matches available");
+                return null;
+            }
+
+            // Sort by reveal score descending and pick the best
+            candidates.Sort((a, b) => b.revealScore.CompareTo(a.revealScore));
+
+            var best = candidates[0];
+            Log($"  Found {candidates.Count} 1-move match(es). Best: {best.move.ItemId} (score: {best.revealScore}, {best.reason})");
+
+            return best.move;
         }
 
         /// <summary>
@@ -1069,6 +1256,68 @@ namespace SortResort
         #endregion
 
         #region Utility Methods
+
+        /// <summary>
+        /// Check if a move reverses the previous move (same item, swapped containers)
+        /// </summary>
+        private bool IsReversalMove(Move current, Move previous)
+        {
+            // A reversal is when we move the same item back to where it came from
+            return current.ItemId == previous.ItemId &&
+                   current.FromContainerIndex == previous.ToContainerIndex &&
+                   current.ToContainerIndex == previous.FromContainerIndex;
+        }
+
+        /// <summary>
+        /// Get the items that would advance to front row if all front slots were empty
+        /// </summary>
+        private List<string> GetItemsThatWouldAdvance(ContainerState container)
+        {
+            var items = new List<string>();
+            for (int s = 0; s < container.SlotCount; s++)
+            {
+                // Find the first non-null item starting from row 1
+                for (int r = 1; r < container.Slots[s].Count; r++)
+                {
+                    if (container.Slots[s][r] != null)
+                    {
+                        items.Add(container.Slots[s][r]);
+                        break; // Only first non-null per slot advances
+                    }
+                }
+            }
+            return items;
+        }
+
+        /// <summary>
+        /// Check if there's a "waiting pair" for an item type:
+        /// A container with exactly 2 of this item and at least 1 empty slot
+        /// </summary>
+        private bool HasWaitingPairForItem(GameState state, string itemId)
+        {
+            for (int ci = 0; ci < state.Containers.Count; ci++)
+            {
+                var container = state.Containers[ci];
+                if (container.IsLocked) continue;
+                if (container.SlotCount < 3) continue;
+
+                int matchCount = 0;
+                int emptyCount = 0;
+                for (int s = 0; s < container.SlotCount; s++)
+                {
+                    var frontItem = container.GetFrontItem(s);
+                    if (frontItem == itemId) matchCount++;
+                    else if (frontItem == null) emptyCount++;
+                }
+
+                // Waiting pair: 2 matching items + at least 1 empty slot for the 3rd
+                if (matchCount == 2 && emptyCount >= 1)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
 
         /// <summary>
         /// Print the current state for debugging
