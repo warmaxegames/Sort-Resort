@@ -57,11 +57,16 @@ namespace SortResort
         {
             if (DialogueManager.Instance != null)
             {
+                Debug.Log("[DialogueUI] OnEnable - subscribing to DialogueManager events");
                 DialogueManager.Instance.OnTextUpdated += UpdateText;
                 DialogueManager.Instance.OnLineStarted += OnLineStarted;
                 DialogueManager.Instance.OnLineComplete += OnLineComplete;
                 DialogueManager.Instance.OnDialogueComplete += OnDialogueComplete;
                 DialogueManager.Instance.OnMascotChanged += OnMascotChanged;
+            }
+            else
+            {
+                Debug.LogWarning("[DialogueUI] OnEnable - DialogueManager.Instance is NULL!");
             }
         }
 
@@ -88,6 +93,9 @@ namespace SortResort
 
         private void OnLineStarted(DialogueLine line)
         {
+            Debug.Log($"[DialogueUI] OnLineStarted: {line.text}");
+            Debug.Log($"[DialogueUI] dialoguePanel is {(dialoguePanel != null ? "SET" : "NULL")}");
+
             Show();
 
             // Update mascot expression
@@ -189,7 +197,13 @@ namespace SortResort
 
         public void Show(bool immediate = false)
         {
-            if (dialoguePanel == null) return;
+            Debug.Log($"[DialogueUI] Show called, dialoguePanel={dialoguePanel != null}, canvasGroup={canvasGroup != null}");
+
+            if (dialoguePanel == null)
+            {
+                Debug.LogError("[DialogueUI] Cannot show - dialoguePanel is null!");
+                return;
+            }
 
             if (animationCoroutine != null)
             {
@@ -198,6 +212,7 @@ namespace SortResort
 
             dialoguePanel.SetActive(true);
             isVisible = true;
+            Debug.Log("[DialogueUI] Panel activated");
 
             if (immediate || showAnimationDuration <= 0)
             {
