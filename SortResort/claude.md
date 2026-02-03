@@ -190,3 +190,22 @@ Container border scale: 1.2 (17% border around slots)
 - Greedy algorithm with heuristics for pairing and row advancement
 - Alerts saved when player beats solver score (`{persistentDataPath}/SolverAlerts/`)
 - Known limitation: 4-move lookahead "reveal combos" not detected (greedy algorithm)
+
+### Star Thresholds & Move Limits
+Thresholds are based on solver optimal move count:
+```
+star_move_thresholds: [3-star, 2-star, 1-star, fail]
+
+3-star: solver moves (optimal)
+2-star: solver × 1.15 (rounded to nearest)
+1-star: solver × 1.30 (rounded to nearest)
+Fail:   solver × 1.40 (rounded to nearest)
+```
+
+Example (solver finds 10-move solution):
+- 3-star: ≤10 moves
+- 2-star: ≤12 moves (10 × 1.15 = 11.5 → 12)
+- 1-star: ≤13 moves (10 × 1.30 = 13)
+- Fail:   >14 moves (10 × 1.40 = 14)
+
+To update all level thresholds: `Tools > Sort Resort > Solver > Update All Level Thresholds`

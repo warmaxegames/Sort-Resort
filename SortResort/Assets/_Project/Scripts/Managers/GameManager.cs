@@ -175,6 +175,19 @@ namespace SortResort
         {
             currentMoveCount++;
             GameEvents.InvokeMoveUsed(currentMoveCount);
+
+            // Check if player exceeded fail threshold (move limit)
+            var levelData = LevelManager.Instance?.CurrentLevel;
+            if (levelData != null && currentMoveCount > levelData.FailThreshold)
+            {
+                // Only fail if there are still items remaining
+                int itemsRemaining = LevelManager.Instance?.ItemsRemaining ?? 0;
+                if (itemsRemaining > 0)
+                {
+                    Debug.Log($"[GameManager] Level failed - exceeded move limit ({currentMoveCount} > {levelData.FailThreshold})");
+                    FailLevel();
+                }
+            }
         }
 
         public void DecrementMoveCount()

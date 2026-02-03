@@ -95,6 +95,7 @@ namespace SortResort
         private Image[] levelCompleteStarImages;
         private TextMeshProUGUI levelCompleteMessageText;
         private TextMeshProUGUI levelCompleteMoveCountText;
+        private AnimatedLevelComplete animatedLevelComplete;
         private GameObject levelFailedPanel;
         private TextMeshProUGUI levelFailedReasonText;
         private GameObject levelSelectPanel;
@@ -877,6 +878,7 @@ namespace SortResort
             scrollView.movementType = ScrollRect.MovementType.Elastic;
             scrollView.content = contentRect;
             scrollView.viewport = scrollAreaRect;
+            scrollView.scrollSensitivity = 50f; // Increase scroll wheel sensitivity
 
             // Vertical scrollbar - LARGER for touch, with rounded appearance
             var scrollbarGO = new GameObject("Scrollbar");
@@ -999,22 +1001,27 @@ namespace SortResort
         {
             Debug.Log($"[UIManager] Level selected: {worldId} #{levelNumber}");
 
-            // Update GameManager state
-            if (GameManager.Instance != null)
+            TransitionManager.Instance?.FadeOut(() =>
             {
-                var flags = System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance;
-                typeof(GameManager).GetField("currentWorldId", flags)?.SetValue(GameManager.Instance, worldId);
-                typeof(GameManager).GetField("currentLevelNumber", flags)?.SetValue(GameManager.Instance, levelNumber);
+                // Update GameManager state
+                if (GameManager.Instance != null)
+                {
+                    var flags = System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance;
+                    typeof(GameManager).GetField("currentWorldId", flags)?.SetValue(GameManager.Instance, worldId);
+                    typeof(GameManager).GetField("currentLevelNumber", flags)?.SetValue(GameManager.Instance, levelNumber);
 
-                // Set game state to Playing so DragDropManager works
-                GameManager.Instance.SetState(GameState.Playing);
-            }
+                    // Set game state to Playing so DragDropManager works
+                    GameManager.Instance.SetState(GameState.Playing);
+                }
 
-            // Show gameplay UI
-            ShowGameplay();
+                // Show gameplay UI
+                ShowGameplay();
 
-            // Load the level
-            LevelManager.Instance?.LoadLevel(worldId, levelNumber);
+                // Load the level
+                LevelManager.Instance?.LoadLevel(worldId, levelNumber);
+
+                TransitionManager.Instance?.FadeIn();
+            });
         }
 
         private void CreateHUDPanel()
@@ -1352,9 +1359,31 @@ namespace SortResort
             rect.offsetMin = Vector2.zero;
             rect.offsetMax = Vector2.zero;
 
-            // Dark overlay
-            var overlay = levelCompletePanel.AddComponent<Image>();
-            overlay.color = new Color(0, 0, 0, 0.8f);
+            // Animated background - Rays (behind everything, loops)
+            var raysGO = new GameObject("Rays Background");
+            raysGO.transform.SetParent(levelCompletePanel.transform, false);
+            var raysRect = raysGO.AddComponent<RectTransform>();
+            raysRect.anchorMin = Vector2.zero;
+            raysRect.anchorMax = Vector2.one;
+            raysRect.offsetMin = Vector2.zero;
+            raysRect.offsetMax = Vector2.zero;
+            var raysImage = raysGO.AddComponent<Image>();
+            raysImage.preserveAspect = false;
+
+            // Animated background - Curtains (on top of rays, plays once)
+            var curtainsGO = new GameObject("Curtains");
+            curtainsGO.transform.SetParent(levelCompletePanel.transform, false);
+            var curtainsRect = curtainsGO.AddComponent<RectTransform>();
+            curtainsRect.anchorMin = Vector2.zero;
+            curtainsRect.anchorMax = Vector2.one;
+            curtainsRect.offsetMin = Vector2.zero;
+            curtainsRect.offsetMax = Vector2.zero;
+            var curtainsImage = curtainsGO.AddComponent<Image>();
+            curtainsImage.preserveAspect = false;
+
+            // Add and initialize the animation controller
+            animatedLevelComplete = levelCompletePanel.AddComponent<AnimatedLevelComplete>();
+            animatedLevelComplete.Initialize(raysImage, curtainsImage);
 
             // Content container
             var content = new GameObject("Content");
@@ -2606,7 +2635,10 @@ Antonia and Joakim Engfors
         private void OnLevelStarted(int levelNumber)
         {
             if (levelCompletePanel != null)
+            {
                 levelCompletePanel.SetActive(false);
+                animatedLevelComplete?.Hide();
+            }
             if (hudPanel != null)
                 hudPanel.SetActive(true);
 
@@ -2660,6 +2692,12 @@ Antonia and Joakim Engfors
             if (levelCompletePanel != null)
             {
                 levelCompletePanel.SetActive(true);
+
+                // Start animated background
+                if (animatedLevelComplete != null)
+                {
+                    animatedLevelComplete.Play();
+                }
 
                 // Update stars display
                 if (levelCompleteStarImages != null)
@@ -2729,15 +2767,21 @@ Antonia and Joakim Engfors
         {
             Debug.Log("[UIManager] Back to Levels from failed clicked");
             AudioManager.Instance?.PlayButtonClick();
-            levelFailedPanel?.SetActive(false);
 
-            // Set state back to level selection
-            GameManager.Instance?.SetState(GameState.LevelSelection);
+            TransitionManager.Instance?.FadeOut(() =>
+            {
+                levelFailedPanel?.SetActive(false);
 
-            ShowLevelSelect();
+                // Set state back to level selection
+                GameManager.Instance?.SetState(GameState.LevelSelection);
 
-            // Clear the current level
-            LevelManager.Instance?.ClearLevel();
+                ShowLevelSelect();
+
+                // Clear the current level
+                LevelManager.Instance?.ClearLevel();
+
+                TransitionManager.Instance?.FadeIn();
+            });
         }
 
         private void OnRetryFromFailedClicked()
@@ -2767,7 +2811,10 @@ Antonia and Joakim Engfors
         private void OnLevelRestarted()
         {
             if (levelCompletePanel != null)
+            {
                 levelCompletePanel.SetActive(false);
+                animatedLevelComplete?.Hide();
+            }
             if (levelFailedPanel != null)
                 levelFailedPanel.SetActive(false);
 
@@ -2864,51 +2911,72 @@ Antonia and Joakim Engfors
         private void OnBackToLevelsClicked()
         {
             Debug.Log("[UIManager] Back to Levels clicked");
-            levelCompletePanel?.SetActive(false);
 
-            // Set state back to level selection
-            GameManager.Instance?.SetState(GameState.LevelSelection);
+            TransitionManager.Instance?.FadeOut(() =>
+            {
+                levelCompletePanel?.SetActive(false);
+                animatedLevelComplete?.Hide();
 
-            ShowLevelSelect();
+                // Set state back to level selection
+                GameManager.Instance?.SetState(GameState.LevelSelection);
 
-            // Clear the current level
-            LevelManager.Instance?.ClearLevel();
+                ShowLevelSelect();
+
+                // Clear the current level
+                LevelManager.Instance?.ClearLevel();
+
+                TransitionManager.Instance?.FadeIn();
+            });
         }
 
         private void OnReplayClicked()
         {
             Debug.Log("[UIManager] Replay clicked");
-            levelCompletePanel?.SetActive(false);
 
-            // Ensure state is Playing
-            GameManager.Instance?.SetState(GameState.Playing);
+            TransitionManager.Instance?.FadeOut(() =>
+            {
+                levelCompletePanel?.SetActive(false);
+                animatedLevelComplete?.Hide();
 
-            LevelManager.Instance?.RestartLevel();
+                // Ensure state is Playing
+                GameManager.Instance?.SetState(GameState.Playing);
+
+                LevelManager.Instance?.RestartLevel();
+
+                TransitionManager.Instance?.FadeIn();
+            });
         }
 
         private void OnNextLevelFromCompleteClicked()
         {
             Debug.Log("[UIManager] Next Level clicked");
-            levelCompletePanel?.SetActive(false);
 
-            // Load next level directly
-            int currentLevel = GameManager.Instance?.CurrentLevelNumber ?? 1;
-            string worldId = GameManager.Instance?.CurrentWorldId ?? "island";
-            int nextLevel = currentLevel + 1;
-
-            // Update GameManager state
-            if (GameManager.Instance != null)
+            TransitionManager.Instance?.FadeOut(() =>
             {
-                var field = typeof(GameManager).GetField("currentLevelNumber",
-                    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-                field?.SetValue(GameManager.Instance, nextLevel);
+                levelCompletePanel?.SetActive(false);
+                animatedLevelComplete?.Hide();
 
-                // Ensure state is Playing
-                GameManager.Instance.SetState(GameState.Playing);
-            }
+                // Load next level directly
+                int currentLevel = GameManager.Instance?.CurrentLevelNumber ?? 1;
+                string worldId = GameManager.Instance?.CurrentWorldId ?? "island";
+                int nextLevel = currentLevel + 1;
 
-            // Load the level
-            LevelManager.Instance?.LoadLevel(worldId, nextLevel);
+                // Update GameManager state
+                if (GameManager.Instance != null)
+                {
+                    var field = typeof(GameManager).GetField("currentLevelNumber",
+                        System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                    field?.SetValue(GameManager.Instance, nextLevel);
+
+                    // Ensure state is Playing
+                    GameManager.Instance.SetState(GameState.Playing);
+                }
+
+                // Load the level
+                LevelManager.Instance?.LoadLevel(worldId, nextLevel);
+
+                TransitionManager.Instance?.FadeIn();
+            });
         }
 
         #region Achievement Notification

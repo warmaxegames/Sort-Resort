@@ -47,6 +47,92 @@ namespace SortResort
             SolveWorldLevels("space", 1, 100);
         }
 
+        [MenuItem("Tools/Sort Resort/Solver/Update All Level Thresholds")]
+        public static void UpdateAllLevelThresholds()
+        {
+            string[] worlds = { "island", "supermarket", "farm", "tavern", "space" };
+            var report = new StringBuilder();
+            report.AppendLine("=== THRESHOLD UPDATE REPORT ===\n");
+
+            int totalUpdated = 0;
+            int totalFailed = 0;
+
+            foreach (var worldId in worlds)
+            {
+                report.AppendLine($"\n--- {worldId.ToUpper()} ---");
+
+                for (int level = 1; level <= 100; level++)
+                {
+                    var levelData = LevelDataLoader.LoadLevel(worldId, level);
+                    if (levelData == null) continue;
+
+                    var solver = new LevelSolver();
+                    solver.VerboseLogging = false;
+
+                    // Progress bar
+                    if (EditorUtility.DisplayCancelableProgressBar(
+                        "Updating Thresholds",
+                        $"{worldId} Level {level}",
+                        (float)level / 100f))
+                    {
+                        EditorUtility.ClearProgressBar();
+                        report.AppendLine("\n(Cancelled by user)");
+                        Debug.Log(report.ToString());
+                        return;
+                    }
+
+                    var result = solver.SolveLevel(levelData);
+
+                    if (result.Success)
+                    {
+                        // Calculate new thresholds
+                        int optimal = result.TotalMoves;
+                        int[] newThresholds = new int[]
+                        {
+                            optimal,
+                            Mathf.RoundToInt(optimal * 1.15f),
+                            Mathf.RoundToInt(optimal * 1.30f),
+                            Mathf.RoundToInt(optimal * 1.40f)
+                        };
+
+                        // Update file
+                        string worldFolder = char.ToUpper(worldId[0]) + worldId.Substring(1);
+                        string filePath = $"Assets/_Project/Resources/Data/Levels/{worldFolder}/level_{level:D3}.json";
+
+                        if (File.Exists(filePath))
+                        {
+                            string json = File.ReadAllText(filePath);
+                            var data = JsonUtility.FromJson<LevelData>(json);
+                            data.star_move_thresholds = newThresholds;
+                            string updatedJson = JsonUtility.ToJson(data, true);
+                            File.WriteAllText(filePath, updatedJson);
+
+                            report.AppendLine($"Level {level:D3}: {optimal} moves -> [{newThresholds[0]}, {newThresholds[1]}, {newThresholds[2]}, {newThresholds[3]}]");
+                            totalUpdated++;
+                        }
+                    }
+                    else
+                    {
+                        report.AppendLine($"Level {level:D3}: FAILED - {result.FailureReason}");
+                        totalFailed++;
+                    }
+                }
+            }
+
+            EditorUtility.ClearProgressBar();
+            AssetDatabase.Refresh();
+
+            report.AppendLine($"\n=== SUMMARY ===");
+            report.AppendLine($"Updated: {totalUpdated} levels");
+            report.AppendLine($"Failed: {totalFailed} levels");
+
+            Debug.Log(report.ToString());
+
+            EditorUtility.DisplayDialog("Thresholds Updated",
+                $"Updated {totalUpdated} levels\nFailed: {totalFailed} levels\n\nSee console for details.",
+                "OK");
+        }
+
         private static void SolveWorldLevels(string worldId, int start, int end)
         {
             var report = new StringBuilder();
@@ -308,13 +394,18 @@ namespace SortResort
                 return;
             }
 
-            // Calculate new thresholds
+            // Calculate new thresholds based on solver optimal:
+            // 3-star: solver moves (optimal)
+            // 2-star: solver × 1.15 (rounded)
+            // 1-star: solver × 1.30 (rounded)
+            // Fail:   solver × 1.40 (rounded)
             int optimal = lastResult.TotalMoves;
             int[] newThresholds = new int[]
             {
                 optimal,                              // 3-star = solver's exact score
-                Mathf.CeilToInt(optimal * 1.2f),      // 2-star
-                Mathf.CeilToInt(optimal * 1.5f)       // 1-star
+                Mathf.RoundToInt(optimal * 1.15f),    // 2-star = 15% more moves
+                Mathf.RoundToInt(optimal * 1.30f),    // 1-star = 30% more moves
+                Mathf.RoundToInt(optimal * 1.40f)     // Fail = 40% more moves
             };
 
             // Read and update JSON
@@ -332,13 +423,14 @@ namespace SortResort
             current3StarThreshold = optimal;
             thresholdNeedsUpdate = false;
 
-            Debug.Log($"[Solver] Updated {worldId} Level {levelNumber} thresholds to [{newThresholds[0]}, {newThresholds[1]}, {newThresholds[2]}]");
+            Debug.Log($"[Solver] Updated {worldId} Level {levelNumber} thresholds to [{newThresholds[0]}, {newThresholds[1]}, {newThresholds[2]}, {newThresholds[3]}]");
 
             EditorUtility.DisplayDialog("Success",
                 $"Updated thresholds:\n" +
-                $"3-star: {newThresholds[0]}\n" +
-                $"2-star: {newThresholds[1]}\n" +
-                $"1-star: {newThresholds[2]}",
+                $"3-star: {newThresholds[0]} moves\n" +
+                $"2-star: {newThresholds[1]} moves\n" +
+                $"1-star: {newThresholds[2]} moves\n" +
+                $"Fail: >{newThresholds[3]} moves",
                 "OK");
         }
 
