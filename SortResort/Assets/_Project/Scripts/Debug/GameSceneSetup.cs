@@ -125,6 +125,12 @@ namespace SortResort
             achGO.AddComponent<AchievementManager>();
             Debug.Log("[GameSceneSetup] AchievementManager created");
 
+            // DialogueManager (for typewriter dialogue with mascot voices)
+            var dialogueGO = new GameObject("DialogueManager");
+            dialogueGO.transform.SetParent(managersRoot.transform);
+            dialogueGO.AddComponent<DialogueManager>();
+            Debug.Log("[GameSceneSetup] DialogueManager created");
+
             // LevelSolverRunner (debug tool for auto-solving levels)
             var solverGO = new GameObject("LevelSolverRunner");
             solverGO.transform.SetParent(managersRoot.transform);

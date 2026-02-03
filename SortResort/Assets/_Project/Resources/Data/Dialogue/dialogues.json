@@ -1,0 +1,208 @@
+{
+    "mascots": [
+        {
+            "id": "cat",
+            "displayName": "Whiskers",
+            "worldId": "island",
+            "basePitch": 1.3,
+            "speakSpeed": 20,
+            "spriteFolder": "Sprites/Mascots/Island"
+        },
+        {
+            "id": "tommy",
+            "displayName": "Tommy",
+            "worldId": "supermarket",
+            "basePitch": 1.0,
+            "speakSpeed": 18,
+            "spriteFolder": "Sprites/Mascots/Supermarket"
+        },
+        {
+            "id": "chicken",
+            "displayName": "Clucky",
+            "worldId": "farm",
+            "basePitch": 1.4,
+            "speakSpeed": 22,
+            "spriteFolder": "Sprites/Mascots/Farm"
+        },
+        {
+            "id": "bartender",
+            "displayName": "Barley",
+            "worldId": "tavern",
+            "basePitch": 0.85,
+            "speakSpeed": 16,
+            "spriteFolder": "Sprites/Mascots/Tavern"
+        },
+        {
+            "id": "alien",
+            "displayName": "Zyx",
+            "worldId": "space",
+            "basePitch": 1.5,
+            "speakSpeed": 25,
+            "spriteFolder": "Sprites/Mascots/Space"
+        }
+    ],
+    "dialogues": [
+        {
+            "id": "island_welcome",
+            "triggerId": "island_first_play",
+            "playOnce": true,
+            "lines": [
+                {
+                    "mascotId": "cat",
+                    "expression": "happy",
+                    "text": "Welcome to Sort Resort!"
+                },
+                {
+                    "mascotId": "cat",
+                    "expression": "default",
+                    "text": "I'm Whiskers, and I'll help you get started."
+                },
+                {
+                    "mascotId": "cat",
+                    "expression": "happy",
+                    "text": "Match three of the same items to clear them. Simple, right?"
+                }
+            ]
+        },
+        {
+            "id": "island_level1_complete",
+            "triggerId": "island_level_1_complete",
+            "playOnce": true,
+            "lines": [
+                {
+                    "mascotId": "cat",
+                    "expression": "happy",
+                    "text": "Great job! You're a natural!"
+                },
+                {
+                    "mascotId": "cat",
+                    "expression": "default",
+                    "text": "Try to use fewer moves for more stars."
+                }
+            ]
+        },
+        {
+            "id": "supermarket_welcome",
+            "triggerId": "supermarket_first_play",
+            "playOnce": true,
+            "lines": [
+                {
+                    "mascotId": "tommy",
+                    "expression": "happy",
+                    "text": "Hey there! Welcome to my supermarket!"
+                },
+                {
+                    "mascotId": "tommy",
+                    "expression": "default",
+                    "text": "Help me sort these groceries, will ya?"
+                }
+            ]
+        },
+        {
+            "id": "farm_welcome",
+            "triggerId": "farm_first_play",
+            "playOnce": true,
+            "lines": [
+                {
+                    "mascotId": "chicken",
+                    "expression": "happy",
+                    "text": "Bawk bawk! Welcome to the farm!"
+                },
+                {
+                    "mascotId": "chicken",
+                    "expression": "default",
+                    "text": "These veggies won't sort themselves!"
+                }
+            ]
+        },
+        {
+            "id": "tavern_welcome",
+            "triggerId": "tavern_first_play",
+            "playOnce": true,
+            "lines": [
+                {
+                    "mascotId": "bartender",
+                    "expression": "default",
+                    "text": "Welcome to the tavern, traveler."
+                },
+                {
+                    "mascotId": "bartender",
+                    "expression": "happy",
+                    "text": "Help me organize the supplies and I'll pour you a drink."
+                }
+            ]
+        },
+        {
+            "id": "space_welcome",
+            "triggerId": "space_first_play",
+            "playOnce": true,
+            "lines": [
+                {
+                    "mascotId": "alien",
+                    "expression": "happy",
+                    "text": "Greetings, Earth creature!"
+                },
+                {
+                    "mascotId": "alien",
+                    "expression": "default",
+                    "text": "We require assistance organizing our cosmic cargo."
+                },
+                {
+                    "mascotId": "alien",
+                    "expression": "happy",
+                    "text": "Your sorting skills are... acceptable."
+                }
+            ]
+        }
+    ],
+    "triggers": [
+        {
+            "id": "trig_island_welcome",
+            "dialogueId": "island_welcome",
+            "type": 4,
+            "worldId": "island",
+            "levelNumber": 0,
+            "threshold": 0
+        },
+        {
+            "id": "trig_island_l1",
+            "dialogueId": "island_level1_complete",
+            "type": 0,
+            "worldId": "island",
+            "levelNumber": 1,
+            "threshold": 0
+        },
+        {
+            "id": "trig_supermarket_welcome",
+            "dialogueId": "supermarket_welcome",
+            "type": 1,
+            "worldId": "supermarket",
+            "levelNumber": 0,
+            "threshold": 0
+        },
+        {
+            "id": "trig_farm_welcome",
+            "dialogueId": "farm_welcome",
+            "type": 1,
+            "worldId": "farm",
+            "levelNumber": 0,
+            "threshold": 0
+        },
+        {
+            "id": "trig_tavern_welcome",
+            "dialogueId": "tavern_welcome",
+            "type": 1,
+            "worldId": "tavern",
+            "levelNumber": 0,
+            "threshold": 0
+        },
+        {
+            "id": "trig_space_welcome",
+            "dialogueId": "space_welcome",
+            "type": 1,
+            "worldId": "space",
+            "levelNumber": 0,
+            "threshold": 0
+        }
+    ]
+}
