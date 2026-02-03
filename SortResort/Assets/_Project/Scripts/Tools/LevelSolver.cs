@@ -808,12 +808,13 @@ namespace SortResort
             {
                 if (!fromContainer.IsFrontSlotEmpty(s)) fromOccupiedCount++;
             }
+
             if (fromOccupiedCount == 1 && fromContainer.HasBackRowItems())
             {
-                // Base bonus for revealing hidden items
+                // IMMEDIATE REVEAL: This move clears the front row
                 var revealedItems = GetItemsThatWouldAdvance(fromContainer);
                 int revealCount = revealedItems.Count;
-                score += 80 + (revealCount * 20);
+                score += 100 + (revealCount * 25);
                 reasons.Add($"triggers row advance ({revealCount} items)");
 
                 // Extra bonus if revealed item completes a waiting pair (2 matching + empty slot)
@@ -833,6 +834,15 @@ namespace SortResort
                     score += 50;
                     reasons.Add("combo: pair + reveal");
                 }
+            }
+            else if (fromContainer.HasBackRowItems())
+            {
+                // PROGRESS TOWARD REVEAL: Source container has back-row items
+                // Moving items out brings us closer to revealing them
+                int backRowCount = fromContainer.GetBackRowItemCount();
+                int progressBonus = 30 + (backRowCount * 10);
+                score += progressBonus;
+                reasons.Add($"progress toward reveal ({backRowCount} hidden)");
             }
 
             // === DESTINATION QUALITY ===
