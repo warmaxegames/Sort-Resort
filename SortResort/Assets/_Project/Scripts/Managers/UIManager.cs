@@ -147,6 +147,15 @@ namespace SortResort
         private Coroutine achievementCoroutine;
         private Achievement currentAchievement;
 
+        // Dialogue system
+        private GameObject dialoguePanel;
+        private DialogueUI dialogueUI;
+        private Image dialogueBoxImage;
+        private Image dialogueMascotImage;
+        private TextMeshProUGUI dialogueNameText;
+        private TextMeshProUGUI dialogueText;
+        private GameObject dialogueContinueIndicator;
+
         private void Awake()
         {
             if (Instance != null && Instance != this)
@@ -260,6 +269,7 @@ namespace SortResort
             CreatePauseMenuPanel();
             CreateAchievementNotificationPanel();
             CreateAchievementsPanel();
+            CreateDialoguePanel();
 
             // Hide all panels initially
             if (levelCompletePanel != null)
@@ -280,6 +290,8 @@ namespace SortResort
                 achievementDetailPanel.SetActive(false);
             if (achievementsPanel != null)
                 achievementsPanel.SetActive(false);
+            if (dialoguePanel != null)
+                dialoguePanel.SetActive(false);
 
             // Show splash screen first
             if (splashPanel != null)
@@ -4546,6 +4558,164 @@ Antonia and Joakim Engfors
                 }
             }
             return string.Join("  ", parts);
+        }
+
+        #endregion
+
+        #region Dialogue Panel
+
+        private void CreateDialoguePanel()
+        {
+            dialoguePanel = new GameObject("Dialogue Panel");
+            dialoguePanel.transform.SetParent(mainCanvas.transform, false);
+
+            var rect = dialoguePanel.AddComponent<RectTransform>();
+            rect.anchorMin = Vector2.zero;
+            rect.anchorMax = Vector2.one;
+            rect.offsetMin = Vector2.zero;
+            rect.offsetMax = Vector2.zero;
+
+            // Add canvas group for fade animations
+            var canvasGroup = dialoguePanel.AddComponent<CanvasGroup>();
+
+            // Semi-transparent overlay (optional - can be disabled)
+            var overlay = new GameObject("Overlay");
+            overlay.transform.SetParent(dialoguePanel.transform, false);
+            var overlayRect = overlay.AddComponent<RectTransform>();
+            overlayRect.anchorMin = Vector2.zero;
+            overlayRect.anchorMax = Vector2.one;
+            overlayRect.offsetMin = Vector2.zero;
+            overlayRect.offsetMax = Vector2.zero;
+            var overlayImage = overlay.AddComponent<Image>();
+            overlayImage.color = new Color(0, 0, 0, 0.3f);
+
+            // Dialogue box container (bottom of screen)
+            var dialogueBox = new GameObject("Dialogue Box");
+            dialogueBox.transform.SetParent(dialoguePanel.transform, false);
+            var boxRect = dialogueBox.AddComponent<RectTransform>();
+            boxRect.anchorMin = new Vector2(0, 0);
+            boxRect.anchorMax = new Vector2(1, 0);
+            boxRect.pivot = new Vector2(0.5f, 0);
+            boxRect.anchoredPosition = new Vector2(0, 50);
+            boxRect.sizeDelta = new Vector2(-60, 350); // Full width minus margins, 350px tall
+
+            // Dialogue box background
+            dialogueBoxImage = dialogueBox.AddComponent<Image>();
+            var defaultBoxSprite = Resources.Load<Sprite>("Sprites/UI/Dialogue/dialoguebox_island");
+            if (defaultBoxSprite != null)
+            {
+                dialogueBoxImage.sprite = defaultBoxSprite;
+                dialogueBoxImage.type = Image.Type.Sliced;
+            }
+            else
+            {
+                dialogueBoxImage.color = new Color(0.2f, 0.15f, 0.1f, 0.95f);
+            }
+
+            // Mascot image (left side, overlapping box)
+            var mascotContainer = new GameObject("Mascot Container");
+            mascotContainer.transform.SetParent(dialogueBox.transform, false);
+            var mascotRect = mascotContainer.AddComponent<RectTransform>();
+            mascotRect.anchorMin = new Vector2(0, 0.5f);
+            mascotRect.anchorMax = new Vector2(0, 0.5f);
+            mascotRect.pivot = new Vector2(0, 0.5f);
+            mascotRect.anchoredPosition = new Vector2(20, 50);
+            mascotRect.sizeDelta = new Vector2(200, 280);
+
+            dialogueMascotImage = mascotContainer.AddComponent<Image>();
+            dialogueMascotImage.preserveAspect = true;
+            dialogueMascotImage.enabled = false; // Hidden until mascot set
+
+            // Text content area (right side of mascot)
+            var textArea = new GameObject("Text Area");
+            textArea.transform.SetParent(dialogueBox.transform, false);
+            var textRect = textArea.AddComponent<RectTransform>();
+            textRect.anchorMin = new Vector2(0, 0);
+            textRect.anchorMax = new Vector2(1, 1);
+            textRect.offsetMin = new Vector2(240, 30);  // Left offset for mascot
+            textRect.offsetMax = new Vector2(-30, -30); // Right and top padding
+
+            // Name label (speaker name)
+            var nameContainer = new GameObject("Name Container");
+            nameContainer.transform.SetParent(dialogueBox.transform, false);
+            var nameRect = nameContainer.AddComponent<RectTransform>();
+            nameRect.anchorMin = new Vector2(0, 1);
+            nameRect.anchorMax = new Vector2(0, 1);
+            nameRect.pivot = new Vector2(0, 1);
+            nameRect.anchoredPosition = new Vector2(240, -15);
+            nameRect.sizeDelta = new Vector2(250, 50);
+
+            // Name background
+            var nameBg = nameContainer.AddComponent<Image>();
+            nameBg.color = new Color(0.6f, 0.4f, 0.2f, 1f);
+
+            // Name text
+            var nameTextGO = new GameObject("Name Text");
+            nameTextGO.transform.SetParent(nameContainer.transform, false);
+            var nameTextRect = nameTextGO.AddComponent<RectTransform>();
+            nameTextRect.anchorMin = Vector2.zero;
+            nameTextRect.anchorMax = Vector2.one;
+            nameTextRect.offsetMin = new Vector2(15, 5);
+            nameTextRect.offsetMax = new Vector2(-15, -5);
+
+            dialogueNameText = nameTextGO.AddComponent<TextMeshProUGUI>();
+            dialogueNameText.text = "Speaker";
+            dialogueNameText.fontSize = 28;
+            dialogueNameText.fontStyle = FontStyles.Bold;
+            dialogueNameText.color = Color.white;
+            dialogueNameText.alignment = TextAlignmentOptions.Left;
+
+            // Dialogue text
+            var dialogueTextGO = new GameObject("Dialogue Text");
+            dialogueTextGO.transform.SetParent(textArea.transform, false);
+            var dialogueTextRect = dialogueTextGO.AddComponent<RectTransform>();
+            dialogueTextRect.anchorMin = Vector2.zero;
+            dialogueTextRect.anchorMax = Vector2.one;
+            dialogueTextRect.offsetMin = new Vector2(10, 10);
+            dialogueTextRect.offsetMax = new Vector2(-10, -50);
+
+            dialogueText = dialogueTextGO.AddComponent<TextMeshProUGUI>();
+            dialogueText.text = "";
+            dialogueText.fontSize = 32;
+            dialogueText.color = Color.white;
+            dialogueText.alignment = TextAlignmentOptions.TopLeft;
+            dialogueText.enableWordWrapping = true;
+
+            // Continue indicator (blinking arrow or "tap to continue")
+            var continueGO = new GameObject("Continue Indicator");
+            continueGO.transform.SetParent(dialogueBox.transform, false);
+            var continueRect = continueGO.AddComponent<RectTransform>();
+            continueRect.anchorMin = new Vector2(1, 0);
+            continueRect.anchorMax = new Vector2(1, 0);
+            continueRect.pivot = new Vector2(1, 0);
+            continueRect.anchoredPosition = new Vector2(-30, 20);
+            continueRect.sizeDelta = new Vector2(150, 40);
+
+            var continueText = continueGO.AddComponent<TextMeshProUGUI>();
+            continueText.text = "Tap to continue >";
+            continueText.fontSize = 20;
+            continueText.color = new Color(1, 1, 1, 0.7f);
+            continueText.alignment = TextAlignmentOptions.Right;
+            continueText.fontStyle = FontStyles.Italic;
+
+            dialogueContinueIndicator = continueGO;
+            dialogueContinueIndicator.SetActive(false);
+
+            // Add DialogueUI component and wire up references
+            dialogueUI = dialoguePanel.AddComponent<DialogueUI>();
+
+            // Use reflection to set serialized fields (since they're private)
+            var uiType = typeof(DialogueUI);
+            var flags = System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance;
+
+            uiType.GetField("dialoguePanel", flags)?.SetValue(dialogueUI, dialogueBox);
+            uiType.GetField("dialogueBoxImage", flags)?.SetValue(dialogueUI, dialogueBoxImage);
+            uiType.GetField("mascotImage", flags)?.SetValue(dialogueUI, dialogueMascotImage);
+            uiType.GetField("nameText", flags)?.SetValue(dialogueUI, dialogueNameText);
+            uiType.GetField("dialogueText", flags)?.SetValue(dialogueUI, dialogueText);
+            uiType.GetField("continueIndicator", flags)?.SetValue(dialogueUI, dialogueContinueIndicator);
+
+            Debug.Log("[UIManager] Dialogue panel created");
         }
 
         #endregion

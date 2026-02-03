@@ -57,6 +57,40 @@ namespace SortResort
             SetupAudioSource();
         }
 
+        private void OnEnable()
+        {
+            // Subscribe to game events to trigger dialogues
+            GameEvents.OnLevelStarted += OnLevelStarted;
+            GameEvents.OnLevelCompleted += OnLevelCompleted;
+        }
+
+        private void OnDisable()
+        {
+            GameEvents.OnLevelStarted -= OnLevelStarted;
+            GameEvents.OnLevelCompleted -= OnLevelCompleted;
+        }
+
+        private void OnLevelStarted(int levelNumber)
+        {
+            // Check for first time playing this world
+            string worldId = GameManager.Instance?.CurrentWorldId;
+            if (string.IsNullOrEmpty(worldId)) return;
+
+            // Check if this is the first level of the world
+            if (levelNumber == 1)
+            {
+                CheckTriggers(DialogueTrigger.TriggerType.WorldFirstLevel, worldId, levelNumber);
+            }
+        }
+
+        private void OnLevelCompleted(int levelNumber, int starsEarned)
+        {
+            string worldId = GameManager.Instance?.CurrentWorldId;
+            if (string.IsNullOrEmpty(worldId)) return;
+
+            CheckTriggers(DialogueTrigger.TriggerType.LevelComplete, worldId, levelNumber);
+        }
+
         private void LoadLetterClips()
         {
             for (char c = 'A'; c <= 'Z'; c++)
