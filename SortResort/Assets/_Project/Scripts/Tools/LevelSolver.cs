@@ -766,7 +766,8 @@ namespace SortResort
                     {
                         // BAD: Creating a pair that blocks its own completion!
                         // The 3rd item is hidden here and can't advance while we have items in front
-                        score -= 60;
+                        // This costs an extra move because you have to move items OUT before the advance
+                        score -= 200;
                         reasons.Add("SELF-BLOCKING pair (3rd hidden HERE)");
                     }
                     else
