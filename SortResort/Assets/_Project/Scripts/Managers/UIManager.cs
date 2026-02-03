@@ -290,8 +290,7 @@ namespace SortResort
                 achievementDetailPanel.SetActive(false);
             if (achievementsPanel != null)
                 achievementsPanel.SetActive(false);
-            if (dialoguePanel != null)
-                dialoguePanel.SetActive(false);
+            // Note: dialoguePanel stays active - DialogueUI manages its own visibility via CanvasGroup
 
             // Show splash screen first
             if (splashPanel != null)
@@ -4708,7 +4707,7 @@ Antonia and Joakim Engfors
             var uiType = typeof(DialogueUI);
             var flags = System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance;
 
-            uiType.GetField("dialoguePanel", flags)?.SetValue(dialogueUI, dialogueBox);
+            uiType.GetField("dialoguePanel", flags)?.SetValue(dialogueUI, dialoguePanel);
             uiType.GetField("dialogueBoxImage", flags)?.SetValue(dialogueUI, dialogueBoxImage);
             uiType.GetField("mascotImage", flags)?.SetValue(dialogueUI, dialogueMascotImage);
             uiType.GetField("nameText", flags)?.SetValue(dialogueUI, dialogueNameText);
