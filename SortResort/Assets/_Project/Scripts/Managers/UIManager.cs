@@ -4714,6 +4714,9 @@ Antonia and Joakim Engfors
             uiType.GetField("dialogueText", flags)?.SetValue(dialogueUI, dialogueText);
             uiType.GetField("continueIndicator", flags)?.SetValue(dialogueUI, dialogueContinueIndicator);
 
+            // Initialize after fields are set (hides the panel)
+            dialogueUI.Initialize();
+
             Debug.Log("[UIManager] Dialogue panel created");
         }
 

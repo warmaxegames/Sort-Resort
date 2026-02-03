@@ -32,6 +32,15 @@ namespace SortResort
 
         private void Awake()
         {
+            // Note: When created via AddComponent, fields aren't set yet
+            // Initialize() will be called after fields are set via reflection
+        }
+
+        /// <summary>
+        /// Called after fields are set via reflection in UIManager
+        /// </summary>
+        public void Initialize()
+        {
             if (dialoguePanel != null)
             {
                 canvasGroup = dialoguePanel.GetComponent<CanvasGroup>();
