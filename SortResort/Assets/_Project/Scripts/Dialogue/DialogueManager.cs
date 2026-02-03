@@ -74,11 +74,14 @@ namespace SortResort
         {
             // Check for first time playing this world
             string worldId = GameManager.Instance?.CurrentWorldId;
+            Debug.Log($"[DialogueManager] OnLevelStarted: level {levelNumber}, world {worldId}");
+
             if (string.IsNullOrEmpty(worldId)) return;
 
             // Check if this is the first level of the world
             if (levelNumber == 1)
             {
+                Debug.Log($"[DialogueManager] Checking WorldFirstLevel triggers for {worldId}");
                 CheckTriggers(DialogueTrigger.TriggerType.WorldFirstLevel, worldId, levelNumber);
             }
         }
@@ -391,10 +394,20 @@ namespace SortResort
         public void CheckTriggers(DialogueTrigger.TriggerType triggerType, string worldId = null, int levelNumber = 0, int value = 0)
         {
             var db = DialogueDataLoader.LoadDatabase();
-            if (db.triggers == null) return;
+            Debug.Log($"[DialogueManager] CheckTriggers: type={triggerType}, world={worldId}, level={levelNumber}");
+
+            if (db.triggers == null || db.triggers.Count == 0)
+            {
+                Debug.LogWarning("[DialogueManager] No triggers loaded from database!");
+                return;
+            }
+
+            Debug.Log($"[DialogueManager] Checking {db.triggers.Count} triggers...");
 
             foreach (var trigger in db.triggers)
             {
+                Debug.Log($"[DialogueManager] Trigger {trigger.id}: type={trigger.type}, world={trigger.worldId}, level={trigger.levelNumber}");
+
                 if (trigger.type != triggerType) continue;
 
                 // Check world match
@@ -407,6 +420,7 @@ namespace SortResort
                 if (trigger.threshold > 0 && value < trigger.threshold) continue;
 
                 // Trigger matched - start dialogue
+                Debug.Log($"[DialogueManager] Trigger MATCHED! Starting dialogue: {trigger.dialogueId}");
                 StartDialogue(trigger.dialogueId);
                 break; // Only trigger one dialogue at a time
             }

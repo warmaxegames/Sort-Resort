@@ -48,6 +48,7 @@
    - Milestone triggers (dialogue on progress events)
    - Data-driven dialogue management
    - Tap to advance
+   - Settings toggle to disable mascot voices
 3. **Level Complete screen (animated)** - Rays/curtains done, needs mascot, stars, ribbon
 4. **Mobile Testing** - Touch input validation on device
 
