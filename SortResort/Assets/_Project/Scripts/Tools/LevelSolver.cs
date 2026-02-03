@@ -736,8 +736,9 @@ namespace SortResort
 
             if (matchingAtDest == 1 && !alreadyCreditedPair)
             {
-                // Check if 3rd item of this type is accessible BEFORE giving pair bonus
+                // Check if 3rd item of this type is accessible or nearly accessible
                 bool thirdIsAccessible = accessible >= 3; // All 3 copies are accessible
+                bool thirdIsNearlyAccessible = (accessible + nearlyAccessible) >= 3; // 3rd will become accessible soon
 
                 // Check if destination will have room for the 3rd item after this move
                 int emptyAtDest = toContainer.GetEmptyFrontSlotCount();
@@ -755,9 +756,30 @@ namespace SortResort
                     score -= 50;
                     reasons.Add("creates BLOCKED pair (no room for 3rd)");
                 }
+                else if (thirdIsNearlyAccessible && hasRoomForThird)
+                {
+                    // Check if the 3rd item is hidden at THIS container (self-blocking pair)
+                    var hiddenAtDest = toContainer.GetBackRowItemTypes();
+                    bool selfBlocking = hiddenAtDest.Contains(move.ItemId);
+
+                    if (selfBlocking)
+                    {
+                        // BAD: Creating a pair that blocks its own completion!
+                        // The 3rd item is hidden here and can't advance while we have items in front
+                        score -= 60;
+                        reasons.Add("SELF-BLOCKING pair (3rd hidden HERE)");
+                    }
+                    else
+                    {
+                        // GOOD PAIR: 3rd item will become accessible soon (at different container) AND room exists
+                        // This is valuable because it sets up a 1-move match once the 3rd reveals
+                        score += 100;
+                        reasons.Add("creates near-completable pair (3rd nearly accessible)");
+                    }
+                }
                 else if (!thirdIsAccessible && hasRoomForThird)
                 {
-                    // WAITING PAIR: 3rd hidden but room exists - OK but low priority
+                    // WAITING PAIR: 3rd deeply hidden but room exists - low priority
                     score += 20;
                     reasons.Add("creates waiting pair (3rd hidden)");
 
@@ -798,6 +820,40 @@ namespace SortResort
                 {
                     score -= 40;
                     reasons.Add("stuck item shuffle");
+                }
+            }
+
+            // === PAIR DESTRUCTION PENALTY ===
+            // Penalize moves that break up an existing pair at the source container
+            // ONLY if that pair was actually completable (3rd accessible + room at source)
+            var sourceItems = fromContainer.GetFrontRowItems();
+            int matchingAtSource = sourceItems.Count(i => i == move.ItemId);
+            if (matchingAtSource == 2)
+            {
+                // We're moving an item that's part of an existing pair
+                // Check if this pair was completable at source
+                bool completingTripleElsewhere = matchingAtDest == 2;
+
+                if (!completingTripleElsewhere)
+                {
+                    // Check if the source pair was actually completable
+                    int sourceEmptySlots = fromContainer.GetEmptyFrontSlotCount();
+                    bool sourceHasRoom = sourceEmptySlots >= 1; // After moving, we need 1 slot for the 3rd
+                    bool thirdAccessible = accessible >= 3;
+
+                    if (thirdAccessible && sourceHasRoom)
+                    {
+                        // BAD: We're destroying a completable pair!
+                        score -= 150;
+                        reasons.Add("DESTROYS completable pair");
+                    }
+                    else if (thirdAccessible && !sourceHasRoom)
+                    {
+                        // Pair was blocked anyway (no room for 3rd), small penalty
+                        score -= 30;
+                        reasons.Add("breaks blocked pair");
+                    }
+                    // If 3rd not accessible, no penalty - pair couldn't be completed yet anyway
                 }
             }
 
