@@ -229,12 +229,28 @@ namespace SortResort
             SaveGame();
         }
 
+        // Voice Setting
+        public bool IsVoiceEnabled()
+        {
+            return currentSaveData.voiceEnabled;
+        }
+
+        public void SetVoiceEnabled(bool enabled)
+        {
+            currentSaveData.voiceEnabled = enabled;
+            SaveGame();
+        }
+
         // Reset All Progress
         public void ResetAllProgress()
         {
             currentSaveData = new SaveData();
             SaveGame();
-            Debug.Log("[SaveManager] All progress has been reset");
+
+            // Also reset played dialogues (stored separately in PlayerPrefs)
+            DialogueManager.Instance?.ResetPlayedDialogues();
+
+            Debug.Log("[SaveManager] All progress has been reset (including dialogues)");
             GameEvents.InvokeProgressReset();
         }
 
@@ -281,6 +297,7 @@ namespace SortResort
         // Settings
         public bool hapticsEnabled = true;
         public bool timerEnabled = true; // Timer countdown feature (can be disabled for relaxed gameplay)
+        public bool voiceEnabled = true; // Mascot dialogue voices
 
         public SaveData()
         {
@@ -288,6 +305,7 @@ namespace SortResort
             lastPlayedTime = DateTime.Now;
             hapticsEnabled = true;
             timerEnabled = true;
+            voiceEnabled = true;
         }
     }
 

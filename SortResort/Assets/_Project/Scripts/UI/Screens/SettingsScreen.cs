@@ -28,6 +28,8 @@ namespace SortResort.UI
         [SerializeField] private Image hapticsCheckmark;
         [SerializeField] private Toggle timerToggle;
         [SerializeField] private Image timerCheckmark;
+        [SerializeField] private Toggle voiceToggle;
+        [SerializeField] private Image voiceCheckmark;
 
         [Header("Buttons")]
         [SerializeField] private Button resetProgressButton;
@@ -143,6 +145,10 @@ namespace SortResort.UI
             {
                 timerToggle.onValueChanged.AddListener(OnTimerToggled);
             }
+            if (voiceToggle != null)
+            {
+                voiceToggle.onValueChanged.AddListener(OnVoiceToggled);
+            }
         }
 
         protected override void SubscribeToEvents()
@@ -207,6 +213,14 @@ namespace SortResort.UI
                 bool timerEnabled = SaveManager.Instance.IsTimerEnabled();
                 timerToggle.SetIsOnWithoutNotify(timerEnabled);
                 UpdateTimerCheckmark(timerEnabled);
+            }
+
+            // Load voice setting
+            if (SaveManager.Instance != null && voiceToggle != null)
+            {
+                bool voiceEnabled = SaveManager.Instance.IsVoiceEnabled();
+                voiceToggle.SetIsOnWithoutNotify(voiceEnabled);
+                UpdateVoiceCheckmark(voiceEnabled);
             }
         }
 
@@ -306,6 +320,25 @@ namespace SortResort.UI
                 if (switchBehavior == null)
                 {
                     timerCheckmark.enabled = isOn;
+                }
+            }
+        }
+
+        private void OnVoiceToggled(bool isOn)
+        {
+            SaveManager.Instance?.SetVoiceEnabled(isOn);
+            UpdateVoiceCheckmark(isOn);
+            AudioManager.Instance?.PlayButtonClick();
+        }
+
+        private void UpdateVoiceCheckmark(bool isOn)
+        {
+            if (voiceCheckmark != null && voiceToggle != null)
+            {
+                var switchBehavior = voiceToggle.GetComponent<GoogleSwitchBehavior>();
+                if (switchBehavior == null)
+                {
+                    voiceCheckmark.enabled = isOn;
                 }
             }
         }
@@ -464,6 +497,7 @@ namespace SortResort.UI
             TextMeshProUGUI masterLabel, TextMeshProUGUI musicLabel, TextMeshProUGUI sfxLabel,
             Toggle haptics, Image hapticsCheck,
             Toggle timer, Image timerCheck,
+            Toggle voice, Image voiceCheck,
             Button resetBtn, Button creditsBtn,
             GameObject confirmDialog, Button confirmYes, Button confirmNo,
             GameObject credits, Button creditsClose,
@@ -480,6 +514,8 @@ namespace SortResort.UI
             hapticsCheckmark = hapticsCheck;
             timerToggle = timer;
             timerCheckmark = timerCheck;
+            voiceToggle = voice;
+            voiceCheckmark = voiceCheck;
             resetProgressButton = resetBtn;
             creditsButton = creditsBtn;
             confirmationDialog = confirmDialog;
@@ -528,6 +564,7 @@ namespace SortResort.UI
             if (sfxVolumeSlider != null) sfxVolumeSlider.onValueChanged.RemoveAllListeners();
             if (hapticsToggle != null) hapticsToggle.onValueChanged.RemoveAllListeners();
             if (timerToggle != null) timerToggle.onValueChanged.RemoveAllListeners();
+            if (voiceToggle != null) voiceToggle.onValueChanged.RemoveAllListeners();
             if (resetProgressButton != null) resetProgressButton.onClick.RemoveAllListeners();
             if (creditsButton != null) creditsButton.onClick.RemoveAllListeners();
             if (confirmYesButton != null) confirmYesButton.onClick.RemoveAllListeners();

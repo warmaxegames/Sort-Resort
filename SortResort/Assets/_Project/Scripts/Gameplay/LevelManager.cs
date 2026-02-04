@@ -396,6 +396,9 @@ namespace SortResort
             // Only update if game is playing
             if (GameManager.Instance?.CurrentState != GameState.Playing) return;
 
+            // Pause timer while dialogue is active
+            if (DialogueManager.Instance != null && DialogueManager.Instance.IsDialogueActive) return;
+
             // Countdown
             timeRemaining -= Time.deltaTime;
 

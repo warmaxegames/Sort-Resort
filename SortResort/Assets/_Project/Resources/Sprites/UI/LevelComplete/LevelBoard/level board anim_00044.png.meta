@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 0028c37f1fca1e0408bad69eea84163f
+guid: 62ad0225f187b9447b99706d804e0964
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 1345117005879005767
-    second: island_single_slot_lockoverlay_00027_0
+      213: -1950175900317338533
+    second: level board anim_00044_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -139,13 +139,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: island_single_slot_lockoverlay_00027_0
+      name: level board anim_00044_0
       rect:
         serializedVersion: 2
-        x: 0
-        y: 0
-        width: 156
-        height: 312
+        x: 347
+        y: 1131
+        width: 385
+        height: 131
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -154,8 +154,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 74251c44ac0daa210800000000000000
-      internalID: 1345117005879005767
+      spriteID: b54be04e9559fe4e0800000000000000
+      internalID: -1950175900317338533
       vertices: []
       indices: 
       edges: []
@@ -174,7 +174,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      island_single_slot_lockoverlay_00027_0: 1345117005879005767
+      level board anim_00044_0: -1950175900317338533
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

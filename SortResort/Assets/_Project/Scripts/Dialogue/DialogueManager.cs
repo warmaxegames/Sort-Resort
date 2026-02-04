@@ -15,7 +15,7 @@ namespace SortResort
         [Header("Voice Settings")]
         [SerializeField] private float defaultPitch = 1.0f;
         [SerializeField] private float pitchVariation = 0.05f; // Random variation per letter
-        [SerializeField] private float defaultLettersPerSecond = 18f;
+        [SerializeField] private float defaultLettersPerSecond = 24f;
 
         [Header("Audio")]
         [SerializeField] private AudioSource voiceAudioSource;
@@ -72,18 +72,13 @@ namespace SortResort
 
         private void OnLevelStarted(int levelNumber)
         {
-            // Check for first time playing this world
             string worldId = GameManager.Instance?.CurrentWorldId;
             Debug.Log($"[DialogueManager] OnLevelStarted: level {levelNumber}, world {worldId}");
 
             if (string.IsNullOrEmpty(worldId)) return;
 
-            // Check if this is the first level of the world
-            if (levelNumber == 1)
-            {
-                Debug.Log($"[DialogueManager] Checking WorldFirstLevel triggers for {worldId}");
-                CheckTriggers(DialogueTrigger.TriggerType.WorldFirstLevel, worldId, levelNumber);
-            }
+            // Check level start triggers (trigger's own levelNumber field handles filtering)
+            CheckTriggers(DialogueTrigger.TriggerType.WorldFirstLevel, worldId, levelNumber);
         }
 
         private void OnLevelCompleted(int levelNumber, int starsEarned)
@@ -128,34 +123,36 @@ namespace SortResort
         /// <summary>
         /// Start playing a dialogue sequence
         /// </summary>
-        public void StartDialogue(string dialogueId)
+        public bool StartDialogue(string dialogueId)
         {
             var sequence = DialogueDataLoader.GetDialogue(dialogueId);
             if (sequence == null)
             {
                 Debug.LogWarning($"[DialogueManager] Dialogue not found: {dialogueId}");
-                return;
+                return false;
             }
 
-            StartDialogue(sequence);
+            return StartDialogue(sequence);
         }
 
         /// <summary>
-        /// Start playing a dialogue sequence
+        /// Start playing a dialogue sequence. Returns true if dialogue actually started.
         /// </summary>
-        public void StartDialogue(DialogueSequence sequence)
+        public bool StartDialogue(DialogueSequence sequence)
         {
             if (sequence == null || sequence.lines.Count == 0)
             {
                 Debug.LogWarning("[DialogueManager] Empty or null dialogue sequence");
-                return;
+                return false;
             }
 
             // Check if already played (for playOnce dialogues)
-            if (sequence.playOnce && HasDialogueBeenPlayed(sequence.id))
+            bool alreadyPlayed = HasDialogueBeenPlayed(sequence.id);
+            Debug.Log($"[DialogueManager] Dialogue '{sequence.id}': playOnce={sequence.playOnce}, alreadyPlayed={alreadyPlayed}");
+            if (sequence.playOnce && alreadyPlayed)
             {
                 Debug.Log($"[DialogueManager] Skipping already-played dialogue: {sequence.id}");
-                return;
+                return false;
             }
 
             currentSequence = sequence;
@@ -164,6 +161,7 @@ namespace SortResort
             Debug.Log($"[DialogueManager] Starting dialogue: {sequence.id} ({sequence.lines.Count} lines)");
 
             PlayCurrentLine();
+            return true;
         }
 
         /// <summary>
@@ -213,6 +211,8 @@ namespace SortResort
                 };
             }
 
+            int listenerCount = OnLineStarted?.GetInvocationList()?.Length ?? 0;
+            Debug.Log($"[DialogueManager] Firing OnLineStarted for '{line.text}' ({listenerCount} listeners)");
             OnLineStarted?.Invoke(line);
 
             // Start typewriter effect
@@ -281,6 +281,10 @@ namespace SortResort
 
         private void PlayLetterSound(char letter, float basePitch)
         {
+            // Check if voices are disabled in settings
+            if (SaveManager.Instance != null && !SaveManager.Instance.IsVoiceEnabled())
+                return;
+
             if (!letterClips.TryGetValue(letter, out var clip))
             {
                 return;
@@ -364,7 +368,9 @@ namespace SortResort
         private bool HasDialogueBeenPlayed(string dialogueId)
         {
             string played = PlayerPrefs.GetString(PLAYED_DIALOGUES_KEY, "");
-            return played.Contains($"|{dialogueId}|");
+            bool result = played.Contains($"|{dialogueId}|");
+            Debug.Log($"[DialogueManager] HasDialogueBeenPlayed('{dialogueId}'): {result} (stored: '{played}')");
+            return result;
         }
 
         private void MarkDialogueAsPlayed(string dialogueId)
@@ -382,6 +388,7 @@ namespace SortResort
         {
             PlayerPrefs.DeleteKey(PLAYED_DIALOGUES_KEY);
             PlayerPrefs.Save();
+            Debug.Log("[DialogueManager] Played dialogues reset");
         }
 
         #endregion
@@ -419,10 +426,12 @@ namespace SortResort
                 // Check threshold
                 if (trigger.threshold > 0 && value < trigger.threshold) continue;
 
-                // Trigger matched - start dialogue
+                // Trigger matched - try to start dialogue
                 Debug.Log($"[DialogueManager] Trigger MATCHED! Starting dialogue: {trigger.dialogueId}");
-                StartDialogue(trigger.dialogueId);
-                break; // Only trigger one dialogue at a time
+                if (StartDialogue(trigger.dialogueId))
+                {
+                    break; // Only trigger one dialogue at a time
+                }
             }
         }
 

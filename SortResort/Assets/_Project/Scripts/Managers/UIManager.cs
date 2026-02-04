@@ -154,7 +154,6 @@ namespace SortResort
         private DialogueUI dialogueUI;
         private Image dialogueBoxImage;
         private Image dialogueMascotImage;
-        private TextMeshProUGUI dialogueNameText;
         private TextMeshProUGUI dialogueText;
         private GameObject dialogueContinueIndicator;
 
@@ -1394,9 +1393,35 @@ namespace SortResort
             var curtainsImage = curtainsGO.AddComponent<Image>();
             curtainsImage.preserveAspect = false;
 
+            // Level Board layer (full screen, on top of curtains)
+            var levelBoardGO = new GameObject("Level Board");
+            levelBoardGO.transform.SetParent(levelCompletePanel.transform, false);
+            var levelBoardRect = levelBoardGO.AddComponent<RectTransform>();
+            levelBoardRect.anchorMin = Vector2.zero;
+            levelBoardRect.anchorMax = Vector2.one;
+            levelBoardRect.offsetMin = Vector2.zero;
+            levelBoardRect.offsetMax = Vector2.zero;
+            var levelBoardImage = levelBoardGO.AddComponent<Image>();
+            levelBoardImage.preserveAspect = true;
+            levelBoardImage.raycastTarget = false;
+
+            // Star Ribbon layer (full screen, on top of level board)
+            var starRibbonGO = new GameObject("Star Ribbon");
+            starRibbonGO.transform.SetParent(levelCompletePanel.transform, false);
+            var starRibbonRect = starRibbonGO.AddComponent<RectTransform>();
+            starRibbonRect.anchorMin = Vector2.zero;
+            starRibbonRect.anchorMax = Vector2.one;
+            starRibbonRect.offsetMin = Vector2.zero;
+            starRibbonRect.offsetMax = Vector2.zero;
+            var starRibbonImage = starRibbonGO.AddComponent<Image>();
+            starRibbonImage.preserveAspect = true;
+            starRibbonImage.raycastTarget = false;
+
             // Add and initialize the animation controller
             animatedLevelComplete = levelCompletePanel.AddComponent<AnimatedLevelComplete>();
             animatedLevelComplete.Initialize(raysImage, curtainsImage);
+            animatedLevelComplete.SetLevelBoardImage(levelBoardImage);
+            animatedLevelComplete.SetStarRibbonImage(starRibbonImage);
 
             // Content container - positioned at top third of screen
             var content = new GameObject("Content");
@@ -1768,6 +1793,40 @@ namespace SortResort
             var (timerToggle, timerCheckmark) = CreateGoogleSwitch(timerRowGO.transform);
 
             // ============================================
+            // VOICE TOGGLE
+            // ============================================
+            var voiceRowGO = new GameObject("VoiceRow");
+            voiceRowGO.transform.SetParent(contentGO.transform, false);
+            var voiceRowRect = voiceRowGO.AddComponent<RectTransform>();
+            voiceRowRect.anchorMin = new Vector2(0.5f, 1);
+            voiceRowRect.anchorMax = new Vector2(0.5f, 1);
+            voiceRowRect.pivot = new Vector2(0.5f, 1);
+            voiceRowRect.anchoredPosition = new Vector2(0, -780);
+            voiceRowRect.sizeDelta = new Vector2(700, 80);
+
+            var voiceLayout = voiceRowGO.AddComponent<HorizontalLayoutGroup>();
+            voiceLayout.spacing = 20;
+            voiceLayout.childAlignment = TextAnchor.MiddleCenter;
+            voiceLayout.childForceExpandWidth = false;
+            voiceLayout.childForceExpandHeight = false;
+
+            // Voice label
+            var voiceLabelGO = new GameObject("VoiceLabel");
+            voiceLabelGO.transform.SetParent(voiceRowGO.transform, false);
+            var voiceLabelText = voiceLabelGO.AddComponent<TextMeshProUGUI>();
+            voiceLabelText.text = "Mascot Voices";
+            voiceLabelText.fontSize = 36;
+            voiceLabelText.fontStyle = FontStyles.Bold;
+            voiceLabelText.alignment = TextAlignmentOptions.MidlineLeft;
+            voiceLabelText.color = Color.white;
+            var voiceLabelLE = voiceLabelGO.AddComponent<LayoutElement>();
+            voiceLabelLE.preferredWidth = 400;
+            voiceLabelLE.preferredHeight = 60;
+
+            // Voice toggle (Google-style switch)
+            var (voiceToggle, voiceCheckmark) = CreateGoogleSwitch(voiceRowGO.transform);
+
+            // ============================================
             // BUTTONS (Reset Progress, Credits)
             // ============================================
             var buttonsContainer = new GameObject("ButtonsContainer");
@@ -1776,7 +1835,7 @@ namespace SortResort
             buttonsContainerRect.anchorMin = new Vector2(0.5f, 1);
             buttonsContainerRect.anchorMax = new Vector2(0.5f, 1);
             buttonsContainerRect.pivot = new Vector2(0.5f, 1);
-            buttonsContainerRect.anchoredPosition = new Vector2(0, -820);
+            buttonsContainerRect.anchoredPosition = new Vector2(0, -900);
             buttonsContainerRect.sizeDelta = new Vector2(700, 200);
 
             var buttonsLayout = buttonsContainer.AddComponent<VerticalLayoutGroup>();
@@ -1873,6 +1932,7 @@ namespace SortResort
                 masterLabel, musicLabel, sfxLabel,
                 hapticsToggle, hapticsCheckmark,
                 timerToggle, timerCheckmark,
+                voiceToggle, voiceCheckmark,
                 resetBtn, creditsBtn,
                 confirmDialog, confirmYes, confirmNo,
                 creditsPanel, creditsClose,
@@ -4683,8 +4743,8 @@ Antonia and Joakim Engfors
             mascotRect.anchorMin = new Vector2(0, 0);
             mascotRect.anchorMax = new Vector2(0, 0);
             mascotRect.pivot = new Vector2(0, 0);
-            mascotRect.anchoredPosition = new Vector2(30, 180); // Left side, positioned so feet overlap box
-            mascotRect.sizeDelta = new Vector2(320, 500); // Taller to show full mascot above box
+            mascotRect.anchoredPosition = new Vector2(10, 160); // Left side, positioned so feet overlap box
+            mascotRect.sizeDelta = new Vector2(480, 750); // Large mascot visible above box
 
             dialogueMascotImage = mascotContainer.AddComponent<Image>();
             dialogueMascotImage.preserveAspect = true;
@@ -4714,44 +4774,14 @@ Antonia and Joakim Engfors
                 dialogueBoxImage.color = new Color(0.9f, 0.85f, 0.7f, 0.98f); // Light beige fallback
             }
 
-            // Text content area (right side of mascot)
+            // Text content area
             var textArea = new GameObject("Text Area");
             textArea.transform.SetParent(dialogueBox.transform, false);
             var textRect = textArea.AddComponent<RectTransform>();
             textRect.anchorMin = new Vector2(0, 0);
             textRect.anchorMax = new Vector2(1, 1);
-            textRect.offsetMin = new Vector2(240, 30);  // Left offset for mascot
-            textRect.offsetMax = new Vector2(-30, -30); // Right and top padding
-
-            // Name label (speaker name)
-            var nameContainer = new GameObject("Name Container");
-            nameContainer.transform.SetParent(dialogueBox.transform, false);
-            var nameRect = nameContainer.AddComponent<RectTransform>();
-            nameRect.anchorMin = new Vector2(0, 1);
-            nameRect.anchorMax = new Vector2(0, 1);
-            nameRect.pivot = new Vector2(0, 1);
-            nameRect.anchoredPosition = new Vector2(240, -15);
-            nameRect.sizeDelta = new Vector2(250, 50);
-
-            // Name background
-            var nameBg = nameContainer.AddComponent<Image>();
-            nameBg.color = new Color(0.6f, 0.4f, 0.2f, 1f);
-
-            // Name text
-            var nameTextGO = new GameObject("Name Text");
-            nameTextGO.transform.SetParent(nameContainer.transform, false);
-            var nameTextRect = nameTextGO.AddComponent<RectTransform>();
-            nameTextRect.anchorMin = Vector2.zero;
-            nameTextRect.anchorMax = Vector2.one;
-            nameTextRect.offsetMin = new Vector2(15, 5);
-            nameTextRect.offsetMax = new Vector2(-15, -5);
-
-            dialogueNameText = nameTextGO.AddComponent<TextMeshProUGUI>();
-            dialogueNameText.text = "Speaker";
-            dialogueNameText.fontSize = 28;
-            dialogueNameText.fontStyle = FontStyles.Bold;
-            dialogueNameText.color = Color.white;
-            dialogueNameText.alignment = TextAlignmentOptions.Left;
+            textRect.offsetMin = new Vector2(40, 30);   // Close to left edge
+            textRect.offsetMax = new Vector2(-30, -70); // Right and top padding (push text below border)
 
             // Dialogue text
             var dialogueTextGO = new GameObject("Dialogue Text");
@@ -4760,11 +4790,12 @@ Antonia and Joakim Engfors
             dialogueTextRect.anchorMin = Vector2.zero;
             dialogueTextRect.anchorMax = Vector2.one;
             dialogueTextRect.offsetMin = new Vector2(10, 10);
-            dialogueTextRect.offsetMax = new Vector2(-10, -50);
+            dialogueTextRect.offsetMax = new Vector2(-10, -10);
 
             dialogueText = dialogueTextGO.AddComponent<TextMeshProUGUI>();
             dialogueText.text = "";
-            dialogueText.fontSize = 32;
+            dialogueText.fontSize = 42;
+            dialogueText.fontStyle = FontStyles.Bold;
             dialogueText.color = new Color(0.1f, 0.1f, 0.1f, 1f); // Dark/black text
             dialogueText.alignment = TextAlignmentOptions.TopLeft;
             dialogueText.enableWordWrapping = true;
@@ -4799,7 +4830,6 @@ Antonia and Joakim Engfors
             uiType.GetField("dialoguePanel", flags)?.SetValue(dialogueUI, dialoguePanel);
             uiType.GetField("dialogueBoxImage", flags)?.SetValue(dialogueUI, dialogueBoxImage);
             uiType.GetField("mascotImage", flags)?.SetValue(dialogueUI, dialogueMascotImage);
-            uiType.GetField("nameText", flags)?.SetValue(dialogueUI, dialogueNameText);
             uiType.GetField("dialogueText", flags)?.SetValue(dialogueUI, dialogueText);
             uiType.GetField("continueIndicator", flags)?.SetValue(dialogueUI, dialogueContinueIndicator);
 

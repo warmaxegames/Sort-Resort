@@ -27,6 +27,8 @@ namespace SortResort
         [SerializeField] private bool isLocked;
         [SerializeField] private int unlockMatchesRequired;
         private int currentUnlockProgress;
+        private string lockOverlayImageName;
+        private Vector3 lockSpriteScale;
 
         [Header("Visual Components")]
         [SerializeField] private SpriteRenderer containerSprite;
@@ -893,6 +895,9 @@ namespace SortResort
         /// </summary>
         private void CreateLockOverlay(string lockOverlayImage)
         {
+            // Store the lock overlay image name for unlock animation
+            lockOverlayImageName = lockOverlayImage;
+
             // Create lock overlay parent
             lockOverlay = new GameObject("LockOverlay");
             lockOverlay.transform.SetParent(transform);
@@ -934,6 +939,9 @@ namespace SortResort
                 float spriteWidth = lockSprite.bounds.size.x;
                 float scale = containerWidth / spriteWidth;
                 lockSpriteGO.transform.localScale = new Vector3(scale, scale, 1f);
+
+                // Store scale for unlock animation
+                lockSpriteScale = lockSpriteGO.transform.localScale;
             }
             else
             {
@@ -951,6 +959,9 @@ namespace SortResort
                 float width = slotCount * slotSpacing / 100f * 1.3f;  // Slightly wider than container
                 float height = slotSize.y / 100f * 1.2f;  // Slightly taller than slots
                 lockSpriteGO.transform.localScale = new Vector3(width, height, 1f);
+
+                // Store scale for unlock animation
+                lockSpriteScale = lockSpriteGO.transform.localScale;
             }
 
             // Create countdown text - positioned to center in lock overlay image
@@ -1032,45 +1043,18 @@ namespace SortResort
             // Play unlock sound
             AudioManager.Instance?.PlayUnlockSound();
 
-            // Animate lock overlay with scale and fade
+            // Hide the static lock overlay immediately
             if (lockOverlay != null)
             {
-                // Scale up and fade out animation
-                LeanTween.scale(lockOverlay, Vector3.one * 1.3f, 0.4f)
-                    .setEase(LeanTweenType.easeOutBack);
+                lockOverlay.SetActive(false);
+            }
 
-                // Fade out all sprite renderers in lock overlay
-                var spriteRenderers = lockOverlay.GetComponentsInChildren<SpriteRenderer>();
-                foreach (var sr in spriteRenderers)
+            // Play frame-by-frame unlock animation
+            if (!string.IsNullOrEmpty(lockOverlayImageName))
+            {
+                UnlockEffect.PlayAt(transform, lockOverlayImageName, lockSpriteScale, () =>
                 {
-                    LeanTween.value(sr.gameObject, sr.color.a, 0f, 0.4f)
-                        .setOnUpdate((float val) => {
-                            if (sr != null)
-                            {
-                                var c = sr.color;
-                                sr.color = new Color(c.r, c.g, c.b, val);
-                            }
-                        });
-                }
-
-                // Fade out text components
-                var textComponents = lockOverlay.GetComponentsInChildren<TMPro.TextMeshPro>();
-                foreach (var tmp in textComponents)
-                {
-                    LeanTween.value(tmp.gameObject, tmp.color.a, 0f, 0.4f)
-                        .setOnUpdate((float val) => {
-                            if (tmp != null)
-                            {
-                                var c = tmp.color;
-                                tmp.color = new Color(c.r, c.g, c.b, val);
-                            }
-                        });
-                }
-
-                // Disable after animation
-                LeanTween.delayedCall(0.5f, () => {
-                    if (lockOverlay != null)
-                        lockOverlay.SetActive(false);
+                    Debug.Log($"[ItemContainer] Unlock animation complete for {containerId}");
                 });
             }
 

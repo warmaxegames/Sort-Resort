@@ -22,7 +22,7 @@ namespace SortResort
         public MascotData()
         {
             basePitch = 1.0f;
-            speakSpeed = 18f;
+            speakSpeed = 24f;
         }
     }
 
@@ -157,45 +157,45 @@ namespace SortResort
                 id = "cat",
                 displayName = "Whiskers",
                 worldId = "island",
-                basePitch = 1.3f,
-                speakSpeed = 20f,
-                spriteFolder = "Sprites/Mascots/Island"
+                basePitch = 1.45f,
+                speakSpeed = 27f,
+                spriteFolder = "Sprites/Mascots/island_whiskers"
             });
 
             db.mascots.Add(new MascotData {
                 id = "tommy",
                 displayName = "Tommy",
                 worldId = "supermarket",
-                basePitch = 1.0f,
-                speakSpeed = 18f,
-                spriteFolder = "Sprites/Mascots/Supermarket"
+                basePitch = 1.35f,
+                speakSpeed = 24f,
+                spriteFolder = "Sprites/Mascots/supermarket_tommy"
             });
 
             db.mascots.Add(new MascotData {
                 id = "chicken",
-                displayName = "Clucky",
+                displayName = "Mara",
                 worldId = "farm",
-                basePitch = 1.4f,
-                speakSpeed = 22f,
-                spriteFolder = "Sprites/Mascots/Farm"
+                basePitch = 1.5f,
+                speakSpeed = 29f,
+                spriteFolder = "Sprites/Mascots/farm_mara"
             });
 
             db.mascots.Add(new MascotData {
                 id = "bartender",
-                displayName = "Barley",
+                displayName = "Hog",
                 worldId = "tavern",
-                basePitch = 0.85f,
-                speakSpeed = 16f,
-                spriteFolder = "Sprites/Mascots/Tavern"
+                basePitch = 1.3f,
+                speakSpeed = 21f,
+                spriteFolder = "Sprites/Mascots/tavern_hog"
             });
 
             db.mascots.Add(new MascotData {
                 id = "alien",
-                displayName = "Zyx",
+                displayName = "Leika",
                 worldId = "space",
-                basePitch = 1.5f,
-                speakSpeed = 25f,
-                spriteFolder = "Sprites/Mascots/Space"
+                basePitch = 1.55f,
+                speakSpeed = 33f,
+                spriteFolder = "Sprites/Mascots/space_leika"
             });
 
             cachedDatabase = db;

@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 10951e957e2bcbe498f6d2b9019459f8
+guid: 8fe953962cd7b9e438ea5655af73e8aa
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 1133171097765669794
-    second: island_single_slot_lockoverlay_00028_0
+      213: -3527508063268542350
+    second: supermarket_tommy_neutral_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -139,13 +139,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: island_single_slot_lockoverlay_00028_0
+      name: supermarket_tommy_neutral_0
       rect:
         serializedVersion: 2
         x: 0
         y: 0
-        width: 156
-        height: 312
+        width: 391
+        height: 545
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -154,8 +154,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 2abef001c15d9bf00800000000000000
-      internalID: 1133171097765669794
+      spriteID: 2786d822b16cb0fc0800000000000000
+      internalID: -3527508063268542350
       vertices: []
       indices: 
       edges: []
@@ -174,7 +174,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      island_single_slot_lockoverlay_00028_0: 1133171097765669794
+      supermarket_tommy_neutral_0: -3527508063268542350
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

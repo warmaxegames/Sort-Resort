@@ -94,6 +94,7 @@ namespace SortResort
                 DialogueManager.Instance.OnDialogueComplete += OnDialogueComplete;
                 DialogueManager.Instance.OnMascotChanged += OnMascotChanged;
                 isSubscribed = true;
+                Debug.Log("[DialogueUI] Successfully subscribed to DialogueManager events");
 
                 // Check if dialogue is already playing (we may have missed OnLineStarted)
                 if (DialogueManager.Instance.IsDialogueActive)
@@ -129,6 +130,12 @@ namespace SortResort
 
         private void Update()
         {
+            // Retry subscription if not yet subscribed (handles init order issues)
+            if (!isSubscribed)
+            {
+                TrySubscribe();
+            }
+
             // Handle player input to advance dialogue (using new Input System)
             if (isVisible && (clickAction?.WasPressedThisFrame() == true || submitAction?.WasPressedThisFrame() == true))
             {
@@ -213,6 +220,7 @@ namespace SortResort
             }
             else if (mascotImage != null && defaultMascotSprite == null)
             {
+                mascotImage.enabled = false; // Hide to avoid blank white square
                 Debug.LogWarning($"[DialogueUI] Failed to load mascot sprite at {currentMascotFolder}_neutral");
             }
         }
@@ -233,8 +241,9 @@ namespace SortResort
                 expressionSprite = Resources.Load<Sprite>($"{currentMascotFolder}_{mappedExpression}");
             }
 
-            mascotImage.sprite = expressionSprite ?? defaultMascotSprite;
-            mascotImage.enabled = true;
+            var sprite = expressionSprite ?? defaultMascotSprite;
+            mascotImage.sprite = sprite;
+            mascotImage.enabled = sprite != null;
         }
 
         private void LoadDialogueBoxForWorld(string worldId)
@@ -260,18 +269,25 @@ namespace SortResort
             dialoguePanel.SetActive(true);
             isVisible = true;
 
+            if (canvasGroup != null)
+            {
+                canvasGroup.blocksRaycasts = true;
+                canvasGroup.interactable = true;
+            }
+
             if (immediate || showAnimationDuration <= 0)
             {
                 if (canvasGroup != null)
                 {
                     canvasGroup.alpha = 1f;
                 }
-                dialoguePanel.transform.localScale = Vector3.one;
             }
             else
             {
                 animationCoroutine = StartCoroutine(AnimateShow());
             }
+
+            Debug.Log("[DialogueUI] Show() called");
         }
 
         public void Hide(bool immediate = false)
@@ -288,8 +304,10 @@ namespace SortResort
                 if (canvasGroup != null)
                 {
                     canvasGroup.alpha = 0f;
+                    canvasGroup.blocksRaycasts = false;
+                    canvasGroup.interactable = false;
                 }
-                dialoguePanel.SetActive(false);
+                // Don't SetActive(false) - keep alive for event subscription
                 isVisible = false;
             }
             else
@@ -303,7 +321,6 @@ namespace SortResort
             float elapsed = 0f;
 
             if (canvasGroup != null) canvasGroup.alpha = 0f;
-            dialoguePanel.transform.localScale = new Vector3(0.8f, 0.8f, 1f);
 
             while (elapsed < showAnimationDuration)
             {
@@ -315,13 +332,11 @@ namespace SortResort
                 {
                     canvasGroup.alpha = eased;
                 }
-                dialoguePanel.transform.localScale = Vector3.Lerp(new Vector3(0.8f, 0.8f, 1f), Vector3.one, eased);
 
                 yield return null;
             }
 
             if (canvasGroup != null) canvasGroup.alpha = 1f;
-            dialoguePanel.transform.localScale = Vector3.one;
         }
 
         private IEnumerator AnimateHide()
@@ -337,12 +352,16 @@ namespace SortResort
                 {
                     canvasGroup.alpha = 1f - t;
                 }
-                dialoguePanel.transform.localScale = Vector3.Lerp(Vector3.one, new Vector3(0.9f, 0.9f, 1f), t);
 
                 yield return null;
             }
 
-            dialoguePanel.SetActive(false);
+            if (canvasGroup != null)
+            {
+                canvasGroup.alpha = 0f;
+                canvasGroup.blocksRaycasts = false;
+                canvasGroup.interactable = false;
+            }
             isVisible = false;
         }
     }

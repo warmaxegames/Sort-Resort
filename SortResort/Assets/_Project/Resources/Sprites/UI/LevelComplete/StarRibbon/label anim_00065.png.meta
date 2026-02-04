@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 4d747d598d6500d41a6f110ff9d149ca
+guid: 4953198b7e1cf5a46b2eb1a05a310224
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 905851459791076922
-    second: island_single_slot_lockoverlay_00026_0
+      213: -6367122310361798846
+    second: label anim_00065_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -139,13 +139,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: island_single_slot_lockoverlay_00026_0
+      name: label anim_00065_0
       rect:
         serializedVersion: 2
-        x: 0
-        y: 0
-        width: 156
-        height: 312
+        x: 175
+        y: 1143
+        width: 730
+        height: 268
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -154,8 +154,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: a3ebd107a1b329c00800000000000000
-      internalID: 905851459791076922
+      spriteID: 247ab614eff63a7a0800000000000000
+      internalID: -6367122310361798846
       vertices: []
       indices: 
       edges: []
@@ -174,7 +174,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      island_single_slot_lockoverlay_00026_0: 905851459791076922
+      label anim_00065_0: -6367122310361798846
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
