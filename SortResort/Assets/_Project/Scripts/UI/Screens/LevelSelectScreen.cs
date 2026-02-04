@@ -32,6 +32,7 @@ namespace SortResort.UI
         private List<string> worldIds = new List<string> { "island", "supermarket", "farm", "tavern", "space" };
         private int currentWorldIndex = 0;
         private List<LevelButton> levelButtons = new List<LevelButton>();
+        private bool isPortalAnimating = false;
 
         public System.Action<string, int> OnLevelSelected;
 
@@ -229,6 +230,8 @@ namespace SortResort.UI
         {
             Debug.Log($"[LevelSelectScreen] Level button {levelNumber} clicked!");
 
+            if (isPortalAnimating) return;
+
             string worldId = worldIds[currentWorldIndex];
 
             // Check if level is unlocked
@@ -239,10 +242,18 @@ namespace SortResort.UI
                 return;
             }
 
-            AudioManager.Instance?.PlayButtonClick();
-            Debug.Log($"[LevelSelectScreen] Selected {worldId} level {levelNumber}, invoking OnLevelSelected");
+            Debug.Log($"[LevelSelectScreen] Selected {worldId} level {levelNumber}, playing portal animation");
 
-            OnLevelSelected?.Invoke(worldId, levelNumber);
+            // Get the button's RectTransform for positioning the animation
+            RectTransform buttonRect = levelButtons[levelNumber - 1].GetComponent<RectTransform>();
+
+            isPortalAnimating = true;
+            PortalAnimation.EnsureInstance();
+            PortalAnimation.Instance.Play(buttonRect, () =>
+            {
+                isPortalAnimating = false;
+                OnLevelSelected?.Invoke(worldId, levelNumber);
+            });
         }
 
         public void RefreshDisplay()
