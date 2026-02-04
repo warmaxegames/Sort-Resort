@@ -35,7 +35,8 @@
 - Save/load progress (PlayerPrefs), undo system, optional timer
 - Achievement system (88 achievements with UI, notifications, rewards)
 - Level solver tool (Editor window + in-game auto-solve button)
-- **Dialogue system** - Typewriter text, Animal Crossing-style voices, mascot portraits, triggered on level events
+- **Dialogue system** - Typewriter text with Animal Crossing-style voices, mascot portraits, per-world welcome dialogues, voice toggle in settings, timer pauses during dialogue
+- **Level complete screen** - Animated rays, curtains, level board, star ribbon, mascot thumbsup animation (Island)
 
 ---
 
@@ -43,13 +44,14 @@
 
 ### High Priority
 1. **World-specific lock overlays** - Placeholders exist (copies of base), need custom designs
-2. **Polish dialogue system** - Core system working, needs refinement:
-   - Fine-tune mascot positioning and sizing
-   - Add settings toggle to disable mascot voices
-   - Add more dialogue triggers (level milestones, achievements)
-   - Create mascot sprites for Supermarket (Tommy) world
-   - Test all world welcome dialogues
-3. **Level Complete screen (animated)** - Rays/curtains done, needs mascot, stars, ribbon
+2. **Polish dialogue system** - Core working with welcome dialogues for all 5 worlds. Remaining:
+   - Add more dialogue triggers (level milestones, achievements, world completion)
+   - Create mascot sprites for Farm (Mara - only neutral), Tavern (Hog - missing neutral/happy)
+   - Add more expression variants for existing mascots
+3. **Level Complete screen (animated)** - Rays, curtains, level board, star ribbon, mascot animation done. Remaining:
+   - Add level number text overlay on level board
+   - Add star animations to ribbon based on star count
+   - Move replay/next/level select buttons into animated screen (remove blue placeholder)
 4. **Mobile Testing** - Touch input validation on device
 
 ### Medium Priority
@@ -84,7 +86,7 @@
 - [x] ContainerMovement.cs (back_and_forth, carousel, falling)
 - [x] Despawn-on-match stacking containers
 - [x] Undo system
-- [x] Dialogue system (core working, needs polish)
+- [x] Dialogue system (working: typewriter, voices, mascot sprites, triggers, voice toggle, timer pause)
 - [ ] Profile customization
 
 ### Phase 8: Content & Testing
@@ -161,15 +163,35 @@ Container border scale: 1.2 (17% border around slots)
 ### Timer System
 - `time_limit_seconds` in level JSON (0 or omitted = no timer)
 - Disable globally via `SaveManager.IsTimerEnabled()`
+- Timer pauses automatically while dialogue is active
 - Power-ups: `LevelManager.FreezeTimer(duration)`, `AddTime(seconds)`
 - UI: M:SS format, flashes red under 10s, cyan when frozen
+
+### Dialogue System
+- **Data**: `Resources/Data/Dialogue/dialogues.json` (mascots, dialogues, triggers)
+- **Mascots**: Whiskers (island), Tommy (supermarket), Mara (farm), Hog (tavern), Leika (space)
+- **Sprites**: `Resources/Sprites/Mascots/{worldId}_{mascotName}_{expression}.png`
+- **Voice clips**: `Resources/Audio/Dialogue/Letters/A-Z.wav` (per-letter Animal Crossing style)
+- **Trigger types**: WorldFirstLevel (type:1), LevelComplete (type:0), plus unused types in enum
+- **UI**: DialogueUI uses CanvasGroup for visibility (not SetActive), retries subscription in Update()
+- **Settings**: Voice toggle via `SaveManager.IsVoiceEnabled()` / `SetVoiceEnabled()`
+- **Persistence**: Played dialogues stored in PlayerPrefs key "PlayedDialogues" (pipe-delimited)
+- **Reset**: `SaveManager.ResetAllProgress()` also clears played dialogues
+
+### Level Complete Animation
+- **AnimatedLevelComplete.cs**: 4 layers - rays, curtains, level board, star ribbon
+- **MascotAnimator.cs**: Frame-by-frame animation for mascot thumbsup (Island world, 56 frames)
+- Frames loaded via `Resources.LoadAll<Texture2D>()` from folders in `Resources/Sprites/UI/LevelComplete/`
+- Mascot animation frames: `Resources/Sprites/Mascots/Animations/{World}/`
 
 ### Asset Locations (Unity)
 - Item Sprites: `Resources/Sprites/Items/{World}/`
 - Container Sprites: `Resources/Sprites/Containers/`
+- Mascot Sprites: `Resources/Sprites/Mascots/`
 - Audio: `Resources/Audio/{Music|SFX|UI}/`
 - Prefabs: `Resources/Prefabs/`
 - Level Data: `Resources/Data/Levels/{World}/`
+- Dialogue Data: `Resources/Data/Dialogue/`
 
 ### Level Structure (All Worlds)
 - level_001: 3 containers, 2 item types, intro
