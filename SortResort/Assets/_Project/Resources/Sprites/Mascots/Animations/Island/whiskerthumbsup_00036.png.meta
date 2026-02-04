@@ -1,0 +1,754 @@
+fileFormatVersion: 2
+guid: 21bb98268d6de5340a3169603aa86e2d
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -3848156782313297209
+    second: whiskerthumbsup_00036_0
+  - first:
+      213: 6837461977025327347
+    second: whiskerthumbsup_00036_1
+  - first:
+      213: 1744100125408619949
+    second: whiskerthumbsup_00036_2
+  - first:
+      213: -7976961882714256864
+    second: whiskerthumbsup_00036_3
+  - first:
+      213: 5913587283849640662
+    second: whiskerthumbsup_00036_4
+  - first:
+      213: 6170122397053575139
+    second: whiskerthumbsup_00036_5
+  - first:
+      213: 5445503589351095861
+    second: whiskerthumbsup_00036_6
+  - first:
+      213: 2544367875197090781
+    second: whiskerthumbsup_00036_7
+  - first:
+      213: 7865823440323901917
+    second: whiskerthumbsup_00036_8
+  - first:
+      213: -6985601799071171960
+    second: whiskerthumbsup_00036_9
+  - first:
+      213: 6643845349461059488
+    second: whiskerthumbsup_00036_10
+  - first:
+      213: 4806307520613348139
+    second: whiskerthumbsup_00036_11
+  - first:
+      213: 2474165037321833808
+    second: whiskerthumbsup_00036_12
+  - first:
+      213: -4531744376595340480
+    second: whiskerthumbsup_00036_13
+  - first:
+      213: -5230009637108420854
+    second: whiskerthumbsup_00036_14
+  - first:
+      213: -2977808227849665215
+    second: whiskerthumbsup_00036_15
+  - first:
+      213: -5354496341982962792
+    second: whiskerthumbsup_00036_16
+  - first:
+      213: -1392265676009858216
+    second: whiskerthumbsup_00036_17
+  - first:
+      213: -5105652142968570337
+    second: whiskerthumbsup_00036_18
+  - first:
+      213: 1525559369767247767
+    second: whiskerthumbsup_00036_19
+  - first:
+      213: -3228042725756992775
+    second: whiskerthumbsup_00036_20
+  - first:
+      213: 1775743595122642677
+    second: whiskerthumbsup_00036_21
+  - first:
+      213: -4710559450088239577
+    second: whiskerthumbsup_00036_22
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 1
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Android
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: iOS
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: whiskerthumbsup_00036_0
+      rect:
+        serializedVersion: 2
+        x: 151
+        y: 796
+        width: 29
+        height: 79
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7caa43e7bc9989ac0800000000000000
+      internalID: -3848156782313297209
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: whiskerthumbsup_00036_1
+      rect:
+        serializedVersion: 2
+        x: 182
+        y: 791
+        width: 56
+        height: 45
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3f0b5d1117b83ee50800000000000000
+      internalID: 6837461977025327347
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: whiskerthumbsup_00036_2
+      rect:
+        serializedVersion: 2
+        x: 186
+        y: 827
+        width: 40
+        height: 64
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: dade1bbc2d9443810800000000000000
+      internalID: 1744100125408619949
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: whiskerthumbsup_00036_3
+      rect:
+        serializedVersion: 2
+        x: 240
+        y: 453
+        width: 594
+        height: 614
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 02a4cf17e632c4190800000000000000
+      internalID: -7976961882714256864
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: whiskerthumbsup_00036_4
+      rect:
+        serializedVersion: 2
+        x: 840
+        y: 791
+        width: 56
+        height: 45
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6daff1a9d48411250800000000000000
+      internalID: 5913587283849640662
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: whiskerthumbsup_00036_5
+      rect:
+        serializedVersion: 2
+        x: 852
+        y: 827
+        width: 41
+        height: 64
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3ef5f0121ada0a550800000000000000
+      internalID: 6170122397053575139
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: whiskerthumbsup_00036_6
+      rect:
+        serializedVersion: 2
+        x: 899
+        y: 796
+        width: 28
+        height: 79
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 53ef26ab9a0529b40800000000000000
+      internalID: 5445503589351095861
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: whiskerthumbsup_00036_7
+      rect:
+        serializedVersion: 2
+        x: 121
+        y: 689
+        width: 40
+        height: 73
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ddbb9031a196f4320800000000000000
+      internalID: 2544367875197090781
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: whiskerthumbsup_00036_8
+      rect:
+        serializedVersion: 2
+        x: 133
+        y: 743
+        width: 31
+        height: 78
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: dd9727a7eb4092d60800000000000000
+      internalID: 7865823440323901917
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: whiskerthumbsup_00036_9
+      rect:
+        serializedVersion: 2
+        x: 164
+        y: 483
+        width: 128
+        height: 289
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 88a7800dc282e0f90800000000000000
+      internalID: -6985601799071171960
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: whiskerthumbsup_00036_10
+      rect:
+        serializedVersion: 2
+        x: 172
+        y: 741
+        width: 49
+        height: 53
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0a7e14d052ea33c50800000000000000
+      internalID: 6643845349461059488
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: whiskerthumbsup_00036_11
+      rect:
+        serializedVersion: 2
+        x: 786
+        y: 483
+        width: 128
+        height: 289
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b23727f993f63b240800000000000000
+      internalID: 4806307520613348139
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: whiskerthumbsup_00036_12
+      rect:
+        serializedVersion: 2
+        x: 857
+        y: 741
+        width: 49
+        height: 53
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 05d42452efff55220800000000000000
+      internalID: 2474165037321833808
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: whiskerthumbsup_00036_13
+      rect:
+        serializedVersion: 2
+        x: 914
+        y: 743
+        width: 32
+        height: 78
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 043292cef720c11c0800000000000000
+      internalID: -4531744376595340480
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: whiskerthumbsup_00036_14
+      rect:
+        serializedVersion: 2
+        x: 917
+        y: 689
+        width: 41
+        height: 73
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a0f6840e1f54b67b0800000000000000
+      internalID: -5230009637108420854
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: whiskerthumbsup_00036_15
+      rect:
+        serializedVersion: 2
+        x: 118
+        y: 633
+        width: 53
+        height: 66
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 14509c1a133bca6d0800000000000000
+      internalID: -2977808227849665215
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: whiskerthumbsup_00036_16
+      rect:
+        serializedVersion: 2
+        x: 127
+        y: 577
+        width: 66
+        height: 59
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 89b1af042f101b5b0800000000000000
+      internalID: -5354496341982962792
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: whiskerthumbsup_00036_17
+      rect:
+        serializedVersion: 2
+        x: 885
+        y: 577
+        width: 66
+        height: 59
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 85b96748ebdadace0800000000000000
+      internalID: -1392265676009858216
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: whiskerthumbsup_00036_18
+      rect:
+        serializedVersion: 2
+        x: 907
+        y: 633
+        width: 53
+        height: 66
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f1e75a74d641529b0800000000000000
+      internalID: -5105652142968570337
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: whiskerthumbsup_00036_19
+      rect:
+        serializedVersion: 2
+        x: 150
+        y: 524
+        width: 77
+        height: 48
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 79fdebef920eb2510800000000000000
+      internalID: 1525559369767247767
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: whiskerthumbsup_00036_20
+      rect:
+        serializedVersion: 2
+        x: 851
+        y: 524
+        width: 77
+        height: 48
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9f2887b6e30b333d0800000000000000
+      internalID: -3228042725756992775
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: whiskerthumbsup_00036_21
+      rect:
+        serializedVersion: 2
+        x: 187
+        y: 476
+        width: 84
+        height: 38
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5fec5773465b4a810800000000000000
+      internalID: 1775743595122642677
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: whiskerthumbsup_00036_22
+      rect:
+        serializedVersion: 2
+        x: 807
+        y: 476
+        width: 84
+        height: 38
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 72e8124432bb0aeb0800000000000000
+      internalID: -4710559450088239577
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 5e97eb03825dee720800000000000000
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      whiskerthumbsup_00036_0: -3848156782313297209
+      whiskerthumbsup_00036_1: 6837461977025327347
+      whiskerthumbsup_00036_10: 6643845349461059488
+      whiskerthumbsup_00036_11: 4806307520613348139
+      whiskerthumbsup_00036_12: 2474165037321833808
+      whiskerthumbsup_00036_13: -4531744376595340480
+      whiskerthumbsup_00036_14: -5230009637108420854
+      whiskerthumbsup_00036_15: -2977808227849665215
+      whiskerthumbsup_00036_16: -5354496341982962792
+      whiskerthumbsup_00036_17: -1392265676009858216
+      whiskerthumbsup_00036_18: -5105652142968570337
+      whiskerthumbsup_00036_19: 1525559369767247767
+      whiskerthumbsup_00036_2: 1744100125408619949
+      whiskerthumbsup_00036_20: -3228042725756992775
+      whiskerthumbsup_00036_21: 1775743595122642677
+      whiskerthumbsup_00036_22: -4710559450088239577
+      whiskerthumbsup_00036_3: -7976961882714256864
+      whiskerthumbsup_00036_4: 5913587283849640662
+      whiskerthumbsup_00036_5: 6170122397053575139
+      whiskerthumbsup_00036_6: 5445503589351095861
+      whiskerthumbsup_00036_7: 2544367875197090781
+      whiskerthumbsup_00036_8: 7865823440323901917
+      whiskerthumbsup_00036_9: -6985601799071171960
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

@@ -96,6 +96,8 @@ namespace SortResort
         private TextMeshProUGUI levelCompleteMessageText;
         private TextMeshProUGUI levelCompleteMoveCountText;
         private AnimatedLevelComplete animatedLevelComplete;
+        private Image levelCompleteMascotImage;
+        private MascotAnimator levelCompleteMascotAnimator;
         private GameObject levelFailedPanel;
         private TextMeshProUGUI levelFailedReasonText;
         private GameObject levelSelectPanel;
@@ -1396,21 +1398,23 @@ namespace SortResort
             animatedLevelComplete = levelCompletePanel.AddComponent<AnimatedLevelComplete>();
             animatedLevelComplete.Initialize(raysImage, curtainsImage);
 
-            // Content container
+            // Content container - positioned at top third of screen
             var content = new GameObject("Content");
             content.transform.SetParent(levelCompletePanel.transform, false);
             var contentRect = content.AddComponent<RectTransform>();
-            contentRect.anchorMin = new Vector2(0.5f, 0.5f);
-            contentRect.anchorMax = new Vector2(0.5f, 0.5f);
-            contentRect.sizeDelta = new Vector2(600, 500);
+            contentRect.anchorMin = new Vector2(0.5f, 1f);
+            contentRect.anchorMax = new Vector2(0.5f, 1f);
+            contentRect.pivot = new Vector2(0.5f, 1f);
+            contentRect.anchoredPosition = new Vector2(0, -40);
+            contentRect.sizeDelta = new Vector2(600, 420);
 
             // Background panel
             var panelBg = content.AddComponent<Image>();
             panelBg.color = new Color(0.2f, 0.6f, 0.9f, 1f);
 
             var vlayout = content.AddComponent<VerticalLayoutGroup>();
-            vlayout.padding = new RectOffset(40, 40, 40, 40);
-            vlayout.spacing = 30;
+            vlayout.padding = new RectOffset(30, 30, 20, 20);
+            vlayout.spacing = 15;
             vlayout.childAlignment = TextAnchor.MiddleCenter;
             vlayout.childForceExpandWidth = true;
             vlayout.childForceExpandHeight = false;
@@ -1450,6 +1454,20 @@ namespace SortResort
 
                 levelCompleteStarImages[i] = starImg;
             }
+
+            // Mascot image - fills the lower portion of the screen below the content panel
+            // Frames are 1080x1920 (full screen) with mascot occupying a portion,
+            // so we stretch to full screen size and let preserveAspect handle it
+            var mascotGO = new GameObject("Mascot");
+            mascotGO.transform.SetParent(levelCompletePanel.transform, false);
+            var mascotRect = mascotGO.AddComponent<RectTransform>();
+            mascotRect.anchorMin = Vector2.zero;
+            mascotRect.anchorMax = Vector2.one;
+            mascotRect.offsetMin = Vector2.zero;
+            mascotRect.offsetMax = Vector2.zero;
+            levelCompleteMascotImage = mascotGO.AddComponent<Image>();
+            levelCompleteMascotImage.preserveAspect = true;
+            levelCompleteMascotImage.raycastTarget = false;
 
             // Move count display
             var moveCountGO = CreateTextElement(content.transform, "MoveCount", "Completed in 0 moves", 24,
@@ -2649,6 +2667,7 @@ Antonia and Joakim Engfors
             {
                 levelCompletePanel.SetActive(false);
                 animatedLevelComplete?.Hide();
+                CleanupMascotAnimator();
             }
             if (hudPanel != null)
                 hudPanel.SetActive(true);
@@ -2742,6 +2761,9 @@ Antonia and Joakim Engfors
                         _ => "Good job!"
                     };
                 }
+
+                // Update mascot
+                UpdateLevelCompleteMascot(stars);
             }
         }
 
@@ -2829,6 +2851,9 @@ Antonia and Joakim Engfors
             if (levelFailedPanel != null)
                 levelFailedPanel.SetActive(false);
 
+            // Clean up mascot animator
+            CleanupMascotAnimator();
+
             UpdateMoveDisplay(0);
             UpdateMatchDisplay(0);
 
@@ -2840,6 +2865,67 @@ Antonia and Joakim Engfors
             if (timerText != null)
             {
                 timerText.color = Color.white;
+            }
+        }
+
+        private void UpdateLevelCompleteMascot(int stars)
+        {
+            if (levelCompleteMascotImage == null) return;
+
+            string worldId = GameManager.Instance?.CurrentWorldId;
+            var world = WorldProgressionManager.Instance?.GetWorldData(worldId);
+
+            // Check if we have a victory animation for this world (2+ stars)
+            string animationName = MascotAnimator.GetVictoryAnimationName(worldId);
+            string worldFolder = MascotAnimator.GetWorldFolderName(worldId);
+
+            Debug.Log($"[UIManager] UpdateLevelCompleteMascot: world={worldId}, folder={worldFolder}, anim={animationName}, stars={stars}");
+
+            if (stars >= 2 && !string.IsNullOrEmpty(animationName) && !string.IsNullOrEmpty(worldFolder))
+            {
+                // Clean up existing animator
+                CleanupMascotAnimator();
+
+                // Try to play animated mascot
+                levelCompleteMascotAnimator = levelCompleteMascotImage.gameObject.AddComponent<MascotAnimator>();
+
+                if (levelCompleteMascotAnimator.LoadFrames(worldFolder, animationName))
+                {
+                    Debug.Log($"[UIManager] Playing mascot animation with {levelCompleteMascotAnimator.Duration}s duration");
+                    levelCompleteMascotImage.enabled = true;
+                    levelCompleteMascotAnimator.Play();
+                    return;
+                }
+                else
+                {
+                    Debug.LogWarning("[UIManager] Failed to load mascot animation frames");
+                    // Clean up failed animator
+                    Destroy(levelCompleteMascotAnimator);
+                    levelCompleteMascotAnimator = null;
+                }
+            }
+
+            // Fallback to static sprite
+            if (world != null)
+            {
+                levelCompleteMascotImage.sprite = stars >= 2 ? world.mascotHappy : world.mascotIdle;
+                levelCompleteMascotImage.enabled = levelCompleteMascotImage.sprite != null;
+                Debug.Log($"[UIManager] Using static mascot sprite: {(levelCompleteMascotImage.sprite != null ? levelCompleteMascotImage.sprite.name : "null")}");
+            }
+            else
+            {
+                levelCompleteMascotImage.enabled = false;
+                Debug.LogWarning($"[UIManager] No world data found for worldId: {worldId}");
+            }
+        }
+
+        private void CleanupMascotAnimator()
+        {
+            if (levelCompleteMascotAnimator != null)
+            {
+                levelCompleteMascotAnimator.Stop();
+                Destroy(levelCompleteMascotAnimator);
+                levelCompleteMascotAnimator = null;
             }
         }
 

@@ -22,6 +22,7 @@ namespace SortResort.UI
 
         [Header("Mascot")]
         [SerializeField] private Image mascotImage;
+        private MascotAnimator mascotAnimator;
 
         [Header("Animation Settings")]
         [SerializeField] private float starAnimationDelay = 0.5f;
@@ -76,6 +77,9 @@ namespace SortResort.UI
 
         private IEnumerator PlayVictorySequence()
         {
+            // Clean up any previous mascot animation
+            CleanupMascotAnimator();
+
             // Set initial state
             SetInteractable(false);
 
@@ -171,10 +175,52 @@ namespace SortResort.UI
         {
             if (mascotImage == null) return;
 
-            var world = WorldProgressionManager.Instance?.GetWorldData(GameManager.Instance?.CurrentWorldId);
+            string worldId = GameManager.Instance?.CurrentWorldId;
+            var world = WorldProgressionManager.Instance?.GetWorldData(worldId);
             if (world == null) return;
 
+            // Check if we have a victory animation for this world
+            string animationName = MascotAnimator.GetVictoryAnimationName(worldId);
+            string worldFolder = MascotAnimator.GetWorldFolderName(worldId);
+
+            if (earnedStars >= 2 && !string.IsNullOrEmpty(animationName) && !string.IsNullOrEmpty(worldFolder))
+            {
+                Debug.Log($"[LevelCompleteScreen] Attempting mascot animation: world={worldFolder}, anim={animationName}");
+
+                // Try to play animated mascot
+                if (mascotAnimator == null)
+                {
+                    mascotAnimator = mascotImage.gameObject.AddComponent<MascotAnimator>();
+                }
+
+                if (mascotAnimator.LoadFrames(worldFolder, animationName))
+                {
+                    Debug.Log("[LevelCompleteScreen] Mascot animation loaded successfully, playing...");
+                    mascotAnimator.Play();
+                    return;
+                }
+                else
+                {
+                    Debug.LogWarning("[LevelCompleteScreen] Failed to load mascot animation, falling back to static sprite");
+                }
+            }
+            else
+            {
+                Debug.Log($"[LevelCompleteScreen] No animation for world '{worldId}' or stars={earnedStars} < 2");
+            }
+
+            // Fallback to static sprite
             mascotImage.sprite = earnedStars >= 2 ? world.mascotHappy : world.mascotIdle;
+        }
+
+        private void CleanupMascotAnimator()
+        {
+            if (mascotAnimator != null)
+            {
+                mascotAnimator.Stop();
+                Destroy(mascotAnimator);
+                mascotAnimator = null;
+            }
         }
 
         private void OnNextLevelClicked()
@@ -205,6 +251,7 @@ namespace SortResort.UI
 
         private void OnDestroy()
         {
+            CleanupMascotAnimator();
             if (nextLevelButton != null) nextLevelButton.onClick.RemoveAllListeners();
             if (replayButton != null) replayButton.onClick.RemoveAllListeners();
             if (exitButton != null) exitButton.onClick.RemoveAllListeners();
