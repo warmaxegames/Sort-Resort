@@ -206,7 +206,11 @@ Container border scale: 1.2 (17% border around slots)
 - In-game: "Solve" button in HUD
 - Greedy algorithm with heuristics for pairing and row advancement
 - Alerts saved when player beats solver score (`{persistentDataPath}/SolverAlerts/`)
-- Known limitation: 4-move lookahead "reveal combos" not detected (greedy algorithm)
+- Move sequence output includes scores, reasons, and top 3 runner-ups for debugging
+- Key heuristics added:
+  - **Self-blocking penalty**: -200 when pair's 3rd item is hidden behind the pair at same container (fires even in enables-match path)
+  - **Room-will-open**: +30 for pairs at full containers when non-matching items are fully accessible types (will clear soon, opening room). Also exempts "fills container" penalty.
+- Solver matches player optimal on Levels 8 (19), 9 (21), 10 (23)
 
 ### Star Thresholds & Move Limits
 Thresholds are based on solver optimal move count:

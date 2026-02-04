@@ -197,6 +197,11 @@ namespace SortResort
             public int ToSlot;
             public string ItemId;
 
+            // Debug info (populated by FindBestMove)
+            public int Score;
+            public string Reason;
+            public string RunnerUp; // Description of 2nd-best move
+
             public override string ToString()
             {
                 return $"Move {ItemId} from Container[{FromContainerIndex}].Slot[{FromSlot}] to Container[{ToContainerIndex}].Slot[{ToSlot}]";
@@ -399,6 +404,9 @@ namespace SortResort
                     : $"Container[{move.ToContainerIndex}]";
 
                 sb.AppendLine($"  {i + 1,2}. {move.ItemId,-16} : {fromName}[slot {move.FromSlot}] -> {toName}[slot {move.ToSlot}]");
+                sb.AppendLine($"      Score: {move.Score}  |  {move.Reason}");
+                if (!string.IsNullOrEmpty(move.RunnerUp))
+                    sb.AppendLine($"      Runner-up: {move.RunnerUp}");
             }
 
             sb.AppendLine("\n=== END SOLVER SEQUENCE ===");
@@ -499,7 +507,11 @@ namespace SortResort
             if (oneMoveMatch != null)
             {
                 Log($"Taking 1-move match: {oneMoveMatch.Value}");
-                return oneMoveMatch;
+                var matchMove = oneMoveMatch.Value;
+                matchMove.Score = 999;
+                matchMove.Reason = "1-move match (always taken)";
+                matchMove.RunnerUp = "";
+                return matchMove;
             }
 
             // RULE 2: Analyze which items are "actionable" vs "stuck"
@@ -565,7 +577,20 @@ namespace SortResort
 
             var best = scoredMoves[0];
             Log($"Selected: {best.move} (score: {best.score})");
-            return best.move;
+
+            // Populate debug info on the returned move
+            var bestMove = best.move;
+            bestMove.Score = best.score;
+            bestMove.Reason = best.reason;
+            // Show top 3 runners-up for debugging
+            var runnerParts = new List<string>();
+            for (int r = 1; r < Math.Min(4, scoredMoves.Count); r++)
+            {
+                var runner = scoredMoves[r];
+                runnerParts.Add($"#{r+1}: {runner.move.ItemId}: {state.Containers[runner.move.FromContainerIndex].Id}[{runner.move.FromSlot}]->{state.Containers[runner.move.ToContainerIndex].Id}[{runner.move.ToSlot}] (score: {runner.score}, {runner.reason})");
+            }
+            bestMove.RunnerUp = string.Join("\n      ", runnerParts);
+            return bestMove;
         }
 
         /// <summary>
@@ -733,6 +758,7 @@ namespace SortResort
 
             // === PAIRING BONUS (if not already counted in enables-match section) ===
             bool alreadyCreditedPair = reasons.Contains("enables match + creates pair");
+            bool pairRoomWillOpen = false; // Track for "fills container" exemption
 
             if (matchingAtDest == 1 && !alreadyCreditedPair)
             {
@@ -793,9 +819,40 @@ namespace SortResort
                 }
                 else
                 {
-                    // WORST PAIR: 3rd hidden AND no room - very bad
-                    score -= 100;
-                    reasons.Add("creates useless pair (hidden + blocked)");
+                    // WORST PAIR: 3rd hidden AND no room
+                    // But check if room will open soon: are the non-matching items at destination
+                    // of types that are fully accessible (all 3 copies in front rows)?
+                    // If so, they'll be cleared soon, freeing a slot for the 3rd.
+                    var nonMatchingTypes = destItems.Where(i => i != move.ItemId).Distinct();
+                    // Use testState (post-move) to count accessibility, since this move
+                    // may reveal items at the source that increase a type's accessible count
+                    bool roomWillOpen = nonMatchingTypes.Any() && nonMatchingTypes.All(itemType =>
+                    {
+                        int postMoveAccessible = 0;
+                        foreach (var c in testState.Containers)
+                        {
+                            if (c.IsLocked) continue;
+                            foreach (var item in c.GetFrontRowItems())
+                            {
+                                if (item == itemType) postMoveAccessible++;
+                            }
+                        }
+                        return postMoveAccessible >= 3;
+                    });
+
+                    if (roomWillOpen)
+                    {
+                        // Better than staging: creates a pair that will become completable
+                        // once the blocking type clears (all 3 copies accessible in post-move state)
+                        score += 30;
+                        pairRoomWillOpen = true;
+                        reasons.Add("creates pair (room will open - blocking type clearable)");
+                    }
+                    else
+                    {
+                        score -= 100;
+                        reasons.Add("creates useless pair (hidden + blocked)");
+                    }
                 }
             }
             else if (matchingAtDest == 0 && destItems.Count > 0 && !reasons.Contains("enables match (temp location)"))
@@ -803,6 +860,18 @@ namespace SortResort
                 // Only penalize mixing if we didn't already note it as "temp location"
                 score -= 10;
                 reasons.Add("mixes items");
+            }
+
+            // === SELF-BLOCKING PAIR PENALTY (applies even when pair was credited via enables-match) ===
+            if (matchingAtDest >= 1 && alreadyCreditedPair)
+            {
+                var hiddenAtDest = toContainer.GetBackRowItemTypes();
+                bool selfBlocking = hiddenAtDest.Contains(move.ItemId);
+                if (selfBlocking)
+                {
+                    score -= 200;
+                    reasons.Add("SELF-BLOCKING pair (3rd hidden HERE)");
+                }
             }
 
             // === ACTIONABILITY BONUS/PENALTY ===
@@ -904,8 +973,9 @@ namespace SortResort
 
             // === DESTINATION QUALITY ===
             int destEmptySlots = toContainer.GetEmptyFrontSlotCount();
-            if (destEmptySlots <= 1)
+            if (destEmptySlots <= 1 && !pairRoomWillOpen)
             {
+                // Skip this penalty when room-will-open: the fullness is temporary
                 score -= 15;
                 reasons.Add("fills container");
             }
