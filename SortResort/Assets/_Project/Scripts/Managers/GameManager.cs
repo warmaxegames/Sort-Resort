@@ -176,16 +176,30 @@ namespace SortResort
             currentMoveCount++;
             GameEvents.InvokeMoveUsed(currentMoveCount);
 
-            // Check if player exceeded fail threshold (move limit)
+            // Check if player has used their second-to-last move without completing
+            // This prevents the awkward case where the final move makes a match but still fails
+            // Delay the check to allow any match animation to complete first (0.6s covers the 0.5s animation)
             var levelData = LevelManager.Instance?.CurrentLevel;
-            if (levelData != null && currentMoveCount > levelData.FailThreshold)
+            if (levelData != null && currentMoveCount >= levelData.FailThreshold - 1)
             {
-                // Only fail if there are still items remaining
+                StartCoroutine(DelayedFailureCheck());
+            }
+        }
+
+        private System.Collections.IEnumerator DelayedFailureCheck()
+        {
+            // Wait for match animation to complete (0.5s animation + small buffer)
+            yield return new WaitForSeconds(0.6f);
+
+            // Re-check conditions after the delay (level might have been completed by a match)
+            var levelData = LevelManager.Instance?.CurrentLevel;
+            if (levelData != null && currentMoveCount >= levelData.FailThreshold - 1)
+            {
                 int itemsRemaining = LevelManager.Instance?.ItemsRemaining ?? 0;
-                if (itemsRemaining > 0)
+                if (itemsRemaining > 0 && currentState == GameState.Playing)
                 {
-                    Debug.Log($"[GameManager] Level failed - exceeded move limit ({currentMoveCount} > {levelData.FailThreshold})");
-                    FailLevel();
+                    Debug.Log($"[GameManager] Level failed - out of moves ({currentMoveCount} >= {levelData.FailThreshold - 1}, items remaining: {itemsRemaining})");
+                    FailLevel("Out of Moves");
                 }
             }
         }
@@ -213,10 +227,10 @@ namespace SortResort
             GameEvents.InvokeLevelCompleted(currentLevelNumber, starsEarned);
         }
 
-        public void FailLevel()
+        public void FailLevel(string reason = null)
         {
             SetState(GameState.LevelFailed);
-            GameEvents.InvokeLevelFailed(currentLevelNumber);
+            GameEvents.InvokeLevelFailed(currentLevelNumber, reason);
         }
 
         public void RestartLevel()

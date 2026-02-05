@@ -5,7 +5,8 @@ using UnityEngine.UI;
 namespace SortResort
 {
     /// <summary>
-    /// Handles the animated level complete background with rays, curtains, level board, and star ribbon
+    /// Handles the animated level complete background with rays, curtains, level board, and star ribbon.
+    /// Supports staged playback — each layer can be started independently.
     /// </summary>
     public class AnimatedLevelComplete : MonoBehaviour
     {
@@ -25,6 +26,11 @@ namespace SortResort
         private int currentStarRibbonFrame = 0;
 
         private bool isPlaying = false;
+        private bool raysActive = false;
+        private bool curtainsActive = false;
+        private bool levelBoardActive = false;
+        private bool starRibbonActive = false;
+
         private bool raysComplete = false;
         private bool curtainsComplete = false;
         private bool levelBoardComplete = false;
@@ -44,6 +50,9 @@ namespace SortResort
         private static Sprite[] cachedCurtainsFrames;
         private static Sprite[] cachedLevelBoardFrames;
         private static Sprite[] cachedStarRibbonFrames;
+
+        public bool IsLevelBoardComplete => levelBoardComplete;
+        public bool IsStarRibbonComplete => starRibbonComplete;
 
         public void Initialize(Image raysImg, Image curtainsImg)
         {
@@ -121,9 +130,68 @@ namespace SortResort
             return sprites;
         }
 
+        /// <summary>
+        /// Starts only rays and curtains. Level board and star ribbon must be triggered separately.
+        /// </summary>
+        public void PlayRaysAndCurtains()
+        {
+            isPlaying = true;
+
+            raysActive = true;
+            curtainsActive = true;
+            levelBoardActive = false;
+            starRibbonActive = false;
+
+            raysComplete = false;
+            curtainsComplete = false;
+            levelBoardComplete = false;
+            starRibbonComplete = false;
+
+            currentRaysFrame = 0;
+            currentCurtainsFrame = 0;
+            currentLevelBoardFrame = 0;
+            currentStarRibbonFrame = 0;
+
+            raysTimer = 0f;
+            curtainsTimer = 0f;
+            levelBoardTimer = 0f;
+            starRibbonTimer = 0f;
+
+            if (raysImage != null) raysImage.gameObject.SetActive(true);
+            if (curtainsImage != null) curtainsImage.gameObject.SetActive(true);
+            if (levelBoardImage != null) levelBoardImage.gameObject.SetActive(false);
+            if (starRibbonImage != null) starRibbonImage.gameObject.SetActive(false);
+        }
+
+        public void PlayLevelBoard()
+        {
+            levelBoardActive = true;
+            levelBoardComplete = false;
+            currentLevelBoardFrame = 0;
+            levelBoardTimer = 0f;
+            if (levelBoardImage != null) levelBoardImage.gameObject.SetActive(true);
+        }
+
+        public void PlayStarRibbon()
+        {
+            starRibbonActive = true;
+            starRibbonComplete = false;
+            currentStarRibbonFrame = 0;
+            starRibbonTimer = 0f;
+            if (starRibbonImage != null) starRibbonImage.gameObject.SetActive(true);
+        }
+
+        /// <summary>
+        /// Legacy method — starts all layers at once.
+        /// </summary>
         public void Play()
         {
             isPlaying = true;
+            raysActive = true;
+            curtainsActive = true;
+            levelBoardActive = true;
+            starRibbonActive = true;
+
             raysComplete = false;
             curtainsComplete = false;
             levelBoardComplete = false;
@@ -151,6 +219,10 @@ namespace SortResort
         public void Hide()
         {
             isPlaying = false;
+            raysActive = false;
+            curtainsActive = false;
+            levelBoardActive = false;
+            starRibbonActive = false;
             if (raysImage != null) raysImage.gameObject.SetActive(false);
             if (curtainsImage != null) curtainsImage.gameObject.SetActive(false);
             if (levelBoardImage != null) levelBoardImage.gameObject.SetActive(false);
@@ -161,10 +233,14 @@ namespace SortResort
         {
             if (!isPlaying) return;
 
-            UpdateLayer(ref currentRaysFrame, ref raysTimer, ref raysComplete, raysFrames, raysImage, raysFrameRate);
-            UpdateLayer(ref currentCurtainsFrame, ref curtainsTimer, ref curtainsComplete, curtainsFrames, curtainsImage, curtainsFrameRate);
-            UpdateLayer(ref currentLevelBoardFrame, ref levelBoardTimer, ref levelBoardComplete, levelBoardFrames, levelBoardImage, levelBoardFrameRate);
-            UpdateLayer(ref currentStarRibbonFrame, ref starRibbonTimer, ref starRibbonComplete, starRibbonFrames, starRibbonImage, starRibbonFrameRate);
+            if (raysActive)
+                UpdateLayer(ref currentRaysFrame, ref raysTimer, ref raysComplete, raysFrames, raysImage, raysFrameRate);
+            if (curtainsActive)
+                UpdateLayer(ref currentCurtainsFrame, ref curtainsTimer, ref curtainsComplete, curtainsFrames, curtainsImage, curtainsFrameRate);
+            if (levelBoardActive)
+                UpdateLayer(ref currentLevelBoardFrame, ref levelBoardTimer, ref levelBoardComplete, levelBoardFrames, levelBoardImage, levelBoardFrameRate);
+            if (starRibbonActive)
+                UpdateLayer(ref currentStarRibbonFrame, ref starRibbonTimer, ref starRibbonComplete, starRibbonFrames, starRibbonImage, starRibbonFrameRate);
         }
 
         private void UpdateLayer(ref int currentFrame, ref float timer, ref bool complete, Sprite[] frames, Image image, float frameRate)

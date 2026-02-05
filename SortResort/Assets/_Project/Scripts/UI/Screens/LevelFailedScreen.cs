@@ -61,7 +61,7 @@ namespace SortResort.UI
             GameEvents.OnLevelFailed -= OnLevelFailed;
         }
 
-        private void OnLevelFailed(int levelNumber)
+        private void OnLevelFailed(int levelNumber, string reason)
         {
             Show();
             UpdateDisplay();

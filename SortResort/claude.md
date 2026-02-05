@@ -22,11 +22,11 @@
 
 ## Current Status
 
-**Last Updated:** 2026-02-03
+**Last Updated:** 2026-02-04
 
 ### Working Features (Unity)
 - Splash screen → Level select with fade transition
-- 5 worlds: Island, Supermarket, Farm, Tavern, Space (5-6 levels each, 26 total)
+- 5 worlds: Island, Supermarket, Farm, Tavern, Space (5-11 levels each, 31 total)
 - Full game flow: Level Select → Play → Complete/Fail → Back/Next
 - Drag-drop with visual feedback, sounds, triple-match detection
 - Row advancement, locked containers with unlock animation
@@ -36,66 +36,55 @@
 - Achievement system (88 achievements with UI, notifications, rewards)
 - Level solver tool (Editor window + in-game auto-solve button)
 - **Dialogue system** - Typewriter text with Animal Crossing-style voices, mascot portraits, per-world welcome dialogues, voice toggle in settings, timer pauses during dialogue
-- **Level complete screen** - Animated rays, curtains, level board, star ribbon, mascot thumbsup animation (Island)
+- **Level complete screen** - Animated rays, curtains, star ribbon, level/moves labels with text overlays, grey stars + gold star animations (1/2/3 star), dancing stars animation (3-star), mascot thumbsup animation (Island), bottom board animation, sprite-based buttons (return to map, replay, next level)
+- **Level failed screen** - Fullscreen fail_screen.jpg background, reason text ("Out of Moves"/"Out of Time"), animated bottom board, sprite-based buttons (retry, level select)
+- **Fail-before-last-move** - Level fails after second-to-last move if not complete (prevents awkward final-move-still-fails scenario)
+- **Star threshold separation** - All thresholds guaranteed at least 1 move apart
 
 ---
 
 ## TODO List
 
-### High Priority
-1. **World-specific lock overlays** - Placeholders exist (copies of base), need custom designs
-2. **Polish dialogue system** - Core working with welcome dialogues for all 5 worlds. Remaining:
-   - Add more dialogue triggers (level milestones, achievements, world completion)
-   - Create mascot sprites for Farm (Mara - only neutral), Tavern (Hog - missing neutral/happy)
-   - Add more expression variants for existing mascots
-3. **Level Complete screen (animated)** - Rays, curtains, level board, star ribbon, mascot animation done. Remaining:
-   - Add level number text overlay on level board
-   - Add star animations to ribbon based on star count
-   - Move replay/next/level select buttons into animated screen (remove blue placeholder)
-4. **Mobile Testing** - Touch input validation on device
+### Priority Items
+1. **Level Complete Screen** - Remaining:
+   - Animated mascot art assets for each world (currently only Island has thumbsup animation)
+   - Audio: music and sound effects for each scenario (1-star, 2-star, 3-star)
+2. **Level Failed Screen** - Remaining:
+   - Sound effect audio for failed screen
+3. **World-Specific Lock Overlays** - Need custom designs for:
+   - Farm
+   - Supermarket
+   - Space
+4. **World-Specific Dialogue Boxes** - Need custom designs for:
+   - Farm
+   - Supermarket
+   - Space
+5. **Dialogue System** - Build out content:
+   - Tutorial dialogue
+   - World-by-world stories
+   - Dialogue checkpoints throughout level progression
+6. **Add More Levels** - All worlds need levels beyond current set:
+   - Island
+   - Farm
+   - Supermarket
+   - Tavern
+   - Space
+7. **Mobile/Device Testing** - Test performance on mobile devices, tablets, different screen sizes
 
-### Medium Priority
-5. **Create Levels 7-100** - Complete level content for all worlds
-6. **Trophy Room** - 3D shelf display for earned trophies
-7. **Profile Customization** - Player profiles with customizable mascot/avatar (character, eye colors, hats, outfits, name)
-
-### Lower Priority
-8. **Level Creator Tool** - GUI-based level editor:
-    - Visual container placement, world/theme selection
-    - Slot configuration, container properties (locked, movement, despawn)
-    - Item assignment with validation, star thresholds, timer setting
-    - Play-test, export/import JSON
-9. **Leaderboard System** - Competitive rankings:
-    - Total achievement points, daily challenge, weekly stars, world speed runs
-    - Profile pages with mascot, titles, trophy showcase, stats
-    - Requires backend service
-
----
-
-## Incomplete Phases
-
-### Phase 6: Visual Polish - PARTIAL
-- [x] Match animation (15-frame pink glow effect)
-- [x] Container unlock animation (scale + fade)
-- [x] Row depth visualization (grayed back rows, vertical offset)
-- [x] Tween animations (item scale, highlight)
-- [x] Scene transitions (fade between screens)
-- [ ] Mascot reactions
-
-### Phase 7: Advanced Features - PARTIAL
-- [x] ContainerMovement.cs (back_and_forth, carousel, falling)
-- [x] Despawn-on-match stacking containers
-- [x] Undo system
-- [x] Dialogue system (working: typewriter, voices, mascot sprites, triggers, voice toggle, timer pause)
-- [ ] Profile customization
-
-### Phase 8: Content & Testing
-- [x] Import all sprite assets
-- [x] Levels 1-5 for all 5 worlds (26 levels total)
-- [ ] Create remaining levels (7-100 for each world)
-- [ ] Test on mobile devices
-- [ ] Performance optimization
-- [ ] Bug fixing and polish
+### Future Lower Priority Items
+8. **Trophy Room** - World-specific and achievement trophies:
+   - Silhouettes for missing trophies, hover tooltip showing how to earn them
+   - Vertical scroll through many shelves (extendable)
+9. **Player Profile Creation/Customization**:
+   - Player name
+   - Player avatar
+   - Player title
+   - Player background
+   - Player profile frame
+   - Player cosmetics (clothes, hats, sunglasses, accessories)
+10. **Leaderboards**:
+    - Categories: achievement points, matches made, trophies, daily/weekly activity, etc.
+    - Backend infrastructure for tracking/displaying leaderboards
 
 ---
 
@@ -179,10 +168,13 @@ Container border scale: 1.2 (17% border around slots)
 - **Reset**: `SaveManager.ResetAllProgress()` also clears played dialogues
 
 ### Level Complete Animation
-- **AnimatedLevelComplete.cs**: 4 layers - rays, curtains, level board, star ribbon
+- **AnimatedLevelComplete.cs**: 3 layers - rays, curtains, star ribbon (level board removed)
 - **MascotAnimator.cs**: Frame-by-frame animation for mascot thumbsup (Island world, 56 frames)
 - Frames loaded via `Resources.LoadAll<Texture2D>()` from folders in `Resources/Sprites/UI/LevelComplete/`
 - Mascot animation frames: `Resources/Sprites/Mascots/Animations/{World}/`
+- **Animation sequence**: rays+curtains+mascot → labels fade in → star ribbon → grey stars → gold stars (1-by-1) → dancing stars (3-star only) → bottom board → buttons
+- **Star animations**: Star1 (9 frames), Star2 (9 frames), Star3 (9 frames) at 15fps; DancingStars (74 frames) at 24fps
+- **Level Failed screen**: fail_screen.jpg background, reason text overlay, bottom board animation (shared frames), retry + level select sprite buttons
 
 ### Asset Locations (Unity)
 - Item Sprites: `Resources/Sprites/Items/{World}/`

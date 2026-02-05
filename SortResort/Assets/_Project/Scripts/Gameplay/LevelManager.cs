@@ -422,7 +422,7 @@ namespace SortResort
         {
             Debug.Log("[LevelManager] Timer expired - level failed!");
             GameEvents.InvokeTimerExpired();
-            GameManager.Instance?.FailLevel();
+            GameManager.Instance?.FailLevel("Out of Time");
         }
 
         /// <summary>

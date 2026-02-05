@@ -163,6 +163,13 @@ namespace SortResort
                         Mathf.CeilToInt(optimal * 1.5f)    // 1-star
                     };
 
+                    // Ensure each threshold is at least 1 move apart
+                    for (int i = 1; i < result.StarThresholds.Length; i++)
+                    {
+                        if (result.StarThresholds[i] <= result.StarThresholds[i - 1])
+                            result.StarThresholds[i] = result.StarThresholds[i - 1] + 1;
+                    }
+
                     // Apply thresholds and timer to level data
                     levelData.star_move_thresholds = result.StarThresholds;
                     levelData.time_limit_seconds = result.TimeLimitSeconds;

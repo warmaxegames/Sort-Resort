@@ -95,6 +95,13 @@ namespace SortResort
                             Mathf.RoundToInt(optimal * 1.40f)
                         };
 
+                        // Ensure each threshold is at least 1 move apart
+                        for (int i = 1; i < newThresholds.Length; i++)
+                        {
+                            if (newThresholds[i] <= newThresholds[i - 1])
+                                newThresholds[i] = newThresholds[i - 1] + 1;
+                        }
+
                         // Update file
                         string worldFolder = char.ToUpper(worldId[0]) + worldId.Substring(1);
                         string filePath = $"Assets/_Project/Resources/Data/Levels/{worldFolder}/level_{level:D3}.json";
@@ -407,6 +414,13 @@ namespace SortResort
                 Mathf.RoundToInt(optimal * 1.30f),    // 1-star = 30% more moves
                 Mathf.RoundToInt(optimal * 1.40f)     // Fail = 40% more moves
             };
+
+            // Ensure each threshold is at least 1 move apart
+            for (int i = 1; i < newThresholds.Length; i++)
+            {
+                if (newThresholds[i] <= newThresholds[i - 1])
+                    newThresholds[i] = newThresholds[i - 1] + 1;
+            }
 
             // Read and update JSON
             string json = File.ReadAllText(filePath);

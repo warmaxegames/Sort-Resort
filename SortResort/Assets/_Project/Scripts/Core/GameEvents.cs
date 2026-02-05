@@ -13,7 +13,7 @@ namespace SortResort
         // Level Events
         public static event Action<int> OnLevelStarted;
         public static event Action<int, int> OnLevelCompleted; // levelNumber, starsEarned
-        public static event Action<int> OnLevelFailed; // levelNumber
+        public static event Action<int, string> OnLevelFailed; // levelNumber, reason
         public static event Action OnLevelRestarted;
 
         // Gameplay Events
@@ -58,7 +58,7 @@ namespace SortResort
         // Invoke Methods - Level
         public static void InvokeLevelStarted(int levelNumber) => OnLevelStarted?.Invoke(levelNumber);
         public static void InvokeLevelCompleted(int levelNumber, int stars) => OnLevelCompleted?.Invoke(levelNumber, stars);
-        public static void InvokeLevelFailed(int levelNumber) => OnLevelFailed?.Invoke(levelNumber);
+        public static void InvokeLevelFailed(int levelNumber, string reason = null) => OnLevelFailed?.Invoke(levelNumber, reason);
         public static void InvokeLevelRestarted() => OnLevelRestarted?.Invoke();
 
         // Invoke Methods - Gameplay

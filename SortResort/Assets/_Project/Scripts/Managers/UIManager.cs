@@ -92,14 +92,34 @@ namespace SortResort
         private SplashScreen splashScreen;
         private GameObject hudPanel;
         private GameObject levelCompletePanel;
-        private Image[] levelCompleteStarImages;
-        private TextMeshProUGUI levelCompleteMessageText;
-        private TextMeshProUGUI levelCompleteMoveCountText;
         private AnimatedLevelComplete animatedLevelComplete;
+        private Image levelCompleteGreyStarsImage;
+        private Image levelCompleteStar1Image;
+        private Image levelCompleteStar2Image;
+        private Image levelCompleteStar3Image;
+        private Sprite[] star1Frames;
+        private Sprite[] star2Frames;
+        private Sprite[] star3Frames;
+        private TextMeshProUGUI levelCompleteLevelNumberText;
+        private TextMeshProUGUI levelCompleteMoveCountText;
+        private CanvasGroup levelLabelCanvasGroup;
+        private CanvasGroup movesLabelCanvasGroup;
+        private CanvasGroup greyStarsCanvasGroup;
+        private Image dancingStarsImage;
+        private Sprite[] dancingStarsFrames;
+        private Coroutine dancingStarsCoroutine;
+        private Image bottomBoardImage;
+        private Sprite[] bottomBoardFrames;
+        private GameObject buttonsContainerGO;
+        private Coroutine levelCompleteSequence;
         private Image levelCompleteMascotImage;
         private MascotAnimator levelCompleteMascotAnimator;
         private GameObject levelFailedPanel;
         private TextMeshProUGUI levelFailedReasonText;
+        private Image failedBottomBoardImage;
+        private Sprite[] failedBottomBoardFrames;
+        private GameObject failedButtonsContainerGO;
+        private Coroutine failedScreenSequence;
         private GameObject levelSelectPanel;
         private LevelSelectScreen levelSelectScreen;
         private GameObject settingsPanel;
@@ -180,7 +200,6 @@ namespace SortResort
             GameEvents.OnTimerUpdated += OnTimerUpdated;
             GameEvents.OnTimerFrozen += OnTimerFrozen;
             GameEvents.OnLevelFailed += OnLevelFailed;
-            GameEvents.OnTimerExpired += OnTimerExpiredUI;
 
             if (LevelManager.Instance != null)
             {
@@ -209,7 +228,6 @@ namespace SortResort
             GameEvents.OnTimerUpdated -= OnTimerUpdated;
             GameEvents.OnTimerFrozen -= OnTimerFrozen;
             GameEvents.OnLevelFailed -= OnLevelFailed;
-            GameEvents.OnTimerExpired -= OnTimerExpiredUI;
 
             if (LevelManager.Instance != null)
             {
@@ -1393,19 +1411,7 @@ namespace SortResort
             var curtainsImage = curtainsGO.AddComponent<Image>();
             curtainsImage.preserveAspect = false;
 
-            // Level Board layer (full screen, on top of curtains)
-            var levelBoardGO = new GameObject("Level Board");
-            levelBoardGO.transform.SetParent(levelCompletePanel.transform, false);
-            var levelBoardRect = levelBoardGO.AddComponent<RectTransform>();
-            levelBoardRect.anchorMin = Vector2.zero;
-            levelBoardRect.anchorMax = Vector2.one;
-            levelBoardRect.offsetMin = Vector2.zero;
-            levelBoardRect.offsetMax = Vector2.zero;
-            var levelBoardImage = levelBoardGO.AddComponent<Image>();
-            levelBoardImage.preserveAspect = true;
-            levelBoardImage.raycastTarget = false;
-
-            // Star Ribbon layer (full screen, on top of level board)
+            // Star Ribbon layer (full screen, on top of curtains)
             var starRibbonGO = new GameObject("Star Ribbon");
             starRibbonGO.transform.SetParent(levelCompletePanel.transform, false);
             var starRibbonRect = starRibbonGO.AddComponent<RectTransform>();
@@ -1417,72 +1423,174 @@ namespace SortResort
             starRibbonImage.preserveAspect = true;
             starRibbonImage.raycastTarget = false;
 
-            // Add and initialize the animation controller
+            // Add and initialize the animation controller (Level Board removed - replaced by level_label.png)
             animatedLevelComplete = levelCompletePanel.AddComponent<AnimatedLevelComplete>();
             animatedLevelComplete.Initialize(raysImage, curtainsImage);
-            animatedLevelComplete.SetLevelBoardImage(levelBoardImage);
             animatedLevelComplete.SetStarRibbonImage(starRibbonImage);
 
-            // Content container - positioned at top third of screen
-            var content = new GameObject("Content");
-            content.transform.SetParent(levelCompletePanel.transform, false);
-            var contentRect = content.AddComponent<RectTransform>();
-            contentRect.anchorMin = new Vector2(0.5f, 1f);
-            contentRect.anchorMax = new Vector2(0.5f, 1f);
-            contentRect.pivot = new Vector2(0.5f, 1f);
-            contentRect.anchoredPosition = new Vector2(0, -40);
-            contentRect.sizeDelta = new Vector2(600, 420);
-
-            // Background panel
-            var panelBg = content.AddComponent<Image>();
-            panelBg.color = new Color(0.2f, 0.6f, 0.9f, 1f);
-
-            var vlayout = content.AddComponent<VerticalLayoutGroup>();
-            vlayout.padding = new RectOffset(30, 30, 20, 20);
-            vlayout.spacing = 15;
-            vlayout.childAlignment = TextAnchor.MiddleCenter;
-            vlayout.childForceExpandWidth = true;
-            vlayout.childForceExpandHeight = false;
-
-            // Title
-            CreateTextElement(content.transform, "Title", "Level Complete!", 48,
-                new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, 80);
-
-            // Stars container
-            var starsContainer = new GameObject("Stars");
-            starsContainer.transform.SetParent(content.transform, false);
-            var starsRect = starsContainer.AddComponent<RectTransform>();
-            starsRect.sizeDelta = new Vector2(300, 100);
-            var starsLayout = starsContainer.AddComponent<HorizontalLayoutGroup>();
-            starsLayout.spacing = 10;
-            starsLayout.childAlignment = TextAnchor.MiddleCenter;
-            starsLayout.childForceExpandWidth = false;
-            starsLayout.childControlWidth = false;
-            starsLayout.childControlHeight = false;
-
-            // Load star sprite
-            var starSprite = Resources.Load<Sprite>("Sprites/UI/Icons/star");
-
-            // Create star image elements and store references
-            levelCompleteStarImages = new Image[3];
-            for (int i = 0; i < 3; i++)
+            // Level Label - fullscreen image overlay (has its own brown circle for level number)
+            var levelLabelGO = new GameObject("Level Label");
+            levelLabelGO.transform.SetParent(levelCompletePanel.transform, false);
+            var levelLabelRect = levelLabelGO.AddComponent<RectTransform>();
+            levelLabelRect.anchorMin = Vector2.zero;
+            levelLabelRect.anchorMax = Vector2.one;
+            levelLabelRect.offsetMin = Vector2.zero;
+            levelLabelRect.offsetMax = Vector2.zero;
+            var levelLabelImage = levelLabelGO.AddComponent<Image>();
+            var levelLabelSprite = Resources.Load<Sprite>("Sprites/UI/LevelComplete/Buttons/level_label");
+            if (levelLabelSprite == null)
             {
-                var starGO = new GameObject($"CompleteStar_{i}");
-                starGO.transform.SetParent(starsContainer.transform, false);
-                var starRectTrans = starGO.AddComponent<RectTransform>();
-                starRectTrans.sizeDelta = new Vector2(80, 80);
-
-                var starImg = starGO.AddComponent<Image>();
-                starImg.sprite = starSprite;
-                starImg.preserveAspect = true;
-                starImg.color = new Color(0.4f, 0.4f, 0.4f, 1f); // Gray by default
-
-                levelCompleteStarImages[i] = starImg;
+                var levelLabelTex = Resources.Load<Texture2D>("Sprites/UI/LevelComplete/Buttons/level_label");
+                if (levelLabelTex != null)
+                    levelLabelSprite = Sprite.Create(levelLabelTex, new Rect(0, 0, levelLabelTex.width, levelLabelTex.height), new Vector2(0.5f, 0.5f), 100f);
             }
+            levelLabelImage.sprite = levelLabelSprite;
+            levelLabelImage.preserveAspect = true;
+            levelLabelImage.raycastTarget = false;
+            levelLabelCanvasGroup = levelLabelGO.AddComponent<CanvasGroup>();
+            levelLabelCanvasGroup.alpha = 0f;
 
-            // Mascot image - fills the lower portion of the screen below the content panel
-            // Frames are 1080x1920 (full screen) with mascot occupying a portion,
-            // so we stretch to full screen size and let preserveAspect handle it
+            // Level Number text - child of Level Label, positioned on the brown circle
+            var levelNumGO = new GameObject("Level Number Text");
+            levelNumGO.transform.SetParent(levelLabelGO.transform, false);
+            var levelNumRect = levelNumGO.AddComponent<RectTransform>();
+            levelNumRect.anchorMin = new Vector2(0.417f, 0.602f);
+            levelNumRect.anchorMax = new Vector2(0.417f, 0.602f);
+            levelNumRect.pivot = new Vector2(0.5f, 0.5f);
+            levelNumRect.anchoredPosition = Vector2.zero;
+            levelNumRect.sizeDelta = new Vector2(120, 80);
+            levelCompleteLevelNumberText = levelNumGO.AddComponent<TextMeshProUGUI>();
+            levelCompleteLevelNumberText.text = "";
+            levelCompleteLevelNumberText.fontSize = 52;
+            levelCompleteLevelNumberText.fontStyle = FontStyles.Bold;
+            levelCompleteLevelNumberText.alignment = TextAlignmentOptions.Center;
+            levelCompleteLevelNumberText.color = Color.black;
+            levelCompleteLevelNumberText.enableWordWrapping = false;
+            levelCompleteLevelNumberText.overflowMode = TextOverflowModes.Overflow;
+
+            // Moves Label - fullscreen image (positioned within the 1080x1920 PNG)
+            var movesLabelGO = new GameObject("Moves Label");
+            movesLabelGO.transform.SetParent(levelCompletePanel.transform, false);
+            var movesLabelRect = movesLabelGO.AddComponent<RectTransform>();
+            movesLabelRect.anchorMin = Vector2.zero;
+            movesLabelRect.anchorMax = Vector2.one;
+            movesLabelRect.offsetMin = Vector2.zero;
+            movesLabelRect.offsetMax = Vector2.zero;
+            var movesLabelImage = movesLabelGO.AddComponent<Image>();
+            var movesLabelSprite = Resources.Load<Sprite>("Sprites/UI/LevelComplete/Buttons/moves_label");
+            if (movesLabelSprite == null)
+            {
+                var movesLabelTex = Resources.Load<Texture2D>("Sprites/UI/LevelComplete/Buttons/moves_label");
+                if (movesLabelTex != null)
+                    movesLabelSprite = Sprite.Create(movesLabelTex, new Rect(0, 0, movesLabelTex.width, movesLabelTex.height), new Vector2(0.5f, 0.5f), 100f);
+            }
+            movesLabelImage.sprite = movesLabelSprite;
+            movesLabelImage.preserveAspect = true;
+            movesLabelImage.raycastTarget = false;
+            movesLabelCanvasGroup = movesLabelGO.AddComponent<CanvasGroup>();
+            movesLabelCanvasGroup.alpha = 0f;
+
+            // Moves Count text - child of Moves Label, positioned on its brown circle
+            var movesCountGO = new GameObject("Moves Count Text");
+            movesCountGO.transform.SetParent(movesLabelGO.transform, false);
+            var movesCountRect = movesCountGO.AddComponent<RectTransform>();
+            movesCountRect.anchorMin = new Vector2(0.598f, 0.601f);
+            movesCountRect.anchorMax = new Vector2(0.598f, 0.601f);
+            movesCountRect.pivot = new Vector2(0.5f, 0.5f);
+            movesCountRect.anchoredPosition = Vector2.zero;
+            movesCountRect.sizeDelta = new Vector2(120, 80);
+            levelCompleteMoveCountText = movesCountGO.AddComponent<TextMeshProUGUI>();
+            levelCompleteMoveCountText.text = "";
+            levelCompleteMoveCountText.fontSize = 52;
+            levelCompleteMoveCountText.fontStyle = FontStyles.Bold;
+            levelCompleteMoveCountText.alignment = TextAlignmentOptions.Center;
+            levelCompleteMoveCountText.color = Color.black;
+            levelCompleteMoveCountText.enableWordWrapping = false;
+            levelCompleteMoveCountText.overflowMode = TextOverflowModes.Overflow;
+
+            // Grey Stars - static fullscreen, always visible as baseline
+            var greyStarsGO = new GameObject("Grey Stars");
+            greyStarsGO.transform.SetParent(levelCompletePanel.transform, false);
+            var greyStarsRect = greyStarsGO.AddComponent<RectTransform>();
+            greyStarsRect.anchorMin = Vector2.zero;
+            greyStarsRect.anchorMax = Vector2.one;
+            greyStarsRect.offsetMin = Vector2.zero;
+            greyStarsRect.offsetMax = Vector2.zero;
+            levelCompleteGreyStarsImage = greyStarsGO.AddComponent<Image>();
+            var greyStarsSprite = Resources.Load<Sprite>("Sprites/UI/LevelComplete/grey_stars");
+            if (greyStarsSprite == null)
+            {
+                var greyStarsTex = Resources.Load<Texture2D>("Sprites/UI/LevelComplete/grey_stars");
+                if (greyStarsTex != null)
+                    greyStarsSprite = Sprite.Create(greyStarsTex, new Rect(0, 0, greyStarsTex.width, greyStarsTex.height), new Vector2(0.5f, 0.5f), 100f);
+            }
+            levelCompleteGreyStarsImage.sprite = greyStarsSprite;
+            levelCompleteGreyStarsImage.preserveAspect = true;
+            levelCompleteGreyStarsImage.raycastTarget = false;
+            greyStarsCanvasGroup = greyStarsGO.AddComponent<CanvasGroup>();
+            greyStarsCanvasGroup.alpha = 0f;
+
+            // Load star animation frames
+            star1Frames = LoadStarFrames("Sprites/UI/LevelComplete/Star1", "star1");
+            star2Frames = LoadStarFrames("Sprites/UI/LevelComplete/Star2", "star2");
+            star3Frames = LoadStarFrames("Sprites/UI/LevelComplete/Star3", "star3");
+
+            // Star 1 Image (left star) - fullscreen, starts hidden
+            var star1GO = new GameObject("Star 1");
+            star1GO.transform.SetParent(levelCompletePanel.transform, false);
+            var star1Rect = star1GO.AddComponent<RectTransform>();
+            star1Rect.anchorMin = Vector2.zero;
+            star1Rect.anchorMax = Vector2.one;
+            star1Rect.offsetMin = Vector2.zero;
+            star1Rect.offsetMax = Vector2.zero;
+            levelCompleteStar1Image = star1GO.AddComponent<Image>();
+            levelCompleteStar1Image.preserveAspect = true;
+            levelCompleteStar1Image.raycastTarget = false;
+            star1GO.SetActive(false);
+
+            // Star 2 Image (right star) - fullscreen, starts hidden
+            var star2GO = new GameObject("Star 2");
+            star2GO.transform.SetParent(levelCompletePanel.transform, false);
+            var star2Rect = star2GO.AddComponent<RectTransform>();
+            star2Rect.anchorMin = Vector2.zero;
+            star2Rect.anchorMax = Vector2.one;
+            star2Rect.offsetMin = Vector2.zero;
+            star2Rect.offsetMax = Vector2.zero;
+            levelCompleteStar2Image = star2GO.AddComponent<Image>();
+            levelCompleteStar2Image.preserveAspect = true;
+            levelCompleteStar2Image.raycastTarget = false;
+            star2GO.SetActive(false);
+
+            // Star 3 Image (center/large star) - fullscreen, starts hidden
+            var star3GO = new GameObject("Star 3");
+            star3GO.transform.SetParent(levelCompletePanel.transform, false);
+            var star3Rect = star3GO.AddComponent<RectTransform>();
+            star3Rect.anchorMin = Vector2.zero;
+            star3Rect.anchorMax = Vector2.one;
+            star3Rect.offsetMin = Vector2.zero;
+            star3Rect.offsetMax = Vector2.zero;
+            levelCompleteStar3Image = star3GO.AddComponent<Image>();
+            levelCompleteStar3Image.preserveAspect = true;
+            levelCompleteStar3Image.raycastTarget = false;
+            star3GO.SetActive(false);
+
+            // Dancing Stars - fullscreen, loops when 3 stars earned, starts hidden
+            var dancingStarsGO = new GameObject("Dancing Stars");
+            dancingStarsGO.transform.SetParent(levelCompletePanel.transform, false);
+            var dancingStarsRect = dancingStarsGO.AddComponent<RectTransform>();
+            dancingStarsRect.anchorMin = Vector2.zero;
+            dancingStarsRect.anchorMax = Vector2.one;
+            dancingStarsRect.offsetMin = Vector2.zero;
+            dancingStarsRect.offsetMax = Vector2.zero;
+            dancingStarsImage = dancingStarsGO.AddComponent<Image>();
+            dancingStarsImage.preserveAspect = true;
+            dancingStarsImage.raycastTarget = false;
+            dancingStarsGO.SetActive(false);
+
+            // Load dancing stars animation frames
+            dancingStarsFrames = LoadStarFrames("Sprites/UI/LevelComplete/DancingStars", "dancing stars");
+
+            // Mascot image - fullscreen with preserveAspect
             var mascotGO = new GameObject("Mascot");
             mascotGO.transform.SetParent(levelCompletePanel.transform, false);
             var mascotRect = mascotGO.AddComponent<RectTransform>();
@@ -1494,37 +1602,58 @@ namespace SortResort
             levelCompleteMascotImage.preserveAspect = true;
             levelCompleteMascotImage.raycastTarget = false;
 
-            // Move count display
-            var moveCountGO = CreateTextElement(content.transform, "MoveCount", "Completed in 0 moves", 24,
-                new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, 40);
-            levelCompleteMoveCountText = moveCountGO.GetComponent<TextMeshProUGUI>();
+            // Bottom Board - animated wooden board that slides up behind buttons
+            var bottomBoardGO = new GameObject("Bottom Board");
+            bottomBoardGO.transform.SetParent(levelCompletePanel.transform, false);
+            var bottomBoardRect = bottomBoardGO.AddComponent<RectTransform>();
+            bottomBoardRect.anchorMin = Vector2.zero;
+            bottomBoardRect.anchorMax = Vector2.one;
+            bottomBoardRect.offsetMin = Vector2.zero;
+            bottomBoardRect.offsetMax = Vector2.zero;
+            bottomBoardImage = bottomBoardGO.AddComponent<Image>();
+            bottomBoardImage.preserveAspect = true;
+            bottomBoardImage.raycastTarget = false;
+            bottomBoardGO.SetActive(false);
 
-            // Message
-            var messageGO = CreateTextElement(content.transform, "Message", "Great job!", 28,
-                new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, 50);
-            levelCompleteMessageText = messageGO.GetComponent<TextMeshProUGUI>();
+            // Load bottom board animation frames
+            bottomBoardFrames = LoadStarFrames("Sprites/UI/LevelComplete/BottomBoard", "bottom board");
 
-            // Buttons container
+            // Buttons container - positioned at bottom of screen
             var buttonsContainer = new GameObject("Buttons");
-            buttonsContainer.transform.SetParent(content.transform, false);
+            buttonsContainer.transform.SetParent(levelCompletePanel.transform, false);
+            buttonsContainerGO = buttonsContainer;
             var buttonsRect = buttonsContainer.AddComponent<RectTransform>();
-            buttonsRect.sizeDelta = new Vector2(500, 70);
+            buttonsRect.anchorMin = new Vector2(0.5f, 0.078f);
+            buttonsRect.anchorMax = new Vector2(0.5f, 0.078f);
+            buttonsRect.pivot = new Vector2(0.5f, 0.5f);
+            buttonsRect.anchoredPosition = Vector2.zero;
+            buttonsRect.sizeDelta = new Vector2(1200, 220);
+            buttonsContainer.SetActive(false);
             var buttonsLayout = buttonsContainer.AddComponent<HorizontalLayoutGroup>();
-            buttonsLayout.spacing = 15;
+            buttonsLayout.spacing = 20;
             buttonsLayout.childAlignment = TextAnchor.MiddleCenter;
             buttonsLayout.childForceExpandWidth = false;
             buttonsLayout.childForceExpandHeight = false;
+            buttonsLayout.childControlWidth = false;
+            buttonsLayout.childControlHeight = false;
 
-            // Add layout element for proper sizing in vertical layout
-            var layoutElement = buttonsContainer.AddComponent<LayoutElement>();
-            layoutElement.preferredHeight = 70;
-            layoutElement.preferredWidth = 500;
+            // Create sprite-based buttons
+            CreateSpriteButton(buttonsContainer.transform, "Return to Map",
+                "Sprites/UI/LevelComplete/Buttons/return_to_map",
+                "Sprites/UI/LevelComplete/Buttons/return_to_map_pressed",
+                OnBackToLevelsClicked, 340, 190);
 
-            CreateButton(buttonsContainer.transform, "Levels", "Levels", OnBackToLevelsClicked, 140, 60);
-            CreateButton(buttonsContainer.transform, "Replay", "Replay", OnReplayClicked, 140, 60);
-            CreateButton(buttonsContainer.transform, "Next", "Next", OnNextLevelFromCompleteClicked, 140, 60);
+            CreateSpriteButton(buttonsContainer.transform, "Replay Level",
+                "Sprites/UI/LevelComplete/Buttons/replay_level",
+                "Sprites/UI/LevelComplete/Buttons/replay_level_pressed",
+                OnReplayClicked, 340, 190);
 
-            Debug.Log("[UIManager] Level complete panel created with 3 buttons");
+            CreateSpriteButton(buttonsContainer.transform, "Next Level",
+                "Sprites/UI/LevelComplete/Buttons/next_level",
+                "Sprites/UI/LevelComplete/Buttons/next_level_pressed",
+                OnNextLevelFromCompleteClicked, 340, 190);
+
+            Debug.Log("[UIManager] Level complete panel created with sprite-based buttons and star animations");
         }
 
         private void CreateLevelFailedPanel()
@@ -1538,60 +1667,75 @@ namespace SortResort
             rect.offsetMin = Vector2.zero;
             rect.offsetMax = Vector2.zero;
 
-            // Dark overlay
-            var overlay = levelFailedPanel.AddComponent<Image>();
-            overlay.color = new Color(0, 0, 0, 0.8f);
+            // Fullscreen fail screen background image
+            var bgImage = levelFailedPanel.AddComponent<Image>();
+            var failSprite = LoadSpriteFromTexture("Sprites/UI/LevelFailed/fail_screen");
+            bgImage.sprite = failSprite;
+            bgImage.preserveAspect = true;
+            bgImage.type = Image.Type.Simple;
+            bgImage.color = Color.white;
 
-            // Content container
-            var content = new GameObject("Content");
-            content.transform.SetParent(levelFailedPanel.transform, false);
-            var contentRect = content.AddComponent<RectTransform>();
-            contentRect.anchorMin = new Vector2(0.5f, 0.5f);
-            contentRect.anchorMax = new Vector2(0.5f, 0.5f);
-            contentRect.sizeDelta = new Vector2(600, 450);
+            // Reason text overlay - positioned on the brown board area
+            var reasonGO = new GameObject("Reason Text");
+            reasonGO.transform.SetParent(levelFailedPanel.transform, false);
+            var reasonRect = reasonGO.AddComponent<RectTransform>();
+            reasonRect.anchorMin = new Vector2(0.5f, 0.67f);
+            reasonRect.anchorMax = new Vector2(0.5f, 0.67f);
+            reasonRect.pivot = new Vector2(0.5f, 0.5f);
+            reasonRect.anchoredPosition = Vector2.zero;
+            reasonRect.sizeDelta = new Vector2(600, 120);
+            levelFailedReasonText = reasonGO.AddComponent<TextMeshProUGUI>();
+            levelFailedReasonText.text = "Level Failed";
+            levelFailedReasonText.fontSize = 52;
+            levelFailedReasonText.fontStyle = FontStyles.Bold;
+            levelFailedReasonText.color = new Color(1f, 0.85f, 0.85f, 1f);
+            levelFailedReasonText.alignment = TextAlignmentOptions.Center;
+            levelFailedReasonText.enableWordWrapping = true;
 
-            // Background panel (red/orange tint for failure)
-            var panelBg = content.AddComponent<Image>();
-            panelBg.color = new Color(0.8f, 0.3f, 0.2f, 1f);
+            // Bottom Board - reuse the same animated board from level complete
+            var failBottomBoardGO = new GameObject("Bottom Board");
+            failBottomBoardGO.transform.SetParent(levelFailedPanel.transform, false);
+            var failBoardRect = failBottomBoardGO.AddComponent<RectTransform>();
+            failBoardRect.anchorMin = Vector2.zero;
+            failBoardRect.anchorMax = Vector2.one;
+            failBoardRect.offsetMin = Vector2.zero;
+            failBoardRect.offsetMax = Vector2.zero;
+            failedBottomBoardImage = failBottomBoardGO.AddComponent<Image>();
+            failedBottomBoardImage.preserveAspect = true;
+            failedBottomBoardImage.raycastTarget = false;
+            failBottomBoardGO.SetActive(false);
 
-            var vlayout = content.AddComponent<VerticalLayoutGroup>();
-            vlayout.padding = new RectOffset(40, 40, 40, 40);
-            vlayout.spacing = 25;
-            vlayout.childAlignment = TextAnchor.MiddleCenter;
-            vlayout.childForceExpandWidth = true;
-            vlayout.childForceExpandHeight = false;
+            // Load bottom board frames (reuse same frames as level complete)
+            failedBottomBoardFrames = LoadStarFrames("Sprites/UI/LevelComplete/BottomBoard", "failed bottom board");
 
-            // Title
-            CreateTextElement(content.transform, "Title", "Level Failed", 48,
-                new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, 80);
-
-            // Reason text (will be updated dynamically)
-            var reasonGO = CreateTextElement(content.transform, "Reason", "Time's Up!", 32,
-                new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, 60);
-            levelFailedReasonText = reasonGO.GetComponent<TextMeshProUGUI>();
-
-            // Encouragement message
-            CreateTextElement(content.transform, "Message", "Try again!", 24,
-                new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, 40);
-
-            // Buttons container
+            // Buttons container - positioned at bottom, starts hidden
             var buttonsContainer = new GameObject("Buttons");
-            buttonsContainer.transform.SetParent(content.transform, false);
+            buttonsContainer.transform.SetParent(levelFailedPanel.transform, false);
+            failedButtonsContainerGO = buttonsContainer;
             var buttonsRect = buttonsContainer.AddComponent<RectTransform>();
-            buttonsRect.sizeDelta = new Vector2(400, 70);
+            buttonsRect.anchorMin = new Vector2(0.5f, 0.078f);
+            buttonsRect.anchorMax = new Vector2(0.5f, 0.078f);
+            buttonsRect.pivot = new Vector2(0.5f, 0.5f);
+            buttonsRect.anchoredPosition = Vector2.zero;
+            buttonsRect.sizeDelta = new Vector2(900, 150);
+
             var buttonsLayout = buttonsContainer.AddComponent<HorizontalLayoutGroup>();
-            buttonsLayout.spacing = 20;
+            buttonsLayout.spacing = 40;
             buttonsLayout.childAlignment = TextAnchor.MiddleCenter;
             buttonsLayout.childForceExpandWidth = false;
             buttonsLayout.childForceExpandHeight = false;
 
-            // Add layout element for proper sizing
-            var layoutElement = buttonsContainer.AddComponent<LayoutElement>();
-            layoutElement.preferredHeight = 70;
-            layoutElement.preferredWidth = 400;
+            CreateSpriteButton(buttonsContainer.transform, "Retry",
+                "Sprites/UI/LevelFailed/retry_button",
+                "Sprites/UI/LevelFailed/retry_button_pressed",
+                OnRetryFromFailedClicked, 366, 114);
 
-            CreateButton(buttonsContainer.transform, "Levels", "Levels", OnBackToLevelsFromFailedClicked, 160, 60);
-            CreateButton(buttonsContainer.transform, "Retry", "Retry", OnRetryFromFailedClicked, 160, 60);
+            CreateSpriteButton(buttonsContainer.transform, "Level Select",
+                "Sprites/UI/LevelFailed/levelselect",
+                "Sprites/UI/LevelFailed/levelselect_pressed",
+                OnBackToLevelsFromFailedClicked, 366, 114);
+
+            failedButtonsContainerGO.SetActive(false);
 
             Debug.Log("[UIManager] Level failed panel created");
         }
@@ -2720,13 +2864,157 @@ Antonia and Joakim Engfors
             return btn;
         }
 
+        private static Sprite LoadSpriteFromTexture(string resourcePath)
+        {
+            var sprite = Resources.Load<Sprite>(resourcePath);
+            if (sprite != null)
+            {
+                Debug.Log($"[UIManager] Loaded sprite directly: {resourcePath} ({sprite.rect.width}x{sprite.rect.height})");
+                return sprite;
+            }
+            var tex = Resources.Load<Texture2D>(resourcePath);
+            if (tex != null)
+            {
+                Debug.Log($"[UIManager] Loaded texture fallback: {resourcePath} ({tex.width}x{tex.height})");
+                return Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), new Vector2(0.5f, 0.5f), 100f);
+            }
+            Debug.LogWarning($"[UIManager] Failed to load sprite or texture: {resourcePath}");
+            return null;
+        }
+
+        private static Sprite[] LoadStarFrames(string resourcePath, string label)
+        {
+            var textures = Resources.LoadAll<Texture2D>(resourcePath);
+            if (textures.Length == 0)
+            {
+                Debug.LogWarning($"[UIManager] No star frames found at: {resourcePath}");
+                return new Sprite[0];
+            }
+            System.Array.Sort(textures, (a, b) => a.name.CompareTo(b.name));
+            var sprites = new Sprite[textures.Length];
+            for (int i = 0; i < textures.Length; i++)
+            {
+                var tex = textures[i];
+                sprites[i] = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), new Vector2(0.5f, 0.5f), 100f);
+            }
+            Debug.Log($"[UIManager] Loaded {sprites.Length} {label} frames");
+            return sprites;
+        }
+
+        private Button CreateSpriteButton(Transform parent, string name, string normalSpritePath, string pressedSpritePath, System.Action onClick, float width, float height)
+        {
+            var btnGO = new GameObject(name + " Button");
+            btnGO.transform.SetParent(parent, false);
+
+            var rect = btnGO.AddComponent<RectTransform>();
+            rect.sizeDelta = new Vector2(width, height);
+
+            var layoutElement = btnGO.AddComponent<LayoutElement>();
+            layoutElement.minWidth = width;
+            layoutElement.minHeight = height;
+            layoutElement.preferredWidth = width;
+            layoutElement.preferredHeight = height;
+
+            var normalSprite = LoadSpriteFromTexture(normalSpritePath);
+            var pressedSprite = LoadSpriteFromTexture(pressedSpritePath);
+
+            var img = btnGO.AddComponent<Image>();
+            img.sprite = normalSprite;
+            img.preserveAspect = true;
+            img.type = Image.Type.Simple;
+
+            var btn = btnGO.AddComponent<Button>();
+            btn.targetGraphic = img;
+            btn.transition = Selectable.Transition.SpriteSwap;
+
+            var spriteState = new SpriteState();
+            spriteState.pressedSprite = pressedSprite;
+            spriteState.highlightedSprite = normalSprite;
+            spriteState.selectedSprite = normalSprite;
+            btn.spriteState = spriteState;
+
+            if (onClick != null)
+            {
+                btn.onClick.AddListener(() => onClick.Invoke());
+            }
+
+            return btn;
+        }
+
+
+        private IEnumerator PlayStarAnimation(Image starImage, Sprite[] frames, float delay)
+        {
+            if (starImage == null || frames == null || frames.Length == 0) yield break;
+
+            yield return new WaitForSecondsRealtime(delay);
+
+            starImage.gameObject.SetActive(true);
+            float frameTime = 1f / 15f; // 15 fps
+
+            for (int i = 0; i < frames.Length; i++)
+            {
+                starImage.sprite = frames[i];
+                if (i < frames.Length - 1)
+                    yield return new WaitForSecondsRealtime(frameTime);
+            }
+            // Hold on last frame
+        }
+
+        private IEnumerator PlayDancingStarsAnimation()
+        {
+            if (dancingStarsImage == null || dancingStarsFrames == null || dancingStarsFrames.Length == 0)
+                yield break;
+
+            // Hide gold and grey stars so they don't show behind the dancing animation
+            if (levelCompleteStar1Image != null) levelCompleteStar1Image.gameObject.SetActive(false);
+            if (levelCompleteStar2Image != null) levelCompleteStar2Image.gameObject.SetActive(false);
+            if (levelCompleteStar3Image != null) levelCompleteStar3Image.gameObject.SetActive(false);
+            if (levelCompleteGreyStarsImage != null) levelCompleteGreyStarsImage.gameObject.SetActive(false);
+
+            dancingStarsImage.gameObject.SetActive(true);
+            float frameTime = 1f / 24f; // 24 fps
+
+            for (int i = 0; i < dancingStarsFrames.Length; i++)
+            {
+                dancingStarsImage.sprite = dancingStarsFrames[i];
+                if (i < dancingStarsFrames.Length - 1)
+                    yield return new WaitForSecondsRealtime(frameTime);
+            }
+            // Hold on last frame
+            dancingStarsCoroutine = null;
+        }
+
+        private void ResetStarAnimations()
+        {
+            if (levelCompleteStar1Image != null) levelCompleteStar1Image.gameObject.SetActive(false);
+            if (levelCompleteStar2Image != null) levelCompleteStar2Image.gameObject.SetActive(false);
+            if (levelCompleteStar3Image != null) levelCompleteStar3Image.gameObject.SetActive(false);
+            if (dancingStarsCoroutine != null)
+            {
+                StopCoroutine(dancingStarsCoroutine);
+                dancingStarsCoroutine = null;
+            }
+            if (dancingStarsImage != null) dancingStarsImage.gameObject.SetActive(false);
+        }
+
+        private void StopLevelCompleteSequence()
+        {
+            if (levelCompleteSequence != null)
+            {
+                StopCoroutine(levelCompleteSequence);
+                levelCompleteSequence = null;
+            }
+        }
+
         // Event handlers
         private void OnLevelStarted(int levelNumber)
         {
+            StopLevelCompleteSequence();
             if (levelCompletePanel != null)
             {
                 levelCompletePanel.SetActive(false);
                 animatedLevelComplete?.Hide();
+                ResetStarAnimations();
                 CleanupMascotAnimator();
             }
             if (hudPanel != null)
@@ -2783,58 +3071,126 @@ Antonia and Joakim Engfors
             {
                 levelCompletePanel.SetActive(true);
 
-                // Start animated background
-                if (animatedLevelComplete != null)
-                {
-                    animatedLevelComplete.Play();
-                }
-
-                // Update stars display
-                if (levelCompleteStarImages != null)
-                {
-                    for (int i = 0; i < levelCompleteStarImages.Length; i++)
-                    {
-                        if (levelCompleteStarImages[i] != null)
-                        {
-                            // Full color for earned, gray for not earned
-                            levelCompleteStarImages[i].color = i < stars
-                                ? Color.white  // Full color (sprite is already yellow)
-                                : new Color(0.3f, 0.3f, 0.3f, 1f); // Gray tint
-                        }
-                    }
-                }
-
-                // Update move count
+                // Set text values (hidden until their layers fade in)
+                if (levelCompleteLevelNumberText != null)
+                    levelCompleteLevelNumberText.text = levelNumber.ToString();
                 if (levelCompleteMoveCountText != null)
                 {
                     int moveCount = GameManager.Instance?.CurrentMoveCount ?? 0;
-                    levelCompleteMoveCountText.text = $"Completed in {moveCount} moves";
+                    levelCompleteMoveCountText.text = moveCount.ToString();
                 }
 
-                // Update message based on stars
-                if (levelCompleteMessageText != null)
+                // Reset everything to initial hidden state
+                ResetStarAnimations();
+                if (levelLabelCanvasGroup != null) levelLabelCanvasGroup.alpha = 0f;
+                if (movesLabelCanvasGroup != null) movesLabelCanvasGroup.alpha = 0f;
+                if (greyStarsCanvasGroup != null)
                 {
-                    levelCompleteMessageText.text = stars switch
-                    {
-                        3 => "Perfect!",
-                        2 => "Great work!",
-                        _ => "Good job!"
-                    };
+                    greyStarsCanvasGroup.alpha = 0f;
+                    greyStarsCanvasGroup.gameObject.SetActive(true);
                 }
+                if (bottomBoardImage != null) bottomBoardImage.gameObject.SetActive(false);
+                if (buttonsContainerGO != null) buttonsContainerGO.SetActive(false);
 
-                // Update mascot
-                UpdateLevelCompleteMascot(stars);
+                // Start the sequenced animation
+                if (levelCompleteSequence != null)
+                    StopCoroutine(levelCompleteSequence);
+                levelCompleteSequence = StartCoroutine(LevelCompleteAnimationSequence(levelNumber, stars));
             }
         }
 
-        private void OnLevelFailed(int levelNumber)
+        private IEnumerator LevelCompleteAnimationSequence(int levelNumber, int stars)
         {
-            ShowLevelFailedScreen("Level Failed");
+            Debug.Log("[UIManager] LevelComplete sequence: Phase 1 - Rays, curtains, mascot");
+            // Phase 1: Rays, curtains, and mascot all start together
+            if (animatedLevelComplete != null)
+                animatedLevelComplete.PlayRaysAndCurtains();
+            UpdateLevelCompleteMascot(stars);
+
+            // Wait until halfway through the mascot animation
+            float mascotHalfway = 1.15f; // ~half of 56 frames @ 24fps
+            if (levelCompleteMascotAnimator != null && levelCompleteMascotAnimator.Duration > 0)
+                mascotHalfway = levelCompleteMascotAnimator.Duration * 0.5f;
+            yield return new WaitForSecondsRealtime(mascotHalfway);
+
+            Debug.Log("[UIManager] LevelComplete sequence: Phase 2 - Labels fade in");
+            // Phase 2: Fade in level label and moves label together
+            yield return StartCoroutine(FadeCanvasGroup(levelLabelCanvasGroup, 0f, 1f, 0.3f));
+            yield return StartCoroutine(FadeCanvasGroup(movesLabelCanvasGroup, 0f, 1f, 0.3f));
+
+            Debug.Log("[UIManager] LevelComplete sequence: Phase 3 - Star ribbon");
+            // Phase 3: Star ribbon expands from center
+            if (animatedLevelComplete != null)
+                animatedLevelComplete.PlayStarRibbon();
+            while (animatedLevelComplete != null && !animatedLevelComplete.IsStarRibbonComplete)
+                yield return null;
+
+            Debug.Log("[UIManager] LevelComplete sequence: Phase 4 - Grey stars");
+            // Phase 4: Grey stars fade in on the ribbon
+            yield return StartCoroutine(FadeCanvasGroup(greyStarsCanvasGroup, 0f, 1f, 0.25f));
+
+            // Phase 5: Brief pause, then stars animate sequentially
+            yield return new WaitForSecondsRealtime(0.3f);
+
+            Debug.Log($"[UIManager] LevelComplete sequence: Phase 5 - Star animations ({stars} stars)");
+            if (stars >= 1)
+            {
+                yield return StartCoroutine(PlayStarAnimation(levelCompleteStar1Image, star1Frames, 0f));
+            }
+            if (stars >= 2)
+            {
+                yield return StartCoroutine(PlayStarAnimation(levelCompleteStar2Image, star2Frames, 0f));
+            }
+            if (stars >= 3)
+            {
+                yield return StartCoroutine(PlayStarAnimation(levelCompleteStar3Image, star3Frames, 0f));
+                // Start looping dancing stars animation after all 3 stars are in
+                dancingStarsCoroutine = StartCoroutine(PlayDancingStarsAnimation());
+            }
+
+            Debug.Log("[UIManager] LevelComplete sequence: Bottom board + buttons");
+            // Play bottom board animation, then show buttons on top
+            yield return StartCoroutine(PlayBottomBoardAnimation());
+            if (buttonsContainerGO != null) buttonsContainerGO.SetActive(true);
+
+            Debug.Log("[UIManager] LevelComplete sequence: COMPLETE");
+            levelCompleteSequence = null;
         }
 
-        private void OnTimerExpiredUI()
+        private IEnumerator PlayBottomBoardAnimation()
         {
-            ShowLevelFailedScreen("Time's Up!");
+            if (bottomBoardImage == null || bottomBoardFrames == null || bottomBoardFrames.Length == 0)
+                yield break;
+
+            bottomBoardImage.gameObject.SetActive(true);
+            float frameTime = 1f / 24f; // 24 fps
+
+            for (int i = 0; i < bottomBoardFrames.Length; i++)
+            {
+                bottomBoardImage.sprite = bottomBoardFrames[i];
+                if (i < bottomBoardFrames.Length - 1)
+                    yield return new WaitForSecondsRealtime(frameTime);
+            }
+            // Hold on last frame
+        }
+
+        private IEnumerator FadeCanvasGroup(CanvasGroup group, float from, float to, float duration)
+        {
+            if (group == null) yield break;
+            float elapsed = 0f;
+            group.alpha = from;
+            while (elapsed < duration)
+            {
+                elapsed += Time.unscaledDeltaTime;
+                group.alpha = Mathf.Lerp(from, to, elapsed / duration);
+                yield return null;
+            }
+            group.alpha = to;
+        }
+
+        private void OnLevelFailed(int levelNumber, string reason)
+        {
+            ShowLevelFailedScreen(reason ?? "Level Failed");
         }
 
         private void ShowLevelFailedScreen(string reason)
@@ -2851,8 +3207,50 @@ Antonia and Joakim Engfors
                     levelFailedReasonText.text = reason;
                 }
 
+                // Reset animated elements
+                if (failedBottomBoardImage != null) failedBottomBoardImage.gameObject.SetActive(false);
+                if (failedButtonsContainerGO != null) failedButtonsContainerGO.SetActive(false);
+
                 levelFailedPanel.SetActive(true);
                 Debug.Log($"[UIManager] Showing level failed screen: {reason}");
+
+                // Start the animation sequence
+                if (failedScreenSequence != null)
+                    StopCoroutine(failedScreenSequence);
+                failedScreenSequence = StartCoroutine(FailedScreenAnimationSequence());
+            }
+        }
+
+        private IEnumerator FailedScreenAnimationSequence()
+        {
+            // Brief pause to let the screen appear
+            yield return new WaitForSecondsRealtime(0.5f);
+
+            // Play bottom board animation
+            if (failedBottomBoardImage != null && failedBottomBoardFrames != null && failedBottomBoardFrames.Length > 0)
+            {
+                failedBottomBoardImage.gameObject.SetActive(true);
+                float frameTime = 1f / 24f;
+                for (int i = 0; i < failedBottomBoardFrames.Length; i++)
+                {
+                    failedBottomBoardImage.sprite = failedBottomBoardFrames[i];
+                    if (i < failedBottomBoardFrames.Length - 1)
+                        yield return new WaitForSecondsRealtime(frameTime);
+                }
+            }
+
+            // Show buttons
+            if (failedButtonsContainerGO != null) failedButtonsContainerGO.SetActive(true);
+
+            failedScreenSequence = null;
+        }
+
+        private void StopFailedScreenSequence()
+        {
+            if (failedScreenSequence != null)
+            {
+                StopCoroutine(failedScreenSequence);
+                failedScreenSequence = null;
             }
         }
 
@@ -2860,6 +3258,7 @@ Antonia and Joakim Engfors
         {
             Debug.Log("[UIManager] Back to Levels from failed clicked");
             AudioManager.Instance?.PlayButtonClick();
+            StopFailedScreenSequence();
 
             TransitionManager.Instance?.FadeOut(() =>
             {
@@ -2881,6 +3280,7 @@ Antonia and Joakim Engfors
         {
             Debug.Log("[UIManager] Retry from failed clicked");
             AudioManager.Instance?.PlayButtonClick();
+            StopFailedScreenSequence();
             levelFailedPanel?.SetActive(false);
 
             // Ensure state is Playing
@@ -2903,10 +3303,12 @@ Antonia and Joakim Engfors
 
         private void OnLevelRestarted()
         {
+            StopLevelCompleteSequence();
             if (levelCompletePanel != null)
             {
                 levelCompletePanel.SetActive(false);
                 animatedLevelComplete?.Hide();
+                ResetStarAnimations();
             }
             if (levelFailedPanel != null)
                 levelFailedPanel.SetActive(false);
@@ -2941,7 +3343,7 @@ Antonia and Joakim Engfors
 
             Debug.Log($"[UIManager] UpdateLevelCompleteMascot: world={worldId}, folder={worldFolder}, anim={animationName}, stars={stars}");
 
-            if (stars >= 2 && !string.IsNullOrEmpty(animationName) && !string.IsNullOrEmpty(worldFolder))
+            if (stars >= 1 && !string.IsNullOrEmpty(animationName) && !string.IsNullOrEmpty(worldFolder))
             {
                 // Clean up existing animator
                 CleanupMascotAnimator();
