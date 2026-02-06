@@ -452,7 +452,8 @@ namespace SortResort
             }
 
             // Skip timer achievements if timer is disabled
-            if (achievement.requiresTimer && SaveManager.Instance?.IsTimerEnabled() != true)
+            var currentMode = GameManager.Instance?.CurrentGameMode ?? GameMode.FreePlay;
+            if (achievement.requiresTimer && currentMode != GameMode.TimerMode && currentMode != GameMode.HardMode)
                 return;
 
             var prog = GetOrCreateProgress(achievementId);
@@ -495,7 +496,8 @@ namespace SortResort
             }
 
             // Skip timer achievements if timer is disabled
-            if (achievement.requiresTimer && SaveManager.Instance?.IsTimerEnabled() != true)
+            var currentMode = GameManager.Instance?.CurrentGameMode ?? GameMode.FreePlay;
+            if (achievement.requiresTimer && currentMode != GameMode.TimerMode && currentMode != GameMode.HardMode)
                 return;
 
             var prog = GetOrCreateProgress(achievementId);
@@ -517,7 +519,8 @@ namespace SortResort
                 return;
 
             // Skip timer achievements if timer is disabled
-            if (achievement.requiresTimer && SaveManager.Instance?.IsTimerEnabled() != true)
+            var currentMode = GameManager.Instance?.CurrentGameMode ?? GameMode.FreePlay;
+            if (achievement.requiresTimer && currentMode != GameMode.TimerMode && currentMode != GameMode.HardMode)
                 return;
 
             var prog = GetOrCreateProgress(achievementId);
@@ -541,7 +544,8 @@ namespace SortResort
             if (!achievements.TryGetValue(achievementId, out var achievement))
                 return;
 
-            if (achievement.requiresTimer && SaveManager.Instance?.IsTimerEnabled() != true)
+            var currentMode = GameManager.Instance?.CurrentGameMode ?? GameMode.FreePlay;
+            if (achievement.requiresTimer && currentMode != GameMode.TimerMode && currentMode != GameMode.HardMode)
                 return;
 
             var prog = GetOrCreateProgress(achievementId);

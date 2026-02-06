@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace SortResort
@@ -9,6 +10,7 @@ namespace SortResort
         public static SaveManager Instance { get; private set; }
 
         private const string SAVE_KEY = "SortResortSaveData";
+        private const int CURRENT_SAVE_VERSION = 2;
 
         [SerializeField] private SaveData currentSaveData;
 
@@ -53,15 +55,17 @@ namespace SortResort
                     string json = PlayerPrefs.GetString(SAVE_KEY);
                     currentSaveData = JsonUtility.FromJson<SaveData>(json);
 
-                    // Migrate old save data - check if timerEnabled field existed
-                    // JsonUtility sets missing bools to false, but we want true as default
-                    if (!json.Contains("timerEnabled"))
+                    // If save version is old or missing, wipe to fresh data
+                    if (currentSaveData.saveVersion < CURRENT_SAVE_VERSION)
                     {
-                        currentSaveData.timerEnabled = true;
-                        Debug.Log("[SaveManager] Migrated old save: timerEnabled set to true");
+                        Debug.Log($"[SaveManager] Old save version {currentSaveData.saveVersion}, resetting to v{CURRENT_SAVE_VERSION}");
+                        currentSaveData = new SaveData();
+                        SaveGame();
                     }
-
-                    Debug.Log("[SaveManager] Game loaded successfully");
+                    else
+                    {
+                        Debug.Log("[SaveManager] Game loaded successfully");
+                    }
                 }
                 else
                 {
@@ -83,19 +87,42 @@ namespace SortResort
             Debug.Log("[SaveManager] Save data deleted");
         }
 
-        // Level Progress
-        public void SaveLevelProgress(string worldId, int levelNumber, int stars)
+        // Game Mode
+        public GameMode GetActiveGameMode()
+        {
+            return currentSaveData.activeGameMode;
+        }
+
+        public void SetActiveGameMode(GameMode mode)
+        {
+            if (currentSaveData.activeGameMode != mode)
+            {
+                currentSaveData.activeGameMode = mode;
+                SaveGame();
+                GameEvents.InvokeGameModeChanged(mode);
+            }
+        }
+
+        // Level Progress (operates on active game mode)
+        public void SaveLevelProgress(string worldId, int levelNumber, int stars, float timeTaken = 0f)
         {
             var worldProgress = GetOrCreateWorldProgress(worldId);
 
             string levelKey = $"{worldId}_{levelNumber}";
             var existingLevel = worldProgress.levelProgress.Find(l => l.levelKey == levelKey);
 
+            bool isNewBestTime = false;
+
             if (existingLevel != null)
             {
                 if (stars > existingLevel.starsEarned)
                 {
                     existingLevel.starsEarned = stars;
+                }
+                if (timeTaken > 0 && (existingLevel.bestTime <= 0 || timeTaken < existingLevel.bestTime))
+                {
+                    existingLevel.bestTime = timeTaken;
+                    isNewBestTime = true;
                 }
                 existingLevel.completionCount++;
             }
@@ -107,8 +134,10 @@ namespace SortResort
                     levelNumber = levelNumber,
                     starsEarned = stars,
                     isCompleted = true,
-                    completionCount = 1
+                    completionCount = 1,
+                    bestTime = timeTaken
                 });
+                if (timeTaken > 0) isNewBestTime = true;
             }
 
             if (levelNumber > worldProgress.highestLevelCompleted)
@@ -120,6 +149,17 @@ namespace SortResort
             SaveGame();
 
             GameEvents.InvokeStarsEarned(currentSaveData.totalStars);
+
+            // Fire detailed completion event
+            var mode = currentSaveData.activeGameMode;
+            GameEvents.InvokeLevelCompletedDetailed(new LevelCompletionData
+            {
+                levelNumber = levelNumber,
+                starsEarned = stars,
+                timeTaken = timeTaken,
+                mode = mode,
+                isNewBestTime = isNewBestTime
+            });
         }
 
         public int GetLevelStars(string worldId, int levelNumber)
@@ -130,6 +170,16 @@ namespace SortResort
             string levelKey = $"{worldId}_{levelNumber}";
             var level = worldProgress.levelProgress.Find(l => l.levelKey == levelKey);
             return level?.starsEarned ?? 0;
+        }
+
+        public float GetLevelBestTime(string worldId, int levelNumber)
+        {
+            var worldProgress = GetWorldProgress(worldId);
+            if (worldProgress == null) return 0f;
+
+            string levelKey = $"{worldId}_{levelNumber}";
+            var level = worldProgress.levelProgress.Find(l => l.levelKey == levelKey);
+            return level?.bestTime ?? 0f;
         }
 
         public bool IsLevelCompleted(string worldId, int levelNumber)
@@ -177,6 +227,27 @@ namespace SortResort
             return worldProgress?.levelProgress.Count ?? 0;
         }
 
+        /// <summary>
+        /// Count unique completed levels across ALL modes for a world.
+        /// Used for world unlock checks (shared across modes).
+        /// </summary>
+        public int GetWorldCompletedLevelCountAnyMode(string worldId)
+        {
+            var completedLevels = new HashSet<int>();
+            foreach (var modeProg in currentSaveData.modeProgress)
+            {
+                var wp = modeProg.worldProgress.Find(w => w.worldId == worldId);
+                if (wp != null)
+                {
+                    foreach (var lp in wp.levelProgress)
+                    {
+                        if (lp.isCompleted) completedLevels.Add(lp.levelNumber);
+                    }
+                }
+            }
+            return completedLevels.Count;
+        }
+
         public int GetWorldTotalStars(string worldId)
         {
             var worldProgress = GetWorldProgress(worldId);
@@ -188,6 +259,18 @@ namespace SortResort
                 total += level.starsEarned;
             }
             return total;
+        }
+
+        // Hard Mode unlock check
+        public bool IsHardModeUnlocked(string worldId)
+        {
+            var starProgress = GetModeWorldProgress(GameMode.StarMode, worldId);
+            int starCompleted = starProgress?.levelProgress.Count(l => l.isCompleted) ?? 0;
+
+            var timerProgress = GetModeWorldProgress(GameMode.TimerMode, worldId);
+            int timerCompleted = timerProgress?.levelProgress.Count(l => l.isCompleted) ?? 0;
+
+            return starCompleted >= 100 && timerCompleted >= 100;
         }
 
         // Dialogue Tracking
@@ -217,16 +300,11 @@ namespace SortResort
             SaveGame();
         }
 
-        // Timer Setting
+        // Timer Setting (kept for backward compatibility, now derived from mode)
         public bool IsTimerEnabled()
         {
-            return currentSaveData.timerEnabled;
-        }
-
-        public void SetTimerEnabled(bool enabled)
-        {
-            currentSaveData.timerEnabled = enabled;
-            SaveGame();
+            var mode = currentSaveData.activeGameMode;
+            return mode == GameMode.TimerMode || mode == GameMode.HardMode;
         }
 
         // Voice Setting
@@ -254,30 +332,74 @@ namespace SortResort
             GameEvents.InvokeProgressReset();
         }
 
-        // Helper Methods
+        // Helper Methods - operate on active mode
         private WorldProgress GetWorldProgress(string worldId)
         {
-            return currentSaveData.worldProgress.Find(w => w.worldId == worldId);
+            var modeProgress = GetOrCreateModeProgress(currentSaveData.activeGameMode);
+            return modeProgress.worldProgress.Find(w => w.worldId == worldId);
         }
 
         private WorldProgress GetOrCreateWorldProgress(string worldId)
         {
-            var existing = GetWorldProgress(worldId);
+            var modeProgress = GetOrCreateModeProgress(currentSaveData.activeGameMode);
+            var existing = modeProgress.worldProgress.Find(w => w.worldId == worldId);
             if (existing != null) return existing;
 
             var newProgress = new WorldProgress { worldId = worldId };
-            currentSaveData.worldProgress.Add(newProgress);
+            modeProgress.worldProgress.Add(newProgress);
             return newProgress;
+        }
+
+        /// <summary>
+        /// Get world progress for a specific mode (not necessarily the active mode).
+        /// </summary>
+        public WorldProgress GetModeWorldProgress(GameMode mode, string worldId)
+        {
+            var modeProgress = currentSaveData.modeProgress.Find(m => m.mode == mode);
+            return modeProgress?.worldProgress.Find(w => w.worldId == worldId);
+        }
+
+        private ModeProgress GetOrCreateModeProgress(GameMode mode)
+        {
+            var existing = currentSaveData.modeProgress.Find(m => m.mode == mode);
+            if (existing != null) return existing;
+
+            var newProgress = new ModeProgress { mode = mode };
+            currentSaveData.modeProgress.Add(newProgress);
+            return newProgress;
+        }
+
+        /// <summary>
+        /// Clear all progress for a specific mode and world (used by debug tools).
+        /// </summary>
+        public void ClearModeWorldProgress(GameMode mode, string worldId)
+        {
+            var modeProgress = currentSaveData.modeProgress.Find(m => m.mode == mode);
+            var worldProgress = modeProgress?.worldProgress.Find(w => w.worldId == worldId);
+            if (worldProgress != null)
+            {
+                worldProgress.levelProgress.Clear();
+                worldProgress.highestLevelCompleted = 0;
+            }
+            RecalculateTotalStars();
+            SaveGame();
         }
 
         private void RecalculateTotalStars()
         {
             int total = 0;
-            foreach (var world in currentSaveData.worldProgress)
+            // Only count stars from modes that track them (StarMode and HardMode)
+            foreach (var modeProg in currentSaveData.modeProgress)
             {
-                foreach (var level in world.levelProgress)
+                if (modeProg.mode == GameMode.StarMode || modeProg.mode == GameMode.HardMode)
                 {
-                    total += level.starsEarned;
+                    foreach (var world in modeProg.worldProgress)
+                    {
+                        foreach (var level in world.levelProgress)
+                        {
+                            total += level.starsEarned;
+                        }
+                    }
                 }
             }
             currentSaveData.totalStars = total;
@@ -287,26 +409,35 @@ namespace SortResort
     [Serializable]
     public class SaveData
     {
+        public int saveVersion = 2;
         public string playerId;
         public int totalStars;
-        public List<string> unlockedWorlds = new List<string> { "island" }; // Island unlocked by default
-        public List<WorldProgress> worldProgress = new List<WorldProgress>();
+        public GameMode activeGameMode = GameMode.FreePlay;
+        public List<string> unlockedWorlds = new List<string> { "island" };
+        public List<ModeProgress> modeProgress = new List<ModeProgress>();
         public List<string> seenDialogues = new List<string>();
         public DateTime lastPlayedTime;
 
         // Settings
         public bool hapticsEnabled = true;
-        public bool timerEnabled = true; // Timer countdown feature (can be disabled for relaxed gameplay)
-        public bool voiceEnabled = true; // Mascot dialogue voices
+        public bool voiceEnabled = true;
 
         public SaveData()
         {
+            saveVersion = 2;
             playerId = System.Guid.NewGuid().ToString();
             lastPlayedTime = DateTime.Now;
+            activeGameMode = GameMode.FreePlay;
             hapticsEnabled = true;
-            timerEnabled = true;
             voiceEnabled = true;
         }
+    }
+
+    [Serializable]
+    public class ModeProgress
+    {
+        public GameMode mode;
+        public List<WorldProgress> worldProgress = new List<WorldProgress>();
     }
 
     [Serializable]
@@ -325,5 +456,6 @@ namespace SortResort
         public int starsEarned;
         public bool isCompleted;
         public int completionCount;
+        public float bestTime; // Best completion time in seconds (Timer/Hard modes)
     }
 }

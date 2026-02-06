@@ -3,6 +3,16 @@ using UnityEngine;
 
 namespace SortResort
 {
+    [Serializable]
+    public struct LevelCompletionData
+    {
+        public int levelNumber;
+        public int starsEarned;
+        public float timeTaken;
+        public GameMode mode;
+        public bool isNewBestTime;
+    }
+
     public static class GameEvents
     {
         // Game State Events
@@ -10,9 +20,13 @@ namespace SortResort
         public static event Action OnGamePaused;
         public static event Action OnGameResumed;
 
+        // Game Mode Events
+        public static event Action<GameMode> OnGameModeChanged;
+
         // Level Events
         public static event Action<int> OnLevelStarted;
         public static event Action<int, int> OnLevelCompleted; // levelNumber, starsEarned
+        public static event Action<LevelCompletionData> OnLevelCompletedDetailed; // full completion data with mode, time, etc.
         public static event Action<int, string> OnLevelFailed; // levelNumber, reason
         public static event Action OnLevelRestarted;
 
@@ -55,9 +69,13 @@ namespace SortResort
         public static void InvokeGamePaused() => OnGamePaused?.Invoke();
         public static void InvokeGameResumed() => OnGameResumed?.Invoke();
 
+        // Invoke Methods - Game Mode
+        public static void InvokeGameModeChanged(GameMode mode) => OnGameModeChanged?.Invoke(mode);
+
         // Invoke Methods - Level
         public static void InvokeLevelStarted(int levelNumber) => OnLevelStarted?.Invoke(levelNumber);
         public static void InvokeLevelCompleted(int levelNumber, int stars) => OnLevelCompleted?.Invoke(levelNumber, stars);
+        public static void InvokeLevelCompletedDetailed(LevelCompletionData data) => OnLevelCompletedDetailed?.Invoke(data);
         public static void InvokeLevelFailed(int levelNumber, string reason = null) => OnLevelFailed?.Invoke(levelNumber, reason);
         public static void InvokeLevelRestarted() => OnLevelRestarted?.Invoke();
 
@@ -101,8 +119,10 @@ namespace SortResort
             OnGameStateChanged = null;
             OnGamePaused = null;
             OnGameResumed = null;
+            OnGameModeChanged = null;
             OnLevelStarted = null;
             OnLevelCompleted = null;
+            OnLevelCompletedDetailed = null;
             OnLevelFailed = null;
             OnLevelRestarted = null;
             OnMoveUsed = null;

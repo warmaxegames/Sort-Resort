@@ -68,7 +68,9 @@ namespace SortResort
         private float totalTimeLimit;
         private bool timerActive = false;
         private bool timerFrozen = false;
-        private bool timerEnabled = true;
+
+        // Elapsed time tracking (all modes, for recording completion time)
+        private float elapsedTime = 0f;
 
         // Properties
         public LevelData CurrentLevel => currentLevel;
@@ -76,7 +78,8 @@ namespace SortResort
         public int CurrentLevelNumber => currentLevelNumber;
         public float TimeRemaining => timeRemaining;
         public float TotalTimeLimit => totalTimeLimit;
-        public bool IsTimerActive => timerActive && timerEnabled;
+        public float ElapsedTime => elapsedTime;
+        public bool IsTimerActive => timerActive;
         public bool IsTimerFrozen => timerFrozen;
         public int ItemsRemaining => itemsRemaining;
         public int MatchesMade => matchesMade;
@@ -151,6 +154,15 @@ namespace SortResort
 
         private void Update()
         {
+            // Track elapsed time in all modes (for recording completion time)
+            if (GameManager.Instance?.CurrentState == GameState.Playing)
+            {
+                if (DialogueManager.Instance == null || !DialogueManager.Instance.IsDialogueActive)
+                {
+                    elapsedTime += Time.deltaTime;
+                }
+            }
+
             UpdateTimer();
         }
 
@@ -348,6 +360,7 @@ namespace SortResort
             totalItemsAtStart = CountTotalItems();
             itemsRemaining = totalItemsAtStart;
             matchesMade = 0;
+            elapsedTime = 0f;
 
             // Initialize timer if level has time limit
             InitializeTimer();
@@ -363,13 +376,23 @@ namespace SortResort
         /// </summary>
         private void InitializeTimer()
         {
-            // Check if timer is enabled in settings
-            timerEnabled = SaveManager.Instance?.IsTimerEnabled() ?? true;
+            // Timer is active only in TimerMode and HardMode
+            var mode = GameManager.Instance?.CurrentGameMode ?? GameMode.FreePlay;
+            bool timerActiveForMode = (mode == GameMode.TimerMode || mode == GameMode.HardMode);
 
-            // Check if level has a time limit
-            if (currentLevel != null && currentLevel.HasTimeLimit && timerEnabled)
+            if (timerActiveForMode && currentLevel != null)
             {
-                totalTimeLimit = currentLevel.time_limit_seconds;
+                // Use level's time limit, or estimate from fail threshold if not set
+                if (currentLevel.HasTimeLimit)
+                {
+                    totalTimeLimit = currentLevel.time_limit_seconds;
+                }
+                else
+                {
+                    // Runtime fallback: ~6 seconds per optimal move
+                    totalTimeLimit = currentLevel.FailThreshold * 6;
+                }
+
                 timeRemaining = totalTimeLimit;
                 timerActive = true;
                 timerFrozen = false;
@@ -391,7 +414,7 @@ namespace SortResort
         /// </summary>
         private void UpdateTimer()
         {
-            if (!timerActive || timerFrozen || !timerEnabled) return;
+            if (!timerActive || timerFrozen) return;
 
             // Only update if game is playing
             if (GameManager.Instance?.CurrentState != GameState.Playing) return;
@@ -745,19 +768,24 @@ namespace SortResort
 
             OnLevelCleared?.Invoke();
 
-            // Calculate stars
+            // Calculate stars based on mode
+            var mode = GameManager.Instance?.CurrentGameMode ?? GameMode.FreePlay;
             int movesUsed = GameManager.Instance?.CurrentMoveCount ?? 0;
-            int stars = CalculateStars(movesUsed);
+            int stars = 0;
 
-            // ALERT: Player beat the solver's score! This indicates the solver may not be optimal.
-            // The 3-star threshold (starThresholds[0]) is set to the solver's move count.
-            if (starThresholds != null && starThresholds.Length > 0 && movesUsed < starThresholds[0])
+            if (mode == GameMode.StarMode || mode == GameMode.HardMode)
             {
-                LogSolverAlert(movesUsed, starThresholds[0]);
+                stars = CalculateStars(movesUsed);
+
+                // ALERT: Player beat the solver's score! This indicates the solver may not be optimal.
+                if (starThresholds != null && starThresholds.Length > 0 && movesUsed < starThresholds[0])
+                {
+                    LogSolverAlert(movesUsed, starThresholds[0]);
+                }
             }
 
-            // Complete the level
-            GameManager.Instance?.CompleteLevel(stars);
+            // Complete the level with elapsed time
+            GameManager.Instance?.CompleteLevel(stars, elapsedTime);
         }
 
         /// <summary>

@@ -26,8 +26,6 @@ namespace SortResort.UI
         [Header("Toggle Settings")]
         [SerializeField] private Toggle hapticsToggle;
         [SerializeField] private Image hapticsCheckmark;
-        [SerializeField] private Toggle timerToggle;
-        [SerializeField] private Image timerCheckmark;
         [SerializeField] private Toggle voiceToggle;
         [SerializeField] private Image voiceCheckmark;
 
@@ -43,9 +41,8 @@ namespace SortResort.UI
         private TextMeshProUGUI confirmMessageText;
 
         // Pending action tracking
-        private enum PendingAction { None, ResetProgress, TimerChange }
+        private enum PendingAction { None, ResetProgress }
         private PendingAction pendingAction = PendingAction.None;
-        private bool pendingTimerValue;
 
         [Header("Credits Panel")]
         [SerializeField] private GameObject creditsPanel;
@@ -141,10 +138,6 @@ namespace SortResort.UI
             {
                 hapticsToggle.onValueChanged.AddListener(OnHapticsToggled);
             }
-            if (timerToggle != null)
-            {
-                timerToggle.onValueChanged.AddListener(OnTimerToggled);
-            }
             if (voiceToggle != null)
             {
                 voiceToggle.onValueChanged.AddListener(OnVoiceToggled);
@@ -207,14 +200,6 @@ namespace SortResort.UI
                 UpdateHapticsCheckmark(hapticsEnabled);
             }
 
-            // Load timer setting
-            if (SaveManager.Instance != null && timerToggle != null)
-            {
-                bool timerEnabled = SaveManager.Instance.IsTimerEnabled();
-                timerToggle.SetIsOnWithoutNotify(timerEnabled);
-                UpdateTimerCheckmark(timerEnabled);
-            }
-
             // Load voice setting
             if (SaveManager.Instance != null && voiceToggle != null)
             {
@@ -268,58 +253,12 @@ namespace SortResort.UI
 
         private void UpdateHapticsCheckmark(bool isOn)
         {
-            // For Google-style switch, the GoogleSwitchBehavior handles visuals
-            // This is kept for backwards compatibility with checkbox style
             if (hapticsCheckmark != null && hapticsToggle != null)
             {
-                // Only toggle visibility if not using Google switch
                 var switchBehavior = hapticsToggle.GetComponent<GoogleSwitchBehavior>();
                 if (switchBehavior == null)
                 {
                     hapticsCheckmark.enabled = isOn;
-                }
-            }
-        }
-
-        private void OnTimerToggled(bool isOn)
-        {
-            AudioManager.Instance?.PlayButtonClick();
-
-            // Check if we're currently in a level (Playing or Paused state)
-            var currentState = GameManager.Instance?.CurrentState ?? GameState.Loading;
-            bool inLevel = currentState == GameState.Playing || currentState == GameState.Paused;
-
-            if (inLevel)
-            {
-                // Show confirmation - changing timer during level requires restart
-                pendingAction = PendingAction.TimerChange;
-                pendingTimerValue = isOn;
-                ShowConfirmationDialog(
-                    "Change Timer Setting?",
-                    "Changing the timer setting will\nrestart the current level."
-                );
-
-                // Revert toggle visually until confirmed
-                timerToggle.SetIsOnWithoutNotify(!isOn);
-            }
-            else
-            {
-                // Not in a level, apply immediately
-                SaveManager.Instance?.SetTimerEnabled(isOn);
-                UpdateTimerCheckmark(isOn);
-                Debug.Log($"[SettingsScreen] Timer toggled: {isOn}");
-            }
-        }
-
-        private void UpdateTimerCheckmark(bool isOn)
-        {
-            // For Google-style switch, the GoogleSwitchBehavior handles visuals
-            if (timerCheckmark != null && timerToggle != null)
-            {
-                var switchBehavior = timerToggle.GetComponent<GoogleSwitchBehavior>();
-                if (switchBehavior == null)
-                {
-                    timerCheckmark.enabled = isOn;
                 }
             }
         }
@@ -364,14 +303,10 @@ namespace SortResort.UI
             if (SaveManager.Instance != null && !SaveManager.Instance.IsHapticsEnabled())
                 return;
 
-            // On iOS, we can use taptic engine for lighter feedback
-            // On Android, Handheld.Vibrate() is the standard option
 #if UNITY_IOS
             // iOS haptic feedback would require native plugin for fine-grained control
-            // For now, we skip light haptics on iOS to avoid full vibration
 #elif UNITY_ANDROID
             // Android can use shorter vibrations with native plugins
-            // Standard Handheld.Vibrate() is too strong for light feedback
 #endif
         }
 
@@ -389,7 +324,6 @@ namespace SortResort.UI
         {
             if (confirmationDialog != null)
             {
-                // Update dialog text if we have references
                 if (confirmTitleText != null)
                     confirmTitleText.text = title;
                 if (confirmMessageText != null)
@@ -419,37 +353,6 @@ namespace SortResort.UI
                     OnResetConfirmed?.Invoke();
                     Debug.Log("[SettingsScreen] Progress reset confirmed");
                     break;
-
-                case PendingAction.TimerChange:
-                    // Apply the timer setting
-                    SaveManager.Instance?.SetTimerEnabled(pendingTimerValue);
-                    timerToggle.SetIsOnWithoutNotify(pendingTimerValue);
-                    UpdateTimerCheckmark(pendingTimerValue);
-                    Debug.Log($"[SettingsScreen] Timer changed to: {pendingTimerValue}, restarting level");
-
-                    // Close confirmation dialog
-                    HideConfirmationDialog();
-
-                    // Hide settings immediately (no animation)
-                    Hide(true);
-
-                    // Resume game and close pause menu
-                    GameManager.Instance?.ResumeGame();
-
-                    // Restart the level with fade
-                    if (TransitionManager.Instance != null)
-                    {
-                        TransitionManager.Instance.FadeOut(() =>
-                        {
-                            LevelManager.Instance?.RestartLevel();
-                            TransitionManager.Instance.FadeIn();
-                        });
-                    }
-                    else
-                    {
-                        LevelManager.Instance?.RestartLevel();
-                    }
-                    return; // Don't hide dialog again
             }
 
             HideConfirmationDialog();
@@ -496,7 +399,6 @@ namespace SortResort.UI
             Slider masterSlider, Slider musicSlider, Slider sfxSlider,
             TextMeshProUGUI masterLabel, TextMeshProUGUI musicLabel, TextMeshProUGUI sfxLabel,
             Toggle haptics, Image hapticsCheck,
-            Toggle timer, Image timerCheck,
             Toggle voice, Image voiceCheck,
             Button resetBtn, Button creditsBtn,
             GameObject confirmDialog, Button confirmYes, Button confirmNo,
@@ -512,8 +414,6 @@ namespace SortResort.UI
             sfxVolumeLabel = sfxLabel;
             hapticsToggle = haptics;
             hapticsCheckmark = hapticsCheck;
-            timerToggle = timer;
-            timerCheckmark = timerCheck;
             voiceToggle = voice;
             voiceCheckmark = voiceCheck;
             resetProgressButton = resetBtn;
@@ -563,7 +463,6 @@ namespace SortResort.UI
             if (musicVolumeSlider != null) musicVolumeSlider.onValueChanged.RemoveAllListeners();
             if (sfxVolumeSlider != null) sfxVolumeSlider.onValueChanged.RemoveAllListeners();
             if (hapticsToggle != null) hapticsToggle.onValueChanged.RemoveAllListeners();
-            if (timerToggle != null) timerToggle.onValueChanged.RemoveAllListeners();
             if (voiceToggle != null) voiceToggle.onValueChanged.RemoveAllListeners();
             if (resetProgressButton != null) resetProgressButton.onClick.RemoveAllListeners();
             if (creditsButton != null) creditsButton.onClick.RemoveAllListeners();

@@ -107,7 +107,7 @@ namespace SortResort
             if (requirement.isDefaultUnlocked) return true;
             if (requirement.requiresPurchase) return false; // Requires IAP
 
-            int completedLevels = SaveManager.Instance.GetWorldCompletedLevelCount(requirement.requiredWorldId);
+            int completedLevels = SaveManager.Instance.GetWorldCompletedLevelCountAnyMode(requirement.requiredWorldId);
             return completedLevels >= requirement.requiredLevelsCompleted;
         }
 
@@ -133,7 +133,7 @@ namespace SortResort
                 return new WorldUnlockStatus { isUnlocked = true };
             }
 
-            int currentProgress = SaveManager.Instance.GetWorldCompletedLevelCount(requirement.requiredWorldId);
+            int currentProgress = SaveManager.Instance.GetWorldCompletedLevelCountAnyMode(requirement.requiredWorldId);
 
             return new WorldUnlockStatus
             {

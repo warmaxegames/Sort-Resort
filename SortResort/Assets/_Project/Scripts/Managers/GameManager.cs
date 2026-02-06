@@ -28,6 +28,7 @@ namespace SortResort
         public int CurrentLevelNumber => currentLevelNumber;
         public int CurrentMoveCount => currentMoveCount;
         public int CurrentMatchCount => currentMatchCount;
+        public GameMode CurrentGameMode => SaveManager.Instance?.GetActiveGameMode() ?? GameMode.FreePlay;
 
         private void Awake()
         {
@@ -176,6 +177,11 @@ namespace SortResort
             currentMoveCount++;
             GameEvents.InvokeMoveUsed(currentMoveCount);
 
+            // Only enforce move limits in modes that track stars (StarMode and HardMode)
+            var mode = CurrentGameMode;
+            bool enforcesMoveLimits = (mode == GameMode.StarMode || mode == GameMode.HardMode);
+            if (!enforcesMoveLimits) return;
+
             // Check if player has used their second-to-last move without completing
             // This prevents the awkward case where the final move makes a match but still fails
             // Delay the check to allow any match animation to complete first (0.6s covers the 0.5s animation)
@@ -220,10 +226,10 @@ namespace SortResort
             GameEvents.InvokeMatchCountChanged(currentMatchCount);
         }
 
-        public void CompleteLevel(int starsEarned)
+        public void CompleteLevel(int starsEarned, float timeTaken = 0f)
         {
             SetState(GameState.LevelComplete);
-            SaveManager.Instance?.SaveLevelProgress(currentWorldId, currentLevelNumber, starsEarned);
+            SaveManager.Instance?.SaveLevelProgress(currentWorldId, currentLevelNumber, starsEarned, timeTaken);
             GameEvents.InvokeLevelCompleted(currentLevelNumber, starsEarned);
         }
 

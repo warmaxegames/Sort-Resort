@@ -22,7 +22,7 @@
 
 ## Current Status
 
-**Last Updated:** 2026-02-04
+**Last Updated:** 2026-02-05
 
 ### Working Features (Unity)
 - Splash screen → Level select with fade transition
@@ -32,14 +32,16 @@
 - Row advancement, locked containers with unlock animation
 - Carousel movement, despawn-on-match stacking containers
 - World-specific backgrounds, music, and ambient audio
-- Save/load progress (PlayerPrefs), undo system, optional timer
+- Save/load progress (PlayerPrefs), undo system, timer format M:SS.CC
+- **4 Game Modes** - Free Play (green, no limits), Star Mode (pink, move-based stars), Timer Mode (blue, beat the clock), Hard Mode (red, stars + timer). Separate progress per mode, mode selector tabs on level select, mode-specific portal tinting, mode-specific level complete animations (stopwatch count-up for timer, "New Record!" pulse), mode-specific HUD visibility, Hard Mode locked per-world until Star+Timer 100% complete, debug unlock/lock button on level select
 - Achievement system (88 achievements with UI, notifications, rewards)
 - Level solver tool (Editor window + in-game auto-solve button)
 - **Dialogue system** - Typewriter text with Animal Crossing-style voices, mascot portraits, per-world welcome dialogues, voice toggle in settings, timer pauses during dialogue
-- **Level complete screen** - Animated rays, curtains, star ribbon, level/moves labels with text overlays, grey stars + gold star animations (1/2/3 star), dancing stars animation (3-star), mascot thumbsup animation (Island), bottom board animation, sprite-based buttons (return to map, replay, next level)
+- **Level complete screen** - Mode-specific animations: Star Mode has rays, curtains, star ribbon, grey/gold star animations, dancing stars (3-star); Timer Mode has stopwatch count-up animation with "New Record!" bounce; Free Play skips stars; Hard Mode combines stars + timer. All modes: mascot thumbsup (Island), bottom board animation, sprite-based buttons
 - **Level failed screen** - Fullscreen fail_screen.jpg background, reason text ("Out of Moves"/"Out of Time"), animated bottom board, sprite-based buttons (retry, level select)
 - **Fail-before-last-move** - Level fails after second-to-last move if not complete (prevents awkward final-move-still-fails scenario)
 - **Star threshold separation** - All thresholds guaranteed at least 1 move apart
+- **Mode-specific HUD overlay** - Hard Mode (Island) has custom wooden bar with Level/Moves/Timer counter bubbles, world icon, and fullscreen settings gear button. Other modes/worlds use default HUD. Settings gear opens pause menu (Resume, Restart, Settings, Quit to Menu)
 
 ---
 
@@ -69,7 +71,11 @@
    - Supermarket
    - Tavern
    - Space
-7. **Mobile/Device Testing** - Test performance on mobile devices, tablets, different screen sizes
+7. **HUD Overlay Assets** - Expand mode-specific HUD to remaining modes and worlds:
+   - Free Play, Star Mode, Timer Mode bar assets
+   - World icons for: Supermarket, Farm, Tavern, Space
+8. **Game Modes Tutorial Dialogues** - First-time-entering-mode tutorial dialogues
+9. **Mobile/Device Testing** - Test performance on mobile devices, tablets, different screen sizes
 
 ### Future Lower Priority Items
 8. **Trophy Room** - World-specific and achievement trophies:
@@ -84,7 +90,38 @@
    - Player cosmetics (clothes, hats, sunglasses, accessories)
 10. **Leaderboards**:
     - Categories: achievement points, matches made, trophies, daily/weekly activity, etc.
+    - Friends list leaderboard (compare scores with friends)
     - Backend infrastructure for tracking/displaying leaderboards
+11. **Premium Currency** - In-game currency earned through gameplay and purchaseable, tied to shop, cosmetics, and achievements
+12. **Shop & Monetization**:
+    - In-app purchases for worlds (each world individually purchaseable)
+    - Cosmetics shop (profile items, accessories)
+    - Power-ups (timer freeze, extra moves, hints, etc.)
+13. **Build Out Achievement Rewards** - Replace placeholder rewards with real rewards (premium currency, cosmetics, titles, etc.)
+14. **Daily Login Rewards** - Incentivize daily play with escalating rewards
+15. **Share Button** - Post scores/achievements to social media from post-level screen
+16. **Accessibility Options** - Additional settings for accessibility support
+
+### Future Roadmap Ideas
+- **Ad Monetization** - Rewarded ads (extra moves, continue after fail, free power-up) and interstitial ads between levels
+- **Lives/Energy System** - Lose a life on failure, lives regenerate over time or can be purchased
+- **Season Pass/Battle Pass** - Tiered reward track (free + premium) with daily/weekly task progression
+- **Lucky Wheel/Daily Spin** - Random reward mechanic, can tie into daily login
+- **Hints/Boosters** - Show best move hint, shuffle items, wildcard match-anything item; purchaseable with premium currency
+- **Continue After Fail** - Spend currency or watch ad for extra moves instead of restarting
+- **Star Gates** - Require total star count to unlock next world (replay incentive)
+- **Daily/Weekly Challenges** - Special levels with unique constraints and exclusive rewards
+- **Seasonal Events** - Limited-time themed events with exclusive cosmetics/rewards
+- **Push Notifications** - Energy refilled, daily rewards, event reminders, friend activity
+- **Friend System** - Add friends, send/receive lives, see friends' progress on level map
+- **App Store Rating Prompt** - Prompt for review after positive moments (e.g. 3-star completion)
+- **Cloud Save** - Cross-device progress sync
+- **Localization** - Multi-language support for global audience
+- **Analytics** - Player behavior tracking, retention funnels, monetization metrics
+- **Haptic Feedback** - Vibration on matches, combos, failures (mobile feel)
+- **Offline Support** - Ensure core gameplay works without internet
+- **World Completion Rewards** - Special trophy, cosmetic, or currency for 3-starring all levels in a world
+- **Collection System** - Collect themed item sets across levels for bonus rewards
 
 ---
 
@@ -149,12 +186,28 @@ Container border scale: 1.2 (17% border around slots)
 - Layer 6: "Items" - for item raycasting
 - Layer 7: "Slots" - for slot raycasting
 
+### Game Modes System
+- **Enum**: `GameMode.cs` - FreePlay(0), StarMode(1), TimerMode(2), HardMode(3)
+- **Save Data**: `SaveData` v2 with `List<ModeProgress>` - separate progress per mode
+- **Active Mode**: `SaveManager.GetActiveGameMode()` / `SetActiveGameMode()`
+- **Mode Colors**: Green (Free), Pink (Stars), Blue (Timer), Red (Hard)
+- **Hard Mode Unlock**: Per-world, requires all 100 levels in both Star + Timer mode
+- **Level Select**: Mode tabs row with colored pill buttons, portal tinting per mode
+- **Level Complete**: Mode-branched animation sequence (PlayStarSequence, PlayTimerCountUpAnimation)
+- **HUD**: Star display hidden in FreePlay/TimerMode; timer only for TimerMode/HardMode
+- **HUD Overlay**: Mode-specific fullscreen overlay system. Hard Mode (Island) uses `hard_mode_UI_top.png` wooden bar + `island_icon_UI_top.png` world icon + counter texts at bubble positions. Default HUD for other modes/worlds. Settings gear via fullscreen `settings_button_UI_top.png` with invisible click button at gear location.
+- **HUD Buttons**: Record (debug), Solve (debug), Undo, Settings gear (opens pause menu). Back/Pause buttons removed - functionality consolidated into pause menu.
+- **World Unlocks**: Shared across all modes via `GetWorldCompletedLevelCountAnyMode()`
+- **LevelCompletionData**: Struct with levelNumber, starsEarned, timeTaken, mode, isNewBestTime
+
 ### Timer System
 - `time_limit_seconds` in level JSON (0 or omitted = no timer)
-- Disable globally via `SaveManager.IsTimerEnabled()`
+- Timer active only in TimerMode and HardMode (mode-driven, not settings-driven)
+- Runtime fallback for missing timer values: `FailThreshold * 6` seconds
 - Timer pauses automatically while dialogue is active
 - Power-ups: `LevelManager.FreezeTimer(duration)`, `AddTime(seconds)`
-- UI: M:SS format, flashes red under 10s, cyan when frozen
+- UI: M:SS.CC format (centiseconds), flashes red under 10s, cyan when frozen
+- Overlay timer: dark red flash and dark teal frozen (visible on light wood background)
 
 ### Dialogue System
 - **Data**: `Resources/Data/Dialogue/dialogues.json` (mascots, dialogues, triggers)
@@ -180,6 +233,7 @@ Container border scale: 1.2 (17% border around slots)
 - Item Sprites: `Resources/Sprites/Items/{World}/`
 - Container Sprites: `Resources/Sprites/Containers/`
 - Mascot Sprites: `Resources/Sprites/Mascots/`
+- HUD Overlays: `Resources/Sprites/UI/HUD/` (`hard_mode_UI_top.png`, `island_icon_UI_top.png`, `settings_button_UI_top.png`)
 - Audio: `Resources/Audio/{Music|SFX|UI}/`
 - Prefabs: `Resources/Prefabs/`
 - Level Data: `Resources/Data/Levels/{World}/`

@@ -114,6 +114,23 @@ namespace SortResort
         private Coroutine levelCompleteSequence;
         private Image levelCompleteMascotImage;
         private MascotAnimator levelCompleteMascotAnimator;
+        private TextMeshProUGUI timerResultText;
+        private TextMeshProUGUI newRecordText;
+        private CanvasGroup timerResultCanvasGroup;
+        private LevelCompletionData lastCompletionData;
+        private Coroutine newRecordPulseCoroutine;
+
+        // Hard Mode HUD overlay
+        private GameObject hudModeOverlay;
+        private Image hudOverlayBgImage;
+        private Image hudWorldIconImage;
+        private TextMeshProUGUI overlayLevelText;
+        private TextMeshProUGUI overlayMovesText;
+        private TextMeshProUGUI overlayTimerText;
+        private Image hudPanelBgImage;
+        private GameObject statsContainerGO;
+        private GameObject hudSettingsOverlay;
+
         private GameObject levelFailedPanel;
         private TextMeshProUGUI levelFailedReasonText;
         private Image failedBottomBoardImage;
@@ -132,6 +149,7 @@ namespace SortResort
         private TextMeshProUGUI timerText;
         private GameObject timerContainer;
         private Image[] starImages;
+        private GameObject starDisplayGO;
         private Button undoButton;
         private CanvasGroup undoButtonCanvasGroup;
         private Button autoSolveButton;
@@ -193,6 +211,7 @@ namespace SortResort
             GameEvents.OnMoveUsed += OnMoveUsed;
             GameEvents.OnMatchCountChanged += OnMatchCountChanged;
             GameEvents.OnLevelCompleted += OnLevelCompleted;
+            GameEvents.OnLevelCompletedDetailed += OnLevelCompletedDetailed;
             GameEvents.OnLevelRestarted += OnLevelRestarted;
             GameEvents.OnGamePaused += OnGamePausedUI;
             GameEvents.OnGameResumed += OnGameResumedUI;
@@ -221,6 +240,7 @@ namespace SortResort
             GameEvents.OnMoveUsed -= OnMoveUsed;
             GameEvents.OnMatchCountChanged -= OnMatchCountChanged;
             GameEvents.OnLevelCompleted -= OnLevelCompleted;
+            GameEvents.OnLevelCompletedDetailed -= OnLevelCompletedDetailed;
             GameEvents.OnLevelRestarted -= OnLevelRestarted;
             GameEvents.OnGamePaused -= OnGamePausedUI;
             GameEvents.OnGameResumed -= OnGameResumedUI;
@@ -282,6 +302,7 @@ namespace SortResort
             CreateSplashPanel();
             CreateLevelSelectPanel();
             CreateHUDPanel();
+            CreateHUDModeOverlay();
             CreateLevelCompletePanel();
             CreateLevelFailedPanel();
             CreateSettingsPanel();
@@ -297,6 +318,10 @@ namespace SortResort
                 levelFailedPanel.SetActive(false);
             if (hudPanel != null)
                 hudPanel.SetActive(false);
+            if (hudModeOverlay != null)
+                hudModeOverlay.SetActive(false);
+            if (hudSettingsOverlay != null)
+                hudSettingsOverlay.SetActive(false);
             if (levelSelectPanel != null)
                 levelSelectPanel.SetActive(false);
             if (settingsPanel != null)
@@ -344,6 +369,10 @@ namespace SortResort
                 levelSelectPanel.SetActive(false);
             if (hudPanel != null)
                 hudPanel.SetActive(false);
+            if (hudModeOverlay != null)
+                hudModeOverlay.SetActive(false);
+            if (hudSettingsOverlay != null)
+                hudSettingsOverlay.SetActive(false);
             if (levelCompletePanel != null)
                 levelCompletePanel.SetActive(false);
         }
@@ -359,6 +388,10 @@ namespace SortResort
                 levelSelectPanel.SetActive(true);
             if (hudPanel != null)
                 hudPanel.SetActive(false);
+            if (hudModeOverlay != null)
+                hudModeOverlay.SetActive(false);
+            if (hudSettingsOverlay != null)
+                hudSettingsOverlay.SetActive(false);
             if (levelCompletePanel != null)
                 levelCompletePanel.SetActive(false);
 
@@ -380,6 +413,8 @@ namespace SortResort
                 levelSelectPanel.SetActive(false);
             if (hudPanel != null)
                 hudPanel.SetActive(true);
+            if (hudSettingsOverlay != null)
+                hudSettingsOverlay.SetActive(true);
             if (levelCompletePanel != null)
                 levelCompletePanel.SetActive(false);
         }
@@ -710,8 +745,8 @@ namespace SortResort
             trophyTextRect.offsetMin = Vector2.zero;
             trophyTextRect.offsetMax = Vector2.zero;
             var trophyText = trophyTextGO.AddComponent<TextMeshProUGUI>();
-            trophyText.text = "\u2605"; // Star symbol as placeholder for trophy
-            trophyText.fontSize = 48;
+            trophyText.text = "ACH";
+            trophyText.fontSize = 28;
             trophyText.fontStyle = FontStyles.Bold;
             trophyText.alignment = TextAlignmentOptions.Center;
             trophyText.color = new Color(0.4f, 0.25f, 0f, 1f); // Dark brown
@@ -846,13 +881,31 @@ namespace SortResort
             }
 
             // ============================================
+            // MODE TABS ROW - Between world area and level grid
+            // ============================================
+            var modeTabContainerGO = new GameObject("ModeTabContainer");
+            modeTabContainerGO.transform.SetParent(levelSelectPanel.transform, false);
+            var modeTabRect = modeTabContainerGO.AddComponent<RectTransform>();
+            modeTabRect.anchorMin = new Vector2(0, 0.465f);
+            modeTabRect.anchorMax = new Vector2(1, 0.51f);
+            modeTabRect.offsetMin = new Vector2(20, 0);
+            modeTabRect.offsetMax = new Vector2(-20, 0);
+
+            var modeTabLayout = modeTabContainerGO.AddComponent<HorizontalLayoutGroup>();
+            modeTabLayout.spacing = 8;
+            modeTabLayout.childAlignment = TextAnchor.MiddleCenter;
+            modeTabLayout.childForceExpandWidth = true;
+            modeTabLayout.childForceExpandHeight = true;
+            modeTabLayout.padding = new RectOffset(5, 5, 4, 4);
+
+            // ============================================
             // LEVEL GRID SCROLL AREA - Rounded corners, larger scrollbar
             // ============================================
             var scrollArea = new GameObject("ScrollArea");
             scrollArea.transform.SetParent(levelSelectPanel.transform, false);
             var scrollAreaRect = scrollArea.AddComponent<RectTransform>();
             scrollAreaRect.anchorMin = new Vector2(0, 0);
-            scrollAreaRect.anchorMax = new Vector2(1, 0.48f);
+            scrollAreaRect.anchorMax = new Vector2(1, 0.46f);
             scrollAreaRect.offsetMin = new Vector2(15, 15);
             scrollAreaRect.offsetMax = new Vector2(-15, 0);
 
@@ -986,6 +1039,13 @@ namespace SortResort
             screenType.GetField("levelGridParent", flags)?.SetValue(levelSelectScreen, content.transform);
             screenType.GetField("levelScrollRect", flags)?.SetValue(levelSelectScreen, scrollView);
 
+            // Wire mode tab container and topBar reference
+            levelSelectScreen.SetModeTabContainer(modeTabContainerGO.transform);
+            levelSelectScreen.SetTopBar(topBar.transform);
+
+            // Initialize level select screen (creates grid, loads portals, etc.)
+            levelSelectScreen.Initialize();
+
             // Connect level selected callback
             levelSelectScreen.OnLevelSelected += OnLevelSelectedFromMenu;
 
@@ -1069,6 +1129,7 @@ namespace SortResort
             // Background
             var bg = hudPanel.AddComponent<Image>();
             bg.color = new Color(0, 0, 0, 0.7f);
+            hudPanelBgImage = bg;
 
             // Add CanvasGroup for fading
             hudPanel.AddComponent<CanvasGroup>();
@@ -1087,6 +1148,7 @@ namespace SortResort
             // Stats container
             var statsGO = new GameObject("Stats");
             statsGO.transform.SetParent(hudPanel.transform, false);
+            statsContainerGO = statsGO;
             var statsRect = statsGO.AddComponent<RectTransform>();
             statsRect.anchorMin = new Vector2(0, 0.5f);
             statsRect.anchorMax = new Vector2(1, 0.5f);
@@ -1185,7 +1247,7 @@ namespace SortResort
             var valueGO = new GameObject("Value");
             valueGO.transform.SetParent(container.transform, false);
             timerText = valueGO.AddComponent<TextMeshProUGUI>();
-            timerText.text = "0:00";
+            timerText.text = "0:00.00";
             timerText.fontSize = 32;
             timerText.fontStyle = FontStyles.Bold;
             timerText.alignment = TextAlignmentOptions.Center;
@@ -1203,6 +1265,7 @@ namespace SortResort
         {
             var starsGO = new GameObject("Stars");
             starsGO.transform.SetParent(hudPanel.transform, false);
+            starDisplayGO = starsGO;
 
             var rect = starsGO.AddComponent<RectTransform>();
             rect.anchorMin = new Vector2(0.5f, 0);
@@ -1241,7 +1304,7 @@ namespace SortResort
             rect.anchorMax = new Vector2(1, 1);
             rect.pivot = new Vector2(1, 1);
             rect.anchoredPosition = new Vector2(-20, -20);
-            rect.sizeDelta = new Vector2(340, 50);
+            rect.sizeDelta = new Vector2(290, 50);
 
             var layout = buttonsGO.AddComponent<HorizontalLayoutGroup>();
             layout.spacing = 10;
@@ -1262,11 +1325,136 @@ namespace SortResort
             // Start disabled (no moves to undo)
             SetUndoButtonEnabled(false);
 
-            // Pause button - opens pause menu
-            CreateButton(buttonsGO.transform, "Pause", "II", OnPauseClicked, 50, 50);
+            // Settings gear - fullscreen image overlay for pixel-perfect positioning
+            hudSettingsOverlay = new GameObject("HUD Settings Overlay");
+            hudSettingsOverlay.transform.SetParent(mainCanvas.transform, false);
+            var settingsOvRect = hudSettingsOverlay.AddComponent<RectTransform>();
+            settingsOvRect.anchorMin = Vector2.zero;
+            settingsOvRect.anchorMax = Vector2.one;
+            settingsOvRect.offsetMin = Vector2.zero;
+            settingsOvRect.offsetMax = Vector2.zero;
 
-            // Back button - exits level and returns to level select
-            CreateButton(buttonsGO.transform, "Back", "Back", OnBackToLevelsClicked, 80, 50);
+            // Place just above hudPanel so the gear renders on top
+            if (hudPanel != null)
+                hudSettingsOverlay.transform.SetSiblingIndex(hudPanel.transform.GetSiblingIndex() + 1);
+
+            // Fullscreen image for the gear visual (raycast disabled - display only)
+            var gearVisualGO = new GameObject("Settings Gear Visual");
+            gearVisualGO.transform.SetParent(hudSettingsOverlay.transform, false);
+            var gearVisRect = gearVisualGO.AddComponent<RectTransform>();
+            gearVisRect.anchorMin = Vector2.zero;
+            gearVisRect.anchorMax = Vector2.one;
+            gearVisRect.offsetMin = Vector2.zero;
+            gearVisRect.offsetMax = Vector2.zero;
+            var gearVisImg = gearVisualGO.AddComponent<Image>();
+            var gearTex = Resources.Load<Texture2D>("Sprites/UI/HUD/settings_button_UI_top");
+            if (gearTex != null)
+            {
+                gearVisImg.sprite = Sprite.Create(gearTex,
+                    new Rect(0, 0, gearTex.width, gearTex.height),
+                    new Vector2(0.5f, 0.5f), 100f);
+            }
+            gearVisImg.preserveAspect = true;
+            gearVisImg.raycastTarget = false;
+
+            // Invisible click button at gear location (~pixel 990, 50 in 1080x1920)
+            var gearBtnGO = new GameObject("Settings Gear Button");
+            gearBtnGO.transform.SetParent(hudSettingsOverlay.transform, false);
+            var gearBtnRect = gearBtnGO.AddComponent<RectTransform>();
+            gearBtnRect.anchorMin = new Vector2(0.917f, 0.974f);
+            gearBtnRect.anchorMax = new Vector2(0.917f, 0.974f);
+            gearBtnRect.pivot = new Vector2(0.5f, 0.5f);
+            gearBtnRect.anchoredPosition = Vector2.zero;
+            gearBtnRect.sizeDelta = new Vector2(100, 100);
+            var gearBtnImg = gearBtnGO.AddComponent<Image>();
+            gearBtnImg.color = new Color(0, 0, 0, 0); // Invisible
+            var gearBtn = gearBtnGO.AddComponent<Button>();
+            gearBtn.targetGraphic = gearBtnImg;
+            gearBtn.onClick.AddListener(OnPauseClicked);
+
+            hudSettingsOverlay.SetActive(false);
+        }
+
+        private void CreateHUDModeOverlay()
+        {
+            // Fullscreen overlay panel - sibling of hudPanel, renders behind it
+            hudModeOverlay = new GameObject("HUD Mode Overlay");
+            hudModeOverlay.transform.SetParent(mainCanvas.transform, false);
+
+            var rect = hudModeOverlay.AddComponent<RectTransform>();
+            rect.anchorMin = Vector2.zero;
+            rect.anchorMax = Vector2.one;
+            rect.offsetMin = Vector2.zero;
+            rect.offsetMax = Vector2.zero;
+
+            // Place behind hudPanel in sibling order so buttons on hudPanel remain clickable
+            if (hudPanel != null)
+                hudModeOverlay.transform.SetSiblingIndex(hudPanel.transform.GetSiblingIndex());
+
+            // Background image (mode-specific bar)
+            var bgGO = new GameObject("Overlay Background");
+            bgGO.transform.SetParent(hudModeOverlay.transform, false);
+            var bgRect = bgGO.AddComponent<RectTransform>();
+            bgRect.anchorMin = Vector2.zero;
+            bgRect.anchorMax = Vector2.one;
+            bgRect.offsetMin = Vector2.zero;
+            bgRect.offsetMax = Vector2.zero;
+            hudOverlayBgImage = bgGO.AddComponent<Image>();
+            hudOverlayBgImage.preserveAspect = true;
+            hudOverlayBgImage.raycastTarget = false;
+
+            // World icon image (overlaid on the bar)
+            var iconGO = new GameObject("World Icon");
+            iconGO.transform.SetParent(hudModeOverlay.transform, false);
+            var iconRect = iconGO.AddComponent<RectTransform>();
+            iconRect.anchorMin = Vector2.zero;
+            iconRect.anchorMax = Vector2.one;
+            iconRect.offsetMin = Vector2.zero;
+            iconRect.offsetMax = Vector2.zero;
+            hudWorldIconImage = iconGO.AddComponent<Image>();
+            hudWorldIconImage.preserveAspect = true;
+            hudWorldIconImage.raycastTarget = false;
+
+            // Counter text elements - positioned at bubble centers
+            // Level counter at anchor (0.3194, 0.9188)
+            overlayLevelText = CreateOverlayCounterText(hudModeOverlay.transform, "Overlay Level",
+                new Vector2(0.3194f, 0.9188f), 100f, 80f, 36);
+
+            // Moves counter at anchor (0.5269, 0.9188)
+            overlayMovesText = CreateOverlayCounterText(hudModeOverlay.transform, "Overlay Moves",
+                new Vector2(0.5269f, 0.9188f), 100f, 80f, 36);
+
+            // Timer counter at anchor (0.7407, 0.9188)
+            overlayTimerText = CreateOverlayCounterText(hudModeOverlay.transform, "Overlay Timer",
+                new Vector2(0.7407f, 0.9188f), 150f, 80f, 28);
+
+            hudModeOverlay.SetActive(false);
+        }
+
+        private TextMeshProUGUI CreateOverlayCounterText(Transform parent, string name,
+            Vector2 anchorPos, float width, float height, int fontSize)
+        {
+            var go = new GameObject(name);
+            go.transform.SetParent(parent, false);
+
+            var rect = go.AddComponent<RectTransform>();
+            rect.anchorMin = anchorPos;
+            rect.anchorMax = anchorPos;
+            rect.pivot = new Vector2(0.5f, 0.5f);
+            rect.anchoredPosition = Vector2.zero;
+            rect.sizeDelta = new Vector2(width, height);
+
+            var text = go.AddComponent<TextMeshProUGUI>();
+            text.text = "0";
+            text.fontSize = fontSize;
+            text.fontStyle = FontStyles.Bold;
+            text.alignment = TextAlignmentOptions.Center;
+            text.color = Color.black;
+            text.enableWordWrapping = false;
+            text.overflowMode = TextOverflowModes.Overflow;
+            text.raycastTarget = false;
+
+            return text;
         }
 
         private void SetUndoButtonEnabled(bool enabled)
@@ -1590,6 +1778,45 @@ namespace SortResort
             // Load dancing stars animation frames
             dancingStarsFrames = LoadStarFrames("Sprites/UI/LevelComplete/DancingStars", "dancing stars");
 
+            // Timer Result - shows elapsed time for Timer/Hard modes (positioned center screen)
+            var timerResultGO = new GameObject("Timer Result");
+            timerResultGO.transform.SetParent(levelCompletePanel.transform, false);
+            var timerResultRect = timerResultGO.AddComponent<RectTransform>();
+            timerResultRect.anchorMin = new Vector2(0.5f, 0.48f);
+            timerResultRect.anchorMax = new Vector2(0.5f, 0.48f);
+            timerResultRect.pivot = new Vector2(0.5f, 0.5f);
+            timerResultRect.anchoredPosition = Vector2.zero;
+            timerResultRect.sizeDelta = new Vector2(400, 100);
+            timerResultText = timerResultGO.AddComponent<TextMeshProUGUI>();
+            timerResultText.text = "0:00.00";
+            timerResultText.fontSize = 72;
+            timerResultText.fontStyle = FontStyles.Bold;
+            timerResultText.alignment = TextAlignmentOptions.Center;
+            timerResultText.color = new Color(0.3f, 0.85f, 1f, 1f);
+            timerResultText.outlineWidth = 0.25f;
+            timerResultText.outlineColor = new Color32(0, 0, 80, 200);
+            timerResultCanvasGroup = timerResultGO.AddComponent<CanvasGroup>();
+            timerResultCanvasGroup.alpha = 0f;
+
+            // "New Record!" text - positioned below timer result
+            var newRecordGO = new GameObject("New Record");
+            newRecordGO.transform.SetParent(levelCompletePanel.transform, false);
+            var newRecordRect = newRecordGO.AddComponent<RectTransform>();
+            newRecordRect.anchorMin = new Vector2(0.5f, 0.43f);
+            newRecordRect.anchorMax = new Vector2(0.5f, 0.43f);
+            newRecordRect.pivot = new Vector2(0.5f, 0.5f);
+            newRecordRect.anchoredPosition = Vector2.zero;
+            newRecordRect.sizeDelta = new Vector2(400, 60);
+            newRecordText = newRecordGO.AddComponent<TextMeshProUGUI>();
+            newRecordText.text = "New Record!";
+            newRecordText.fontSize = 42;
+            newRecordText.fontStyle = FontStyles.Bold;
+            newRecordText.alignment = TextAlignmentOptions.Center;
+            newRecordText.color = new Color(1f, 0.85f, 0.2f, 1f);
+            newRecordText.outlineWidth = 0.2f;
+            newRecordText.outlineColor = new Color32(80, 40, 0, 200);
+            newRecordText.enabled = false;
+
             // Mascot image - fullscreen with preserveAspect
             var mascotGO = new GameObject("Mascot");
             mascotGO.transform.SetParent(levelCompletePanel.transform, false);
@@ -1903,40 +2130,6 @@ namespace SortResort
             var (hapticsToggle, hapticsCheckmark) = CreateGoogleSwitch(hapticsRowGO.transform);
 
             // ============================================
-            // TIMER TOGGLE
-            // ============================================
-            var timerRowGO = new GameObject("TimerRow");
-            timerRowGO.transform.SetParent(contentGO.transform, false);
-            var timerRowRect = timerRowGO.AddComponent<RectTransform>();
-            timerRowRect.anchorMin = new Vector2(0.5f, 1);
-            timerRowRect.anchorMax = new Vector2(0.5f, 1);
-            timerRowRect.pivot = new Vector2(0.5f, 1);
-            timerRowRect.anchoredPosition = new Vector2(0, -700);
-            timerRowRect.sizeDelta = new Vector2(700, 80);
-
-            var timerLayout = timerRowGO.AddComponent<HorizontalLayoutGroup>();
-            timerLayout.spacing = 20;
-            timerLayout.childAlignment = TextAnchor.MiddleCenter;
-            timerLayout.childForceExpandWidth = false;
-            timerLayout.childForceExpandHeight = false;
-
-            // Timer label
-            var timerLabelGO = new GameObject("TimerLabel");
-            timerLabelGO.transform.SetParent(timerRowGO.transform, false);
-            var timerLabelText = timerLabelGO.AddComponent<TextMeshProUGUI>();
-            timerLabelText.text = "Level Timer";
-            timerLabelText.fontSize = 36;
-            timerLabelText.fontStyle = FontStyles.Bold;
-            timerLabelText.alignment = TextAlignmentOptions.MidlineLeft;
-            timerLabelText.color = Color.white;
-            var timerLabelLE = timerLabelGO.AddComponent<LayoutElement>();
-            timerLabelLE.preferredWidth = 400;
-            timerLabelLE.preferredHeight = 60;
-
-            // Timer toggle (Google-style switch)
-            var (timerToggle, timerCheckmark) = CreateGoogleSwitch(timerRowGO.transform);
-
-            // ============================================
             // VOICE TOGGLE
             // ============================================
             var voiceRowGO = new GameObject("VoiceRow");
@@ -1945,7 +2138,7 @@ namespace SortResort
             voiceRowRect.anchorMin = new Vector2(0.5f, 1);
             voiceRowRect.anchorMax = new Vector2(0.5f, 1);
             voiceRowRect.pivot = new Vector2(0.5f, 1);
-            voiceRowRect.anchoredPosition = new Vector2(0, -780);
+            voiceRowRect.anchoredPosition = new Vector2(0, -700);
             voiceRowRect.sizeDelta = new Vector2(700, 80);
 
             var voiceLayout = voiceRowGO.AddComponent<HorizontalLayoutGroup>();
@@ -1979,7 +2172,7 @@ namespace SortResort
             buttonsContainerRect.anchorMin = new Vector2(0.5f, 1);
             buttonsContainerRect.anchorMax = new Vector2(0.5f, 1);
             buttonsContainerRect.pivot = new Vector2(0.5f, 1);
-            buttonsContainerRect.anchoredPosition = new Vector2(0, -900);
+            buttonsContainerRect.anchoredPosition = new Vector2(0, -820);
             buttonsContainerRect.sizeDelta = new Vector2(700, 200);
 
             var buttonsLayout = buttonsContainer.AddComponent<VerticalLayoutGroup>();
@@ -2075,7 +2268,6 @@ namespace SortResort
                 masterSlider, musicSlider, sfxSlider,
                 masterLabel, musicLabel, sfxLabel,
                 hapticsToggle, hapticsCheckmark,
-                timerToggle, timerCheckmark,
                 voiceToggle, voiceCheckmark,
                 resetBtn, creditsBtn,
                 confirmDialog, confirmYes, confirmNo,
@@ -2995,6 +3187,18 @@ Antonia and Joakim Engfors
                 dancingStarsCoroutine = null;
             }
             if (dancingStarsImage != null) dancingStarsImage.gameObject.SetActive(false);
+            if (timerResultCanvasGroup != null) timerResultCanvasGroup.alpha = 0f;
+            if (newRecordPulseCoroutine != null)
+            {
+                StopCoroutine(newRecordPulseCoroutine);
+                newRecordPulseCoroutine = null;
+            }
+            if (newRecordText != null)
+            {
+                newRecordText.enabled = false;
+                var rt = newRecordText.GetComponent<RectTransform>();
+                if (rt != null) rt.localScale = Vector3.one;
+            }
         }
 
         private void StopLevelCompleteSequence()
@@ -3019,6 +3223,8 @@ Antonia and Joakim Engfors
             }
             if (hudPanel != null)
                 hudPanel.SetActive(true);
+            if (hudSettingsOverlay != null)
+                hudSettingsOverlay.SetActive(true);
 
             // Update title with level info
             string worldId = GameManager.Instance?.CurrentWorldId ?? "island";
@@ -3032,12 +3238,88 @@ Antonia and Joakim Engfors
             // Reset undo button (no moves to undo at level start)
             SetUndoButtonEnabled(false);
 
-            // Show/hide timer based on level settings
-            // Timer visibility is handled in OnTimerUpdated when first timer event comes in
-            // Hide timer initially - it will be shown when OnTimerUpdated fires if level has timer
+            // Mode-aware HUD visibility
+            GameMode currentMode = GameManager.Instance?.CurrentGameMode ?? GameMode.FreePlay;
+
+            // Stars: show in Star Mode and Hard Mode only
+            if (starDisplayGO != null)
+                starDisplayGO.SetActive(currentMode == GameMode.StarMode || currentMode == GameMode.HardMode);
+
+            // Timer: hidden initially, shown by OnTimerUpdated for Timer/Hard modes
             if (timerContainer != null)
-            {
                 timerContainer.SetActive(false);
+
+            // Mode-specific HUD overlay
+            bool useOverlay = false;
+            if (currentMode == GameMode.HardMode)
+            {
+                // Check if we have assets for this world
+                string overlayBarPath = $"Sprites/UI/HUD/hard_mode_UI_top";
+                string overlayIconPath = $"Sprites/UI/HUD/{worldId}_icon_UI_top";
+                var barTex = Resources.Load<Texture2D>(overlayBarPath);
+                var iconTex = Resources.Load<Texture2D>(overlayIconPath);
+
+                if (barTex != null)
+                {
+                    useOverlay = true;
+
+                    // Show overlay
+                    if (hudModeOverlay != null)
+                        hudModeOverlay.SetActive(true);
+
+                    // Set bar sprite
+                    if (hudOverlayBgImage != null)
+                    {
+                        hudOverlayBgImage.sprite = Sprite.Create(barTex,
+                            new Rect(0, 0, barTex.width, barTex.height),
+                            new Vector2(0.5f, 0.5f), 100f);
+                    }
+
+                    // Set world icon sprite (or hide if missing)
+                    if (hudWorldIconImage != null)
+                    {
+                        if (iconTex != null)
+                        {
+                            hudWorldIconImage.sprite = Sprite.Create(iconTex,
+                                new Rect(0, 0, iconTex.width, iconTex.height),
+                                new Vector2(0.5f, 0.5f), 100f);
+                            hudWorldIconImage.gameObject.SetActive(true);
+                        }
+                        else
+                        {
+                            hudWorldIconImage.gameObject.SetActive(false);
+                        }
+                    }
+
+                    // Set overlay counter texts
+                    if (overlayLevelText != null)
+                        overlayLevelText.text = levelNumber.ToString();
+                    if (overlayMovesText != null)
+                        overlayMovesText.text = "0";
+                    if (overlayTimerText != null)
+                        overlayTimerText.text = "0:00.00";
+
+                    // Hide default HUD elements (background, title, stats) but keep buttons + stars
+                    if (hudPanelBgImage != null)
+                        hudPanelBgImage.color = new Color(0, 0, 0, 0);
+                    if (levelTitleText != null)
+                        levelTitleText.gameObject.SetActive(false);
+                    if (statsContainerGO != null)
+                        statsContainerGO.SetActive(false);
+                }
+            }
+
+            if (!useOverlay)
+            {
+                // Default HUD - restore everything
+                if (hudModeOverlay != null)
+                    hudModeOverlay.SetActive(false);
+                if (hudPanelBgImage != null)
+                    hudPanelBgImage.color = new Color(0, 0, 0, 0.7f);
+                if (levelTitleText != null)
+                    levelTitleText.gameObject.SetActive(true);
+                if (statsContainerGO != null)
+                    statsContainerGO.SetActive(true);
             }
 
             // Reset record button text (recording is stopped when level changes)
@@ -3065,11 +3347,24 @@ Antonia and Joakim Engfors
                 itemsRemainingText.text = remaining.ToString();
         }
 
+        private void OnLevelCompletedDetailed(LevelCompletionData data)
+        {
+            lastCompletionData = data;
+        }
+
         private void OnLevelCompleted(int levelNumber, int stars)
         {
+            // Hide overlays during level complete screen
+            if (hudModeOverlay != null)
+                hudModeOverlay.SetActive(false);
+            if (hudSettingsOverlay != null)
+                hudSettingsOverlay.SetActive(false);
+
             if (levelCompletePanel != null)
             {
                 levelCompletePanel.SetActive(true);
+
+                GameMode mode = GameManager.Instance?.CurrentGameMode ?? GameMode.FreePlay;
 
                 // Set text values (hidden until their layers fade in)
                 if (levelCompleteLevelNumberText != null)
@@ -3089,72 +3384,253 @@ Antonia and Joakim Engfors
                     greyStarsCanvasGroup.alpha = 0f;
                     greyStarsCanvasGroup.gameObject.SetActive(true);
                 }
+                if (timerResultCanvasGroup != null) timerResultCanvasGroup.alpha = 0f;
+                if (newRecordText != null) newRecordText.enabled = false;
                 if (bottomBoardImage != null) bottomBoardImage.gameObject.SetActive(false);
                 if (buttonsContainerGO != null) buttonsContainerGO.SetActive(false);
 
                 // Start the sequenced animation
                 if (levelCompleteSequence != null)
                     StopCoroutine(levelCompleteSequence);
-                levelCompleteSequence = StartCoroutine(LevelCompleteAnimationSequence(levelNumber, stars));
+                levelCompleteSequence = StartCoroutine(LevelCompleteAnimationSequence(levelNumber, stars, mode));
             }
         }
 
-        private IEnumerator LevelCompleteAnimationSequence(int levelNumber, int stars)
+        private IEnumerator LevelCompleteAnimationSequence(int levelNumber, int stars, GameMode mode)
         {
-            Debug.Log("[UIManager] LevelComplete sequence: Phase 1 - Rays, curtains, mascot");
-            // Phase 1: Rays, curtains, and mascot all start together
+            Debug.Log($"[UIManager] LevelComplete sequence: Mode={mode}, Stars={stars}");
+
+            // Phase 1: Rays, curtains, and mascot all start together (all modes)
             if (animatedLevelComplete != null)
                 animatedLevelComplete.PlayRaysAndCurtains();
             UpdateLevelCompleteMascot(stars);
 
-            // Wait until halfway through the mascot animation
-            float mascotHalfway = 1.15f; // ~half of 56 frames @ 24fps
+            float mascotHalfway = 1.15f;
             if (levelCompleteMascotAnimator != null && levelCompleteMascotAnimator.Duration > 0)
                 mascotHalfway = levelCompleteMascotAnimator.Duration * 0.5f;
             yield return new WaitForSecondsRealtime(mascotHalfway);
 
-            Debug.Log("[UIManager] LevelComplete sequence: Phase 2 - Labels fade in");
-            // Phase 2: Fade in level label and moves label together
+            // Phase 2: Labels (mode-dependent)
             yield return StartCoroutine(FadeCanvasGroup(levelLabelCanvasGroup, 0f, 1f, 0.3f));
-            yield return StartCoroutine(FadeCanvasGroup(movesLabelCanvasGroup, 0f, 1f, 0.3f));
 
-            Debug.Log("[UIManager] LevelComplete sequence: Phase 3 - Star ribbon");
-            // Phase 3: Star ribbon expands from center
-            if (animatedLevelComplete != null)
-                animatedLevelComplete.PlayStarRibbon();
-            while (animatedLevelComplete != null && !animatedLevelComplete.IsStarRibbonComplete)
-                yield return null;
-
-            Debug.Log("[UIManager] LevelComplete sequence: Phase 4 - Grey stars");
-            // Phase 4: Grey stars fade in on the ribbon
-            yield return StartCoroutine(FadeCanvasGroup(greyStarsCanvasGroup, 0f, 1f, 0.25f));
-
-            // Phase 5: Brief pause, then stars animate sequentially
-            yield return new WaitForSecondsRealtime(0.3f);
-
-            Debug.Log($"[UIManager] LevelComplete sequence: Phase 5 - Star animations ({stars} stars)");
-            if (stars >= 1)
+            // Moves label: show for Star and Hard modes, skip for Free Play and Timer
+            if (mode == GameMode.StarMode || mode == GameMode.HardMode)
             {
-                yield return StartCoroutine(PlayStarAnimation(levelCompleteStar1Image, star1Frames, 0f));
+                yield return StartCoroutine(FadeCanvasGroup(movesLabelCanvasGroup, 0f, 1f, 0.3f));
             }
-            if (stars >= 2)
+
+            // Phase 3: Mode-specific middle section
+            switch (mode)
             {
-                yield return StartCoroutine(PlayStarAnimation(levelCompleteStar2Image, star2Frames, 0f));
-            }
-            if (stars >= 3)
-            {
-                yield return StartCoroutine(PlayStarAnimation(levelCompleteStar3Image, star3Frames, 0f));
-                // Start looping dancing stars animation after all 3 stars are in
-                dancingStarsCoroutine = StartCoroutine(PlayDancingStarsAnimation());
+                case GameMode.FreePlay:
+                    // Free Play: skip stars entirely, go straight to bottom board
+                    yield return new WaitForSecondsRealtime(0.3f);
+                    break;
+
+                case GameMode.StarMode:
+                    // Star Mode: full star ribbon + star animations (original behavior)
+                    yield return StartCoroutine(PlayStarSequence(stars));
+                    break;
+
+                case GameMode.TimerMode:
+                    // Timer Mode: stopwatch counting animation
+                    yield return new WaitForSecondsRealtime(0.3f);
+                    yield return StartCoroutine(PlayTimerCountUpAnimation());
+                    break;
+
+                case GameMode.HardMode:
+                    // Hard Mode: stars first, then timer
+                    yield return StartCoroutine(PlayStarSequence(stars));
+                    yield return new WaitForSecondsRealtime(0.2f);
+                    yield return StartCoroutine(PlayTimerCountUpAnimation());
+                    break;
             }
 
             Debug.Log("[UIManager] LevelComplete sequence: Bottom board + buttons");
-            // Play bottom board animation, then show buttons on top
             yield return StartCoroutine(PlayBottomBoardAnimation());
             if (buttonsContainerGO != null) buttonsContainerGO.SetActive(true);
 
             Debug.Log("[UIManager] LevelComplete sequence: COMPLETE");
             levelCompleteSequence = null;
+        }
+
+        private IEnumerator PlayStarSequence(int stars)
+        {
+            // Star ribbon expands from center
+            if (animatedLevelComplete != null)
+                animatedLevelComplete.PlayStarRibbon();
+            while (animatedLevelComplete != null && !animatedLevelComplete.IsStarRibbonComplete)
+                yield return null;
+
+            // Grey stars fade in on the ribbon
+            yield return StartCoroutine(FadeCanvasGroup(greyStarsCanvasGroup, 0f, 1f, 0.25f));
+
+            // Brief pause, then stars animate sequentially
+            yield return new WaitForSecondsRealtime(0.3f);
+
+            if (stars >= 1)
+                yield return StartCoroutine(PlayStarAnimation(levelCompleteStar1Image, star1Frames, 0f));
+            if (stars >= 2)
+                yield return StartCoroutine(PlayStarAnimation(levelCompleteStar2Image, star2Frames, 0f));
+            if (stars >= 3)
+            {
+                yield return StartCoroutine(PlayStarAnimation(levelCompleteStar3Image, star3Frames, 0f));
+                dancingStarsCoroutine = StartCoroutine(PlayDancingStarsAnimation());
+            }
+        }
+
+        private IEnumerator PlayTimerCountUpAnimation()
+        {
+            float finalTime = lastCompletionData.timeTaken;
+            bool isNewRecord = lastCompletionData.isNewBestTime;
+            GameMode mode = lastCompletionData.mode;
+
+            if (finalTime <= 0f)
+            {
+                // No valid time, skip
+                yield break;
+            }
+
+            // Position timer elements based on mode
+            // TimerMode: move up to ribbon/star area since no stars are shown
+            // HardMode: keep lower since stars are above
+            if (timerResultText != null)
+            {
+                var timerRect = timerResultText.GetComponent<RectTransform>();
+                if (timerRect != null)
+                {
+                    float yPos = (mode == GameMode.TimerMode) ? 0.72f : 0.48f;
+                    timerRect.anchorMin = new Vector2(0.5f, yPos);
+                    timerRect.anchorMax = new Vector2(0.5f, yPos);
+                }
+            }
+            if (newRecordText != null)
+            {
+                var recordRect = newRecordText.GetComponent<RectTransform>();
+                if (recordRect != null)
+                {
+                    float yPos = (mode == GameMode.TimerMode) ? 0.67f : 0.43f;
+                    recordRect.anchorMin = new Vector2(0.5f, yPos);
+                    recordRect.anchorMax = new Vector2(0.5f, yPos);
+                }
+            }
+
+            // Ensure timer elements render above mascot (which is fullscreen)
+            // Place them right after mascot but before bottom board/buttons
+            if (levelCompleteMascotImage != null)
+            {
+                int mascotIdx = levelCompleteMascotImage.transform.GetSiblingIndex();
+                if (timerResultText != null)
+                    timerResultText.transform.SetSiblingIndex(mascotIdx + 1);
+                if (newRecordText != null)
+                    newRecordText.transform.SetSiblingIndex(mascotIdx + 2);
+            }
+
+            // Fade in timer result
+            if (timerResultText != null)
+                timerResultText.text = "0:00.00";
+            yield return StartCoroutine(FadeCanvasGroup(timerResultCanvasGroup, 0f, 1f, 0.2f));
+
+            // Animate counting up from 0 to final time over ~2 seconds
+            float countDuration = 2.0f;
+            float elapsed = 0f;
+
+            while (elapsed < countDuration)
+            {
+                elapsed += Time.unscaledDeltaTime;
+                float t = Mathf.Clamp01(elapsed / countDuration);
+                // Ease out for a satisfying deceleration
+                t = 1f - (1f - t) * (1f - t);
+                float displayTime = Mathf.Lerp(0f, finalTime, t);
+
+                int minutes = (int)(displayTime / 60);
+                int seconds = (int)(displayTime % 60);
+                int centiseconds = (int)((displayTime % 1f) * 100f);
+
+                if (timerResultText != null)
+                    timerResultText.text = $"{minutes}:{seconds:D2}.{centiseconds:D2}";
+
+                yield return null;
+            }
+
+            // Set final value precisely
+            {
+                int minutes = (int)(finalTime / 60);
+                int seconds = (int)(finalTime % 60);
+                int centiseconds = (int)((finalTime % 1f) * 100f);
+                if (timerResultText != null)
+                    timerResultText.text = $"{minutes}:{seconds:D2}.{centiseconds:D2}";
+            }
+
+            // Show "New Record!" if applicable with pop-in + continuous pulse
+            if (isNewRecord && newRecordText != null)
+            {
+                yield return new WaitForSecondsRealtime(0.3f);
+                newRecordText.enabled = true;
+
+                var rectTransform = newRecordText.GetComponent<RectTransform>();
+                if (rectTransform != null)
+                {
+                    // Pop-in: scale from 0 to 1.2 then settle to 1.0
+                    float popDuration = 0.35f;
+                    float popElapsed = 0f;
+                    Vector3 originalScale = Vector3.one;
+
+                    while (popElapsed < popDuration)
+                    {
+                        popElapsed += Time.unscaledDeltaTime;
+                        float bt = Mathf.Clamp01(popElapsed / popDuration);
+                        float scale;
+                        if (bt < 0.6f)
+                            scale = Mathf.Lerp(0f, 1.2f, bt / 0.6f);
+                        else
+                            scale = Mathf.Lerp(1.2f, 1f, (bt - 0.6f) / 0.4f);
+                        rectTransform.localScale = originalScale * scale;
+                        yield return null;
+                    }
+                    rectTransform.localScale = originalScale;
+                }
+
+                // Start continuous pulsing animation
+                newRecordPulseCoroutine = StartCoroutine(PulseNewRecordText());
+            }
+
+            yield return new WaitForSecondsRealtime(0.3f);
+        }
+
+        private IEnumerator PulseNewRecordText()
+        {
+            if (newRecordText == null) yield break;
+
+            var rectTransform = newRecordText.GetComponent<RectTransform>();
+            if (rectTransform == null) yield break;
+
+            Vector3 baseScale = Vector3.one;
+            float baseY = rectTransform.anchoredPosition.y;
+            float time = 0f;
+
+            while (true)
+            {
+                time += Time.unscaledDeltaTime;
+
+                // Scale pulse: oscillate between 0.95 and 1.12
+                float scaleFactor = 1f + 0.085f * Mathf.Sin(time * 5f);
+                rectTransform.localScale = baseScale * scaleFactor;
+
+                // Subtle Y bounce: +/- 4 pixels
+                float yOffset = 4f * Mathf.Sin(time * 3.5f);
+                rectTransform.anchoredPosition = new Vector2(0f, baseY + yOffset);
+
+                // Subtle color shift between gold shades
+                float colorShift = 0.5f + 0.5f * Mathf.Sin(time * 4f);
+                newRecordText.color = Color.Lerp(
+                    new Color(1f, 0.8f, 0.15f, 1f),
+                    new Color(1f, 0.95f, 0.4f, 1f),
+                    colorShift
+                );
+
+                yield return null;
+            }
         }
 
         private IEnumerator PlayBottomBoardAnimation()
@@ -3198,6 +3674,10 @@ Antonia and Joakim Engfors
             // Hide HUD
             if (hudPanel != null)
                 hudPanel.SetActive(false);
+            if (hudModeOverlay != null)
+                hudModeOverlay.SetActive(false);
+            if (hudSettingsOverlay != null)
+                hudSettingsOverlay.SetActive(false);
 
             if (levelFailedPanel != null)
             {
@@ -3328,6 +3808,11 @@ Antonia and Joakim Engfors
             {
                 timerText.color = Color.white;
             }
+            if (overlayTimerText != null)
+            {
+                overlayTimerText.text = "0:00.00";
+                overlayTimerText.color = Color.black;
+            }
         }
 
         private void UpdateLevelCompleteMascot(int stars)
@@ -3337,13 +3822,13 @@ Antonia and Joakim Engfors
             string worldId = GameManager.Instance?.CurrentWorldId;
             var world = WorldProgressionManager.Instance?.GetWorldData(worldId);
 
-            // Check if we have a victory animation for this world (2+ stars)
+            // Check if we have a victory animation for this world (all modes, regardless of stars)
             string animationName = MascotAnimator.GetVictoryAnimationName(worldId);
             string worldFolder = MascotAnimator.GetWorldFolderName(worldId);
 
             Debug.Log($"[UIManager] UpdateLevelCompleteMascot: world={worldId}, folder={worldFolder}, anim={animationName}, stars={stars}");
 
-            if (stars >= 1 && !string.IsNullOrEmpty(animationName) && !string.IsNullOrEmpty(worldFolder))
+            if (!string.IsNullOrEmpty(animationName) && !string.IsNullOrEmpty(worldFolder))
             {
                 // Clean up existing animator
                 CleanupMascotAnimator();
@@ -3370,7 +3855,7 @@ Antonia and Joakim Engfors
             // Fallback to static sprite
             if (world != null)
             {
-                levelCompleteMascotImage.sprite = stars >= 2 ? world.mascotHappy : world.mascotIdle;
+                levelCompleteMascotImage.sprite = (stars >= 2) ? world.mascotHappy : (world.mascotHappy ?? world.mascotIdle);
                 levelCompleteMascotImage.enabled = levelCompleteMascotImage.sprite != null;
                 Debug.Log($"[UIManager] Using static mascot sprite: {(levelCompleteMascotImage.sprite != null ? levelCompleteMascotImage.sprite.name : "null")}");
             }
@@ -3406,31 +3891,42 @@ Antonia and Joakim Engfors
         {
             // Visual feedback for frozen timer (e.g., color change)
             if (timerText != null)
-            {
                 timerText.color = isFrozen ? Color.cyan : Color.white;
-            }
+            // Overlay timer: cyan on light wood is hard to see, use dark teal instead
+            if (overlayTimerText != null)
+                overlayTimerText.color = isFrozen ? new Color(0, 0.4f, 0.4f) : Color.black;
         }
 
         private void UpdateTimerDisplay(float timeRemaining)
         {
-            if (timerText == null) return;
-
-            // Format as M:SS
+            // Format as M:SS.CC
             int minutes = Mathf.FloorToInt(timeRemaining / 60f);
             int seconds = Mathf.FloorToInt(timeRemaining % 60f);
+            int centiseconds = Mathf.FloorToInt((timeRemaining % 1f) * 100f);
+            string formatted = $"{minutes}:{seconds:D2}.{centiseconds:D2}";
 
-            timerText.text = $"{minutes}:{seconds:D2}";
+            if (timerText != null)
+                timerText.text = formatted;
+
+            // Update overlay timer
+            if (overlayTimerText != null)
+                overlayTimerText.text = formatted;
 
             // Change color when time is low (under 10 seconds)
             if (timeRemaining <= 10f && !LevelManager.Instance?.IsTimerFrozen == true)
             {
                 // Flash red when low on time
                 float flash = Mathf.PingPong(Time.unscaledTime * 4f, 1f);
-                timerText.color = Color.Lerp(Color.red, Color.white, flash);
+                Color flashColor = Color.Lerp(Color.red, Color.white, flash);
+                if (timerText != null) timerText.color = flashColor;
+                // On overlay, flash between dark red and black (visible on light wood)
+                Color overlayFlash = Color.Lerp(new Color(0.7f, 0, 0), Color.black, flash);
+                if (overlayTimerText != null) overlayTimerText.color = overlayFlash;
             }
             else if (!LevelManager.Instance?.IsTimerFrozen == true)
             {
-                timerText.color = Color.white;
+                if (timerText != null) timerText.color = Color.white;
+                if (overlayTimerText != null) overlayTimerText.color = Color.black;
             }
         }
 
@@ -3438,6 +3934,8 @@ Antonia and Joakim Engfors
         {
             if (moveCountText != null)
                 moveCountText.text = moves.ToString();
+            if (overlayMovesText != null)
+                overlayMovesText.text = moves.ToString();
         }
 
         private void UpdateMatchDisplay(int matches)
@@ -4608,7 +5106,7 @@ Antonia and Joakim Engfors
             expandRect.sizeDelta = new Vector2(30, 30);
 
             var expandText = expandGO.AddComponent<TextMeshProUGUI>();
-            expandText.text = isExpanded ? "\u25BC" : "\u25B6"; // Down or right arrow
+            expandText.text = isExpanded ? "v" : ">"; // Down or right arrow
             expandText.fontSize = 24;
             expandText.alignment = TextAlignmentOptions.Center;
             expandText.color = Color.white;
@@ -4713,7 +5211,7 @@ Antonia and Joakim Engfors
                 markerTextRect.offsetMax = Vector2.zero;
 
                 var markerText = markerTextGO.AddComponent<TextMeshProUGUI>();
-                markerText.text = isComplete ? "\u2713" : a.targetValue.ToString();
+                markerText.text = isComplete ? "OK" : a.targetValue.ToString();
                 markerText.fontSize = 14;
                 markerText.fontStyle = FontStyles.Bold;
                 markerText.alignment = TextAlignmentOptions.Center;
@@ -4798,7 +5296,7 @@ Antonia and Joakim Engfors
             tierTextRect.offsetMax = Vector2.zero;
 
             var tierText = tierTextGO.AddComponent<TextMeshProUGUI>();
-            tierText.text = isUnlocked ? "\u2713" : achievement.tier.ToString().Substring(0, 1);
+            tierText.text = isUnlocked ? "OK" : achievement.tier.ToString().Substring(0, 1);
             tierText.fontSize = 24;
             tierText.fontStyle = FontStyles.Bold;
             tierText.alignment = TextAlignmentOptions.Center;
@@ -4937,7 +5435,7 @@ Antonia and Joakim Engfors
             iconTextRect.offsetMax = Vector2.zero;
 
             var iconText = iconTextGO.AddComponent<TextMeshProUGUI>();
-            iconText.text = isUnlocked ? "\u2713" : "\u2605";
+            iconText.text = isUnlocked ? "OK" : "*";
             iconText.fontSize = 32;
             iconText.fontStyle = FontStyles.Bold;
             iconText.alignment = TextAlignmentOptions.Center;
