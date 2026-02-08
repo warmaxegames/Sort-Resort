@@ -22,11 +22,11 @@
 
 ## Current Status
 
-**Last Updated:** 2026-02-05
+**Last Updated:** 2026-02-08
 
 ### Working Features (Unity)
 - Splash screen → Level select with fade transition
-- 5 worlds: Island, Supermarket, Farm, Tavern, Space (5-11 levels each, 31 total)
+- 5 worlds: Island (100 levels), Supermarket, Farm, Tavern, Space (5-11 levels each for non-Island)
 - Full game flow: Level Select → Play → Complete/Fail → Back/Next
 - Drag-drop with visual feedback, sounds, triple-match detection
 - Row advancement, locked containers with unlock animation
@@ -36,13 +36,14 @@
 - **4 Game Modes** - Free Play (green, no limits), Star Mode (pink, move-based stars), Timer Mode (blue, beat the clock), Hard Mode (gold, stars + timer). Separate progress per mode, mode selector tabs on level select, mode-specific portal tinting, mode-specific vortex animations (green/pink/blue/gold per mode), mode-specific level complete animations (stopwatch count-up for timer, "New Record!" pulse), mode-specific HUD visibility, Hard Mode locked per-world until Star+Timer 100% complete, debug unlock/lock button on level select
 - Achievement system (88 achievements with UI, notifications, rewards)
 - Level solver tool (Editor window + in-game auto-solve button)
-- **Dialogue system** - Typewriter text with Animal Crossing-style voices, mascot portraits, per-world welcome dialogues, voice toggle in settings, timer pauses during dialogue
+- **Dialogue system** - Typewriter text with Animal Crossing-style voices, mascot portraits, voice toggle in settings, timer pauses during dialogue. Full story content: 5 worlds × 11 checkpoints (welcome + every 10 levels), 4 mode tutorial dialogues, 5 hard mode unlock dialogues. Story is mode-agnostic (fires in any mode, plays once). Dr. Miller overarching mystery across all worlds.
 - **Level complete screen** - Mode-specific animations: Star Mode has rays, curtains, star ribbon, grey/gold star animations, dancing stars (3-star); Timer Mode has stopwatch count-up animation with "New Record!" bounce; Free Play skips stars; Hard Mode combines stars + timer. All modes: mascot thumbsup (Island), bottom board animation, sprite-based buttons
 - **Level failed screen** - Fullscreen fail_screen.png background, reason text ("Out of Moves"/"Out of Time"), animated bottom board, sprite-based buttons (retry, level select)
 - **Fail-before-last-move** - Level fails after second-to-last move if not complete (prevents awkward final-move-still-fails scenario)
 - **Star threshold separation** - All thresholds guaranteed at least 1 move apart
 - **Mode-specific HUD overlay** - All 4 modes have custom ui_top bar overlays (free_ui_top, stars_ui_top, timer_ui_top, hard_mode_UI_top) with mode-specific counter text positions. World icon overlay (island only). Sprite-based settings gear button (116x116, with pressed state) and undo button (142x62, with pressed state) positioned on the overlay. Settings gear opens pause menu (Resume, Restart, Settings, Quit to Menu)
 - **Portal completion overlays** - Mode-specific portal overlays on level select: free_portal (checkmark) for FreePlay, 1/2/3star_portal for StarMode, timer_portal (with best time text) for TimerMode, both star+timer overlays layered for HardMode
+- **Level generator** - Python reverse-play generator (`reverse_generator.py`) builds levels backwards, guaranteeing solvability. Solver-verified with retry mechanism (up to 20 seeds). Star thresholds derived from solver's actual move count. 100 Island levels generated and verified. Locked containers participate in reverse-play with unlock-timing cutoffs.
 
 ---
 
@@ -62,20 +63,14 @@
    - Farm
    - Supermarket
    - Space
-5. **Dialogue System** - Build out content:
-   - Tutorial dialogue
-   - World-by-world stories
-   - Dialogue checkpoints throughout level progression
-6. **Add More Levels** - All worlds need levels beyond current set:
-   - Island
+5. **Generate Levels for Remaining Worlds** - Create world config files like `generate_island_levels.py`:
    - Farm
    - Supermarket
    - Tavern
    - Space
-7. **World Icon Assets** - HUD world icons for non-Island worlds:
+6. **World Icon Assets** - HUD world icons for non-Island worlds:
    - Supermarket, Farm, Tavern, Space
-8. **Game Modes Tutorial Dialogues** - First-time-entering-mode tutorial dialogues
-9. **Mobile/Device Testing** - Test performance on mobile devices, tablets, different screen sizes
+7. **Mobile/Device Testing** - Test performance on mobile devices, tablets, different screen sizes
 
 ### Future Lower Priority Items
 8. **Trophy Room** - World-specific and achievement trophies:
@@ -212,10 +207,15 @@ Container border scale: 1.2 (17% border around slots)
 
 ### Dialogue System
 - **Data**: `Resources/Data/Dialogue/dialogues.json` (mascots, dialogues, triggers)
-- **Mascots**: Whiskers (island), Tommy (supermarket), Mara (farm), Hog (tavern), Leika (space)
+- **Story Bible**: `Story.txt` (root folder) - full narrative, all dialogue text, design notes
+- **Mascots**: Whiskers (island cat), Tommy (supermarket raccoon), Mara (farm alpaca), Mason (tavern hog), Leika (space dog)
 - **Sprites**: `Resources/Sprites/Mascots/{worldId}_{mascotName}_{expression}.png`
 - **Voice clips**: `Resources/Audio/Dialogue/Letters/A-Z.wav` (per-letter Animal Crossing style)
-- **Trigger types**: WorldFirstLevel (type:1), LevelComplete (type:0), plus unused types in enum
+- **Trigger types**: LevelComplete (0), WorldFirstLevel (1), WorldComplete (2), MatchMilestone (3), StarMilestone (4), FirstPlay (5), ReturnAfterAbsence (6), Achievement (7), ModeFirstPlay (8), HardModeUnlock (9)
+- **Mode-agnostic story**: Story dialogues fire on level completion in ANY mode. `playOnce: true` prevents repeats across modes. Player completes world story by reaching level 100 in any single mode.
+- **Mode tutorials**: ModeFirstPlay triggers (type 8) fire first time player switches to each mode. Uses `gameMode` field on trigger (0=FreePlay, 1=StarMode, 2=TimerMode, 3=HardMode). Whiskers delivers all mode tutorials.
+- **Hard Mode unlock**: HardModeUnlock triggers (type 9) fire when Hard Mode unlocks for a world. Each world's own mascot congratulates. Checked in `GameManager.CompleteLevel()` after saving progress.
+- **Dialogue content**: 65 dialogue sequences total - 5 worlds × 11 checkpoints (welcome + levels 10-100) + 4 mode tutorials + 5 hard mode unlocks
 - **UI**: DialogueUI uses CanvasGroup for visibility (not SetActive), retries subscription in Update()
 - **Settings**: Voice toggle via `SaveManager.IsVoiceEnabled()` / `SetVoiceEnabled()`
 - **Persistence**: Played dialogues stored in PlayerPrefs key "PlayedDialogues" (pipe-delimited)
@@ -241,13 +241,27 @@ Container border scale: 1.2 (17% border around slots)
 - Level Data: `Resources/Data/Levels/{World}/`
 - Dialogue Data: `Resources/Data/Dialogue/`
 
+### Level Generator (Python)
+- **Infrastructure**: `level_generator.py` - WorldConfig, progression curves, container builder, specs
+- **Reverse generator**: `reverse_generator.py` - reverse-play item placement + solver-verified generation
+- **Island config**: `generate_island_levels.py` - imports from reverse_generator, defines 50 Island items
+- **Python solver**: `level_solver.py` - greedy solver port for verification during generation
+- **Usage**: `python generate_island_levels.py` (creates 100 levels in `Resources/Data/Levels/Island/`)
+- **Algorithm**: Reverse-play construction V2 (no work container). For each triple: pick random container, push existing items deeper, place triple at front, scatter 1-3 items to other containers. Each scatter = 1 forward move.
+- **Locked containers**: Participate in reverse-play loop with cutoff timing. Last `unlock_matches_required` triples exclude locked container (those forward triples unlock it).
+- **Validation**: No starting triples at ANY row depth. Solver verifies each level; retries with different seed on failure (up to 20 attempts). Star thresholds use solver's actual move count.
+- **To add a new world**: Create `generate_{world}_levels.py` with a `WorldConfig` defining item groups, then run it.
+
 ### Level Structure (All Worlds)
-- level_001: 3 containers, 2 item types, intro
-- level_002: 5 containers, 5 item types, multi-row
-- level_003: 10 containers (carousel), 6 item types, 2 locked
-- level_004: 30 containers (vertical carousel), 6 item types
-- level_005: 9 containers (despawn-on-match), 6 item types
-- level_006 (Island only): moving_tracks format
+- level_001: 3 containers, 2 item types, intro (hardcoded 2-move tutorial)
+- Levels 2-10: 4-7 containers, increasing item types, multi-row
+- Levels 11+: locked containers introduced
+- Levels 16+: single-slot containers
+- Levels 26+: back-and-forth movement
+- Levels 31+: carousel movement
+- Levels 36+: despawn-on-match
+- Levels 41+: all mechanics combined
+- Fill ratios: 57-87% across levels, 50 item types per world
 
 ### Level Solver
 - Editor: Tools > Sort Resort > Solver > Solve Level...

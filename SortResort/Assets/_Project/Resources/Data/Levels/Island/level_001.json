@@ -3,18 +3,18 @@
     "world_id": "island",
     "name": "level_001",
     "star_move_thresholds": [
-        5,
-        6,
-        7,
-        8
+        2,
+        3,
+        4,
+        5
     ],
-    "time_limit_seconds": 36,
+    "time_limit_seconds": 12,
     "containers": [
         {
             "id": "container_1",
             "position": {
                 "x": 200.0,
-                "y": 230.0
+                "y": 250.0
             },
             "container_type": "standard",
             "container_image": "island_container",
@@ -36,14 +36,14 @@
             "despawn_on_match": false,
             "initial_items": [
                 {
-                    "id": "sandpale_red",
-                    "row": 0,
-                    "slot": 1
-                },
-                {
-                    "id": "surfboardpalmtrees",
+                    "id": "pineapple",
                     "row": 0,
                     "slot": 0
+                },
+                {
+                    "id": "pineapple",
+                    "row": 0,
+                    "slot": 1
                 }
             ]
         },
@@ -51,7 +51,7 @@
             "id": "container_2",
             "position": {
                 "x": 540.0,
-                "y": 230.0
+                "y": 250.0
             },
             "container_type": "standard",
             "container_image": "island_container",
@@ -73,9 +73,14 @@
             "despawn_on_match": false,
             "initial_items": [
                 {
-                    "id": "sandpale_red",
+                    "id": "coconut",
                     "row": 0,
-                    "slot": 2
+                    "slot": 0
+                },
+                {
+                    "id": "coconut",
+                    "row": 0,
+                    "slot": 1
                 }
             ]
         },
@@ -83,7 +88,7 @@
             "id": "container_3",
             "position": {
                 "x": 880.0,
-                "y": 230.0
+                "y": 250.0
             },
             "container_type": "standard",
             "container_image": "island_container",
@@ -105,59 +110,12 @@
             "despawn_on_match": false,
             "initial_items": [
                 {
-                    "id": "vanilladrink",
+                    "id": "pineapple",
                     "row": 0,
                     "slot": 0
                 },
                 {
-                    "id": "sandpale_red",
-                    "row": 0,
-                    "slot": 1
-                },
-                {
-                    "id": "surfboardpalmtrees",
-                    "row": 0,
-                    "slot": 2
-                }
-            ]
-        },
-        {
-            "id": "container_4",
-            "position": {
-                "x": 200.0,
-                "y": 480.0
-            },
-            "container_type": "standard",
-            "container_image": "island_container",
-            "slot_count": 3,
-            "max_rows_per_slot": 1,
-            "is_locked": false,
-            "unlock_matches_required": 0,
-            "lock_overlay_image": "",
-            "unlock_animation": "",
-            "is_moving": false,
-            "move_type": "",
-            "move_direction": "",
-            "move_speed": 50.0,
-            "move_distance": 200.0,
-            "track_id": "",
-            "is_falling": false,
-            "fall_speed": 100.0,
-            "fall_target_y": 0.0,
-            "despawn_on_match": false,
-            "initial_items": [
-                {
-                    "id": "vanilladrink",
-                    "row": 0,
-                    "slot": 2
-                },
-                {
-                    "id": "vanilladrink",
-                    "row": 0,
-                    "slot": 0
-                },
-                {
-                    "id": "surfboardpalmtrees",
+                    "id": "coconut",
                     "row": 0,
                     "slot": 1
                 }
