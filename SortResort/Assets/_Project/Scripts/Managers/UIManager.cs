@@ -120,7 +120,7 @@ namespace SortResort
         private LevelCompletionData lastCompletionData;
         private Coroutine newRecordPulseCoroutine;
 
-        // Hard Mode HUD overlay
+        // Mode-specific HUD overlay
         private GameObject hudModeOverlay;
         private Image hudOverlayBgImage;
         private Image hudWorldIconImage;
@@ -130,6 +130,8 @@ namespace SortResort
         private Image hudPanelBgImage;
         private GameObject statsContainerGO;
         private GameObject hudSettingsOverlay;
+        private Button undoSpriteButton;
+        private CanvasGroup undoSpriteCanvasGroup;
 
         private GameObject levelFailedPanel;
         private TextMeshProUGUI levelFailedReasonText;
@@ -1303,8 +1305,8 @@ namespace SortResort
             rect.anchorMin = new Vector2(1, 1);
             rect.anchorMax = new Vector2(1, 1);
             rect.pivot = new Vector2(1, 1);
-            rect.anchoredPosition = new Vector2(-20, -20);
-            rect.sizeDelta = new Vector2(290, 50);
+            rect.anchoredPosition = new Vector2(-120, -20);
+            rect.sizeDelta = new Vector2(200, 50);
 
             var layout = buttonsGO.AddComponent<HorizontalLayoutGroup>();
             layout.spacing = 10;
@@ -1319,13 +1321,7 @@ namespace SortResort
             autoSolveButton = CreateButton(buttonsGO.transform, "AutoSolve", "Solve", OnAutoSolveClicked, 60, 50);
             autoSolveButton.GetComponentInChildren<TextMeshProUGUI>().color = new Color(0.5f, 1f, 0.5f); // Green tint
 
-            // Undo button - undoes last move
-            undoButton = CreateButton(buttonsGO.transform, "Undo", "Undo", OnUndoClicked, 60, 50);
-            undoButtonCanvasGroup = undoButton.gameObject.AddComponent<CanvasGroup>();
-            // Start disabled (no moves to undo)
-            SetUndoButtonEnabled(false);
-
-            // Settings gear - fullscreen image overlay for pixel-perfect positioning
+            // Settings/Undo overlay - sibling of hudPanel, renders on top
             hudSettingsOverlay = new GameObject("HUD Settings Overlay");
             hudSettingsOverlay.transform.SetParent(mainCanvas.transform, false);
             var settingsOvRect = hudSettingsOverlay.AddComponent<RectTransform>();
@@ -1334,43 +1330,78 @@ namespace SortResort
             settingsOvRect.offsetMin = Vector2.zero;
             settingsOvRect.offsetMax = Vector2.zero;
 
-            // Place just above hudPanel so the gear renders on top
+            // Place just above hudPanel so buttons render on top
             if (hudPanel != null)
                 hudSettingsOverlay.transform.SetSiblingIndex(hudPanel.transform.GetSiblingIndex() + 1);
 
-            // Fullscreen image for the gear visual (raycast disabled - display only)
-            var gearVisualGO = new GameObject("Settings Gear Visual");
-            gearVisualGO.transform.SetParent(hudSettingsOverlay.transform, false);
-            var gearVisRect = gearVisualGO.AddComponent<RectTransform>();
-            gearVisRect.anchorMin = Vector2.zero;
-            gearVisRect.anchorMax = Vector2.one;
-            gearVisRect.offsetMin = Vector2.zero;
-            gearVisRect.offsetMax = Vector2.zero;
-            var gearVisImg = gearVisualGO.AddComponent<Image>();
-            var gearTex = Resources.Load<Texture2D>("Sprites/UI/HUD/settings_button_UI_top");
-            if (gearTex != null)
-            {
-                gearVisImg.sprite = Sprite.Create(gearTex,
-                    new Rect(0, 0, gearTex.width, gearTex.height),
-                    new Vector2(0.5f, 0.5f), 100f);
-            }
-            gearVisImg.preserveAspect = true;
-            gearVisImg.raycastTarget = false;
-
-            // Invisible click button at gear location (~pixel 990, 50 in 1080x1920)
+            // Settings gear - 116x116 sprite button at anchor (0.919, 0.957)
             var gearBtnGO = new GameObject("Settings Gear Button");
             gearBtnGO.transform.SetParent(hudSettingsOverlay.transform, false);
             var gearBtnRect = gearBtnGO.AddComponent<RectTransform>();
-            gearBtnRect.anchorMin = new Vector2(0.917f, 0.974f);
-            gearBtnRect.anchorMax = new Vector2(0.917f, 0.974f);
+            gearBtnRect.anchorMin = new Vector2(0.919f, 0.957f);
+            gearBtnRect.anchorMax = new Vector2(0.919f, 0.957f);
             gearBtnRect.pivot = new Vector2(0.5f, 0.5f);
             gearBtnRect.anchoredPosition = Vector2.zero;
-            gearBtnRect.sizeDelta = new Vector2(100, 100);
+            gearBtnRect.sizeDelta = new Vector2(116, 116);
             var gearBtnImg = gearBtnGO.AddComponent<Image>();
-            gearBtnImg.color = new Color(0, 0, 0, 0); // Invisible
+            gearBtnImg.preserveAspect = true;
+            var gearTex = Resources.Load<Texture2D>("Sprites/UI/HUD/settings_button");
+            if (gearTex != null)
+            {
+                gearBtnImg.sprite = Sprite.Create(gearTex,
+                    new Rect(0, 0, gearTex.width, gearTex.height),
+                    new Vector2(0.5f, 0.5f), 100f);
+            }
             var gearBtn = gearBtnGO.AddComponent<Button>();
             gearBtn.targetGraphic = gearBtnImg;
+            // Pressed state sprite
+            var gearPressedTex = Resources.Load<Texture2D>("Sprites/UI/HUD/settings_button_pressed");
+            if (gearPressedTex != null)
+            {
+                var spriteState = new SpriteState();
+                spriteState.pressedSprite = Sprite.Create(gearPressedTex,
+                    new Rect(0, 0, gearPressedTex.width, gearPressedTex.height),
+                    new Vector2(0.5f, 0.5f), 100f);
+                gearBtn.spriteState = spriteState;
+                gearBtn.transition = Selectable.Transition.SpriteSwap;
+            }
             gearBtn.onClick.AddListener(OnPauseClicked);
+
+            // Undo button - 142x62 sprite button at anchor (0.919, 0.906), below settings gear
+            var undoBtnGO = new GameObject("Undo Sprite Button");
+            undoBtnGO.transform.SetParent(hudSettingsOverlay.transform, false);
+            var undoBtnRect = undoBtnGO.AddComponent<RectTransform>();
+            undoBtnRect.anchorMin = new Vector2(0.919f, 0.906f);
+            undoBtnRect.anchorMax = new Vector2(0.919f, 0.906f);
+            undoBtnRect.pivot = new Vector2(0.5f, 0.5f);
+            undoBtnRect.anchoredPosition = Vector2.zero;
+            undoBtnRect.sizeDelta = new Vector2(142, 62);
+            var undoBtnImg = undoBtnGO.AddComponent<Image>();
+            undoBtnImg.preserveAspect = true;
+            var undoTex = Resources.Load<Texture2D>("Sprites/UI/HUD/undo_button");
+            if (undoTex != null)
+            {
+                undoBtnImg.sprite = Sprite.Create(undoTex,
+                    new Rect(0, 0, undoTex.width, undoTex.height),
+                    new Vector2(0.5f, 0.5f), 100f);
+            }
+            undoSpriteButton = undoBtnGO.AddComponent<Button>();
+            undoSpriteButton.targetGraphic = undoBtnImg;
+            // Pressed state sprite
+            var undoPressedTex = Resources.Load<Texture2D>("Sprites/UI/HUD/undo_button_pressed");
+            if (undoPressedTex != null)
+            {
+                var spriteState2 = new SpriteState();
+                spriteState2.pressedSprite = Sprite.Create(undoPressedTex,
+                    new Rect(0, 0, undoPressedTex.width, undoPressedTex.height),
+                    new Vector2(0.5f, 0.5f), 100f);
+                undoSpriteButton.spriteState = spriteState2;
+                undoSpriteButton.transition = Selectable.Transition.SpriteSwap;
+            }
+            undoSpriteButton.onClick.AddListener(OnUndoClicked);
+            undoSpriteCanvasGroup = undoBtnGO.AddComponent<CanvasGroup>();
+            // Start disabled (no moves to undo)
+            SetUndoButtonEnabled(false);
 
             hudSettingsOverlay.SetActive(false);
         }
@@ -1415,20 +1446,84 @@ namespace SortResort
             hudWorldIconImage.preserveAspect = true;
             hudWorldIconImage.raycastTarget = false;
 
-            // Counter text elements - positioned at bubble centers
-            // Level counter at anchor (0.3194, 0.9188)
+            // Counter text elements - positions will be set per-mode at level start
+            // Bubble diameter: ~120px (small) / ~174px (timer), centered at anchor Y=0.9188
             overlayLevelText = CreateOverlayCounterText(hudModeOverlay.transform, "Overlay Level",
-                new Vector2(0.3194f, 0.9188f), 100f, 80f, 36);
+                new Vector2(0.5f, 0.9188f), 120f, 120f, 72);
 
-            // Moves counter at anchor (0.5269, 0.9188)
             overlayMovesText = CreateOverlayCounterText(hudModeOverlay.transform, "Overlay Moves",
-                new Vector2(0.5269f, 0.9188f), 100f, 80f, 36);
+                new Vector2(0.5f, 0.9188f), 120f, 120f, 72);
 
-            // Timer counter at anchor (0.7407, 0.9188)
             overlayTimerText = CreateOverlayCounterText(hudModeOverlay.transform, "Overlay Timer",
-                new Vector2(0.7407f, 0.9188f), 150f, 80f, 28);
+                new Vector2(0.5f, 0.9188f), 174f, 120f, 45);
 
             hudModeOverlay.SetActive(false);
+        }
+
+        /// <summary>
+        /// Positions the overlay counter texts based on which counters the current mode uses.
+        /// </summary>
+        private void PositionOverlayCounters(GameMode mode)
+        {
+            // Hide all first
+            if (overlayLevelText != null) overlayLevelText.gameObject.SetActive(false);
+            if (overlayMovesText != null) overlayMovesText.gameObject.SetActive(false);
+            if (overlayTimerText != null) overlayTimerText.gameObject.SetActive(false);
+
+            switch (mode)
+            {
+                case GameMode.FreePlay:
+                    // Level only, centered
+                    SetOverlayTextAnchor(overlayLevelText, new Vector2(0.500f, 0.9188f));
+                    if (overlayLevelText != null) overlayLevelText.gameObject.SetActive(true);
+                    break;
+
+                case GameMode.StarMode:
+                    // Level + Moves
+                    SetOverlayTextAnchor(overlayLevelText, new Vector2(0.389f, 0.9188f));
+                    SetOverlayTextAnchor(overlayMovesText, new Vector2(0.614f, 0.9188f));
+                    if (overlayLevelText != null) overlayLevelText.gameObject.SetActive(true);
+                    if (overlayMovesText != null) overlayMovesText.gameObject.SetActive(true);
+                    break;
+
+                case GameMode.TimerMode:
+                    // Level + Timer
+                    SetOverlayTextAnchor(overlayLevelText, new Vector2(0.381f, 0.9188f));
+                    SetOverlayTextAnchor(overlayTimerText, new Vector2(0.621f, 0.9188f));
+                    if (overlayLevelText != null) overlayLevelText.gameObject.SetActive(true);
+                    if (overlayTimerText != null) overlayTimerText.gameObject.SetActive(true);
+                    break;
+
+                case GameMode.HardMode:
+                    // Level + Moves + Timer
+                    SetOverlayTextAnchor(overlayLevelText, new Vector2(0.276f, 0.9188f));
+                    SetOverlayTextAnchor(overlayMovesText, new Vector2(0.500f, 0.9188f));
+                    SetOverlayTextAnchor(overlayTimerText, new Vector2(0.732f, 0.9188f));
+                    if (overlayLevelText != null) overlayLevelText.gameObject.SetActive(true);
+                    if (overlayMovesText != null) overlayMovesText.gameObject.SetActive(true);
+                    if (overlayTimerText != null) overlayTimerText.gameObject.SetActive(true);
+                    break;
+            }
+        }
+
+        private void SetOverlayTextAnchor(TextMeshProUGUI text, Vector2 anchor)
+        {
+            if (text == null) return;
+            var rt = text.GetComponent<RectTransform>();
+            rt.anchorMin = anchor;
+            rt.anchorMax = anchor;
+        }
+
+        private string GetOverlayBarPath(GameMode mode)
+        {
+            switch (mode)
+            {
+                case GameMode.FreePlay:  return "Sprites/UI/HUD/free_ui_top";
+                case GameMode.StarMode:  return "Sprites/UI/HUD/stars_ui_top";
+                case GameMode.TimerMode: return "Sprites/UI/HUD/timer_ui_top";
+                case GameMode.HardMode:  return "Sprites/UI/HUD/hard_mode_UI_top";
+                default:                 return "Sprites/UI/HUD/free_ui_top";
+            }
         }
 
         private TextMeshProUGUI CreateOverlayCounterText(Transform parent, string name,
@@ -1449,7 +1544,7 @@ namespace SortResort
             text.fontSize = fontSize;
             text.fontStyle = FontStyles.Bold;
             text.alignment = TextAlignmentOptions.Center;
-            text.color = Color.black;
+            text.color = Color.white;
             text.enableWordWrapping = false;
             text.overflowMode = TextOverflowModes.Overflow;
             text.raycastTarget = false;
@@ -1466,6 +1561,15 @@ namespace SortResort
             if (undoButtonCanvasGroup != null)
             {
                 undoButtonCanvasGroup.alpha = enabled ? 1f : 0.4f;
+            }
+            // Sprite-based undo button
+            if (undoSpriteButton != null)
+            {
+                undoSpriteButton.interactable = enabled;
+            }
+            if (undoSpriteCanvasGroup != null)
+            {
+                undoSpriteCanvasGroup.alpha = enabled ? 1f : 0.4f;
             }
         }
 
@@ -3249,69 +3353,64 @@ Antonia and Joakim Engfors
             if (timerContainer != null)
                 timerContainer.SetActive(false);
 
-            // Mode-specific HUD overlay
-            bool useOverlay = false;
-            if (currentMode == GameMode.HardMode)
-            {
-                // Check if we have assets for this world
-                string overlayBarPath = $"Sprites/UI/HUD/hard_mode_UI_top";
-                string overlayIconPath = $"Sprites/UI/HUD/{worldId}_icon_UI_top";
-                var barTex = Resources.Load<Texture2D>(overlayBarPath);
-                var iconTex = Resources.Load<Texture2D>(overlayIconPath);
+            // Mode-specific HUD overlay - all modes get their own bar
+            string overlayBarPath = GetOverlayBarPath(currentMode);
+            string overlayIconPath = $"Sprites/UI/HUD/{worldId}_icon_UI_top";
+            var barTex = Resources.Load<Texture2D>(overlayBarPath);
+            var iconTex = Resources.Load<Texture2D>(overlayIconPath);
 
-                if (barTex != null)
+            if (barTex != null)
+            {
+                // Show overlay
+                if (hudModeOverlay != null)
+                    hudModeOverlay.SetActive(true);
+
+                // Set bar sprite
+                if (hudOverlayBgImage != null)
                 {
-                    useOverlay = true;
-
-                    // Show overlay
-                    if (hudModeOverlay != null)
-                        hudModeOverlay.SetActive(true);
-
-                    // Set bar sprite
-                    if (hudOverlayBgImage != null)
-                    {
-                        hudOverlayBgImage.sprite = Sprite.Create(barTex,
-                            new Rect(0, 0, barTex.width, barTex.height),
-                            new Vector2(0.5f, 0.5f), 100f);
-                    }
-
-                    // Set world icon sprite (or hide if missing)
-                    if (hudWorldIconImage != null)
-                    {
-                        if (iconTex != null)
-                        {
-                            hudWorldIconImage.sprite = Sprite.Create(iconTex,
-                                new Rect(0, 0, iconTex.width, iconTex.height),
-                                new Vector2(0.5f, 0.5f), 100f);
-                            hudWorldIconImage.gameObject.SetActive(true);
-                        }
-                        else
-                        {
-                            hudWorldIconImage.gameObject.SetActive(false);
-                        }
-                    }
-
-                    // Set overlay counter texts
-                    if (overlayLevelText != null)
-                        overlayLevelText.text = levelNumber.ToString();
-                    if (overlayMovesText != null)
-                        overlayMovesText.text = "0";
-                    if (overlayTimerText != null)
-                        overlayTimerText.text = "0:00.00";
-
-                    // Hide default HUD elements (background, title, stats) but keep buttons + stars
-                    if (hudPanelBgImage != null)
-                        hudPanelBgImage.color = new Color(0, 0, 0, 0);
-                    if (levelTitleText != null)
-                        levelTitleText.gameObject.SetActive(false);
-                    if (statsContainerGO != null)
-                        statsContainerGO.SetActive(false);
+                    hudOverlayBgImage.sprite = Sprite.Create(barTex,
+                        new Rect(0, 0, barTex.width, barTex.height),
+                        new Vector2(0.5f, 0.5f), 100f);
                 }
-            }
 
-            if (!useOverlay)
+                // Set world icon sprite (or hide if missing)
+                if (hudWorldIconImage != null)
+                {
+                    if (iconTex != null)
+                    {
+                        hudWorldIconImage.sprite = Sprite.Create(iconTex,
+                            new Rect(0, 0, iconTex.width, iconTex.height),
+                            new Vector2(0.5f, 0.5f), 100f);
+                        hudWorldIconImage.gameObject.SetActive(true);
+                    }
+                    else
+                    {
+                        hudWorldIconImage.gameObject.SetActive(false);
+                    }
+                }
+
+                // Position and show/hide counter texts based on mode
+                PositionOverlayCounters(currentMode);
+
+                // Set overlay counter text values
+                if (overlayLevelText != null)
+                    overlayLevelText.text = levelNumber.ToString();
+                if (overlayMovesText != null)
+                    overlayMovesText.text = "0";
+                if (overlayTimerText != null)
+                    overlayTimerText.text = "0:00.00";
+
+                // Hide default HUD elements (background, title, stats) but keep buttons + stars
+                if (hudPanelBgImage != null)
+                    hudPanelBgImage.color = new Color(0, 0, 0, 0);
+                if (levelTitleText != null)
+                    levelTitleText.gameObject.SetActive(false);
+                if (statsContainerGO != null)
+                    statsContainerGO.SetActive(false);
+            }
+            else
             {
-                // Default HUD - restore everything
+                // No bar asset - fallback to default HUD
                 if (hudModeOverlay != null)
                     hudModeOverlay.SetActive(false);
                 if (hudPanelBgImage != null)
@@ -3811,7 +3910,7 @@ Antonia and Joakim Engfors
             if (overlayTimerText != null)
             {
                 overlayTimerText.text = "0:00.00";
-                overlayTimerText.color = Color.black;
+                overlayTimerText.color = Color.white;
             }
         }
 
@@ -3892,9 +3991,9 @@ Antonia and Joakim Engfors
             // Visual feedback for frozen timer (e.g., color change)
             if (timerText != null)
                 timerText.color = isFrozen ? Color.cyan : Color.white;
-            // Overlay timer: cyan on light wood is hard to see, use dark teal instead
+            // Overlay timer: use cyan for frozen, white for normal
             if (overlayTimerText != null)
-                overlayTimerText.color = isFrozen ? new Color(0, 0.4f, 0.4f) : Color.black;
+                overlayTimerText.color = isFrozen ? Color.cyan : Color.white;
         }
 
         private void UpdateTimerDisplay(float timeRemaining)
@@ -3919,14 +4018,14 @@ Antonia and Joakim Engfors
                 float flash = Mathf.PingPong(Time.unscaledTime * 4f, 1f);
                 Color flashColor = Color.Lerp(Color.red, Color.white, flash);
                 if (timerText != null) timerText.color = flashColor;
-                // On overlay, flash between dark red and black (visible on light wood)
-                Color overlayFlash = Color.Lerp(new Color(0.7f, 0, 0), Color.black, flash);
+                // On overlay, flash between red and white
+                Color overlayFlash = Color.Lerp(Color.red, Color.white, flash);
                 if (overlayTimerText != null) overlayTimerText.color = overlayFlash;
             }
             else if (!LevelManager.Instance?.IsTimerFrozen == true)
             {
                 if (timerText != null) timerText.color = Color.white;
-                if (overlayTimerText != null) overlayTimerText.color = Color.black;
+                if (overlayTimerText != null) overlayTimerText.color = Color.white;
             }
         }
 

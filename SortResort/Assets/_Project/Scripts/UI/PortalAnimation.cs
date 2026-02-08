@@ -13,7 +13,13 @@ namespace SortResort.UI
     {
         public static PortalAnimation Instance { get; private set; }
 
-        private static Sprite[] cachedFrames;
+        private static readonly string[] ModeFramePaths = {
+            "Sprites/UI/Portal/FreePlay",   // FreePlay = 0
+            "Sprites/UI/Portal/StarMode",   // StarMode = 1
+            "Sprites/UI/Portal/TimerMode",  // TimerMode = 2
+            "Sprites/UI/Portal/HardMode"    // HardMode = 3
+        };
+        private static Sprite[][] modeFrames; // [modeIndex][frameIndex]
 
         private Image portalImage;
         private RectTransform portalRect;
@@ -28,6 +34,7 @@ namespace SortResort.UI
         private Action onComplete;
         private bool callbackFired;
         private float hideTimer;
+        private Sprite[] activeFrames; // frames for the currently playing mode
 
         // Fire the callback at frame 15 so the fade starts while the vortex is still playing
         private const int callbackFrame = 15;
@@ -83,31 +90,36 @@ namespace SortResort.UI
 
         private void LoadFrames()
         {
-            if (cachedFrames != null) return;
+            if (modeFrames != null) return;
 
-            var textures = Resources.LoadAll<Texture2D>("Sprites/UI/Portal");
-            if (textures.Length == 0)
+            modeFrames = new Sprite[ModeFramePaths.Length][];
+
+            for (int m = 0; m < ModeFramePaths.Length; m++)
             {
-                Debug.LogWarning("[PortalAnimation] No frames found at Sprites/UI/Portal");
-                cachedFrames = new Sprite[0];
-                return;
+                var textures = Resources.LoadAll<Texture2D>(ModeFramePaths[m]);
+                if (textures.Length == 0)
+                {
+                    Debug.LogWarning($"[PortalAnimation] No frames found at {ModeFramePaths[m]}");
+                    modeFrames[m] = new Sprite[0];
+                    continue;
+                }
+
+                Array.Sort(textures, (a, b) => a.name.CompareTo(b.name));
+
+                modeFrames[m] = new Sprite[textures.Length];
+                for (int i = 0; i < textures.Length; i++)
+                {
+                    var tex = textures[i];
+                    modeFrames[m][i] = Sprite.Create(
+                        tex,
+                        new Rect(0, 0, tex.width, tex.height),
+                        new Vector2(0.5f, 0.5f),
+                        100f
+                    );
+                }
+
+                Debug.Log($"[PortalAnimation] Loaded {modeFrames[m].Length} frames for {(GameMode)m}");
             }
-
-            Array.Sort(textures, (a, b) => a.name.CompareTo(b.name));
-
-            cachedFrames = new Sprite[textures.Length];
-            for (int i = 0; i < textures.Length; i++)
-            {
-                var tex = textures[i];
-                cachedFrames[i] = Sprite.Create(
-                    tex,
-                    new Rect(0, 0, tex.width, tex.height),
-                    new Vector2(0.5f, 0.5f),
-                    100f
-                );
-            }
-
-            Debug.Log($"[PortalAnimation] Loaded {cachedFrames.Length} portal frames");
         }
 
         /// <summary>
@@ -122,18 +134,22 @@ namespace SortResort.UI
         }
 
         /// <summary>
-        /// Plays the portal animation at the position/size of the given RectTransform,
+        /// Plays the mode-specific portal animation at the position/size of the given RectTransform,
         /// then invokes the callback partway through so the fade overlaps the vortex.
         /// </summary>
-        public void Play(RectTransform sourceButton, Action callback)
+        public void Play(RectTransform sourceButton, GameMode mode, Action callback)
         {
             if (isPlaying) return;
-            if (cachedFrames == null || cachedFrames.Length == 0)
+
+            int modeIndex = (int)mode;
+            if (modeFrames == null || modeIndex < 0 || modeIndex >= modeFrames.Length
+                || modeFrames[modeIndex] == null || modeFrames[modeIndex].Length == 0)
             {
                 callback?.Invoke();
                 return;
             }
 
+            activeFrames = modeFrames[modeIndex];
             onComplete = callback;
             currentFrame = 0;
             timer = 0f;
@@ -148,7 +164,7 @@ namespace SortResort.UI
             // Play the warp sound
             AudioManager.Instance?.PlayWarpSound();
 
-            portalImage.sprite = cachedFrames[0];
+            portalImage.sprite = activeFrames[0];
             canvas.enabled = true;
         }
 
@@ -219,7 +235,7 @@ namespace SortResort.UI
             }
 
             if (reachedEnd) return;
-            if (cachedFrames == null || cachedFrames.Length == 0) return;
+            if (activeFrames == null || activeFrames.Length == 0) return;
 
             timer += Time.unscaledDeltaTime;
             float frameTime = 1f / frameRate;
@@ -229,15 +245,15 @@ namespace SortResort.UI
                 timer -= frameTime;
                 currentFrame++;
 
-                if (currentFrame >= cachedFrames.Length)
+                if (currentFrame >= activeFrames.Length)
                 {
                     // Hold on last frame until hide timer expires
-                    currentFrame = cachedFrames.Length - 1;
+                    currentFrame = activeFrames.Length - 1;
                     reachedEnd = true;
                     return;
                 }
 
-                portalImage.sprite = cachedFrames[currentFrame];
+                portalImage.sprite = activeFrames[currentFrame];
 
                 // Fire callback partway through to start the fade while vortex still plays
                 if (!callbackFired && currentFrame >= callbackFrame)

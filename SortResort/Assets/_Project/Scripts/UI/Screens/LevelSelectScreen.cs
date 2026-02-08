@@ -27,16 +27,18 @@ namespace SortResort.UI
         [Header("Settings")]
         [SerializeField] private int levelsPerWorld = 100;
 
-        // Cached sprites for level portals
-        private Sprite portalSprite;
+        // Cached sprites for level portals (one per game mode)
+        private Sprite[] portalSprites = new Sprite[4]; // [modeIndex] = first vortex frame
         private Sprite[] starSprites = new Sprite[4]; // 0 = none, 1-3 = star count
+        private Sprite timerPortalSprite;  // timer overlay for Timer/Hard modes
+        private Sprite freePortalSprite;   // checkmark overlay for Free mode
 
         // Mode tab colors
         private static readonly Color[] ModeColors = {
             new Color(0.3f, 0.8f, 0.3f, 1f),   // FreePlay - green
             new Color(0.9f, 0.4f, 0.6f, 1f),   // StarMode - pink
             new Color(0.3f, 0.6f, 0.9f, 1f),   // TimerMode - blue
-            new Color(0.85f, 0.2f, 0.2f, 1f)   // HardMode - red
+            new Color(0.85f, 0.65f, 0.13f, 1f)  // HardMode - gold
         };
 
         private static readonly string[] ModeNames = { "Free", "Stars", "Timer", "Hard" };
@@ -99,23 +101,48 @@ namespace SortResort.UI
             Debug.Log($"[LevelSelectScreen] Initialized with {levelButtons.Count} level buttons, mode: {selectedMode}, levelsPerWorld: {levelsPerWorld}, gridParent: {(levelGridParent != null ? levelGridParent.name : "NULL")}");
         }
 
+        private static readonly string[] PortalFramePaths = {
+            "Sprites/UI/Portal/FreePlay/portal_00000",   // FreePlay = 0
+            "Sprites/UI/Portal/StarMode/portal_00000",   // StarMode = 1
+            "Sprites/UI/Portal/TimerMode/portal_00000",  // TimerMode = 2
+            "Sprites/UI/Portal/HardMode/portal_00000"    // HardMode = 3
+        };
+
         private void LoadPortalSprites()
         {
-            portalSprite = Resources.Load<Sprite>("Sprites/UI/Icons/level_portal");
-            if (portalSprite == null)
+            for (int i = 0; i < 4; i++)
             {
-                Debug.LogError("[LevelSelectScreen] level_portal.png NOT FOUND at Sprites/UI/Icons/level_portal");
-                portalSprite = Resources.Load<Sprite>("UI/Icons/level_portal");
-                if (portalSprite != null)
-                    Debug.Log("[LevelSelectScreen] Found portal at alternate path UI/Icons/level_portal");
+                var tex = Resources.Load<Texture2D>(PortalFramePaths[i]);
+                if (tex != null)
+                {
+                    portalSprites[i] = Sprite.Create(
+                        tex,
+                        new Rect(0, 0, tex.width, tex.height),
+                        new Vector2(0.5f, 0.5f),
+                        100f
+                    );
+                }
+                else
+                {
+                    Debug.LogWarning($"[LevelSelectScreen] Portal frame not found at {PortalFramePaths[i]}");
+                }
             }
 
             starSprites[0] = null;
-            starSprites[1] = Resources.Load<Sprite>("Sprites/UI/Icons/portal_1_stars");
-            starSprites[2] = Resources.Load<Sprite>("Sprites/UI/Icons/portal_2_stars");
-            starSprites[3] = Resources.Load<Sprite>("Sprites/UI/Icons/portal_3_stars");
+            starSprites[1] = LoadSpriteFromTexture("Sprites/UI/Icons/1star_portal");
+            starSprites[2] = LoadSpriteFromTexture("Sprites/UI/Icons/2star_portal");
+            starSprites[3] = LoadSpriteFromTexture("Sprites/UI/Icons/3star_portal");
+            timerPortalSprite = LoadSpriteFromTexture("Sprites/UI/Icons/timer_portal");
+            freePortalSprite = LoadSpriteFromTexture("Sprites/UI/Icons/free_portal");
 
-            Debug.Log($"[LevelSelectScreen] Loaded sprites - portal:{portalSprite != null}, star1:{starSprites[1] != null}, star2:{starSprites[2] != null}, star3:{starSprites[3] != null}");
+            Debug.Log($"[LevelSelectScreen] Loaded sprites - portals:{portalSprites[0] != null}/{portalSprites[1] != null}/{portalSprites[2] != null}/{portalSprites[3] != null}, stars:{starSprites[1] != null}/{starSprites[2] != null}/{starSprites[3] != null}, timer:{timerPortalSprite != null}, free:{freePortalSprite != null}");
+        }
+
+        private Sprite LoadSpriteFromTexture(string path)
+        {
+            var tex = Resources.Load<Texture2D>(path);
+            if (tex == null) return null;
+            return Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), new Vector2(0.5f, 0.5f), 100f);
         }
 
         private void SetupWorldNavigation()
@@ -277,12 +304,12 @@ namespace SortResort.UI
         }
 
         // ============================================
-        // PORTAL TINT COLOR
+        // PORTAL SPRITE
         // ============================================
 
-        private Color GetPortalTintForMode()
+        private Sprite GetPortalSpriteForMode()
         {
-            return ModeColors[(int)selectedMode];
+            return portalSprites[(int)selectedMode];
         }
 
         // ============================================
@@ -350,11 +377,12 @@ namespace SortResort.UI
             var rect = btnGO.AddComponent<RectTransform>();
             rect.sizeDelta = new Vector2(200, 200);
 
-            // Background - use portal sprite
+            // Background - use mode-specific portal sprite
             var bgImage = btnGO.AddComponent<Image>();
-            if (portalSprite != null)
+            var modeSprite = portalSprites[(int)selectedMode];
+            if (modeSprite != null)
             {
-                bgImage.sprite = portalSprite;
+                bgImage.sprite = modeSprite;
                 bgImage.type = Image.Type.Simple;
                 bgImage.preserveAspect = true;
             }
@@ -391,35 +419,60 @@ namespace SortResort.UI
             levelText.outlineWidth = 0.3f;
             levelText.outlineColor = new Color32(80, 0, 80, 200);
 
-            // Stars overlay image (used in Star/Hard modes)
-            var starsGO = new GameObject("StarsOverlay");
-            starsGO.transform.SetParent(btnGO.transform, false);
-            var starsRect = starsGO.AddComponent<RectTransform>();
-            starsRect.anchorMin = new Vector2(0.11f, 0.22f);
-            starsRect.anchorMax = new Vector2(0.89f, 0.36f);
-            starsRect.offsetMin = Vector2.zero;
-            starsRect.offsetMax = Vector2.zero;
+            // Result overlays container - renders above portal swirl animation (sortingOrder 5001 > 5000)
+            var resultOvGO = new GameObject("ResultOverlays");
+            resultOvGO.transform.SetParent(btnGO.transform, false);
+            var resultOvRect = resultOvGO.AddComponent<RectTransform>();
+            resultOvRect.anchorMin = Vector2.zero;
+            resultOvRect.anchorMax = Vector2.one;
+            resultOvRect.offsetMin = Vector2.zero;
+            resultOvRect.offsetMax = Vector2.zero;
+            var resultCanvas = resultOvGO.AddComponent<Canvas>();
+            resultCanvas.overrideSorting = true;
+            resultCanvas.sortingOrder = 5001;
+            resultOvGO.AddComponent<GraphicRaycaster>();
 
-            var starsImage = starsGO.AddComponent<Image>();
-            starsImage.preserveAspect = true;
-            starsImage.enabled = false;
+            // Timer overlay (full portal size, used in Timer/Hard modes)
+            var timerOvGO = new GameObject("TimerOverlay");
+            timerOvGO.transform.SetParent(resultOvGO.transform, false);
+            var timerOvRect = timerOvGO.AddComponent<RectTransform>();
+            timerOvRect.anchorMin = Vector2.zero;
+            timerOvRect.anchorMax = Vector2.one;
+            timerOvRect.offsetMin = Vector2.zero;
+            timerOvRect.offsetMax = Vector2.zero;
+            var timerOvImage = timerOvGO.AddComponent<Image>();
+            timerOvImage.preserveAspect = true;
+            timerOvImage.raycastTarget = false;
+            timerOvImage.enabled = false;
 
-            // Info text (for timer best time or checkmark)
-            var infoGO = new GameObject("InfoText");
-            infoGO.transform.SetParent(btnGO.transform, false);
-            var infoRect = infoGO.AddComponent<RectTransform>();
-            infoRect.anchorMin = new Vector2(0.1f, 0.05f);
-            infoRect.anchorMax = new Vector2(0.9f, 0.22f);
-            infoRect.offsetMin = Vector2.zero;
-            infoRect.offsetMax = Vector2.zero;
+            // Completion overlay (full portal size, stars/checkmark)
+            var compOvGO = new GameObject("CompletionOverlay");
+            compOvGO.transform.SetParent(resultOvGO.transform, false);
+            var compOvRect = compOvGO.AddComponent<RectTransform>();
+            compOvRect.anchorMin = Vector2.zero;
+            compOvRect.anchorMax = Vector2.one;
+            compOvRect.offsetMin = Vector2.zero;
+            compOvRect.offsetMax = Vector2.zero;
+            var compOvImage = compOvGO.AddComponent<Image>();
+            compOvImage.preserveAspect = true;
+            compOvImage.raycastTarget = false;
+            compOvImage.enabled = false;
 
-            var infoText = infoGO.AddComponent<TextMeshProUGUI>();
-            infoText.text = "";
-            infoText.fontSize = 22;
-            infoText.fontStyle = FontStyles.Bold;
-            infoText.alignment = TextAlignmentOptions.Center;
-            infoText.color = Color.white;
-            infoText.enabled = false;
+            // Best time text (vertically centered in timer_portal dark rounded rectangle)
+            var timeTextGO = new GameObject("BestTimeText");
+            timeTextGO.transform.SetParent(resultOvGO.transform, false);
+            var timeTextRect = timeTextGO.AddComponent<RectTransform>();
+            timeTextRect.anchorMin = new Vector2(0.275f, 0.12f);
+            timeTextRect.anchorMax = new Vector2(0.975f, 0.30f);
+            timeTextRect.offsetMin = Vector2.zero;
+            timeTextRect.offsetMax = Vector2.zero;
+            var bestTimeText = timeTextGO.AddComponent<TextMeshProUGUI>();
+            bestTimeText.text = "";
+            bestTimeText.fontSize = 26;
+            bestTimeText.fontStyle = FontStyles.Bold;
+            bestTimeText.alignment = TextAlignmentOptions.Center;
+            bestTimeText.color = Color.white;
+            bestTimeText.enabled = false;
 
             // Lock overlay
             var lockGO = new GameObject("Lock");
@@ -435,7 +488,7 @@ namespace SortResort.UI
 
             // Create LevelButton component
             var levelBtn = btnGO.AddComponent<LevelButton>();
-            levelBtn.Initialize(levelNumber, button, bgImage, levelText, starsImage, infoText, lockGO, starSprites);
+            levelBtn.Initialize(levelNumber, button, bgImage, levelText, compOvImage, timerOvImage, bestTimeText, lockGO, starSprites, timerPortalSprite, freePortalSprite);
 
             // Connect click handler
             int lvl = levelNumber;
@@ -460,7 +513,7 @@ namespace SortResort.UI
 
             isPortalAnimating = true;
             PortalAnimation.EnsureInstance();
-            PortalAnimation.Instance.Play(buttonRect, () =>
+            PortalAnimation.Instance.Play(buttonRect, selectedMode, () =>
             {
                 isPortalAnimating = false;
                 OnLevelSelected?.Invoke(worldId, levelNumber);
@@ -474,7 +527,7 @@ namespace SortResort.UI
         public void RefreshDisplay()
         {
             string worldId = worldIds[currentWorldIndex];
-            Color portalTint = GetPortalTintForMode();
+            Sprite modePortalSprite = GetPortalSpriteForMode();
 
             // Update world sprite image
             LoadWorldImage(worldId);
@@ -504,7 +557,7 @@ namespace SortResort.UI
                 float bestTime = GetLevelBestTime(worldId, levelNumber);
                 bool isCompleted = SaveManager.Instance?.IsLevelCompleted(worldId, levelNumber) ?? false;
 
-                levelButtons[i].UpdateState(isUnlocked, stars, bestTime, isCompleted, selectedMode, portalTint);
+                levelButtons[i].UpdateState(isUnlocked, stars, bestTime, isCompleted, selectedMode, modePortalSprite);
             }
 
             // Scroll to top
@@ -760,7 +813,7 @@ namespace SortResort.UI
 
     /// <summary>
     /// Individual level button in the grid.
-    /// Supports mode-specific display: stars, best time, checkmark, portal tinting.
+    /// Supports mode-specific display: star overlays, timer overlays, checkmark, best time text.
     /// </summary>
     public class LevelButton : MonoBehaviour
     {
@@ -768,24 +821,32 @@ namespace SortResort.UI
         private Button button;
         private Image backgroundImage;
         private TextMeshProUGUI levelText;
-        private Image starsOverlay;
-        private TextMeshProUGUI infoText;
+        private Image completionOverlay;
+        private Image timerOverlay;
+        private TextMeshProUGUI bestTimeText;
         private GameObject lockOverlay;
-        private Sprite[] starSprites;
+        private Sprite[] starSprites;       // [1]=1star_portal, [2]=2star_portal, [3]=3star_portal
+        private Sprite timerPortalSprite;   // timer_portal overlay
+        private Sprite freePortalSprite;    // free_portal checkmark overlay
 
-        public void Initialize(int level, Button btn, Image bg, TextMeshProUGUI text, Image starsImg, TextMeshProUGUI info, GameObject lockObj, Sprite[] stars)
+        public void Initialize(int level, Button btn, Image bg, TextMeshProUGUI text,
+            Image compOv, Image timerOv, TextMeshProUGUI timeText, GameObject lockObj,
+            Sprite[] stars, Sprite timerSprite, Sprite freeSprite)
         {
             levelNumber = level;
             button = btn;
             backgroundImage = bg;
             levelText = text;
-            starsOverlay = starsImg;
-            infoText = info;
+            completionOverlay = compOv;
+            timerOverlay = timerOv;
+            bestTimeText = timeText;
             lockOverlay = lockObj;
             starSprites = stars;
+            timerPortalSprite = timerSprite;
+            freePortalSprite = freeSprite;
         }
 
-        public void UpdateState(bool isUnlocked, int starsEarned, float bestTime, bool isCompleted, GameMode mode, Color portalTint)
+        public void UpdateState(bool isUnlocked, int starsEarned, float bestTime, bool isCompleted, GameMode mode, Sprite portalSprite)
         {
             // Lock overlay
             if (lockOverlay != null)
@@ -795,100 +856,90 @@ namespace SortResort.UI
             if (button != null)
                 button.interactable = isUnlocked;
 
-            // Portal tint: mode color when unlocked, grey when locked
+            // Portal sprite: colored when unlocked, greyed when locked
             if (backgroundImage != null)
             {
-                backgroundImage.color = isUnlocked ? portalTint : new Color(0.4f, 0.4f, 0.4f, 1f);
+                if (portalSprite != null)
+                    backgroundImage.sprite = portalSprite;
+                backgroundImage.color = isUnlocked ? Color.white : new Color(0.4f, 0.4f, 0.4f, 1f);
             }
 
             // Text color
             if (levelText != null)
-            {
                 levelText.color = isUnlocked ? Color.white : new Color(0.6f, 0.6f, 0.6f, 1f);
-            }
 
-            // Stars overlay - only in StarMode and HardMode
-            if (starsOverlay != null && starSprites != null)
+            // Reset overlays
+            if (completionOverlay != null) completionOverlay.enabled = false;
+            if (timerOverlay != null) timerOverlay.enabled = false;
+            if (bestTimeText != null) bestTimeText.enabled = false;
+
+            if (!isUnlocked) return;
+
+            switch (mode)
             {
-                bool showStars = (mode == GameMode.StarMode || mode == GameMode.HardMode);
-
-                if (!isUnlocked || !showStars)
-                {
-                    starsOverlay.enabled = false;
-                }
-                else if (starsEarned > 0 && starsEarned <= 3 && starSprites[starsEarned] != null)
-                {
-                    starsOverlay.sprite = starSprites[starsEarned];
-                    starsOverlay.enabled = true;
-                    starsOverlay.color = Color.white;
-                }
-                else
-                {
-                    starsOverlay.enabled = false;
-                }
-            }
-
-            // Info text - mode-specific
-            if (infoText != null)
-            {
-                if (!isUnlocked || !isCompleted)
-                {
-                    infoText.enabled = false;
-                }
-                else
-                {
-                    switch (mode)
+                case GameMode.FreePlay:
+                    // Show free_portal checkmark when completed
+                    if (isCompleted && completionOverlay != null && freePortalSprite != null)
                     {
-                        case GameMode.FreePlay:
-                            // Show "Done" for completed levels
-                            infoText.text = "Done";
-                            infoText.fontSize = 22;
-                            infoText.color = new Color(0.3f, 1f, 0.3f, 1f);
-                            infoText.enabled = true;
-                            break;
-
-                        case GameMode.TimerMode:
-                            // Show best time in M:SS.CC format
-                            if (bestTime > 0)
-                            {
-                                int minutes = (int)(bestTime / 60);
-                                int seconds = (int)(bestTime % 60);
-                                int cs = (int)((bestTime % 1f) * 100f);
-                                infoText.text = $"{minutes}:{seconds:D2}.{cs:D2}";
-                                infoText.fontSize = 18;
-                                infoText.color = new Color(0.7f, 0.9f, 1f, 1f);
-                                infoText.enabled = true;
-                            }
-                            else
-                            {
-                                infoText.enabled = false;
-                            }
-                            break;
-
-                        case GameMode.HardMode:
-                            // Show best time below stars in M:SS.CC format
-                            if (bestTime > 0)
-                            {
-                                int min = (int)(bestTime / 60);
-                                int sec = (int)(bestTime % 60);
-                                int centis = (int)((bestTime % 1f) * 100f);
-                                infoText.text = $"{min}:{sec:D2}.{centis:D2}";
-                                infoText.fontSize = 18;
-                                infoText.color = new Color(1f, 0.8f, 0.8f, 1f);
-                                infoText.enabled = true;
-                            }
-                            else
-                            {
-                                infoText.enabled = false;
-                            }
-                            break;
-
-                        default: // StarMode - stars handle it
-                            infoText.enabled = false;
-                            break;
+                        completionOverlay.sprite = freePortalSprite;
+                        completionOverlay.enabled = true;
                     }
-                }
+                    break;
+
+                case GameMode.StarMode:
+                    // Show Nstar_portal when stars earned
+                    if (starsEarned > 0 && starsEarned <= 3 && completionOverlay != null
+                        && starSprites != null && starSprites[starsEarned] != null)
+                    {
+                        completionOverlay.sprite = starSprites[starsEarned];
+                        completionOverlay.enabled = true;
+                    }
+                    break;
+
+                case GameMode.TimerMode:
+                    // Show timer_portal + best time text when completed
+                    if (isCompleted && timerOverlay != null && timerPortalSprite != null)
+                    {
+                        timerOverlay.sprite = timerPortalSprite;
+                        timerOverlay.enabled = true;
+                    }
+                    if (isCompleted && bestTime > 0 && bestTimeText != null)
+                    {
+                        bestTimeText.text = FormatTime(bestTime);
+                        bestTimeText.color = Color.white;
+                        bestTimeText.enabled = true;
+                    }
+                    break;
+
+                case GameMode.HardMode:
+                    // Show BOTH star overlay AND timer overlay layered
+                    if (starsEarned > 0 && starsEarned <= 3 && completionOverlay != null
+                        && starSprites != null && starSprites[starsEarned] != null)
+                    {
+                        completionOverlay.sprite = starSprites[starsEarned];
+                        completionOverlay.enabled = true;
+                    }
+                    if (isCompleted && timerOverlay != null && timerPortalSprite != null)
+                    {
+                        timerOverlay.sprite = timerPortalSprite;
+                        timerOverlay.enabled = true;
+                    }
+                    if (isCompleted && bestTime > 0 && bestTimeText != null)
+                    {
+                        bestTimeText.text = FormatTime(bestTime);
+                        bestTimeText.color = Color.white;
+                        bestTimeText.enabled = true;
+                    }
+                    break;
             }
+        }
+
+        private string FormatTime(float time)
+        {
+            int minutes = (int)(time / 60);
+            int seconds = (int)(time % 60);
+            int cs = (int)((time % 1f) * 100f);
+            return $"{minutes}:{seconds:D2}.{cs:D2}";
         }
     }
 }
