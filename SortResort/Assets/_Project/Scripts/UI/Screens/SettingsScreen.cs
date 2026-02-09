@@ -62,6 +62,9 @@ namespace SortResort.UI
             SetupButtons();
             SetupSliders();
             SetupToggles();
+            SortResort.FontManager.ApplyBold(masterVolumeLabel);
+            SortResort.FontManager.ApplyBold(musicVolumeLabel);
+            SortResort.FontManager.ApplyBold(sfxVolumeLabel);
 
             if (dimBackground != null)
             {

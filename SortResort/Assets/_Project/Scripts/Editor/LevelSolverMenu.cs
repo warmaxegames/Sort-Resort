@@ -147,13 +147,19 @@ namespace SortResort
 
             int solved = 0;
             int failed = 0;
+            int skipped = 0;
             int thresholdMismatches = 0;
             bool cancelled = false;
 
             for (int level = start; level <= end; level++)
             {
                 var levelData = LevelDataLoader.LoadLevel(worldId, level);
-                if (levelData == null) continue;
+                if (levelData == null)
+                {
+                    skipped++;
+                    report.AppendLine($"Level {level:D3}: SKIPPED - file not found or failed to load");
+                    continue;
+                }
 
                 var solver = new LevelSolver();
                 solver.VerboseLogging = false;
@@ -197,6 +203,7 @@ namespace SortResort
                 {
                     failed++;
                     report.AppendLine($"Level {level:D3}: FAILED - {result.FailureReason}");
+                    Debug.LogWarning($"[Solver] {worldId} Level {level}: FAILED - {result.FailureReason}");
                 }
             }
 
@@ -205,10 +212,22 @@ namespace SortResort
             report.AppendLine($"\n=== SUMMARY ===");
             report.AppendLine($"Solved: {solved}");
             report.AppendLine($"Failed: {failed}");
+            report.AppendLine($"Skipped (not found): {skipped}");
             report.AppendLine($"Threshold mismatches: {thresholdMismatches}");
             if (cancelled) report.AppendLine($"(Cancelled by user)");
 
-            Debug.Log(report.ToString());
+            if (failed > 0)
+                Debug.LogError(report.ToString());
+            else if (skipped > 0)
+                Debug.LogWarning(report.ToString());
+            else
+                Debug.Log(report.ToString());
+
+            EditorUtility.DisplayDialog($"Solver: {worldId}",
+                $"Solved: {solved}\nFailed: {failed}\nSkipped (not found): {skipped}\nThreshold mismatches: {thresholdMismatches}" +
+                (cancelled ? "\n(Cancelled by user)" : "") +
+                "\n\nSee console for full report.",
+                "OK");
         }
     }
 

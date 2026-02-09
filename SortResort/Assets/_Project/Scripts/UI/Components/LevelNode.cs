@@ -39,6 +39,7 @@ namespace SortResort.UI
             {
                 nodeButton.onClick.AddListener(OnNodeClicked);
             }
+            SortResort.FontManager.ApplyBold(levelNumberText);
         }
 
         public void Initialize(int level, int stars, bool unlocked, bool completed)

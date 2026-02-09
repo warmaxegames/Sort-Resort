@@ -47,6 +47,7 @@ namespace SortResort.UI
         private Button[] modeTabButtons = new Button[4];
         private Image[] modeTabImages = new Image[4];
         private TextMeshProUGUI[] modeTabTexts = new TextMeshProUGUI[4];
+        private Sprite[] modeTabSprites = new Sprite[4]; // per-mode tab sprite (null = use color)
         // Runtime data
         private List<string> worldIds = new List<string> { "island", "supermarket", "farm", "tavern", "space" };
         private int currentWorldIndex = 0;
@@ -67,6 +68,7 @@ namespace SortResort.UI
 
         public System.Action<string, int> OnLevelSelected;
         private bool initialized = false;
+        private bool firstShowDone = false;
 
         /// <summary>
         /// Initialize the level select screen. Called by UIManager after all references are set.
@@ -135,6 +137,12 @@ namespace SortResort.UI
             timerPortalSprite = LoadSpriteFromTexture("Sprites/UI/Icons/timer_portal");
             freePortalSprite = LoadSpriteFromTexture("Sprites/UI/Icons/free_portal");
 
+            // Mode tab sprites (sprite-based tabs replace colored rectangles + text)
+            modeTabSprites[0] = LoadSpriteFromTexture("Sprites/UI/HUD/free_tab");   // FreePlay
+            modeTabSprites[1] = LoadSpriteFromTexture("Sprites/UI/HUD/stars_tab");  // StarMode
+            modeTabSprites[2] = LoadSpriteFromTexture("Sprites/UI/HUD/timer_tab");  // TimerMode
+            modeTabSprites[3] = LoadSpriteFromTexture("Sprites/UI/HUD/hard_tab");   // HardMode
+
             Debug.Log($"[LevelSelectScreen] Loaded sprites - portals:{portalSprites[0] != null}/{portalSprites[1] != null}/{portalSprites[2] != null}/{portalSprites[3] != null}, stars:{starSprites[1] != null}/{starSprites[2] != null}/{starSprites[3] != null}, timer:{timerPortalSprite != null}, free:{freePortalSprite != null}");
         }
 
@@ -184,9 +192,18 @@ namespace SortResort.UI
 
             // Tab background
             var tabImage = tabGO.AddComponent<Image>();
-            tabImage.color = ModeColors[index];
-            // Round corners effect via sprite or just use color block
-            tabImage.type = Image.Type.Sliced;
+            bool hasSprite = modeTabSprites[index] != null;
+            if (hasSprite)
+            {
+                tabImage.sprite = modeTabSprites[index];
+                tabImage.color = Color.white;
+                tabImage.preserveAspect = true;
+            }
+            else
+            {
+                tabImage.color = ModeColors[index];
+                tabImage.type = Image.Type.Sliced;
+            }
 
             // Tab button
             var tabButton = tabGO.AddComponent<Button>();
@@ -215,6 +232,10 @@ namespace SortResort.UI
             tabText.color = Color.white;
             tabText.outlineWidth = 0.2f;
             tabText.outlineColor = new Color32(0, 0, 0, 128);
+
+            // Hide text when sprite has baked-in text
+            if (hasSprite)
+                textGO.SetActive(false);
 
             // Store references
             modeTabButtons[index] = tabButton;
@@ -272,13 +293,26 @@ namespace SortResort.UI
 
                 if (modeTabImages[i] != null)
                 {
-                    // Selected tab: full color. Unselected: dimmed. Locked: very dim.
-                    if (isLocked)
-                        modeTabImages[i].color = new Color(ModeColors[i].r * 0.3f, ModeColors[i].g * 0.3f, ModeColors[i].b * 0.3f, 0.6f);
-                    else if (isSelected)
-                        modeTabImages[i].color = ModeColors[i];
+                    if (modeTabSprites[i] != null)
+                    {
+                        // Sprite-based tab: brighten/dim via white tint
+                        if (isLocked)
+                            modeTabImages[i].color = new Color(0.3f, 0.3f, 0.3f, 0.6f);
+                        else if (isSelected)
+                            modeTabImages[i].color = Color.white;
+                        else
+                            modeTabImages[i].color = new Color(0.6f, 0.6f, 0.6f, 0.8f);
+                    }
                     else
-                        modeTabImages[i].color = new Color(ModeColors[i].r * 0.6f, ModeColors[i].g * 0.6f, ModeColors[i].b * 0.6f, 0.8f);
+                    {
+                        // Color-based tab: tint the mode color
+                        if (isLocked)
+                            modeTabImages[i].color = new Color(ModeColors[i].r * 0.3f, ModeColors[i].g * 0.3f, ModeColors[i].b * 0.3f, 0.6f);
+                        else if (isSelected)
+                            modeTabImages[i].color = ModeColors[i];
+                        else
+                            modeTabImages[i].color = new Color(ModeColors[i].r * 0.6f, ModeColors[i].g * 0.6f, ModeColors[i].b * 0.6f, 0.8f);
+                    }
                 }
 
                 if (modeTabTexts[i] != null)
@@ -419,7 +453,7 @@ namespace SortResort.UI
             levelText.outlineWidth = 0.3f;
             levelText.outlineColor = new Color32(80, 0, 80, 200);
 
-            // Result overlays container - renders above portal swirl animation (sortingOrder 5001 > 5000)
+            // Result overlays container (stars, timer, checkmark icons on completed portals)
             var resultOvGO = new GameObject("ResultOverlays");
             resultOvGO.transform.SetParent(btnGO.transform, false);
             var resultOvRect = resultOvGO.AddComponent<RectTransform>();
@@ -427,10 +461,6 @@ namespace SortResort.UI
             resultOvRect.anchorMax = Vector2.one;
             resultOvRect.offsetMin = Vector2.zero;
             resultOvRect.offsetMax = Vector2.zero;
-            var resultCanvas = resultOvGO.AddComponent<Canvas>();
-            resultCanvas.overrideSorting = true;
-            resultCanvas.sortingOrder = 5001;
-            resultOvGO.AddComponent<GraphicRaycaster>();
 
             // Timer overlay (full portal size, used in Timer/Hard modes)
             var timerOvGO = new GameObject("TimerOverlay");
@@ -523,6 +553,20 @@ namespace SortResort.UI
         // ============================================
         // REFRESH DISPLAY
         // ============================================
+
+        /// <summary>
+        /// Called by UIManager when the level select screen is actually shown (not just created).
+        /// Triggers mode dialogue on first show only.
+        /// </summary>
+        public void OnShow()
+        {
+            if (!firstShowDone)
+            {
+                firstShowDone = true;
+                // Fire mode changed event now that UI is visible (triggers first-play dialogue)
+                GameEvents.InvokeGameModeChanged(selectedMode);
+            }
+        }
 
         public void RefreshDisplay()
         {

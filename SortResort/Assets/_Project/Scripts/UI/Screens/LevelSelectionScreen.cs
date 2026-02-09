@@ -26,6 +26,8 @@ namespace SortResort.UI
         {
             base.Awake();
             SetupButtons();
+            SortResort.FontManager.ApplyBold(worldNameText);
+            SortResort.FontManager.ApplyBold(progressText);
         }
 
         private void Start()

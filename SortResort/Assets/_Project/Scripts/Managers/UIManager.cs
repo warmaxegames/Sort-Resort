@@ -397,6 +397,9 @@ namespace SortResort
             if (levelCompletePanel != null)
                 levelCompletePanel.SetActive(false);
 
+            // Notify level select it's being shown (triggers first-play dialogue once)
+            levelSelectScreen?.OnShow();
+
             // Refresh level select to show updated stars
             levelSelectScreen?.RefreshDisplay();
 
@@ -2082,6 +2085,12 @@ namespace SortResort
             rect.offsetMin = Vector2.zero;
             rect.offsetMax = Vector2.zero;
 
+            // Override sorting so settings renders above portal ResultOverlays (sortingOrder 5001)
+            var settingsCanvas = settingsPanel.AddComponent<Canvas>();
+            settingsCanvas.overrideSorting = true;
+            settingsCanvas.sortingOrder = 5200;
+            settingsPanel.AddComponent<GraphicRaycaster>();
+
             // Dark overlay/dim background
             var dimBg = settingsPanel.AddComponent<Image>();
             dimBg.color = new Color(0, 0, 0, 0.7f);
@@ -2872,6 +2881,7 @@ Antonia and Joakim Engfors
         {
             if (settingsPanel != null)
             {
+                settingsPanel.transform.SetAsLastSibling();
                 settingsPanel.SetActive(true);
                 settingsScreen?.Show();
             }
@@ -2903,6 +2913,12 @@ Antonia and Joakim Engfors
             rect.anchorMax = Vector2.one;
             rect.offsetMin = Vector2.zero;
             rect.offsetMax = Vector2.zero;
+
+            // Override sorting so pause menu renders above portal ResultOverlays (sortingOrder 5001)
+            var pauseCanvas = pauseMenuPanel.AddComponent<Canvas>();
+            pauseCanvas.overrideSorting = true;
+            pauseCanvas.sortingOrder = 5200;
+            pauseMenuPanel.AddComponent<GraphicRaycaster>();
 
             // Dark overlay/dim background
             var dimBg = pauseMenuPanel.AddComponent<Image>();
@@ -3046,6 +3062,7 @@ Antonia and Joakim Engfors
         {
             if (pauseMenuPanel != null)
             {
+                pauseMenuPanel.transform.SetAsLastSibling();
                 pauseMenuPanel.SetActive(true);
                 if (pauseMenuScreen != null)
                 {
@@ -5721,6 +5738,12 @@ Antonia and Joakim Engfors
 
             // Add canvas group for fade animations
             var canvasGroup = dialoguePanel.AddComponent<CanvasGroup>();
+
+            // Override sorting so dialogue renders above portal ResultOverlays (sortingOrder 5001)
+            var dialogueCanvas = dialoguePanel.AddComponent<Canvas>();
+            dialogueCanvas.overrideSorting = true;
+            dialogueCanvas.sortingOrder = 5100;
+            dialoguePanel.AddComponent<GraphicRaycaster>();
 
             // Semi-transparent overlay - blocks all clicks behind dialogue
             var overlay = new GameObject("Overlay");

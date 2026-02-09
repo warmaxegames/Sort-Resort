@@ -62,6 +62,9 @@ namespace SortResort
             clickAction.Enable();
             submitAction.Enable();
 
+            FontManager.ApplyBold(nameText);
+            FontManager.ApplyBold(dialogueText);
+
             // Make sure we're subscribed to DialogueManager events
             TrySubscribe();
 

@@ -29,6 +29,8 @@ namespace SortResort.UI
         {
             base.Awake();
             SetupButtons();
+            SortResort.FontManager.ApplyBold(levelNameText);
+            SortResort.FontManager.ApplyBold(moveCountText);
         }
 
         private void SetupButtons()

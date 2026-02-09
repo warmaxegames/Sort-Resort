@@ -33,6 +33,9 @@ namespace SortResort.UI
         {
             base.Awake();
             SetupButtons();
+            SortResort.FontManager.ApplyBold(titleText);
+            SortResort.FontManager.ApplyBold(moveCountText);
+            SortResort.FontManager.ApplyBold(tipText);
 
             if (dimBackground != null)
             {

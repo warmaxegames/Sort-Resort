@@ -62,12 +62,14 @@ namespace SortResort
             // Subscribe to game events to trigger dialogues
             GameEvents.OnLevelStarted += OnLevelStarted;
             GameEvents.OnLevelCompleted += OnLevelCompleted;
+            GameEvents.OnGameModeChanged += OnGameModeChanged;
         }
 
         private void OnDisable()
         {
             GameEvents.OnLevelStarted -= OnLevelStarted;
             GameEvents.OnLevelCompleted -= OnLevelCompleted;
+            GameEvents.OnGameModeChanged -= OnGameModeChanged;
         }
 
         private void OnLevelStarted(int levelNumber)
@@ -87,6 +89,30 @@ namespace SortResort
             if (string.IsNullOrEmpty(worldId)) return;
 
             CheckTriggers(DialogueTrigger.TriggerType.LevelComplete, worldId, levelNumber);
+        }
+
+        private void OnGameModeChanged(GameMode mode)
+        {
+            Debug.Log($"[DialogueManager] OnGameModeChanged: {mode}");
+
+            // Check mode first play triggers (playOnce ensures it only fires once per mode)
+            CheckTriggers(DialogueTrigger.TriggerType.ModeFirstPlay, null, 0, 0, (int)mode);
+        }
+
+        /// <summary>
+        /// Call this after a level is saved to check if Hard Mode just unlocked for the world.
+        /// Should be called from SaveManager or LevelManager after saving progress.
+        /// </summary>
+        public void CheckHardModeUnlock(string worldId)
+        {
+            if (string.IsNullOrEmpty(worldId)) return;
+            if (SaveManager.Instance == null) return;
+
+            if (SaveManager.Instance.IsHardModeUnlocked(worldId))
+            {
+                Debug.Log($"[DialogueManager] Hard Mode is unlocked for {worldId}, checking triggers");
+                CheckTriggers(DialogueTrigger.TriggerType.HardModeUnlock, worldId);
+            }
         }
 
         private void LoadLetterClips()
@@ -398,10 +424,10 @@ namespace SortResort
         /// <summary>
         /// Check if any dialogue should trigger for the given event
         /// </summary>
-        public void CheckTriggers(DialogueTrigger.TriggerType triggerType, string worldId = null, int levelNumber = 0, int value = 0)
+        public void CheckTriggers(DialogueTrigger.TriggerType triggerType, string worldId = null, int levelNumber = 0, int value = 0, int gameMode = -1)
         {
             var db = DialogueDataLoader.LoadDatabase();
-            Debug.Log($"[DialogueManager] CheckTriggers: type={triggerType}, world={worldId}, level={levelNumber}");
+            Debug.Log($"[DialogueManager] CheckTriggers: type={triggerType}, world={worldId}, level={levelNumber}, gameMode={gameMode}");
 
             if (db.triggers == null || db.triggers.Count == 0)
             {
@@ -413,7 +439,7 @@ namespace SortResort
 
             foreach (var trigger in db.triggers)
             {
-                Debug.Log($"[DialogueManager] Trigger {trigger.id}: type={trigger.type}, world={trigger.worldId}, level={trigger.levelNumber}");
+                Debug.Log($"[DialogueManager] Trigger {trigger.id}: type={trigger.type}, world={trigger.worldId}, level={trigger.levelNumber}, gameMode={trigger.gameMode}");
 
                 if (trigger.type != triggerType) continue;
 
@@ -425,6 +451,9 @@ namespace SortResort
 
                 // Check threshold
                 if (trigger.threshold > 0 && value < trigger.threshold) continue;
+
+                // Check game mode match
+                if (trigger.gameMode >= 0 && trigger.gameMode != gameMode) continue;
 
                 // Trigger matched - try to start dialogue
                 Debug.Log($"[DialogueManager] Trigger MATCHED! Starting dialogue: {trigger.dialogueId}");

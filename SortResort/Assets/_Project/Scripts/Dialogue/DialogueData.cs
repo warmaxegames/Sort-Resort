@@ -86,8 +86,12 @@ namespace SortResort
             StarMilestone,          // Total stars reached
             FirstPlay,              // Very first time playing
             ReturnAfterAbsence,     // Haven't played in X days
-            Achievement             // Specific achievement unlocked
+            Achievement,            // Specific achievement unlocked
+            ModeFirstPlay,          // First time entering a game mode
+            HardModeUnlock          // Hard Mode unlocked for a world
         }
+
+        public int gameMode = -1;   // Optional: specific GameMode (0-3), -1 = any
     }
 
     /// <summary>

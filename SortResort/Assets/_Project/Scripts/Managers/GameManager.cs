@@ -231,6 +231,12 @@ namespace SortResort
             SetState(GameState.LevelComplete);
             SaveManager.Instance?.SaveLevelProgress(currentWorldId, currentLevelNumber, starsEarned, timeTaken);
             GameEvents.InvokeLevelCompleted(currentLevelNumber, starsEarned);
+
+            // Check if this completion just unlocked Hard Mode for the world
+            if (DialogueManager.Instance != null)
+            {
+                DialogueManager.Instance.CheckHardModeUnlock(currentWorldId);
+            }
         }
 
         public void FailLevel(string reason = null)

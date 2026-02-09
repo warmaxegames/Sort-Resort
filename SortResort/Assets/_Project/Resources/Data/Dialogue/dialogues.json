@@ -26,7 +26,7 @@
         },
         {
             "id": "bartender",
-            "displayName": "Hog",
+            "displayName": "Mason",
             "worldId": "tavern",
             "basePitch": 1.3,
             "speakSpeed": 21,
@@ -47,21 +47,9 @@
             "triggerId": "island_first_play",
             "playOnce": true,
             "lines": [
-                {
-                    "mascotId": "cat",
-                    "expression": "happy",
-                    "text": "Welcome to Sort Resort!"
-                },
-                {
-                    "mascotId": "cat",
-                    "expression": "default",
-                    "text": "I'm Whiskers, and I'll help you get started."
-                },
-                {
-                    "mascotId": "cat",
-                    "expression": "happy",
-                    "text": "Match three of the same items to clear them. Simple, right?"
-                }
+                { "mascotId": "cat", "expression": "happy", "text": "Welcome to Sort Resort! I'm Professor Whiskers." },
+                { "mascotId": "cat", "expression": "default", "text": "I know - a talking cat. Long story. The short version: reality is broken and you're here to help fix it." },
+                { "mascotId": "cat", "expression": "happy", "text": "Match three identical items to clear them. Let's start simple!" }
             ]
         },
         {
@@ -69,16 +57,109 @@
             "triggerId": "island_level_2_start",
             "playOnce": true,
             "lines": [
-                {
-                    "mascotId": "cat",
-                    "expression": "happy",
-                    "text": "Great job! You're a natural!"
-                },
-                {
-                    "mascotId": "cat",
-                    "expression": "default",
-                    "text": "Try to use as few moves as possible to score the full 3 stars!"
-                }
+                { "mascotId": "cat", "expression": "happy", "text": "Excellent instincts! You're getting the hang of this." },
+                { "mascotId": "cat", "expression": "default", "text": "The puzzles get trickier from here. New containers, new surprises. Stay sharp!" }
+            ]
+        },
+        {
+            "id": "island_l10",
+            "triggerId": "island_level_10_complete",
+            "playOnce": true,
+            "lines": [
+                { "mascotId": "cat", "expression": "default", "text": "Ten portals down! You're a natural at this." },
+                { "mascotId": "cat", "expression": "happy", "text": "I've been handling these alone for years. Having help is... nice." }
+            ]
+        },
+        {
+            "id": "island_l20",
+            "triggerId": "island_level_20_complete",
+            "playOnce": true,
+            "lines": [
+                { "mascotId": "cat", "expression": "default", "text": "These portals appeared after a lab accident years ago." },
+                { "mascotId": "cat", "expression": "default", "text": "My owner, Dr. Miller, was working on dimensional gateways." },
+                { "mascotId": "cat", "expression": "sad", "text": "Something went wrong. She vanished. And I... changed." }
+            ]
+        },
+        {
+            "id": "island_l30",
+            "triggerId": "island_level_30_complete",
+            "playOnce": true,
+            "lines": [
+                { "mascotId": "cat", "expression": "happy", "text": "Dr. Miller was brilliant. She wanted to solve big problems." },
+                { "mascotId": "cat", "expression": "default", "text": "Waste management, resource distribution - using portals to move things between dimensions efficiently." },
+                { "mascotId": "cat", "expression": "sad", "text": "She'd hate seeing her work cause this much chaos." }
+            ]
+        },
+        {
+            "id": "island_l40",
+            "triggerId": "island_level_40_complete",
+            "playOnce": true,
+            "lines": [
+                { "mascotId": "cat", "expression": "default", "text": "I wasn't always this articulate, you know." },
+                { "mascotId": "cat", "expression": "default", "text": "The accident did something to me. Enhanced cognition, speech..." },
+                { "mascotId": "cat", "expression": "sad", "text": "A rather steep price for knocking over lab equipment." }
+            ]
+        },
+        {
+            "id": "island_l50",
+            "triggerId": "island_level_50_complete",
+            "playOnce": true,
+            "lines": [
+                { "mascotId": "cat", "expression": "default", "text": "Halfway through! There's something I need to tell you." },
+                { "mascotId": "cat", "expression": "sad", "text": "The accident... it wasn't random equipment failure." },
+                { "mascotId": "cat", "expression": "sad", "text": "I knocked over the dimensional calibrator. A cat wanting attention." },
+                { "mascotId": "cat", "expression": "default", "text": "Dr. Miller tried to save me instead of herself. That's why I have to fix this." }
+            ]
+        },
+        {
+            "id": "island_l60",
+            "triggerId": "island_level_60_complete",
+            "playOnce": true,
+            "lines": [
+                { "mascotId": "cat", "expression": "default", "text": "Sometimes I detect faint energy signatures in these rifts." },
+                { "mascotId": "cat", "expression": "happy", "text": "Could be echoes. Could be something more." },
+                { "mascotId": "cat", "expression": "default", "text": "I choose to believe Dr. Miller is out there somewhere." }
+            ]
+        },
+        {
+            "id": "island_l70",
+            "triggerId": "island_level_70_complete",
+            "playOnce": true,
+            "lines": [
+                { "mascotId": "cat", "expression": "happy", "text": "You know, Dr. Miller had other animals in the lab too." },
+                { "mascotId": "cat", "expression": "default", "text": "A raccoon, an alpaca, a pig, and a dog. All in the blast radius." },
+                { "mascotId": "cat", "expression": "default", "text": "I wonder what happened to them..." }
+            ]
+        },
+        {
+            "id": "island_l80",
+            "triggerId": "island_level_80_complete",
+            "playOnce": true,
+            "lines": [
+                { "mascotId": "cat", "expression": "default", "text": "The portals are getting more complex. That's actually a good sign." },
+                { "mascotId": "cat", "expression": "happy", "text": "It means we're approaching a dimensional nexus point." },
+                { "mascotId": "cat", "expression": "default", "text": "Other worlds connect through these. Worlds that need our help too." }
+            ]
+        },
+        {
+            "id": "island_l90",
+            "triggerId": "island_level_90_complete",
+            "playOnce": true,
+            "lines": [
+                { "mascotId": "cat", "expression": "happy", "text": "Almost there! I'm detecting portal signatures from other dimensions." },
+                { "mascotId": "cat", "expression": "default", "text": "A supermarket, a farm... these rifts are everywhere." },
+                { "mascotId": "cat", "expression": "default", "text": "Once we stabilize this island, we can start exploring." }
+            ]
+        },
+        {
+            "id": "island_l100",
+            "triggerId": "island_level_100_complete",
+            "playOnce": true,
+            "lines": [
+                { "mascotId": "cat", "expression": "happy", "text": "One hundred portals! This island is dimensionally stable!" },
+                { "mascotId": "cat", "expression": "default", "text": "But I'm picking up distress signals from connected worlds." },
+                { "mascotId": "cat", "expression": "default", "text": "One of them feels... familiar. Like something from the lab." },
+                { "mascotId": "cat", "expression": "happy", "text": "Pack your bags. The multiverse needs us!" }
             ]
         },
         {
@@ -86,16 +167,110 @@
             "triggerId": "supermarket_first_play",
             "playOnce": true,
             "lines": [
-                {
-                    "mascotId": "tommy",
-                    "expression": "happy",
-                    "text": "Hey there! Welcome to my supermarket!"
-                },
-                {
-                    "mascotId": "tommy",
-                    "expression": "default",
-                    "text": "Help me sort these groceries, will ya?"
-                }
+                { "mascotId": "tommy", "expression": "suspicious", "text": "Whoa whoa whoa. Who are you and why are you in my store?" },
+                { "mascotId": "tommy", "expression": "default", "text": "...Whiskers sent you? That old furball is still alive?" },
+                { "mascotId": "tommy", "expression": "default", "text": "Fine. Help me sort this mess and maybe I'll talk." }
+            ]
+        },
+        {
+            "id": "supermarket_l10",
+            "triggerId": "supermarket_level_10_complete",
+            "playOnce": true,
+            "lines": [
+                { "mascotId": "tommy", "expression": "default", "text": "Yeah, I was in Dr. Miller's lab too. The raccoon in cage three." },
+                { "mascotId": "tommy", "expression": "suspicious", "text": "Woke up here surrounded by groceries and dimensional junk." },
+                { "mascotId": "tommy", "expression": "default", "text": "So I did what any raccoon would do. I organized everything." }
+            ]
+        },
+        {
+            "id": "supermarket_l20",
+            "triggerId": "supermarket_level_20_complete",
+            "playOnce": true,
+            "lines": [
+                { "mascotId": "tommy", "expression": "default", "text": "These shelves keep restocking with random stuff from other worlds." },
+                { "mascotId": "tommy", "expression": "suspicious", "text": "Alien fruit, medieval cheese, space rations... it never stops." },
+                { "mascotId": "tommy", "expression": "happy", "text": "But I gotta admit, the variety IS pretty great." }
+            ]
+        },
+        {
+            "id": "supermarket_l30",
+            "triggerId": "supermarket_level_30_complete",
+            "playOnce": true,
+            "lines": [
+                { "mascotId": "tommy", "expression": "default", "text": "The transformation hit me different than Whiskers." },
+                { "mascotId": "tommy", "expression": "default", "text": "He got the big brain. I got... instincts. Amplified." },
+                { "mascotId": "tommy", "expression": "happy", "text": "I can sense when something's out of place from three aisles away. Drives me crazy till it's sorted." }
+            ]
+        },
+        {
+            "id": "supermarket_l40",
+            "triggerId": "supermarket_level_40_complete",
+            "playOnce": true,
+            "lines": [
+                { "mascotId": "tommy", "expression": "suspicious", "text": "Whiskers thinks this is all about science. Typical cat." },
+                { "mascotId": "tommy", "expression": "default", "text": "But I've been watching these portals for years." },
+                { "mascotId": "tommy", "expression": "default", "text": "They're not random. Something is pulling them open." }
+            ]
+        },
+        {
+            "id": "supermarket_l50",
+            "triggerId": "supermarket_level_50_complete",
+            "playOnce": true,
+            "lines": [
+                { "mascotId": "tommy", "expression": "default", "text": "Alright, I trust you enough to tell you something." },
+                { "mascotId": "tommy", "expression": "default", "text": "A few months back, I saw something come through a rift." },
+                { "mascotId": "tommy", "expression": "default", "text": "A glowing figure. Human-shaped. Moving with purpose." },
+                { "mascotId": "tommy", "expression": "suspicious", "text": "Gone before I could get close. But it felt... familiar." }
+            ]
+        },
+        {
+            "id": "supermarket_l60",
+            "triggerId": "supermarket_level_60_complete",
+            "playOnce": true,
+            "lines": [
+                { "mascotId": "tommy", "expression": "default", "text": "After that figure passed through, the portals here calmed down." },
+                { "mascotId": "tommy", "expression": "default", "text": "Just for a few hours. Like someone had tuned them." },
+                { "mascotId": "tommy", "expression": "happy", "text": "Whoever - or whatever - that was, they knew what they were doing." }
+            ]
+        },
+        {
+            "id": "supermarket_l70",
+            "triggerId": "supermarket_level_70_complete",
+            "playOnce": true,
+            "lines": [
+                { "mascotId": "tommy", "expression": "default", "text": "I found something in aisle seven after the figure left." },
+                { "mascotId": "tommy", "expression": "default", "text": "A scorch mark on the floor. Same pattern as Dr. Miller's lab equipment used to leave." },
+                { "mascotId": "tommy", "expression": "suspicious", "text": "Coincidence? Maybe. But my gut says no." }
+            ]
+        },
+        {
+            "id": "supermarket_l80",
+            "triggerId": "supermarket_level_80_complete",
+            "playOnce": true,
+            "lines": [
+                { "mascotId": "tommy", "expression": "default", "text": "You know what I miss most about the lab? Routine." },
+                { "mascotId": "tommy", "expression": "default", "text": "Dr. Miller fed us at the same time every day. Like clockwork." },
+                { "mascotId": "tommy", "expression": "happy", "text": "That woman ran a tight ship. Wherever she is, I bet she's got a schedule pinned to the wall." }
+            ]
+        },
+        {
+            "id": "supermarket_l90",
+            "triggerId": "supermarket_level_90_complete",
+            "playOnce": true,
+            "lines": [
+                { "mascotId": "tommy", "expression": "happy", "text": "We're almost done here! My shelves haven't been this neat in years." },
+                { "mascotId": "tommy", "expression": "default", "text": "I'm picking up portal signatures leading somewhere rural." },
+                { "mascotId": "tommy", "expression": "default", "text": "Smells like hay and... alpaca? No way." }
+            ]
+        },
+        {
+            "id": "supermarket_l100",
+            "triggerId": "supermarket_level_100_complete",
+            "playOnce": true,
+            "lines": [
+                { "mascotId": "tommy", "expression": "happy", "text": "Store's sorted! I haven't felt this good since cage three!" },
+                { "mascotId": "tommy", "expression": "default", "text": "Listen - that energy trail from the glowing figure? It leads to the next world. A farm." },
+                { "mascotId": "tommy", "expression": "suspicious", "text": "If Mara's there... you tell her Tommy says hi. And that I'm still mad she ate my lettuce that one time." }
             ]
         },
         {
@@ -103,16 +278,114 @@
             "triggerId": "farm_first_play",
             "playOnce": true,
             "lines": [
-                {
-                    "mascotId": "chicken",
-                    "expression": "neutral",
-                    "text": "Welcome to Wilty Acres!"
-                },
-                {
-                    "mascotId": "chicken",
-                    "expression": "neutral",
-                    "text": "I'm sorry it's such a mess around here! Jump in and let's get this sorted!"
-                }
+                { "mascotId": "chicken", "expression": "worried", "text": "Oh! A visitor! I'm sorry everything's such a mess!" },
+                { "mascotId": "chicken", "expression": "default", "text": "I'm Mara. This was a lovely farm before the portals started mixing everything up." },
+                { "mascotId": "chicken", "expression": "worried", "text": "Dimensional turnips in the wheat field, space rocks in the chicken coop... please, can you help?" }
+            ]
+        },
+        {
+            "id": "farm_l10",
+            "triggerId": "farm_level_10_complete",
+            "playOnce": true,
+            "lines": [
+                { "mascotId": "chicken", "expression": "happy", "text": "Oh, that's so much better! Thank you!" },
+                { "mascotId": "chicken", "expression": "default", "text": "Yes, I was in Dr. Miller's lab. The alpaca by the window." },
+                { "mascotId": "chicken", "expression": "worried", "text": "I still have nightmares about that day. Everything just... tore apart." }
+            ]
+        },
+        {
+            "id": "farm_l20",
+            "triggerId": "farm_level_20_complete",
+            "playOnce": true,
+            "lines": [
+                { "mascotId": "chicken", "expression": "default", "text": "I landed here and the farm sort of... grew around me." },
+                { "mascotId": "chicken", "expression": "default", "text": "The dimensional energy made everything fertile. Too fertile." },
+                { "mascotId": "chicken", "expression": "worried", "text": "Things grow where they shouldn't. Crops from worlds I've never seen." }
+            ]
+        },
+        {
+            "id": "farm_l30",
+            "triggerId": "farm_level_30_complete",
+            "playOnce": true,
+            "lines": [
+                { "mascotId": "chicken", "expression": "happy", "text": "Tommy sent his regards? That grumpy raccoon!" },
+                { "mascotId": "chicken", "expression": "default", "text": "We used to share a wall in the lab. He'd steal food through the bars." },
+                { "mascotId": "chicken", "expression": "worried", "text": "I hope he's eating properly. Raccoons are terrible at nutrition." }
+            ]
+        },
+        {
+            "id": "farm_l40",
+            "triggerId": "farm_level_40_complete",
+            "playOnce": true,
+            "lines": [
+                { "mascotId": "chicken", "expression": "worried", "text": "I need to show you something. I found it in the north field." },
+                { "mascotId": "chicken", "expression": "default", "text": "A notebook. It drifted through a portal about a year ago." },
+                { "mascotId": "chicken", "expression": "default", "text": "It's Dr. Miller's handwriting. I'd recognize it anywhere." }
+            ]
+        },
+        {
+            "id": "farm_l50",
+            "triggerId": "farm_level_50_complete",
+            "playOnce": true,
+            "lines": [
+                { "mascotId": "chicken", "expression": "default", "text": "The notebook has partial equations. I can't understand the math." },
+                { "mascotId": "chicken", "expression": "default", "text": "But the notes in the margins are clear enough." },
+                { "mascotId": "chicken", "expression": "worried", "text": "She wrote: \"Closing rifts may trigger cascade resonance. Each repair stresses adjacent dimensions.\"" },
+                { "mascotId": "chicken", "expression": "default", "text": "She's alive. And she's worried about what we're doing." }
+            ]
+        },
+        {
+            "id": "farm_l60",
+            "triggerId": "farm_level_60_complete",
+            "playOnce": true,
+            "lines": [
+                { "mascotId": "chicken", "expression": "default", "text": "There's more in the notebook. She wrote about us." },
+                { "mascotId": "chicken", "expression": "default", "text": "\"If my animals survived, they'll try to help. They always did.\"" },
+                { "mascotId": "chicken", "expression": "happy", "text": "She knew we'd come looking for her." },
+                { "mascotId": "chicken", "expression": "worried", "text": "But she also wrote \"Don't rush. The multiverse is fragile.\"" }
+            ]
+        },
+        {
+            "id": "farm_l70",
+            "triggerId": "farm_level_70_complete",
+            "playOnce": true,
+            "lines": [
+                { "mascotId": "chicken", "expression": "default", "text": "The last entry in the notebook is just coordinates." },
+                { "mascotId": "chicken", "expression": "default", "text": "Not for here. Not for the island or supermarket either." },
+                { "mascotId": "chicken", "expression": "worried", "text": "Somewhere else entirely. And a note: \"Find Mason. He'll know.\"" },
+                { "mascotId": "chicken", "expression": "default", "text": "Mason? That was the pig from the lab!" }
+            ]
+        },
+        {
+            "id": "farm_l80",
+            "triggerId": "farm_level_80_complete",
+            "playOnce": true,
+            "lines": [
+                { "mascotId": "chicken", "expression": "happy", "text": "The farm is really coming together! Look at those fields!" },
+                { "mascotId": "chicken", "expression": "worried", "text": "But I've noticed the portals are changing. Getting... organized." },
+                { "mascotId": "chicken", "expression": "default", "text": "Almost like something is guiding them into patterns." }
+            ]
+        },
+        {
+            "id": "farm_l90",
+            "triggerId": "farm_level_90_complete",
+            "playOnce": true,
+            "lines": [
+                { "mascotId": "chicken", "expression": "default", "text": "I can feel new portal signatures forming." },
+                { "mascotId": "chicken", "expression": "default", "text": "One of them smells like old wood and spilled ale." },
+                { "mascotId": "chicken", "expression": "happy", "text": "A tavern! Mason always did love the kitchen at the lab." },
+                { "mascotId": "chicken", "expression": "worried", "text": "Be careful. The portals ahead feel stronger than anything we've seen." }
+            ]
+        },
+        {
+            "id": "farm_l100",
+            "triggerId": "farm_level_100_complete",
+            "playOnce": true,
+            "lines": [
+                { "mascotId": "chicken", "expression": "happy", "text": "The farm is saved! Thank you, truly." },
+                { "mascotId": "chicken", "expression": "default", "text": "Take the notebook. You'll need it more than me." },
+                { "mascotId": "chicken", "expression": "worried", "text": "And please... find Dr. Miller. Tell her we're okay." },
+                { "mascotId": "chicken", "expression": "happy", "text": "Tell her the alpaca by the window still misses her." }
             ]
         },
         {
@@ -120,16 +393,114 @@
             "triggerId": "tavern_first_play",
             "playOnce": true,
             "lines": [
-                {
-                    "mascotId": "bartender",
-                    "expression": "welcome",
-                    "text": "Welcome to the tavern, traveler."
-                },
-                {
-                    "mascotId": "bartender",
-                    "expression": "welcome",
-                    "text": "Help me organize the supplies and I'll pour you a drink."
-                }
+                { "mascotId": "bartender", "expression": "gruff", "text": "Another portal traveler. Take a seat." },
+                { "mascotId": "bartender", "expression": "default", "text": "Name's Mason. I run this place." },
+                { "mascotId": "bartender", "expression": "gruff", "text": "You want to sort my tavern? Fine. But don't touch my personal collection behind the bar." }
+            ]
+        },
+        {
+            "id": "tavern_l10",
+            "triggerId": "tavern_level_10_complete",
+            "playOnce": true,
+            "lines": [
+                { "mascotId": "bartender", "expression": "default", "text": "So Whiskers is running an operation now? Good for him." },
+                { "mascotId": "bartender", "expression": "gruff", "text": "I always figured that cat would land on his feet. Literally." },
+                { "mascotId": "bartender", "expression": "default", "text": "Yeah, I was one of Miller's lab animals. The handsome one." }
+            ]
+        },
+        {
+            "id": "tavern_l20",
+            "triggerId": "tavern_level_20_complete",
+            "playOnce": true,
+            "lines": [
+                { "mascotId": "bartender", "expression": "default", "text": "This tavern sits at a crossroads between dimensions." },
+                { "mascotId": "bartender", "expression": "default", "text": "Travelers come through all the time. Swap stories, trade goods." },
+                { "mascotId": "bartender", "expression": "gruff", "text": "I hear things. Rumors from worlds you can't imagine." }
+            ]
+        },
+        {
+            "id": "tavern_l30",
+            "triggerId": "tavern_level_30_complete",
+            "playOnce": true,
+            "lines": [
+                { "mascotId": "bartender", "expression": "default", "text": "Mara's notebook, eh? Let me see those coordinates." },
+                { "mascotId": "bartender", "expression": "default", "text": "...Interesting. These point toward the dimensional deep." },
+                { "mascotId": "bartender", "expression": "gruff", "text": "Only someone who really understood portal physics could navigate there." }
+            ]
+        },
+        {
+            "id": "tavern_l40",
+            "triggerId": "tavern_level_40_complete",
+            "playOnce": true,
+            "lines": [
+                { "mascotId": "bartender", "expression": "default", "text": "I've heard whispers from travelers. About a \"ghost woman.\"" },
+                { "mascotId": "bartender", "expression": "default", "text": "Shows up in different worlds, adjusts the portals, disappears." },
+                { "mascotId": "bartender", "expression": "gruff", "text": "They say she leaves things more organized than she found them. Sound like anyone we know?" }
+            ]
+        },
+        {
+            "id": "tavern_l50",
+            "triggerId": "tavern_level_50_complete",
+            "playOnce": true,
+            "lines": [
+                { "mascotId": "bartender", "expression": "default", "text": "Alright. Cards on the table." },
+                { "mascotId": "bartender", "expression": "default", "text": "About six months ago, a woman walked into my tavern." },
+                { "mascotId": "bartender", "expression": "default", "text": "Human. Lab coat. Tired eyes. Asked for water and a quiet corner." },
+                { "mascotId": "bartender", "expression": "gruff", "text": "I knew who she was the moment I smelled her. You never forget the person who fed you every day for three years." }
+            ]
+        },
+        {
+            "id": "tavern_l60",
+            "triggerId": "tavern_level_60_complete",
+            "playOnce": true,
+            "lines": [
+                { "mascotId": "bartender", "expression": "default", "text": "She recognized me too. Cried a bit. Hugged my big stupid head." },
+                { "mascotId": "bartender", "expression": "default", "text": "Said she's been moving between dimensions, trying to build something. A stabilizer." },
+                { "mascotId": "bartender", "expression": "gruff", "text": "Said she's \"almost there\" but needs the background chaos cleared first. That's us. We're clearing the background chaos." }
+            ]
+        },
+        {
+            "id": "tavern_l70",
+            "triggerId": "tavern_level_70_complete",
+            "playOnce": true,
+            "lines": [
+                { "mascotId": "bartender", "expression": "default", "text": "She told me something else. About why the portals keep forming." },
+                { "mascotId": "bartender", "expression": "default", "text": "It's not just entropy. The original accident created a feedback loop." },
+                { "mascotId": "bartender", "expression": "gruff", "text": "Every portal that opens makes the next one easier to form." },
+                { "mascotId": "bartender", "expression": "default", "text": "Unless someone stabilizes them from both sides. Her from the deep, us from out here." }
+            ]
+        },
+        {
+            "id": "tavern_l80",
+            "triggerId": "tavern_level_80_complete",
+            "playOnce": true,
+            "lines": [
+                { "mascotId": "bartender", "expression": "default", "text": "Miller said there's one more of us out there. Leika." },
+                { "mascotId": "bartender", "expression": "default", "text": "The dog ended up on a space station near the nexus point." },
+                { "mascotId": "bartender", "expression": "gruff", "text": "If anyone can find Miller's exact location, it's her." },
+                { "mascotId": "bartender", "expression": "default", "text": "That dog always could track a scent across a room. Imagine what she can do across dimensions." }
+            ]
+        },
+        {
+            "id": "tavern_l90",
+            "triggerId": "tavern_level_90_complete",
+            "playOnce": true,
+            "lines": [
+                { "mascotId": "bartender", "expression": "default", "text": "She left me something before she went. A small device." },
+                { "mascotId": "bartender", "expression": "default", "text": "Said to give it to whoever came looking for her." },
+                { "mascotId": "bartender", "expression": "gruff", "text": "It's a beacon. Should help Leika lock onto her signal." },
+                { "mascotId": "bartender", "expression": "default", "text": "Take it. Go find our girl." }
+            ]
+        },
+        {
+            "id": "tavern_l100",
+            "triggerId": "tavern_level_100_complete",
+            "playOnce": true,
+            "lines": [
+                { "mascotId": "bartender", "expression": "default", "text": "Tavern's shipshape. First time in years." },
+                { "mascotId": "bartender", "expression": "gruff", "text": "Listen. When you find Miller... tell her Mason's doing alright." },
+                { "mascotId": "bartender", "expression": "default", "text": "Tell her the pig learned to cook." },
+                { "mascotId": "bartender", "expression": "happy", "text": "And tell her she still owes me for that water. Now get going. The stars are waiting." }
             ]
         },
         {
@@ -137,21 +508,197 @@
             "triggerId": "space_first_play",
             "playOnce": true,
             "lines": [
-                {
-                    "mascotId": "alien",
-                    "expression": "idea",
-                    "text": "Welcome aboard the space station!"
-                },
-                {
-                    "mascotId": "alien",
-                    "expression": "neutral",
-                    "text": "I'm Leika, and things have gotten a little messy up here in zero gravity."
-                },
-                {
-                    "mascotId": "alien",
-                    "expression": "idea",
-                    "text": "Help me sort the cargo before mission control finds out!"
-                }
+                { "mascotId": "alien", "expression": "excited", "text": "A PERSON! An actual person! Up here! In SPACE!" },
+                { "mascotId": "alien", "expression": "happy", "text": "I'm Leika! I've been monitoring dimensional frequencies for years! Alone! In space! It's been a LOT!" },
+                { "mascotId": "alien", "expression": "excited", "text": "Whiskers sent you?! Tommy! Mara! Mason! They're all okay?!" }
+            ]
+        },
+        {
+            "id": "space_l10",
+            "triggerId": "space_level_10_complete",
+            "playOnce": true,
+            "lines": [
+                { "mascotId": "alien", "expression": "happy", "text": "Sorry, I get excited. It's been quiet up here." },
+                { "mascotId": "alien", "expression": "default", "text": "I was Dr. Miller's dog. Lab security, she called me." },
+                { "mascotId": "alien", "expression": "happy", "text": "Mostly I just followed her everywhere and barked at the equipment." }
+            ]
+        },
+        {
+            "id": "space_l20",
+            "triggerId": "space_level_20_complete",
+            "playOnce": true,
+            "lines": [
+                { "mascotId": "alien", "expression": "default", "text": "The space station was already here when I arrived." },
+                { "mascotId": "alien", "expression": "default", "text": "Some kind of automated research outpost. I figured out the controls eventually." },
+                { "mascotId": "alien", "expression": "happy", "text": "Turns out being hyper-intelligent AND a good girl is a winning combination!" }
+            ]
+        },
+        {
+            "id": "space_l30",
+            "triggerId": "space_level_30_complete",
+            "playOnce": true,
+            "lines": [
+                { "mascotId": "alien", "expression": "default", "text": "From up here, I can see the whole dimensional web." },
+                { "mascotId": "alien", "expression": "default", "text": "It's beautiful. And broken. Threads fraying everywhere." },
+                { "mascotId": "alien", "expression": "worried", "text": "But since you started sorting... some threads are reconnecting." }
+            ]
+        },
+        {
+            "id": "space_l40",
+            "triggerId": "space_level_40_complete",
+            "playOnce": true,
+            "lines": [
+                { "mascotId": "alien", "expression": "excited", "text": "You have Mason's beacon?! Let me plug that in!" },
+                { "mascotId": "alien", "expression": "default", "text": "...Processing... triangulating..." },
+                { "mascotId": "alien", "expression": "happy", "text": "I'm getting a signal! Faint, but it's definitely her frequency!" }
+            ]
+        },
+        {
+            "id": "space_l50",
+            "triggerId": "space_level_50_complete",
+            "playOnce": true,
+            "lines": [
+                { "mascotId": "alien", "expression": "default", "text": "The signal is coming from the convergence point." },
+                { "mascotId": "alien", "expression": "default", "text": "It's where all dimensional threads meet. The center of everything." },
+                { "mascotId": "alien", "expression": "worried", "text": "Dr. Miller has been there this whole time. Building something massive." },
+                { "mascotId": "alien", "expression": "default", "text": "A dimensional stabilizer. One big enough to fix everything." }
+            ]
+        },
+        {
+            "id": "space_l60",
+            "triggerId": "space_level_60_complete",
+            "playOnce": true,
+            "lines": [
+                { "mascotId": "alien", "expression": "default", "text": "I can see her work from here. She's been closing micro-rifts around the convergence point, one by one." },
+                { "mascotId": "alien", "expression": "happy", "text": "We've been working the same problem from opposite ends!" },
+                { "mascotId": "alien", "expression": "default", "text": "Her from the center out, us from the edges in." }
+            ]
+        },
+        {
+            "id": "space_l70",
+            "triggerId": "space_level_70_complete",
+            "playOnce": true,
+            "lines": [
+                { "mascotId": "alien", "expression": "default", "text": "The stabilizer is almost complete. But she needs the outer dimensions clear first." },
+                { "mascotId": "alien", "expression": "worried", "text": "If she activates it while there's still too much chaos... the feedback loop could overload everything." },
+                { "mascotId": "alien", "expression": "default", "text": "We're not just sorting for fun. We're clearing the path for her." }
+            ]
+        },
+        {
+            "id": "space_l80",
+            "triggerId": "space_level_80_complete",
+            "playOnce": true,
+            "lines": [
+                { "mascotId": "alien", "expression": "happy", "text": "I sent her a message through the dimensional frequencies!" },
+                { "mascotId": "alien", "expression": "excited", "text": "And she responded! Just two words: \"Good girl.\"" },
+                { "mascotId": "alien", "expression": "happy", "text": "...I'm not crying. Dogs don't cry. It's space allergies." }
+            ]
+        },
+        {
+            "id": "space_l90",
+            "triggerId": "space_level_90_complete",
+            "playOnce": true,
+            "lines": [
+                { "mascotId": "alien", "expression": "default", "text": "Almost there! The dimensional web is stabilizing beautifully." },
+                { "mascotId": "alien", "expression": "excited", "text": "I can see the convergence point getting brighter!" },
+                { "mascotId": "alien", "expression": "default", "text": "When you finish here, the path to Dr. Miller should be clear." },
+                { "mascotId": "alien", "expression": "happy", "text": "We're going to find her. We're really going to find her!" }
+            ]
+        },
+        {
+            "id": "space_l100",
+            "triggerId": "space_level_100_complete",
+            "playOnce": true,
+            "lines": [
+                { "mascotId": "alien", "expression": "excited", "text": "Station sorted! Dimensions stabilizing! Signal locked!" },
+                { "mascotId": "alien", "expression": "happy", "text": "I can see her! On my instruments - Dr. Miller, alive and working!" },
+                { "mascotId": "alien", "expression": "default", "text": "The path to the convergence point is open. But it won't be easy. New worlds, new challenges." },
+                { "mascotId": "alien", "expression": "happy", "text": "She's waiting for us. All of us. Her whole little family." },
+                { "mascotId": "alien", "expression": "excited", "text": "This isn't the end. It's the beginning of bringing her home!" }
+            ]
+        },
+        {
+            "id": "mode_freeplay",
+            "triggerId": "mode_freeplay_first",
+            "playOnce": true,
+            "lines": [
+                { "mascotId": "cat", "expression": "happy", "text": "Welcome! You're in Free Play mode - no move limits, no timers. Just relax and sort at your own pace!" },
+                { "mascotId": "cat", "expression": "default", "text": "When you're ready for a challenge, try the other modes! Star Mode tracks your moves, Timer Mode races the clock, and Hard Mode... well, that's for the brave." }
+            ]
+        },
+        {
+            "id": "mode_starmode",
+            "triggerId": "mode_starmode_first",
+            "playOnce": true,
+            "lines": [
+                { "mascotId": "cat", "expression": "default", "text": "Star Mode! Now we're tracking your moves." },
+                { "mascotId": "cat", "expression": "happy", "text": "Use as few moves as possible to earn up to 3 stars!" }
+            ]
+        },
+        {
+            "id": "mode_timermode",
+            "triggerId": "mode_timermode_first",
+            "playOnce": true,
+            "lines": [
+                { "mascotId": "cat", "expression": "default", "text": "Timer Mode! The clock is ticking!" },
+                { "mascotId": "cat", "expression": "happy", "text": "Sort everything before time runs out. No pressure!" },
+                { "mascotId": "cat", "expression": "default", "text": "...Okay, maybe a little pressure." }
+            ]
+        },
+        {
+            "id": "mode_hardmode",
+            "triggerId": "mode_hardmode_first",
+            "playOnce": true,
+            "lines": [
+                { "mascotId": "cat", "expression": "worried", "text": "Hard Mode?! Stars AND a timer?" },
+                { "mascotId": "cat", "expression": "default", "text": "You've earned this by mastering both Star and Timer modes." },
+                { "mascotId": "cat", "expression": "happy", "text": "Show these portals who's boss!" }
+            ]
+        },
+        {
+            "id": "hardmode_island",
+            "triggerId": "hardmode_island_unlock",
+            "playOnce": true,
+            "lines": [
+                { "mascotId": "cat", "expression": "happy", "text": "Incredible! You've mastered both Star and Timer modes!" },
+                { "mascotId": "cat", "expression": "default", "text": "Hard Mode is now unlocked for the island." },
+                { "mascotId": "cat", "expression": "happy", "text": "Stars AND a timer. The ultimate challenge awaits!" }
+            ]
+        },
+        {
+            "id": "hardmode_supermarket",
+            "triggerId": "hardmode_supermarket_unlock",
+            "playOnce": true,
+            "lines": [
+                { "mascotId": "tommy", "expression": "happy", "text": "No way! You cleaned out Star AND Timer for my store?" },
+                { "mascotId": "tommy", "expression": "default", "text": "Hard Mode unlocked. Good luck keeping up!" }
+            ]
+        },
+        {
+            "id": "hardmode_farm",
+            "triggerId": "hardmode_farm_unlock",
+            "playOnce": true,
+            "lines": [
+                { "mascotId": "chicken", "expression": "happy", "text": "Oh my! You've completed both Star and Timer modes!" },
+                { "mascotId": "chicken", "expression": "default", "text": "Hard Mode is unlocked. I believe in you!" }
+            ]
+        },
+        {
+            "id": "hardmode_tavern",
+            "triggerId": "hardmode_tavern_unlock",
+            "playOnce": true,
+            "lines": [
+                { "mascotId": "bartender", "expression": "gruff", "text": "Well well. Star Mode AND Timer Mode, done and dusted." },
+                { "mascotId": "bartender", "expression": "default", "text": "Hard Mode's open. This one's not for the faint of heart." }
+            ]
+        },
+        {
+            "id": "hardmode_space",
+            "triggerId": "hardmode_space_unlock",
+            "playOnce": true,
+            "lines": [
+                { "mascotId": "alien", "expression": "excited", "text": "You did BOTH Star AND Timer?! All 100 levels?!" },
+                { "mascotId": "alien", "expression": "happy", "text": "Hard Mode activated! Maximum challenge! Let's GOOO!" }
             ]
         }
     ],
@@ -162,7 +709,8 @@
             "type": 1,
             "worldId": "island",
             "levelNumber": 0,
-            "threshold": 0
+            "threshold": 0,
+            "gameMode": -1
         },
         {
             "id": "trig_island_l2_start",
@@ -170,7 +718,98 @@
             "type": 1,
             "worldId": "island",
             "levelNumber": 2,
-            "threshold": 0
+            "threshold": 0,
+            "gameMode": -1
+        },
+        {
+            "id": "trig_island_l10",
+            "dialogueId": "island_l10",
+            "type": 0,
+            "worldId": "island",
+            "levelNumber": 10,
+            "threshold": 0,
+            "gameMode": -1
+        },
+        {
+            "id": "trig_island_l20",
+            "dialogueId": "island_l20",
+            "type": 0,
+            "worldId": "island",
+            "levelNumber": 20,
+            "threshold": 0,
+            "gameMode": -1
+        },
+        {
+            "id": "trig_island_l30",
+            "dialogueId": "island_l30",
+            "type": 0,
+            "worldId": "island",
+            "levelNumber": 30,
+            "threshold": 0,
+            "gameMode": -1
+        },
+        {
+            "id": "trig_island_l40",
+            "dialogueId": "island_l40",
+            "type": 0,
+            "worldId": "island",
+            "levelNumber": 40,
+            "threshold": 0,
+            "gameMode": -1
+        },
+        {
+            "id": "trig_island_l50",
+            "dialogueId": "island_l50",
+            "type": 0,
+            "worldId": "island",
+            "levelNumber": 50,
+            "threshold": 0,
+            "gameMode": -1
+        },
+        {
+            "id": "trig_island_l60",
+            "dialogueId": "island_l60",
+            "type": 0,
+            "worldId": "island",
+            "levelNumber": 60,
+            "threshold": 0,
+            "gameMode": -1
+        },
+        {
+            "id": "trig_island_l70",
+            "dialogueId": "island_l70",
+            "type": 0,
+            "worldId": "island",
+            "levelNumber": 70,
+            "threshold": 0,
+            "gameMode": -1
+        },
+        {
+            "id": "trig_island_l80",
+            "dialogueId": "island_l80",
+            "type": 0,
+            "worldId": "island",
+            "levelNumber": 80,
+            "threshold": 0,
+            "gameMode": -1
+        },
+        {
+            "id": "trig_island_l90",
+            "dialogueId": "island_l90",
+            "type": 0,
+            "worldId": "island",
+            "levelNumber": 90,
+            "threshold": 0,
+            "gameMode": -1
+        },
+        {
+            "id": "trig_island_l100",
+            "dialogueId": "island_l100",
+            "type": 0,
+            "worldId": "island",
+            "levelNumber": 100,
+            "threshold": 0,
+            "gameMode": -1
         },
         {
             "id": "trig_supermarket_welcome",
@@ -178,7 +817,98 @@
             "type": 1,
             "worldId": "supermarket",
             "levelNumber": 0,
-            "threshold": 0
+            "threshold": 0,
+            "gameMode": -1
+        },
+        {
+            "id": "trig_supermarket_l10",
+            "dialogueId": "supermarket_l10",
+            "type": 0,
+            "worldId": "supermarket",
+            "levelNumber": 10,
+            "threshold": 0,
+            "gameMode": -1
+        },
+        {
+            "id": "trig_supermarket_l20",
+            "dialogueId": "supermarket_l20",
+            "type": 0,
+            "worldId": "supermarket",
+            "levelNumber": 20,
+            "threshold": 0,
+            "gameMode": -1
+        },
+        {
+            "id": "trig_supermarket_l30",
+            "dialogueId": "supermarket_l30",
+            "type": 0,
+            "worldId": "supermarket",
+            "levelNumber": 30,
+            "threshold": 0,
+            "gameMode": -1
+        },
+        {
+            "id": "trig_supermarket_l40",
+            "dialogueId": "supermarket_l40",
+            "type": 0,
+            "worldId": "supermarket",
+            "levelNumber": 40,
+            "threshold": 0,
+            "gameMode": -1
+        },
+        {
+            "id": "trig_supermarket_l50",
+            "dialogueId": "supermarket_l50",
+            "type": 0,
+            "worldId": "supermarket",
+            "levelNumber": 50,
+            "threshold": 0,
+            "gameMode": -1
+        },
+        {
+            "id": "trig_supermarket_l60",
+            "dialogueId": "supermarket_l60",
+            "type": 0,
+            "worldId": "supermarket",
+            "levelNumber": 60,
+            "threshold": 0,
+            "gameMode": -1
+        },
+        {
+            "id": "trig_supermarket_l70",
+            "dialogueId": "supermarket_l70",
+            "type": 0,
+            "worldId": "supermarket",
+            "levelNumber": 70,
+            "threshold": 0,
+            "gameMode": -1
+        },
+        {
+            "id": "trig_supermarket_l80",
+            "dialogueId": "supermarket_l80",
+            "type": 0,
+            "worldId": "supermarket",
+            "levelNumber": 80,
+            "threshold": 0,
+            "gameMode": -1
+        },
+        {
+            "id": "trig_supermarket_l90",
+            "dialogueId": "supermarket_l90",
+            "type": 0,
+            "worldId": "supermarket",
+            "levelNumber": 90,
+            "threshold": 0,
+            "gameMode": -1
+        },
+        {
+            "id": "trig_supermarket_l100",
+            "dialogueId": "supermarket_l100",
+            "type": 0,
+            "worldId": "supermarket",
+            "levelNumber": 100,
+            "threshold": 0,
+            "gameMode": -1
         },
         {
             "id": "trig_farm_welcome",
@@ -186,7 +916,98 @@
             "type": 1,
             "worldId": "farm",
             "levelNumber": 0,
-            "threshold": 0
+            "threshold": 0,
+            "gameMode": -1
+        },
+        {
+            "id": "trig_farm_l10",
+            "dialogueId": "farm_l10",
+            "type": 0,
+            "worldId": "farm",
+            "levelNumber": 10,
+            "threshold": 0,
+            "gameMode": -1
+        },
+        {
+            "id": "trig_farm_l20",
+            "dialogueId": "farm_l20",
+            "type": 0,
+            "worldId": "farm",
+            "levelNumber": 20,
+            "threshold": 0,
+            "gameMode": -1
+        },
+        {
+            "id": "trig_farm_l30",
+            "dialogueId": "farm_l30",
+            "type": 0,
+            "worldId": "farm",
+            "levelNumber": 30,
+            "threshold": 0,
+            "gameMode": -1
+        },
+        {
+            "id": "trig_farm_l40",
+            "dialogueId": "farm_l40",
+            "type": 0,
+            "worldId": "farm",
+            "levelNumber": 40,
+            "threshold": 0,
+            "gameMode": -1
+        },
+        {
+            "id": "trig_farm_l50",
+            "dialogueId": "farm_l50",
+            "type": 0,
+            "worldId": "farm",
+            "levelNumber": 50,
+            "threshold": 0,
+            "gameMode": -1
+        },
+        {
+            "id": "trig_farm_l60",
+            "dialogueId": "farm_l60",
+            "type": 0,
+            "worldId": "farm",
+            "levelNumber": 60,
+            "threshold": 0,
+            "gameMode": -1
+        },
+        {
+            "id": "trig_farm_l70",
+            "dialogueId": "farm_l70",
+            "type": 0,
+            "worldId": "farm",
+            "levelNumber": 70,
+            "threshold": 0,
+            "gameMode": -1
+        },
+        {
+            "id": "trig_farm_l80",
+            "dialogueId": "farm_l80",
+            "type": 0,
+            "worldId": "farm",
+            "levelNumber": 80,
+            "threshold": 0,
+            "gameMode": -1
+        },
+        {
+            "id": "trig_farm_l90",
+            "dialogueId": "farm_l90",
+            "type": 0,
+            "worldId": "farm",
+            "levelNumber": 90,
+            "threshold": 0,
+            "gameMode": -1
+        },
+        {
+            "id": "trig_farm_l100",
+            "dialogueId": "farm_l100",
+            "type": 0,
+            "worldId": "farm",
+            "levelNumber": 100,
+            "threshold": 0,
+            "gameMode": -1
         },
         {
             "id": "trig_tavern_welcome",
@@ -194,7 +1015,98 @@
             "type": 1,
             "worldId": "tavern",
             "levelNumber": 0,
-            "threshold": 0
+            "threshold": 0,
+            "gameMode": -1
+        },
+        {
+            "id": "trig_tavern_l10",
+            "dialogueId": "tavern_l10",
+            "type": 0,
+            "worldId": "tavern",
+            "levelNumber": 10,
+            "threshold": 0,
+            "gameMode": -1
+        },
+        {
+            "id": "trig_tavern_l20",
+            "dialogueId": "tavern_l20",
+            "type": 0,
+            "worldId": "tavern",
+            "levelNumber": 20,
+            "threshold": 0,
+            "gameMode": -1
+        },
+        {
+            "id": "trig_tavern_l30",
+            "dialogueId": "tavern_l30",
+            "type": 0,
+            "worldId": "tavern",
+            "levelNumber": 30,
+            "threshold": 0,
+            "gameMode": -1
+        },
+        {
+            "id": "trig_tavern_l40",
+            "dialogueId": "tavern_l40",
+            "type": 0,
+            "worldId": "tavern",
+            "levelNumber": 40,
+            "threshold": 0,
+            "gameMode": -1
+        },
+        {
+            "id": "trig_tavern_l50",
+            "dialogueId": "tavern_l50",
+            "type": 0,
+            "worldId": "tavern",
+            "levelNumber": 50,
+            "threshold": 0,
+            "gameMode": -1
+        },
+        {
+            "id": "trig_tavern_l60",
+            "dialogueId": "tavern_l60",
+            "type": 0,
+            "worldId": "tavern",
+            "levelNumber": 60,
+            "threshold": 0,
+            "gameMode": -1
+        },
+        {
+            "id": "trig_tavern_l70",
+            "dialogueId": "tavern_l70",
+            "type": 0,
+            "worldId": "tavern",
+            "levelNumber": 70,
+            "threshold": 0,
+            "gameMode": -1
+        },
+        {
+            "id": "trig_tavern_l80",
+            "dialogueId": "tavern_l80",
+            "type": 0,
+            "worldId": "tavern",
+            "levelNumber": 80,
+            "threshold": 0,
+            "gameMode": -1
+        },
+        {
+            "id": "trig_tavern_l90",
+            "dialogueId": "tavern_l90",
+            "type": 0,
+            "worldId": "tavern",
+            "levelNumber": 90,
+            "threshold": 0,
+            "gameMode": -1
+        },
+        {
+            "id": "trig_tavern_l100",
+            "dialogueId": "tavern_l100",
+            "type": 0,
+            "worldId": "tavern",
+            "levelNumber": 100,
+            "threshold": 0,
+            "gameMode": -1
         },
         {
             "id": "trig_space_welcome",
@@ -202,7 +1114,179 @@
             "type": 1,
             "worldId": "space",
             "levelNumber": 0,
-            "threshold": 0
+            "threshold": 0,
+            "gameMode": -1
+        },
+        {
+            "id": "trig_space_l10",
+            "dialogueId": "space_l10",
+            "type": 0,
+            "worldId": "space",
+            "levelNumber": 10,
+            "threshold": 0,
+            "gameMode": -1
+        },
+        {
+            "id": "trig_space_l20",
+            "dialogueId": "space_l20",
+            "type": 0,
+            "worldId": "space",
+            "levelNumber": 20,
+            "threshold": 0,
+            "gameMode": -1
+        },
+        {
+            "id": "trig_space_l30",
+            "dialogueId": "space_l30",
+            "type": 0,
+            "worldId": "space",
+            "levelNumber": 30,
+            "threshold": 0,
+            "gameMode": -1
+        },
+        {
+            "id": "trig_space_l40",
+            "dialogueId": "space_l40",
+            "type": 0,
+            "worldId": "space",
+            "levelNumber": 40,
+            "threshold": 0,
+            "gameMode": -1
+        },
+        {
+            "id": "trig_space_l50",
+            "dialogueId": "space_l50",
+            "type": 0,
+            "worldId": "space",
+            "levelNumber": 50,
+            "threshold": 0,
+            "gameMode": -1
+        },
+        {
+            "id": "trig_space_l60",
+            "dialogueId": "space_l60",
+            "type": 0,
+            "worldId": "space",
+            "levelNumber": 60,
+            "threshold": 0,
+            "gameMode": -1
+        },
+        {
+            "id": "trig_space_l70",
+            "dialogueId": "space_l70",
+            "type": 0,
+            "worldId": "space",
+            "levelNumber": 70,
+            "threshold": 0,
+            "gameMode": -1
+        },
+        {
+            "id": "trig_space_l80",
+            "dialogueId": "space_l80",
+            "type": 0,
+            "worldId": "space",
+            "levelNumber": 80,
+            "threshold": 0,
+            "gameMode": -1
+        },
+        {
+            "id": "trig_space_l90",
+            "dialogueId": "space_l90",
+            "type": 0,
+            "worldId": "space",
+            "levelNumber": 90,
+            "threshold": 0,
+            "gameMode": -1
+        },
+        {
+            "id": "trig_space_l100",
+            "dialogueId": "space_l100",
+            "type": 0,
+            "worldId": "space",
+            "levelNumber": 100,
+            "threshold": 0,
+            "gameMode": -1
+        },
+        {
+            "id": "trig_mode_freeplay",
+            "dialogueId": "mode_freeplay",
+            "type": 8,
+            "worldId": "",
+            "levelNumber": 0,
+            "threshold": 0,
+            "gameMode": 0
+        },
+        {
+            "id": "trig_mode_starmode",
+            "dialogueId": "mode_starmode",
+            "type": 8,
+            "worldId": "",
+            "levelNumber": 0,
+            "threshold": 0,
+            "gameMode": 1
+        },
+        {
+            "id": "trig_mode_timermode",
+            "dialogueId": "mode_timermode",
+            "type": 8,
+            "worldId": "",
+            "levelNumber": 0,
+            "threshold": 0,
+            "gameMode": 2
+        },
+        {
+            "id": "trig_mode_hardmode",
+            "dialogueId": "mode_hardmode",
+            "type": 8,
+            "worldId": "",
+            "levelNumber": 0,
+            "threshold": 0,
+            "gameMode": 3
+        },
+        {
+            "id": "trig_hardmode_island",
+            "dialogueId": "hardmode_island",
+            "type": 9,
+            "worldId": "island",
+            "levelNumber": 0,
+            "threshold": 0,
+            "gameMode": -1
+        },
+        {
+            "id": "trig_hardmode_supermarket",
+            "dialogueId": "hardmode_supermarket",
+            "type": 9,
+            "worldId": "supermarket",
+            "levelNumber": 0,
+            "threshold": 0,
+            "gameMode": -1
+        },
+        {
+            "id": "trig_hardmode_farm",
+            "dialogueId": "hardmode_farm",
+            "type": 9,
+            "worldId": "farm",
+            "levelNumber": 0,
+            "threshold": 0,
+            "gameMode": -1
+        },
+        {
+            "id": "trig_hardmode_tavern",
+            "dialogueId": "hardmode_tavern",
+            "type": 9,
+            "worldId": "tavern",
+            "levelNumber": 0,
+            "threshold": 0,
+            "gameMode": -1
+        },
+        {
+            "id": "trig_hardmode_space",
+            "dialogueId": "hardmode_space",
+            "type": 9,
+            "worldId": "space",
+            "levelNumber": 0,
+            "threshold": 0,
+            "gameMode": -1
         }
     ]
 }
