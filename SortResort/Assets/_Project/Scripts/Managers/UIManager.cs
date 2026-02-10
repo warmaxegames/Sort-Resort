@@ -2927,66 +2927,37 @@ Antonia and Joakim Engfors
             // Add CanvasGroup for fading
             var canvasGroup = pauseMenuPanel.AddComponent<CanvasGroup>();
 
-            // Load button sprites
-            var boardSprite = Resources.Load<Sprite>("Sprites/UI/Settings/board");
+            // Board background - fullscreen overlay sprite (1080x1920)
+            var boardGO = new GameObject("Board");
+            boardGO.transform.SetParent(pauseMenuPanel.transform, false);
+            var boardRect = boardGO.AddComponent<RectTransform>();
+            boardRect.anchorMin = Vector2.zero;
+            boardRect.anchorMax = Vector2.one;
+            boardRect.offsetMin = Vector2.zero;
+            boardRect.offsetMax = Vector2.zero;
+            var boardImg = boardGO.AddComponent<Image>();
+            boardImg.sprite = LoadFullRectSprite("Sprites/UI/PauseMenu/pause_board");
+            boardImg.preserveAspect = true;
+            boardImg.raycastTarget = false;
 
-            // Main content container (centered)
-            var contentGO = new GameObject("Content");
-            contentGO.transform.SetParent(pauseMenuPanel.transform, false);
-            var contentRect = contentGO.AddComponent<RectTransform>();
-            contentRect.anchorMin = new Vector2(0.5f, 0.5f);
-            contentRect.anchorMax = new Vector2(0.5f, 0.5f);
-            contentRect.sizeDelta = new Vector2(600, 700);
-
-            // Board background
-            var boardBg = contentGO.AddComponent<Image>();
-            if (boardSprite != null)
-            {
-                boardBg.sprite = boardSprite;
-                boardBg.type = Image.Type.Sliced;
-            }
-            else
-            {
-                boardBg.color = new Color(0.45f, 0.30f, 0.15f, 1f); // Brown fallback
-            }
-
-            // Title
-            var titleGO = new GameObject("Title");
-            titleGO.transform.SetParent(contentGO.transform, false);
-            var titleRect = titleGO.AddComponent<RectTransform>();
-            titleRect.anchorMin = new Vector2(0, 1);
-            titleRect.anchorMax = new Vector2(1, 1);
-            titleRect.pivot = new Vector2(0.5f, 1);
-            titleRect.anchoredPosition = new Vector2(0, -40);
-            titleRect.sizeDelta = new Vector2(0, 80);
-
-            var titleText = titleGO.AddComponent<TextMeshProUGUI>();
-            titleText.text = "PAUSED";
-            titleText.fontSize = 56;
-            titleText.fontStyle = FontStyles.Bold;
-            titleText.alignment = TextAlignmentOptions.Center;
-            titleText.color = Color.white;
-
-            // Buttons container
-            var buttonsContainer = new GameObject("Buttons");
-            buttonsContainer.transform.SetParent(contentGO.transform, false);
-            var buttonsRect = buttonsContainer.AddComponent<RectTransform>();
-            buttonsRect.anchorMin = new Vector2(0.5f, 0.5f);
-            buttonsRect.anchorMax = new Vector2(0.5f, 0.5f);
-            buttonsRect.sizeDelta = new Vector2(450, 450);
-
-            var buttonsLayout = buttonsContainer.AddComponent<VerticalLayoutGroup>();
-            buttonsLayout.spacing = 25;
-            buttonsLayout.childAlignment = TextAnchor.MiddleCenter;
-            buttonsLayout.childForceExpandWidth = false;
-            buttonsLayout.childForceExpandHeight = false;
-            buttonsLayout.padding = new RectOffset(0, 0, 20, 20);
-
-            // Create buttons
-            var resumeBtn = CreatePauseMenuButton(buttonsContainer.transform, "Resume", new Color(0.2f, 0.7f, 0.3f, 1f));
-            var restartBtn = CreatePauseMenuButton(buttonsContainer.transform, "Restart Level", new Color(0.3f, 0.5f, 0.8f, 1f));
-            var settingsBtn = CreatePauseMenuButton(buttonsContainer.transform, "Settings", new Color(0.5f, 0.5f, 0.5f, 1f));
-            var exitBtn = CreatePauseMenuButton(buttonsContainer.transform, "Quit to Menu", new Color(0.8f, 0.3f, 0.3f, 1f));
+            // Create sprite-based buttons with hit areas at exact pixel positions
+            // Button positions from sprite analysis (in 1080x1920 canvas):
+            // Resume:   center=(534, 877),  size=458x141
+            // Restart:  center=(534, 1055), size=458x141
+            // Settings: center=(534, 1229), size=458x142
+            // Quit:     center=(534, 1404), size=458x142
+            var resumeBtn = CreatePauseMenuSpriteButton(pauseMenuPanel.transform, "Resume",
+                "Sprites/UI/PauseMenu/pause_resume", "Sprites/UI/PauseMenu/pause_resume_pressed",
+                534f / 1080f, 1f - 877f / 1920f, 458f, 141f);
+            var restartBtn = CreatePauseMenuSpriteButton(pauseMenuPanel.transform, "Restart",
+                "Sprites/UI/PauseMenu/pause_restart", "Sprites/UI/PauseMenu/pause_restart_pressed",
+                534f / 1080f, 1f - 1055f / 1920f, 458f, 141f);
+            var settingsBtn = CreatePauseMenuSpriteButton(pauseMenuPanel.transform, "Settings",
+                "Sprites/UI/PauseMenu/pause_settings", "Sprites/UI/PauseMenu/pause_settings_pressed",
+                534f / 1080f, 1f - 1229f / 1920f, 458f, 142f);
+            var exitBtn = CreatePauseMenuSpriteButton(pauseMenuPanel.transform, "Quit",
+                "Sprites/UI/PauseMenu/pause_quit", "Sprites/UI/PauseMenu/pause_quit_pressed",
+                534f / 1080f, 1f - 1404f / 1920f, 458f, 142f);
 
             // Add PauseMenuScreen component
             pauseMenuScreen = pauseMenuPanel.AddComponent<PauseMenuScreen>();
@@ -3005,52 +2976,66 @@ Antonia and Joakim Engfors
                 ShowSettings();
             };
 
-            Debug.Log("[UIManager] Pause menu panel created");
+            Debug.Log("[UIManager] Pause menu panel created with sprite-based buttons");
         }
 
-        private Button CreatePauseMenuButton(Transform parent, string text, Color bgColor)
+        /// <summary>
+        /// Creates a pause menu button using fullscreen sprite overlays with a clickable hit area
+        /// at the exact button position within the 1080x1920 canvas.
+        /// </summary>
+        private Button CreatePauseMenuSpriteButton(Transform parent, string name,
+            string normalPath, string pressedPath,
+            float anchorX, float anchorY, float hitWidth, float hitHeight)
         {
-            var btnGO = new GameObject(text + "Button");
-            btnGO.transform.SetParent(parent, false);
-            var btnLE = btnGO.AddComponent<LayoutElement>();
-            btnLE.preferredWidth = 400;
-            btnLE.preferredHeight = 80;
+            // Fullscreen sprite layer for the button visual
+            var spriteGO = new GameObject(name + " Sprite");
+            spriteGO.transform.SetParent(parent, false);
+            var spriteRect = spriteGO.AddComponent<RectTransform>();
+            spriteRect.anchorMin = Vector2.zero;
+            spriteRect.anchorMax = Vector2.one;
+            spriteRect.offsetMin = Vector2.zero;
+            spriteRect.offsetMax = Vector2.zero;
+            var spriteImg = spriteGO.AddComponent<Image>();
+            var normalSprite = LoadFullRectSprite(normalPath);
+            var pressedSprite = LoadFullRectSprite(pressedPath);
+            spriteImg.sprite = normalSprite;
+            spriteImg.preserveAspect = true;
+            spriteImg.raycastTarget = false;
 
-            var btnImg = btnGO.AddComponent<Image>();
-            // Create rounded button
-            var roundedSprite = CreateRoundedRectSprite(256, 64, 20, bgColor);
-            if (roundedSprite != null)
-            {
-                btnImg.sprite = roundedSprite;
-                btnImg.type = Image.Type.Sliced;
-            }
-            else
-            {
-                btnImg.color = bgColor;
-            }
+            // Clickable hit area positioned at the button's exact location
+            var hitGO = new GameObject(name + " HitArea");
+            hitGO.transform.SetParent(spriteGO.transform, false);
+            var hitRect = hitGO.AddComponent<RectTransform>();
+            hitRect.anchorMin = new Vector2(anchorX, anchorY);
+            hitRect.anchorMax = new Vector2(anchorX, anchorY);
+            hitRect.pivot = new Vector2(0.5f, 0.5f);
+            hitRect.anchoredPosition = Vector2.zero;
+            // Scale hit area from pixel dimensions to proportional canvas size
+            hitRect.sizeDelta = new Vector2(hitWidth / 1080f * Screen.width, hitHeight / 1920f * Screen.height);
+            // Use anchor-relative sizing instead for canvas consistency
+            hitRect.anchorMin = new Vector2(anchorX - (hitWidth / 1080f) * 0.5f, anchorY - (hitHeight / 1920f) * 0.5f);
+            hitRect.anchorMax = new Vector2(anchorX + (hitWidth / 1080f) * 0.5f, anchorY + (hitHeight / 1920f) * 0.5f);
+            hitRect.offsetMin = Vector2.zero;
+            hitRect.offsetMax = Vector2.zero;
 
-            var btn = btnGO.AddComponent<Button>();
-            btn.targetGraphic = btnImg;
-            var colors = btn.colors;
-            colors.normalColor = Color.white;
-            colors.highlightedColor = new Color(0.95f, 0.95f, 0.95f, 1f);
-            colors.pressedColor = new Color(0.8f, 0.8f, 0.8f, 1f);
-            btn.colors = colors;
+            var hitImg = hitGO.AddComponent<Image>();
+            hitImg.color = Color.clear; // Invisible but catches raycasts
 
-            // Button text
-            var textGO = new GameObject("Text");
-            textGO.transform.SetParent(btnGO.transform, false);
-            var textRect = textGO.AddComponent<RectTransform>();
-            textRect.anchorMin = Vector2.zero;
-            textRect.anchorMax = Vector2.one;
-            textRect.offsetMin = Vector2.zero;
-            textRect.offsetMax = Vector2.zero;
-            var textTMP = textGO.AddComponent<TextMeshProUGUI>();
-            textTMP.text = text;
-            textTMP.fontSize = 36;
-            textTMP.fontStyle = FontStyles.Bold;
-            textTMP.alignment = TextAlignmentOptions.Center;
-            textTMP.color = Color.white;
+            var btn = hitGO.AddComponent<Button>();
+            btn.targetGraphic = hitImg;
+            btn.transition = Selectable.Transition.None;
+
+            // Swap fullscreen sprite on press via event triggers
+            var pressHandler = hitGO.AddComponent<UnityEngine.EventSystems.EventTrigger>();
+            var pointerDown = new UnityEngine.EventSystems.EventTrigger.Entry();
+            pointerDown.eventID = UnityEngine.EventSystems.EventTriggerType.PointerDown;
+            pointerDown.callback.AddListener((data) => { spriteImg.sprite = pressedSprite ?? normalSprite; });
+            pressHandler.triggers.Add(pointerDown);
+
+            var pointerUp = new UnityEngine.EventSystems.EventTrigger.Entry();
+            pointerUp.eventID = UnityEngine.EventSystems.EventTriggerType.PointerUp;
+            pointerUp.callback.AddListener((data) => { spriteImg.sprite = normalSprite; });
+            pressHandler.triggers.Add(pointerUp);
 
             return btn;
         }
@@ -3175,6 +3160,21 @@ Antonia and Joakim Engfors
             tmp.overflowMode = TextOverflowModes.Overflow;
 
             return btn;
+        }
+
+        /// <summary>
+        /// Loads a texture and creates a sprite covering the full texture rect.
+        /// Use for fullscreen overlay sprites (1080x1920) where the import may trim transparent areas.
+        /// </summary>
+        private static Sprite LoadFullRectSprite(string resourcePath)
+        {
+            var tex = Resources.Load<Texture2D>(resourcePath);
+            if (tex != null)
+            {
+                return Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), new Vector2(0.5f, 0.5f), 100f);
+            }
+            Debug.LogWarning($"[UIManager] Failed to load texture for full-rect sprite: {resourcePath}");
+            return null;
         }
 
         private static Sprite LoadSpriteFromTexture(string resourcePath)
@@ -4659,8 +4659,8 @@ Antonia and Joakim Engfors
             var rect = achievementNotificationPanel.GetComponent<RectTransform>();
             var canvasGroup = achievementNotificationPanel.GetComponent<CanvasGroup>();
 
-            // Play sound
-            AudioManager.Instance?.PlayMatchSound(); // Reuse match sound for now
+            // Play achievement sound
+            AudioManager.Instance?.PlayAchievementSound();
 
             // Slide in from top
             float duration = 0.4f;

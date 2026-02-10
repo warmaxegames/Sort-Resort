@@ -22,7 +22,7 @@
 
 ## Current Status
 
-**Last Updated:** 2026-02-08
+**Last Updated:** 2026-02-09
 
 ### Working Features (Unity)
 - Splash screen → Level select with fade transition
@@ -34,16 +34,21 @@
 - World-specific backgrounds, music, and ambient audio
 - Save/load progress (PlayerPrefs), undo system, timer format M:SS.CC
 - **4 Game Modes** - Free Play (green, no limits), Star Mode (pink, move-based stars), Timer Mode (blue, beat the clock), Hard Mode (gold, stars + timer). Separate progress per mode, mode selector tabs on level select, mode-specific portal tinting, mode-specific vortex animations (green/pink/blue/gold per mode), mode-specific level complete animations (stopwatch count-up for timer, "New Record!" pulse), mode-specific HUD visibility, Hard Mode locked per-world until Star+Timer 100% complete, debug unlock/lock button on level select
-- Achievement system (88 achievements with UI, notifications, rewards)
+- Achievement system (88 achievements with UI, notifications with achievement sound, rewards)
 - Level solver tool (Editor window + in-game auto-solve button)
 - **Dialogue system** - Typewriter text with Animal Crossing-style voices, mascot portraits, voice toggle in settings, timer pauses during dialogue. Full story content: 5 worlds × 11 checkpoints (welcome + every 10 levels), 4 mode tutorial dialogues, 5 hard mode unlock dialogues. Story is mode-agnostic (fires in any mode, plays once). Dr. Miller overarching mystery across all worlds.
 - **Level complete screen** - Mode-specific animations: Star Mode has rays, curtains, star ribbon, grey/gold star animations, dancing stars (3-star); Timer Mode has stopwatch count-up animation with "New Record!" bounce; Free Play skips stars; Hard Mode combines stars + timer. All modes: mascot thumbsup (Island), bottom board animation, sprite-based buttons
 - **Level failed screen** - Fullscreen fail_screen.png background, reason text ("Out of Moves"/"Out of Time"), animated bottom board, sprite-based buttons (retry, level select)
 - **Fail-before-last-move** - Level fails after second-to-last move if not complete (prevents awkward final-move-still-fails scenario)
 - **Star threshold separation** - All thresholds guaranteed at least 1 move apart
-- **Mode-specific HUD overlay** - All 4 modes have custom ui_top bar overlays (free_ui_top, stars_ui_top, timer_ui_top, hard_mode_UI_top) with mode-specific counter text positions. World icon overlay (island only). Sprite-based settings gear button (116x116, with pressed state) and undo button (142x62, with pressed state) positioned on the overlay. Settings gear opens pause menu (Resume, Restart, Settings, Quit to Menu)
+- **Mode-specific HUD overlay** - All 4 modes have custom ui_top bar overlays (free_ui_top, stars_ui_top, timer_ui_top, hard_mode_UI_top) with mode-specific counter text positions. World icon overlay (island only). Sprite-based settings gear button (116x116, with pressed state) and undo button (142x62, with pressed state) positioned on the overlay. Settings gear opens sprite-based pause menu
 - **Portal completion overlays** - Mode-specific portal overlays on level select: free_portal (checkmark) for FreePlay, 1/2/3star_portal for StarMode, timer_portal (with best time text) for TimerMode, both star+timer overlays layered for HardMode
 - **Level generator** - Python reverse-play generator (`reverse_generator.py`) builds levels backwards, guaranteeing solvability. Solver-verified with retry mechanism (up to 20 seeds). Star thresholds derived from solver's actual move count. 100 Island levels generated and verified. Locked containers participate in reverse-play with unlock-timing cutoffs.
+- **Benzin font system** - Custom Benzin-Bold font across all UI text. FontManager static utility with lazy-loaded font properties (Bold, SemiBold, Medium, ExtraBold). Editor script generates TMP SDF font assets. TMP default font set to Benzin-Bold so dynamic text auto-inherits. ApplyBold() calls on 8 scripts with serialized TMP fields.
+- **Sprite-based mode tabs** - Level select mode tabs use custom sprite images (`free_tab`, `stars_tab`, `timer_tab`, `hard_tab`) with baked-in text. Selected=white tint, unselected=60% grey, locked=30% grey.
+- **Sprite-based pause menu** - Fullscreen 1080x1920 overlay sprites for board background and 4 buttons (Resume, Restart, Settings, Quit) with pressed states. `LoadFullRectSprite()` bypasses Unity's alpha-trimming import. EventTrigger-based press feedback swaps normal/pressed sprites. Invisible hit areas positioned at exact pixel coordinates via anchor-based sizing.
+- **Achievement sound** - Dedicated `achievement_sound.mp3` plays at 1.3x volume when achievement notification slides in. Plays per-notification so multiple queued achievements each get the sound.
+- **World-specific dialogue boxes** - Island, Tavern, Space worlds have custom dialogue box sprites (`dialoguebox_{worldId}`). Auto-loaded by `DialogueUI.LoadDialogueBoxForWorld()`.
 
 ---
 
@@ -62,7 +67,6 @@
 4. **World-Specific Dialogue Boxes** - Need custom designs for:
    - Farm
    - Supermarket
-   - Space
 5. **Generate Levels for Remaining Worlds** - Create world config files like `generate_island_levels.py`:
    - Farm
    - Supermarket
@@ -187,11 +191,12 @@ Container border scale: 1.2 (17% border around slots)
 - **Active Mode**: `SaveManager.GetActiveGameMode()` / `SetActiveGameMode()`
 - **Mode Colors**: Green (Free), Pink (Stars), Blue (Timer), Gold (Hard)
 - **Hard Mode Unlock**: Per-world, requires all 100 levels in both Star + Timer mode
-- **Level Select**: Mode tabs row with colored pill buttons, portal tinting per mode
+- **Level Select**: Mode tabs with sprite-based tab images (`free_tab`, `stars_tab`, `timer_tab`, `hard_tab`), portal tinting per mode
 - **Level Complete**: Mode-branched animation sequence (PlayStarSequence, PlayTimerCountUpAnimation)
 - **HUD**: Star display hidden in FreePlay/TimerMode; timer only for TimerMode/HardMode
 - **HUD Overlay**: All 4 modes have per-mode fullscreen bar overlay (`free_ui_top`, `stars_ui_top`, `timer_ui_top`, `hard_mode_UI_top`). Counter texts positioned per mode (FreePlay: level only; StarMode: level+moves; TimerMode: level+timer; HardMode: level+moves+timer). World icon overlay (`{worldId}_icon_UI_top`, currently island only). White counter text color.
 - **HUD Buttons**: Record (debug), Solve (debug) in button row. Settings gear (116x116 sprite with pressed state) and Undo (142x62 sprite with pressed state) on settings overlay. Settings gear opens pause menu.
+- **Pause Menu**: Sprite-based fullscreen overlays (1080x1920). Board background + 4 buttons (Resume, Restart, Settings, Quit) each with normal/pressed sprites. Loaded via `LoadFullRectSprite()` (Texture2D → full-rect Sprite.Create) to avoid Unity alpha-trimming. Button hit areas use anchor-based positioning at exact pixel coords: Resume Y=877, Restart Y=1055, Settings Y=1229, Quit Y=1404 (all centered at X=534). EventTrigger swaps sprites on PointerDown/PointerUp. Canvas sortingOrder=5200.
 - **Portal Overlays**: Level select portals show completion status: `free_portal` (checkmark) for FreePlay, `1/2/3star_portal` for StarMode, `timer_portal` (with best time text) for TimerMode, both star+timer layered for HardMode.
 - **World Unlocks**: Shared across all modes via `GetWorldCompletedLevelCountAnyMode()`
 - **LevelCompletionData**: Struct with levelNumber, starsEarned, timeTaken, mode, isNewBestTime
@@ -234,12 +239,26 @@ Container border scale: 1.2 (17% border around slots)
 - Item Sprites: `Resources/Sprites/Items/{World}/`
 - Container Sprites: `Resources/Sprites/Containers/`
 - Mascot Sprites: `Resources/Sprites/Mascots/`
-- HUD Overlays: `Resources/Sprites/UI/HUD/` (`free_ui_top`, `stars_ui_top`, `timer_ui_top`, `hard_mode_UI_top`, `island_icon_UI_top`, `settings_button`, `settings_button_pressed`, `undo_button`, `undo_button_pressed`)
+- HUD Overlays: `Resources/Sprites/UI/HUD/` (`free_ui_top`, `stars_ui_top`, `timer_ui_top`, `hard_mode_UI_top`, `island_icon_UI_top`, `settings_button`, `settings_button_pressed`, `undo_button`, `undo_button_pressed`, `free_tab`, `stars_tab`, `timer_tab`, `hard_tab`)
+- Fonts: `Resources/Fonts/` (Benzin-Bold/SemiBold/Medium/ExtraBold SDF assets), source TTFs in `_Project/Fonts/`
+- Pause Menu: `Resources/Sprites/UI/PauseMenu/` (`pause_board`, `pause_resume`, `pause_resume_pressed`, `pause_restart`, `pause_restart_pressed`, `pause_settings`, `pause_settings_pressed`, `pause_quit`, `pause_quit_pressed`)
 - Portal Overlays: `Resources/Sprites/UI/Icons/` (`1star_portal`, `2star_portal`, `3star_portal`, `timer_portal`, `free_portal`)
-- Audio: `Resources/Audio/{Music|SFX|UI}/`
+- Dialogue Boxes: `Resources/Sprites/UI/Dialogue/` (`dialoguebox_island`, `dialoguebox_tavern`, `dialoguebox_space`)
+- Audio: `Resources/Audio/{Music|SFX|UI}/` (includes `achievement_sound` in SFX)
 - Prefabs: `Resources/Prefabs/`
 - Level Data: `Resources/Data/Levels/{World}/`
 - Dialogue Data: `Resources/Data/Dialogue/`
+
+### Font System
+- **Font family**: Benzin (Bold, SemiBold, Medium, ExtraBold) - TTFs in `Assets/_Project/Fonts/`
+- **SDF assets**: Generated via `Tools > Sort Resort > Fonts > Generate Benzin SDF Fonts` into `Resources/Fonts/`
+- **TMP default**: Set via `Tools > Sort Resort > Fonts > Set Benzin-Bold as TMP Default` - all dynamic TMP text auto-inherits
+- **FontManager.cs**: Static utility in `Assets/_Project/Scripts/Managers/` - lazy-loads from `Resources/Fonts/BENZIN-{WEIGHT} SDF`
+- **Properties**: `FontManager.Bold`, `.SemiBold`, `.Medium`, `.ExtraBold`
+- **Helper**: `FontManager.ApplyBold(TMP_Text text)` - overrides serialized Inspector fields with Benzin-Bold at runtime
+- **Applied in**: GameHUDScreen, LevelCompleteScreen, LevelFailedScreen, SettingsScreen, DialogueUI, WorldSelectionScreen, LevelSelectionScreen, LevelNode (8 scripts)
+- **Not needed in**: UIManager, LevelSelectScreen, ItemContainer (dynamic TMP creation inherits TMP default)
+- **Editor script**: `Assets/_Project/Scripts/Editor/FontAssetGenerator.cs` - sampling size 90, atlas 1024x1024
 
 ### Level Generator (Python)
 - **Infrastructure**: `level_generator.py` - WorldConfig, progression curves, container builder, specs

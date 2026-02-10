@@ -34,6 +34,7 @@ namespace SortResort
         [SerializeField] private AudioClip buttonClickClip;
         [SerializeField] private AudioClip starEarnedClip;
         [SerializeField] private AudioClip warpClip;
+        [SerializeField] private AudioClip achievementClip;
 
         private bool isUsingSourceA = true;
         private Coroutine crossfadeCoroutine;
@@ -93,8 +94,10 @@ namespace SortResort
                 buttonClickClip = Resources.Load<AudioClip>("Audio/UI/button_click");
             if (warpClip == null)
                 warpClip = Resources.Load<AudioClip>("Audio/UI/warp");
+            if (achievementClip == null)
+                achievementClip = Resources.Load<AudioClip>("Audio/SFX/achievement_sound");
 
-            Debug.Log($"[AudioManager] Audio clips loaded - match:{matchClip != null}, unlock:{unlockClip != null}, victory:{victoryClip != null}, button:{buttonClickClip != null}, warp:{warpClip != null}");
+            Debug.Log($"[AudioManager] Audio clips loaded - match:{matchClip != null}, unlock:{unlockClip != null}, victory:{victoryClip != null}, button:{buttonClickClip != null}, warp:{warpClip != null}, achievement:{achievementClip != null}");
         }
 
         private void InitializeAudioSources()
@@ -579,6 +582,7 @@ namespace SortResort
         public void PlayButtonClick() => PlayUI(buttonClickClip);
         public void PlayStarEarned() => PlaySFX(starEarnedClip);
         public void PlayWarpSound() => PlayUI(warpClip);
+        public void PlayAchievementSound() => PlaySFX(achievementClip, 1.3f);
 
         /// <summary>
         /// Play victory sound (stops gameplay audio first)
