@@ -28,6 +28,7 @@ namespace SortResort
         private Vector3 pointerStartPosition;
         private bool isDragging;
         private bool pointerDown;
+        private Vector3 previousDragPosition;
 
         // Input
         private InputAction pointerPositionAction;
@@ -187,6 +188,7 @@ namespace SortResort
             {
                 isDragging = true;
                 draggedItem = item;
+                previousDragPosition = worldPos;
 
                 if (debugMode)
                     Debug.Log($"[DragDropManager] Started dragging: {item.ItemId}");
@@ -199,7 +201,10 @@ namespace SortResort
             Vector3 worldPos = gameCamera.ScreenToWorldPoint(screenPos);
             worldPos.z = 0;
 
+            Vector3 dragDelta = worldPos - previousDragPosition;
             draggedItem.UpdateDrag(worldPos);
+            draggedItem.UpdateDragTilt(dragDelta);
+            previousDragPosition = worldPos;
         }
 
         private void EndDrag()

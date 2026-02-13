@@ -50,6 +50,12 @@ namespace SortResort
         private Slot originalSlot;
         private ItemContainer originalContainer;
 
+        // Drag tilt
+        private float currentTilt = 0f;
+        private const float MaxTilt = 15f;
+        private const float TiltSpeed = 12f;
+        private const float TiltSensitivity = 2f;
+
         // Pool tracking
         private bool isPooled = false;
         private Action<Item> onReturnToPool;
@@ -202,7 +208,7 @@ namespace SortResort
                     OnMatched?.Invoke(this);
                     break;
                 case ItemState.Returning:
-                    ApplyIdleVisuals();
+                    ApplyReturningVisuals();
                     break;
             }
         }
@@ -214,6 +220,22 @@ namespace SortResort
 
             Debug.Log($"[Item] ApplyIdleVisuals - {itemId} resetting scale from {transform.localScale} to {originalScale}");
             transform.localScale = originalScale;
+            transform.rotation = Quaternion.identity;
+            currentTilt = 0f;
+            if (spriteRenderer != null)
+                spriteRenderer.sortingOrder = originalSortingOrder;
+
+            if (selectionIndicator != null)
+                selectionIndicator.SetActive(false);
+        }
+
+        private void ApplyReturningVisuals()
+        {
+            if (spriteRenderer != null)
+                spriteRenderer.color = normalColor;
+
+            transform.localScale = originalScale;
+            // Don't reset rotation here — CancelDrag animates it back to 0
             if (spriteRenderer != null)
                 spriteRenderer.sortingOrder = originalSortingOrder;
 
@@ -300,6 +322,20 @@ namespace SortResort
         }
 
         /// <summary>
+        /// Update tilt rotation based on drag velocity
+        /// </summary>
+        public void UpdateDragTilt(Vector3 dragDelta)
+        {
+            if (currentState != ItemState.Dragging) return;
+
+            // Convert per-frame delta to velocity (units/sec) for framerate independence
+            float dragVelocityX = Time.deltaTime > 0f ? dragDelta.x / Time.deltaTime : 0f;
+            float targetTilt = Mathf.Clamp(-dragVelocityX * TiltSensitivity, -MaxTilt, MaxTilt);
+            currentTilt = Mathf.Lerp(currentTilt, targetTilt, TiltSpeed * Time.deltaTime);
+            transform.rotation = Quaternion.Euler(0, 0, currentTilt);
+        }
+
+        /// <summary>
         /// End drag - attempt to drop on target slot
         /// </summary>
         public void EndDrag(Slot targetSlot)
@@ -337,8 +373,10 @@ namespace SortResort
             bool isSamePosition = (originalContainer == container) &&
                                   (originalSlot != null && originalSlot.SlotIndex == slot.SlotIndex);
 
-            // Reset scale BEFORE placing so GetItemHeight returns correct value
+            // Reset scale and tilt BEFORE placing so GetItemHeight returns correct value
             transform.localScale = originalScale;
+            transform.rotation = Quaternion.identity;
+            currentTilt = 0f;
 
             // Place in new slot
             bool success = container.PlaceItemInSlot(this, slot.SlotIndex);
@@ -449,6 +487,9 @@ namespace SortResort
                         GameEvents.InvokeItemReturnedToOrigin(gameObject);
                         OnDragEnded?.Invoke(this);
                     });
+                // Animate tilt back to 0
+                LeanTween.rotateZ(gameObject, 0f, 0.2f).setEase(LeanTweenType.easeOutQuad);
+                currentTilt = 0f;
             }
             else
             {
@@ -461,6 +502,9 @@ namespace SortResort
                         GameEvents.InvokeItemReturnedToOrigin(gameObject);
                         OnDragEnded?.Invoke(this);
                     });
+                // Animate tilt back to 0
+                LeanTween.rotateZ(gameObject, 0f, 0.2f).setEase(LeanTweenType.easeOutQuad);
+                currentTilt = 0f;
             }
         }
 
@@ -564,6 +608,10 @@ namespace SortResort
                 spriteRenderer.color = normalColor; // This resets alpha to 1
                 spriteRenderer.sortingOrder = originalSortingOrder;
             }
+
+            // Reset rotation/tilt
+            transform.rotation = Quaternion.identity;
+            currentTilt = 0f;
 
             // Reset scale (use Vector3.one if originalScale is zero from match animation)
             if (originalScale == Vector3.zero || originalScale.x < 0.01f)
