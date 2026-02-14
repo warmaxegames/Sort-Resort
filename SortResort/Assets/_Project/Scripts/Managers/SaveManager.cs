@@ -112,11 +112,13 @@ namespace SortResort
             var existingLevel = worldProgress.levelProgress.Find(l => l.levelKey == levelKey);
 
             bool isNewBestTime = false;
+            bool isNewBestStars = false;
 
             if (existingLevel != null)
             {
                 if (stars > existingLevel.starsEarned)
                 {
+                    isNewBestStars = true;
                     existingLevel.starsEarned = stars;
                 }
                 if (timeTaken > 0 && (existingLevel.bestTime <= 0 || timeTaken < existingLevel.bestTime))
@@ -138,6 +140,7 @@ namespace SortResort
                     bestTime = timeTaken
                 });
                 if (timeTaken > 0) isNewBestTime = true;
+                if (stars > 0) isNewBestStars = true;
             }
 
             if (levelNumber > worldProgress.highestLevelCompleted)
@@ -158,7 +161,8 @@ namespace SortResort
                 starsEarned = stars,
                 timeTaken = timeTaken,
                 mode = mode,
-                isNewBestTime = isNewBestTime
+                isNewBestTime = isNewBestTime,
+                isNewBestStars = isNewBestStars
             });
         }
 

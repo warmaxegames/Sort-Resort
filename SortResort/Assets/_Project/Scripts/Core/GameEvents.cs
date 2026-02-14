@@ -11,6 +11,7 @@ namespace SortResort
         public float timeTaken;
         public GameMode mode;
         public bool isNewBestTime;
+        public bool isNewBestStars;
     }
 
     public static class GameEvents

@@ -102,8 +102,6 @@ namespace SortResort
         private Sprite[] star3Frames;
         private TextMeshProUGUI levelCompleteLevelNumberText;
         private TextMeshProUGUI levelCompleteMoveCountText;
-        private CanvasGroup levelLabelCanvasGroup;
-        private CanvasGroup movesLabelCanvasGroup;
         private CanvasGroup greyStarsCanvasGroup;
         private Image dancingStarsImage;
         private Sprite[] dancingStarsFrames;
@@ -114,11 +112,23 @@ namespace SortResort
         private Coroutine levelCompleteSequence;
         private Image levelCompleteMascotImage;
         private MascotAnimator levelCompleteMascotAnimator;
-        private TextMeshProUGUI timerResultText;
-        private TextMeshProUGUI newRecordText;
-        private CanvasGroup timerResultCanvasGroup;
         private LevelCompletionData lastCompletionData;
         private Coroutine newRecordPulseCoroutine;
+
+        // New level complete screen elements
+        private Image dimOverlayImage;
+        private CanvasGroup dimOverlayCanvasGroup;
+        private Image victoryBoardImage;
+        private CanvasGroup victoryBoardCanvasGroup;
+        private Image levelUIImage;
+        private CanvasGroup levelUICanvasGroup;
+        private Image movesUIImage;
+        private CanvasGroup movesUICanvasGroup;
+        private Image timerBarUIImage;
+        private CanvasGroup timerBarUICanvasGroup;
+        private TextMeshProUGUI timerBarText;
+        private Image newRecordUIImage;
+        private CanvasGroup newRecordUICanvasGroup;
 
         // Mode-specific HUD overlay
         private GameObject hudModeOverlay;
@@ -1684,7 +1694,38 @@ namespace SortResort
             rect.offsetMin = Vector2.zero;
             rect.offsetMax = Vector2.zero;
 
-            // Animated background - Rays (behind everything, loops)
+            // === PHASE A ELEMENTS ===
+
+            // 1. Dim Overlay - semi-transparent black for mascot phase
+            var dimGO = new GameObject("Dim Overlay");
+            dimGO.transform.SetParent(levelCompletePanel.transform, false);
+            var dimRect = dimGO.AddComponent<RectTransform>();
+            dimRect.anchorMin = Vector2.zero;
+            dimRect.anchorMax = Vector2.one;
+            dimRect.offsetMin = Vector2.zero;
+            dimRect.offsetMax = Vector2.zero;
+            dimOverlayImage = dimGO.AddComponent<Image>();
+            dimOverlayImage.color = Color.black;
+            dimOverlayImage.raycastTarget = false;
+            dimOverlayCanvasGroup = dimGO.AddComponent<CanvasGroup>();
+            dimOverlayCanvasGroup.alpha = 0f;
+
+            // 2. Mascot image - fullscreen with preserveAspect (Phase A)
+            var mascotGO = new GameObject("Mascot");
+            mascotGO.transform.SetParent(levelCompletePanel.transform, false);
+            var mascotRect = mascotGO.AddComponent<RectTransform>();
+            mascotRect.anchorMin = Vector2.zero;
+            mascotRect.anchorMax = Vector2.one;
+            mascotRect.offsetMin = Vector2.zero;
+            mascotRect.offsetMax = Vector2.zero;
+            levelCompleteMascotImage = mascotGO.AddComponent<Image>();
+            levelCompleteMascotImage.preserveAspect = true;
+            levelCompleteMascotImage.raycastTarget = false;
+            levelCompleteMascotImage.enabled = false;
+
+            // === PHASE B ELEMENTS ===
+
+            // 3. Animated background - Rays (behind everything in Phase B, loops)
             var raysGO = new GameObject("Rays Background");
             raysGO.transform.SetParent(levelCompletePanel.transform, false);
             var raysRect = raysGO.AddComponent<RectTransform>();
@@ -1695,7 +1736,7 @@ namespace SortResort
             var raysImage = raysGO.AddComponent<Image>();
             raysImage.preserveAspect = false;
 
-            // Animated background - Curtains (on top of rays, plays once)
+            // 4. Animated background - Curtains (on top of rays, plays once)
             var curtainsGO = new GameObject("Curtains");
             curtainsGO.transform.SetParent(levelCompletePanel.transform, false);
             var curtainsRect = curtainsGO.AddComponent<RectTransform>();
@@ -1706,51 +1747,41 @@ namespace SortResort
             var curtainsImage = curtainsGO.AddComponent<Image>();
             curtainsImage.preserveAspect = false;
 
-            // Star Ribbon layer (full screen, on top of curtains)
-            var starRibbonGO = new GameObject("Star Ribbon");
-            starRibbonGO.transform.SetParent(levelCompletePanel.transform, false);
-            var starRibbonRect = starRibbonGO.AddComponent<RectTransform>();
-            starRibbonRect.anchorMin = Vector2.zero;
-            starRibbonRect.anchorMax = Vector2.one;
-            starRibbonRect.offsetMin = Vector2.zero;
-            starRibbonRect.offsetMax = Vector2.zero;
-            var starRibbonImage = starRibbonGO.AddComponent<Image>();
-            starRibbonImage.preserveAspect = true;
-            starRibbonImage.raycastTarget = false;
+            // 5. Victory Board - per-world fullscreen overlay
+            var victoryBoardGO = new GameObject("Victory Board");
+            victoryBoardGO.transform.SetParent(levelCompletePanel.transform, false);
+            var victoryBoardRect = victoryBoardGO.AddComponent<RectTransform>();
+            victoryBoardRect.anchorMin = Vector2.zero;
+            victoryBoardRect.anchorMax = Vector2.one;
+            victoryBoardRect.offsetMin = Vector2.zero;
+            victoryBoardRect.offsetMax = Vector2.zero;
+            victoryBoardImage = victoryBoardGO.AddComponent<Image>();
+            victoryBoardImage.preserveAspect = true;
+            victoryBoardImage.raycastTarget = false;
+            victoryBoardCanvasGroup = victoryBoardGO.AddComponent<CanvasGroup>();
+            victoryBoardCanvasGroup.alpha = 0f;
 
-            // Add and initialize the animation controller (Level Board removed - replaced by level_label.png)
-            animatedLevelComplete = levelCompletePanel.AddComponent<AnimatedLevelComplete>();
-            animatedLevelComplete.Initialize(raysImage, curtainsImage);
-            animatedLevelComplete.SetStarRibbonImage(starRibbonImage);
+            // 6. level_UI - fullscreen overlay with brown circle for level number
+            var levelUIGO = new GameObject("Level UI");
+            levelUIGO.transform.SetParent(levelCompletePanel.transform, false);
+            var levelUIRect = levelUIGO.AddComponent<RectTransform>();
+            levelUIRect.anchorMin = Vector2.zero;
+            levelUIRect.anchorMax = Vector2.one;
+            levelUIRect.offsetMin = Vector2.zero;
+            levelUIRect.offsetMax = Vector2.zero;
+            levelUIImage = levelUIGO.AddComponent<Image>();
+            levelUIImage.sprite = LoadFullRectSprite("Sprites/UI/LevelComplete/level_UI");
+            levelUIImage.preserveAspect = true;
+            levelUIImage.raycastTarget = false;
+            levelUICanvasGroup = levelUIGO.AddComponent<CanvasGroup>();
+            levelUICanvasGroup.alpha = 0f;
 
-            // Level Label - fullscreen image overlay (has its own brown circle for level number)
-            var levelLabelGO = new GameObject("Level Label");
-            levelLabelGO.transform.SetParent(levelCompletePanel.transform, false);
-            var levelLabelRect = levelLabelGO.AddComponent<RectTransform>();
-            levelLabelRect.anchorMin = Vector2.zero;
-            levelLabelRect.anchorMax = Vector2.one;
-            levelLabelRect.offsetMin = Vector2.zero;
-            levelLabelRect.offsetMax = Vector2.zero;
-            var levelLabelImage = levelLabelGO.AddComponent<Image>();
-            var levelLabelSprite = Resources.Load<Sprite>("Sprites/UI/LevelComplete/Buttons/level_label");
-            if (levelLabelSprite == null)
-            {
-                var levelLabelTex = Resources.Load<Texture2D>("Sprites/UI/LevelComplete/Buttons/level_label");
-                if (levelLabelTex != null)
-                    levelLabelSprite = Sprite.Create(levelLabelTex, new Rect(0, 0, levelLabelTex.width, levelLabelTex.height), new Vector2(0.5f, 0.5f), 100f);
-            }
-            levelLabelImage.sprite = levelLabelSprite;
-            levelLabelImage.preserveAspect = true;
-            levelLabelImage.raycastTarget = false;
-            levelLabelCanvasGroup = levelLabelGO.AddComponent<CanvasGroup>();
-            levelLabelCanvasGroup.alpha = 0f;
-
-            // Level Number text - child of Level Label, positioned on the brown circle
+            // Level Number text - child of level_UI, positioned on its brown circle
             var levelNumGO = new GameObject("Level Number Text");
-            levelNumGO.transform.SetParent(levelLabelGO.transform, false);
+            levelNumGO.transform.SetParent(levelUIGO.transform, false);
             var levelNumRect = levelNumGO.AddComponent<RectTransform>();
-            levelNumRect.anchorMin = new Vector2(0.417f, 0.602f);
-            levelNumRect.anchorMax = new Vector2(0.417f, 0.602f);
+            levelNumRect.anchorMin = new Vector2(0.4176f, 0.4510f);
+            levelNumRect.anchorMax = new Vector2(0.4176f, 0.4510f);
             levelNumRect.pivot = new Vector2(0.5f, 0.5f);
             levelNumRect.anchoredPosition = Vector2.zero;
             levelNumRect.sizeDelta = new Vector2(120, 80);
@@ -1763,34 +1794,27 @@ namespace SortResort
             levelCompleteLevelNumberText.enableWordWrapping = false;
             levelCompleteLevelNumberText.overflowMode = TextOverflowModes.Overflow;
 
-            // Moves Label - fullscreen image (positioned within the 1080x1920 PNG)
-            var movesLabelGO = new GameObject("Moves Label");
-            movesLabelGO.transform.SetParent(levelCompletePanel.transform, false);
-            var movesLabelRect = movesLabelGO.AddComponent<RectTransform>();
-            movesLabelRect.anchorMin = Vector2.zero;
-            movesLabelRect.anchorMax = Vector2.one;
-            movesLabelRect.offsetMin = Vector2.zero;
-            movesLabelRect.offsetMax = Vector2.zero;
-            var movesLabelImage = movesLabelGO.AddComponent<Image>();
-            var movesLabelSprite = Resources.Load<Sprite>("Sprites/UI/LevelComplete/Buttons/moves_label");
-            if (movesLabelSprite == null)
-            {
-                var movesLabelTex = Resources.Load<Texture2D>("Sprites/UI/LevelComplete/Buttons/moves_label");
-                if (movesLabelTex != null)
-                    movesLabelSprite = Sprite.Create(movesLabelTex, new Rect(0, 0, movesLabelTex.width, movesLabelTex.height), new Vector2(0.5f, 0.5f), 100f);
-            }
-            movesLabelImage.sprite = movesLabelSprite;
-            movesLabelImage.preserveAspect = true;
-            movesLabelImage.raycastTarget = false;
-            movesLabelCanvasGroup = movesLabelGO.AddComponent<CanvasGroup>();
-            movesLabelCanvasGroup.alpha = 0f;
+            // 7. moves_UI - fullscreen overlay with brown circle for move count
+            var movesUIGO = new GameObject("Moves UI");
+            movesUIGO.transform.SetParent(levelCompletePanel.transform, false);
+            var movesUIRect = movesUIGO.AddComponent<RectTransform>();
+            movesUIRect.anchorMin = Vector2.zero;
+            movesUIRect.anchorMax = Vector2.one;
+            movesUIRect.offsetMin = Vector2.zero;
+            movesUIRect.offsetMax = Vector2.zero;
+            movesUIImage = movesUIGO.AddComponent<Image>();
+            movesUIImage.sprite = LoadFullRectSprite("Sprites/UI/LevelComplete/moves_UI");
+            movesUIImage.preserveAspect = true;
+            movesUIImage.raycastTarget = false;
+            movesUICanvasGroup = movesUIGO.AddComponent<CanvasGroup>();
+            movesUICanvasGroup.alpha = 0f;
 
-            // Moves Count text - child of Moves Label, positioned on its brown circle
+            // Moves Count text - child of moves_UI, positioned on its brown circle
             var movesCountGO = new GameObject("Moves Count Text");
-            movesCountGO.transform.SetParent(movesLabelGO.transform, false);
+            movesCountGO.transform.SetParent(movesUIGO.transform, false);
             var movesCountRect = movesCountGO.AddComponent<RectTransform>();
-            movesCountRect.anchorMin = new Vector2(0.598f, 0.601f);
-            movesCountRect.anchorMax = new Vector2(0.598f, 0.601f);
+            movesCountRect.anchorMin = new Vector2(0.4130f, 0.3453f);
+            movesCountRect.anchorMax = new Vector2(0.4130f, 0.3453f);
             movesCountRect.pivot = new Vector2(0.5f, 0.5f);
             movesCountRect.anchoredPosition = Vector2.zero;
             movesCountRect.sizeDelta = new Vector2(120, 80);
@@ -1803,7 +1827,24 @@ namespace SortResort
             levelCompleteMoveCountText.enableWordWrapping = false;
             levelCompleteMoveCountText.overflowMode = TextOverflowModes.Overflow;
 
-            // Grey Stars - static fullscreen, always visible as baseline
+            // 8. Star Ribbon layer (full screen, on top of curtains)
+            var starRibbonGO = new GameObject("Star Ribbon");
+            starRibbonGO.transform.SetParent(levelCompletePanel.transform, false);
+            var starRibbonRect = starRibbonGO.AddComponent<RectTransform>();
+            starRibbonRect.anchorMin = Vector2.zero;
+            starRibbonRect.anchorMax = Vector2.one;
+            starRibbonRect.offsetMin = Vector2.zero;
+            starRibbonRect.offsetMax = Vector2.zero;
+            var starRibbonImage = starRibbonGO.AddComponent<Image>();
+            starRibbonImage.preserveAspect = true;
+            starRibbonImage.raycastTarget = false;
+
+            // Add and initialize the animation controller
+            animatedLevelComplete = levelCompletePanel.AddComponent<AnimatedLevelComplete>();
+            animatedLevelComplete.Initialize(raysImage, curtainsImage);
+            animatedLevelComplete.SetStarRibbonImage(starRibbonImage);
+
+            // 9. Grey Stars - static fullscreen, always visible as baseline
             var greyStarsGO = new GameObject("Grey Stars");
             greyStarsGO.transform.SetParent(levelCompletePanel.transform, false);
             var greyStarsRect = greyStarsGO.AddComponent<RectTransform>();
@@ -1830,7 +1871,7 @@ namespace SortResort
             star2Frames = LoadStarFrames("Sprites/UI/LevelComplete/Star2", "star2");
             star3Frames = LoadStarFrames("Sprites/UI/LevelComplete/Star3", "star3");
 
-            // Star 1 Image (left star) - fullscreen, starts hidden
+            // 10. Star 1 Image (left star) - fullscreen, starts hidden
             var star1GO = new GameObject("Star 1");
             star1GO.transform.SetParent(levelCompletePanel.transform, false);
             var star1Rect = star1GO.AddComponent<RectTransform>();
@@ -1869,7 +1910,7 @@ namespace SortResort
             levelCompleteStar3Image.raycastTarget = false;
             star3GO.SetActive(false);
 
-            // Dancing Stars - fullscreen, loops when 3 stars earned, starts hidden
+            // 11. Dancing Stars - fullscreen, loops when 3 stars earned, starts hidden
             var dancingStarsGO = new GameObject("Dancing Stars");
             dancingStarsGO.transform.SetParent(levelCompletePanel.transform, false);
             var dancingStarsRect = dancingStarsGO.AddComponent<RectTransform>();
@@ -1885,58 +1926,55 @@ namespace SortResort
             // Load dancing stars animation frames
             dancingStarsFrames = LoadStarFrames("Sprites/UI/LevelComplete/DancingStars", "dancing stars");
 
-            // Timer Result - shows elapsed time for Timer/Hard modes (positioned center screen)
-            var timerResultGO = new GameObject("Timer Result");
-            timerResultGO.transform.SetParent(levelCompletePanel.transform, false);
-            var timerResultRect = timerResultGO.AddComponent<RectTransform>();
-            timerResultRect.anchorMin = new Vector2(0.5f, 0.48f);
-            timerResultRect.anchorMax = new Vector2(0.5f, 0.48f);
-            timerResultRect.pivot = new Vector2(0.5f, 0.5f);
-            timerResultRect.anchoredPosition = Vector2.zero;
-            timerResultRect.sizeDelta = new Vector2(400, 100);
-            timerResultText = timerResultGO.AddComponent<TextMeshProUGUI>();
-            timerResultText.text = "0:00.00";
-            timerResultText.fontSize = 72;
-            timerResultText.fontStyle = FontStyles.Bold;
-            timerResultText.alignment = TextAlignmentOptions.Center;
-            timerResultText.color = new Color(0.3f, 0.85f, 1f, 1f);
-            timerResultText.outlineWidth = 0.25f;
-            timerResultText.outlineColor = new Color32(0, 0, 80, 200);
-            timerResultCanvasGroup = timerResultGO.AddComponent<CanvasGroup>();
-            timerResultCanvasGroup.alpha = 0f;
+            // 12. timer_bar_UI - fullscreen overlay with teal bar for timer text
+            var timerBarGO = new GameObject("Timer Bar UI");
+            timerBarGO.transform.SetParent(levelCompletePanel.transform, false);
+            var timerBarRect = timerBarGO.AddComponent<RectTransform>();
+            timerBarRect.anchorMin = Vector2.zero;
+            timerBarRect.anchorMax = Vector2.one;
+            timerBarRect.offsetMin = Vector2.zero;
+            timerBarRect.offsetMax = Vector2.zero;
+            timerBarUIImage = timerBarGO.AddComponent<Image>();
+            timerBarUIImage.sprite = LoadFullRectSprite("Sprites/UI/LevelComplete/timer_bar_UI");
+            timerBarUIImage.preserveAspect = true;
+            timerBarUIImage.raycastTarget = false;
+            timerBarUICanvasGroup = timerBarGO.AddComponent<CanvasGroup>();
+            timerBarUICanvasGroup.alpha = 0f;
 
-            // "New Record!" text - positioned below timer result
-            var newRecordGO = new GameObject("New Record");
+            // Timer text - child of timer_bar_UI, positioned on the teal bar center
+            var timerTextGO = new GameObject("Timer Bar Text");
+            timerTextGO.transform.SetParent(timerBarGO.transform, false);
+            var timerTextRect = timerTextGO.AddComponent<RectTransform>();
+            timerTextRect.anchorMin = new Vector2(0.4991f, 0.5802f);
+            timerTextRect.anchorMax = new Vector2(0.4991f, 0.5802f);
+            timerTextRect.pivot = new Vector2(0.5f, 0.5f);
+            timerTextRect.anchoredPosition = Vector2.zero;
+            timerTextRect.sizeDelta = new Vector2(400, 80);
+            timerBarText = timerTextGO.AddComponent<TextMeshProUGUI>();
+            timerBarText.text = "0:00.00";
+            timerBarText.fontSize = 56;
+            timerBarText.fontStyle = FontStyles.Bold;
+            timerBarText.alignment = TextAlignmentOptions.Center;
+            timerBarText.color = Color.white;
+            timerBarText.enableWordWrapping = false;
+            timerBarText.overflowMode = TextOverflowModes.Overflow;
+
+            // 13. new_record_UI - fullscreen overlay sprite for "New Record!" display
+            var newRecordGO = new GameObject("New Record UI");
             newRecordGO.transform.SetParent(levelCompletePanel.transform, false);
             var newRecordRect = newRecordGO.AddComponent<RectTransform>();
-            newRecordRect.anchorMin = new Vector2(0.5f, 0.43f);
-            newRecordRect.anchorMax = new Vector2(0.5f, 0.43f);
-            newRecordRect.pivot = new Vector2(0.5f, 0.5f);
-            newRecordRect.anchoredPosition = Vector2.zero;
-            newRecordRect.sizeDelta = new Vector2(400, 60);
-            newRecordText = newRecordGO.AddComponent<TextMeshProUGUI>();
-            newRecordText.text = "New Record!";
-            newRecordText.fontSize = 42;
-            newRecordText.fontStyle = FontStyles.Bold;
-            newRecordText.alignment = TextAlignmentOptions.Center;
-            newRecordText.color = new Color(1f, 0.85f, 0.2f, 1f);
-            newRecordText.outlineWidth = 0.2f;
-            newRecordText.outlineColor = new Color32(80, 40, 0, 200);
-            newRecordText.enabled = false;
+            newRecordRect.anchorMin = Vector2.zero;
+            newRecordRect.anchorMax = Vector2.one;
+            newRecordRect.offsetMin = Vector2.zero;
+            newRecordRect.offsetMax = Vector2.zero;
+            newRecordUIImage = newRecordGO.AddComponent<Image>();
+            newRecordUIImage.sprite = LoadFullRectSprite("Sprites/UI/LevelComplete/new_record_UI");
+            newRecordUIImage.preserveAspect = true;
+            newRecordUIImage.raycastTarget = false;
+            newRecordUICanvasGroup = newRecordGO.AddComponent<CanvasGroup>();
+            newRecordUICanvasGroup.alpha = 0f;
 
-            // Mascot image - fullscreen with preserveAspect
-            var mascotGO = new GameObject("Mascot");
-            mascotGO.transform.SetParent(levelCompletePanel.transform, false);
-            var mascotRect = mascotGO.AddComponent<RectTransform>();
-            mascotRect.anchorMin = Vector2.zero;
-            mascotRect.anchorMax = Vector2.one;
-            mascotRect.offsetMin = Vector2.zero;
-            mascotRect.offsetMax = Vector2.zero;
-            levelCompleteMascotImage = mascotGO.AddComponent<Image>();
-            levelCompleteMascotImage.preserveAspect = true;
-            levelCompleteMascotImage.raycastTarget = false;
-
-            // Bottom Board - animated wooden board that slides up behind buttons
+            // 14. Bottom Board - animated wooden board that slides up behind buttons
             var bottomBoardGO = new GameObject("Bottom Board");
             bottomBoardGO.transform.SetParent(levelCompletePanel.transform, false);
             var bottomBoardRect = bottomBoardGO.AddComponent<RectTransform>();
@@ -1952,7 +1990,7 @@ namespace SortResort
             // Load bottom board animation frames
             bottomBoardFrames = LoadStarFrames("Sprites/UI/LevelComplete/BottomBoard", "bottom board");
 
-            // Buttons container - positioned at bottom of screen
+            // 15. Buttons container - positioned at bottom of screen
             var buttonsContainer = new GameObject("Buttons");
             buttonsContainer.transform.SetParent(levelCompletePanel.transform, false);
             buttonsContainerGO = buttonsContainer;
@@ -1987,7 +2025,7 @@ namespace SortResort
                 "Sprites/UI/LevelComplete/Buttons/next_level_pressed",
                 OnNextLevelFromCompleteClicked, 340, 190);
 
-            Debug.Log("[UIManager] Level complete panel created with sprite-based buttons and star animations");
+            Debug.Log("[UIManager] Level complete panel created with two-phase layout");
         }
 
         private void CreateLevelFailedPanel()
@@ -3308,18 +3346,25 @@ Antonia and Joakim Engfors
                 dancingStarsCoroutine = null;
             }
             if (dancingStarsImage != null) dancingStarsImage.gameObject.SetActive(false);
-            if (timerResultCanvasGroup != null) timerResultCanvasGroup.alpha = 0f;
             if (newRecordPulseCoroutine != null)
             {
                 StopCoroutine(newRecordPulseCoroutine);
                 newRecordPulseCoroutine = null;
             }
-            if (newRecordText != null)
+
+            // Reset new elements
+            if (dimOverlayCanvasGroup != null) dimOverlayCanvasGroup.alpha = 0f;
+            if (victoryBoardCanvasGroup != null) victoryBoardCanvasGroup.alpha = 0f;
+            if (levelUICanvasGroup != null) levelUICanvasGroup.alpha = 0f;
+            if (movesUICanvasGroup != null) movesUICanvasGroup.alpha = 0f;
+            if (timerBarUICanvasGroup != null) timerBarUICanvasGroup.alpha = 0f;
+            if (newRecordUICanvasGroup != null)
             {
-                newRecordText.enabled = false;
-                var rt = newRecordText.GetComponent<RectTransform>();
+                newRecordUICanvasGroup.alpha = 0f;
+                var rt = newRecordUICanvasGroup.GetComponent<RectTransform>();
                 if (rt != null) rt.localScale = Vector3.one;
             }
+            if (levelCompleteMascotImage != null) levelCompleteMascotImage.enabled = false;
         }
 
         private void StopLevelCompleteSequence()
@@ -3493,17 +3538,19 @@ Antonia and Joakim Engfors
 
                 // Reset everything to initial hidden state
                 ResetStarAnimations();
-                if (levelLabelCanvasGroup != null) levelLabelCanvasGroup.alpha = 0f;
-                if (movesLabelCanvasGroup != null) movesLabelCanvasGroup.alpha = 0f;
                 if (greyStarsCanvasGroup != null)
                 {
                     greyStarsCanvasGroup.alpha = 0f;
                     greyStarsCanvasGroup.gameObject.SetActive(true);
                 }
-                if (timerResultCanvasGroup != null) timerResultCanvasGroup.alpha = 0f;
-                if (newRecordText != null) newRecordText.enabled = false;
                 if (bottomBoardImage != null) bottomBoardImage.gameObject.SetActive(false);
                 if (buttonsContainerGO != null) buttonsContainerGO.SetActive(false);
+
+                // Load correct victory board for current world
+                string worldId = GameManager.Instance?.CurrentWorldId ?? "island";
+                var boardSprite = LoadFullRectSprite($"Sprites/UI/LevelComplete/VictoryBoard/{worldId}_board_victory_screen");
+                if (boardSprite != null && victoryBoardImage != null)
+                    victoryBoardImage.sprite = boardSprite;
 
                 // Start the sequenced animation
                 if (levelCompleteSequence != null)
@@ -3516,42 +3563,76 @@ Antonia and Joakim Engfors
         {
             Debug.Log($"[UIManager] LevelComplete sequence: Mode={mode}, Stars={stars}");
 
-            // Phase 1: Rays, curtains, and mascot all start together (all modes)
-            if (animatedLevelComplete != null)
-                animatedLevelComplete.PlayRaysAndCurtains();
+            // ===== PHASE A: Mascot Celebration on dimmed background =====
+
+            // Destroy any lingering match effects so they don't bleed through the dim overlay
+            foreach (var fx in FindObjectsOfType<MatchEffect>())
+                Destroy(fx.gameObject);
+
+            // Load and start mascot FIRST (Resources.LoadAll is expensive/blocking)
+            // Mascot is above dim overlay in sibling order, so it's visible immediately
             UpdateLevelCompleteMascot(stars);
 
-            float mascotHalfway = 1.15f;
+            // Fade in dim overlay behind the already-playing mascot
+            yield return StartCoroutine(FadeCanvasGroup(dimOverlayCanvasGroup, 0f, 0.95f, 0.3f));
+
+            // Wait for remaining mascot animation time (subtract the dim fade duration)
+            float mascotWait = 2.0f;
             if (levelCompleteMascotAnimator != null && levelCompleteMascotAnimator.Duration > 0)
-                mascotHalfway = levelCompleteMascotAnimator.Duration * 0.5f;
-            yield return new WaitForSecondsRealtime(mascotHalfway);
+                mascotWait = levelCompleteMascotAnimator.Duration;
+            float remainingWait = Mathf.Max(0f, mascotWait - 0.3f);
+            yield return new WaitForSecondsRealtime(remainingWait);
 
-            // Phase 2: Labels (mode-dependent)
-            yield return StartCoroutine(FadeCanvasGroup(levelLabelCanvasGroup, 0f, 1f, 0.3f));
+            // Hold on last frame for an extra beat
+            yield return new WaitForSecondsRealtime(0.5f);
 
-            // Moves label: show for Star and Hard modes, skip for Free Play and Timer
+            // Fade out mascot + dim overlay together
+            if (levelCompleteMascotImage != null)
+                levelCompleteMascotImage.enabled = false;
+            CleanupMascotAnimator();
+            yield return StartCoroutine(FadeCanvasGroup(dimOverlayCanvasGroup, 0.95f, 0f, 0.3f));
+
+            // ===== PHASE B: Victory Screen =====
+
+            // Start rays + curtains animation
+            if (animatedLevelComplete != null)
+                animatedLevelComplete.PlayRaysAndCurtains();
+
+            // Fade in victory board
+            yield return StartCoroutine(FadeCanvasGroup(victoryBoardCanvasGroup, 0f, 1f, 0.3f));
+
+            // Fade in level_UI with number text (all modes)
+            yield return StartCoroutine(FadeCanvasGroup(levelUICanvasGroup, 0f, 1f, 0.3f));
+
+            // Moves UI: show for Star and Hard modes
             if (mode == GameMode.StarMode || mode == GameMode.HardMode)
             {
-                yield return StartCoroutine(FadeCanvasGroup(movesLabelCanvasGroup, 0f, 1f, 0.3f));
+                yield return StartCoroutine(FadeCanvasGroup(movesUICanvasGroup, 0f, 1f, 0.3f));
             }
 
-            // Phase 3: Mode-specific middle section
+            // Mode-specific middle section
             switch (mode)
             {
                 case GameMode.FreePlay:
-                    // Free Play: skip stars entirely, go straight to bottom board
+                    // Free Play: skip stars and timer, go straight to bottom board
                     yield return new WaitForSecondsRealtime(0.3f);
                     break;
 
                 case GameMode.StarMode:
-                    // Star Mode: full star ribbon + star animations (original behavior)
+                    // Star Mode: full star ribbon + star animations
                     yield return StartCoroutine(PlayStarSequence(stars));
+                    // Show "New Record!" if better stars
+                    if (lastCompletionData.isNewBestStars)
+                        yield return StartCoroutine(ShowNewRecordAnimation());
                     break;
 
                 case GameMode.TimerMode:
-                    // Timer Mode: stopwatch counting animation
+                    // Timer Mode: timer bar with count-up animation
                     yield return new WaitForSecondsRealtime(0.3f);
                     yield return StartCoroutine(PlayTimerCountUpAnimation());
+                    // Show "New Record!" if best time
+                    if (lastCompletionData.isNewBestTime)
+                        yield return StartCoroutine(ShowNewRecordAnimation());
                     break;
 
                 case GameMode.HardMode:
@@ -3559,6 +3640,9 @@ Antonia and Joakim Engfors
                     yield return StartCoroutine(PlayStarSequence(stars));
                     yield return new WaitForSecondsRealtime(0.2f);
                     yield return StartCoroutine(PlayTimerCountUpAnimation());
+                    // Show "New Record!" if better stars or best time
+                    if (lastCompletionData.isNewBestStars || lastCompletionData.isNewBestTime)
+                        yield return StartCoroutine(ShowNewRecordAnimation());
                     break;
             }
 
@@ -3598,8 +3682,6 @@ Antonia and Joakim Engfors
         private IEnumerator PlayTimerCountUpAnimation()
         {
             float finalTime = lastCompletionData.timeTaken;
-            bool isNewRecord = lastCompletionData.isNewBestTime;
-            GameMode mode = lastCompletionData.mode;
 
             if (finalTime <= 0f)
             {
@@ -3607,45 +3689,10 @@ Antonia and Joakim Engfors
                 yield break;
             }
 
-            // Position timer elements based on mode
-            // TimerMode: move up to ribbon/star area since no stars are shown
-            // HardMode: keep lower since stars are above
-            if (timerResultText != null)
-            {
-                var timerRect = timerResultText.GetComponent<RectTransform>();
-                if (timerRect != null)
-                {
-                    float yPos = (mode == GameMode.TimerMode) ? 0.72f : 0.48f;
-                    timerRect.anchorMin = new Vector2(0.5f, yPos);
-                    timerRect.anchorMax = new Vector2(0.5f, yPos);
-                }
-            }
-            if (newRecordText != null)
-            {
-                var recordRect = newRecordText.GetComponent<RectTransform>();
-                if (recordRect != null)
-                {
-                    float yPos = (mode == GameMode.TimerMode) ? 0.67f : 0.43f;
-                    recordRect.anchorMin = new Vector2(0.5f, yPos);
-                    recordRect.anchorMax = new Vector2(0.5f, yPos);
-                }
-            }
-
-            // Ensure timer elements render above mascot (which is fullscreen)
-            // Place them right after mascot but before bottom board/buttons
-            if (levelCompleteMascotImage != null)
-            {
-                int mascotIdx = levelCompleteMascotImage.transform.GetSiblingIndex();
-                if (timerResultText != null)
-                    timerResultText.transform.SetSiblingIndex(mascotIdx + 1);
-                if (newRecordText != null)
-                    newRecordText.transform.SetSiblingIndex(mascotIdx + 2);
-            }
-
-            // Fade in timer result
-            if (timerResultText != null)
-                timerResultText.text = "0:00.00";
-            yield return StartCoroutine(FadeCanvasGroup(timerResultCanvasGroup, 0f, 1f, 0.2f));
+            // Initialize timer text and fade in the timer bar UI
+            if (timerBarText != null)
+                timerBarText.text = "0:00.00";
+            yield return StartCoroutine(FadeCanvasGroup(timerBarUICanvasGroup, 0f, 1f, 0.2f));
 
             // Animate counting up from 0 to final time over ~2 seconds
             float countDuration = 2.0f;
@@ -3663,8 +3710,8 @@ Antonia and Joakim Engfors
                 int seconds = (int)(displayTime % 60);
                 int centiseconds = (int)((displayTime % 1f) * 100f);
 
-                if (timerResultText != null)
-                    timerResultText.text = $"{minutes}:{seconds:D2}.{centiseconds:D2}";
+                if (timerBarText != null)
+                    timerBarText.text = $"{minutes}:{seconds:D2}.{centiseconds:D2}";
 
                 yield return null;
             }
@@ -3674,55 +3721,57 @@ Antonia and Joakim Engfors
                 int minutes = (int)(finalTime / 60);
                 int seconds = (int)(finalTime % 60);
                 int centiseconds = (int)((finalTime % 1f) * 100f);
-                if (timerResultText != null)
-                    timerResultText.text = $"{minutes}:{seconds:D2}.{centiseconds:D2}";
-            }
-
-            // Show "New Record!" if applicable with pop-in + continuous pulse
-            if (isNewRecord && newRecordText != null)
-            {
-                yield return new WaitForSecondsRealtime(0.3f);
-                newRecordText.enabled = true;
-
-                var rectTransform = newRecordText.GetComponent<RectTransform>();
-                if (rectTransform != null)
-                {
-                    // Pop-in: scale from 0 to 1.2 then settle to 1.0
-                    float popDuration = 0.35f;
-                    float popElapsed = 0f;
-                    Vector3 originalScale = Vector3.one;
-
-                    while (popElapsed < popDuration)
-                    {
-                        popElapsed += Time.unscaledDeltaTime;
-                        float bt = Mathf.Clamp01(popElapsed / popDuration);
-                        float scale;
-                        if (bt < 0.6f)
-                            scale = Mathf.Lerp(0f, 1.2f, bt / 0.6f);
-                        else
-                            scale = Mathf.Lerp(1.2f, 1f, (bt - 0.6f) / 0.4f);
-                        rectTransform.localScale = originalScale * scale;
-                        yield return null;
-                    }
-                    rectTransform.localScale = originalScale;
-                }
-
-                // Start continuous pulsing animation
-                newRecordPulseCoroutine = StartCoroutine(PulseNewRecordText());
+                if (timerBarText != null)
+                    timerBarText.text = $"{minutes}:{seconds:D2}.{centiseconds:D2}";
             }
 
             yield return new WaitForSecondsRealtime(0.3f);
         }
 
-        private IEnumerator PulseNewRecordText()
+        private IEnumerator ShowNewRecordAnimation()
         {
-            if (newRecordText == null) yield break;
+            if (newRecordUICanvasGroup == null) yield break;
 
-            var rectTransform = newRecordText.GetComponent<RectTransform>();
+            yield return new WaitForSecondsRealtime(0.3f);
+
+            var rectTransform = newRecordUICanvasGroup.GetComponent<RectTransform>();
+
+            // Pop-in: scale from 0 to 1.2 then settle to 1.0, while fading in
+            float popDuration = 0.35f;
+            float popElapsed = 0f;
+            Vector3 originalScale = Vector3.one;
+
+            while (popElapsed < popDuration)
+            {
+                popElapsed += Time.unscaledDeltaTime;
+                float bt = Mathf.Clamp01(popElapsed / popDuration);
+                float scale;
+                if (bt < 0.6f)
+                    scale = Mathf.Lerp(0f, 1.2f, bt / 0.6f);
+                else
+                    scale = Mathf.Lerp(1.2f, 1f, (bt - 0.6f) / 0.4f);
+
+                if (rectTransform != null)
+                    rectTransform.localScale = originalScale * scale;
+                newRecordUICanvasGroup.alpha = Mathf.Clamp01(bt * 2f); // Fade in over first half
+                yield return null;
+            }
+            if (rectTransform != null)
+                rectTransform.localScale = originalScale;
+            newRecordUICanvasGroup.alpha = 1f;
+
+            // Start continuous pulsing animation
+            newRecordPulseCoroutine = StartCoroutine(PulseNewRecord());
+        }
+
+        private IEnumerator PulseNewRecord()
+        {
+            if (newRecordUICanvasGroup == null) yield break;
+
+            var rectTransform = newRecordUICanvasGroup.GetComponent<RectTransform>();
             if (rectTransform == null) yield break;
 
             Vector3 baseScale = Vector3.one;
-            float baseY = rectTransform.anchoredPosition.y;
             float time = 0f;
 
             while (true)
@@ -3732,18 +3781,6 @@ Antonia and Joakim Engfors
                 // Scale pulse: oscillate between 0.95 and 1.12
                 float scaleFactor = 1f + 0.085f * Mathf.Sin(time * 5f);
                 rectTransform.localScale = baseScale * scaleFactor;
-
-                // Subtle Y bounce: +/- 4 pixels
-                float yOffset = 4f * Mathf.Sin(time * 3.5f);
-                rectTransform.anchoredPosition = new Vector2(0f, baseY + yOffset);
-
-                // Subtle color shift between gold shades
-                float colorShift = 0.5f + 0.5f * Mathf.Sin(time * 4f);
-                newRecordText.color = Color.Lerp(
-                    new Color(1f, 0.8f, 0.15f, 1f),
-                    new Color(1f, 0.95f, 0.4f, 1f),
-                    colorShift
-                );
 
                 yield return null;
             }
@@ -3951,6 +3988,7 @@ Antonia and Joakim Engfors
 
                 // Try to play animated mascot
                 levelCompleteMascotAnimator = levelCompleteMascotImage.gameObject.AddComponent<MascotAnimator>();
+                levelCompleteMascotAnimator.FrameRate = MascotAnimator.GetVictoryAnimationFPS(worldId);
 
                 if (levelCompleteMascotAnimator.LoadFrames(worldFolder, animationName))
                 {
