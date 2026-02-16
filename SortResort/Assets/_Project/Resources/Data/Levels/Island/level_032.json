@@ -3,17 +3,17 @@
     "world_id": "island",
     "name": "level_032",
     "star_move_thresholds": [
-        27,
-        31,
-        35,
-        38
+        26,
+        30,
+        34,
+        36
     ],
     "time_limit_seconds": 69,
     "containers": [
         {
             "id": "carousel_1",
             "position": {
-                "x": 1280.316,
+                "x": 1350.316,
                 "y": 200.0
             },
             "container_type": "standard",
@@ -60,7 +60,7 @@
         {
             "id": "carousel_2",
             "position": {
-                "x": 925.316,
+                "x": 995.316,
                 "y": 200.0
             },
             "container_type": "standard",
@@ -107,7 +107,7 @@
         {
             "id": "carousel_3",
             "position": {
-                "x": 570.316,
+                "x": 640.316,
                 "y": 200.0
             },
             "container_type": "standard",
@@ -159,7 +159,7 @@
         {
             "id": "carousel_4",
             "position": {
-                "x": 215.31600000000003,
+                "x": 285.31600000000003,
                 "y": 200.0
             },
             "container_type": "standard",
@@ -206,7 +206,7 @@
         {
             "id": "carousel_5",
             "position": {
-                "x": -139.68399999999997,
+                "x": -69.68399999999997,
                 "y": 200.0
             },
             "container_type": "standard",
@@ -232,11 +232,6 @@
                     "id": "hibiscusflower",
                     "row": 0,
                     "slot": 0
-                },
-                {
-                    "id": "sandpale_green",
-                    "row": 0,
-                    "slot": 1
                 },
                 {
                     "id": "sunglassespurple",
@@ -291,6 +286,11 @@
                     "slot": 0
                 },
                 {
+                    "id": "sunhat",
+                    "row": 0,
+                    "slot": 1
+                },
+                {
                     "id": "watermelonslice",
                     "row": 1,
                     "slot": 1
@@ -323,7 +323,7 @@
             "slot_count": 1,
             "max_rows_per_slot": 3,
             "is_locked": true,
-            "unlock_matches_required": 3,
+            "unlock_matches_required": 5,
             "lock_overlay_image": "island_single_slot_lockoverlay",
             "unlock_animation": "",
             "is_moving": false,
@@ -343,7 +343,7 @@
                     "slot": 0
                 },
                 {
-                    "id": "sunhat",
+                    "id": "surfboardbluewhitepeace",
                     "row": 1,
                     "slot": 0
                 }
@@ -360,7 +360,7 @@
             "slot_count": 3,
             "max_rows_per_slot": 3,
             "is_locked": true,
-            "unlock_matches_required": 3,
+            "unlock_matches_required": 4,
             "lock_overlay_image": "island_lockoverlay",
             "unlock_animation": "",
             "is_moving": false,
@@ -443,11 +443,6 @@
             "initial_items": [
                 {
                     "id": "surfboardbluewhitepeace",
-                    "row": 0,
-                    "slot": 0
-                },
-                {
-                    "id": "surfboardbluewhitepeace",
                     "row": 1,
                     "slot": 0
                 },
@@ -470,6 +465,11 @@
                     "id": "surfboardbluewhitestripes",
                     "row": 2,
                     "slot": 1
+                },
+                {
+                    "id": "sandpale_green",
+                    "row": 0,
+                    "slot": 2
                 },
                 {
                     "id": "swimmask",

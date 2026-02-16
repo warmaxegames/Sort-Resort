@@ -13,7 +13,7 @@
         {
             "id": "carousel_1",
             "position": {
-                "x": 1280.316,
+                "x": 1350.316,
                 "y": 200.0
             },
             "container_type": "standard",
@@ -41,7 +41,7 @@
                     "slot": 0
                 },
                 {
-                    "id": "maitai",
+                    "id": "vanillaicecreamcone",
                     "row": 0,
                     "slot": 1
                 },
@@ -56,7 +56,7 @@
                     "slot": 2
                 },
                 {
-                    "id": "swimmask",
+                    "id": "watermelondrink",
                     "row": 1,
                     "slot": 2
                 }
@@ -65,7 +65,7 @@
         {
             "id": "carousel_2",
             "position": {
-                "x": 925.316,
+                "x": 995.316,
                 "y": 200.0
             },
             "container_type": "standard",
@@ -98,7 +98,7 @@
                     "slot": 1
                 },
                 {
-                    "id": "vanillaicecreamcone",
+                    "id": "swimmask",
                     "row": 1,
                     "slot": 1
                 },
@@ -117,7 +117,7 @@
         {
             "id": "carousel_3",
             "position": {
-                "x": 570.316,
+                "x": 640.316,
                 "y": 200.0
             },
             "container_type": "standard",
@@ -140,7 +140,7 @@
             "despawn_on_match": false,
             "initial_items": [
                 {
-                    "id": "vanillaicecreamcone",
+                    "id": "swimmask",
                     "row": 0,
                     "slot": 0
                 },
@@ -155,7 +155,7 @@
                     "slot": 1
                 },
                 {
-                    "id": "piratepopsicle",
+                    "id": "strawberrydaiquiri",
                     "row": 1,
                     "slot": 1
                 }
@@ -164,7 +164,7 @@
         {
             "id": "carousel_4",
             "position": {
-                "x": 215.31600000000003,
+                "x": 285.31600000000003,
                 "y": 200.0
             },
             "container_type": "standard",
@@ -187,7 +187,7 @@
             "despawn_on_match": false,
             "initial_items": [
                 {
-                    "id": "vanillaicecreamcone",
+                    "id": "swimmask",
                     "row": 0,
                     "slot": 0
                 },
@@ -211,7 +211,7 @@
         {
             "id": "carousel_5",
             "position": {
-                "x": -139.68399999999997,
+                "x": -69.68399999999997,
                 "y": 200.0
             },
             "container_type": "standard",
@@ -239,7 +239,7 @@
                     "slot": 0
                 },
                 {
-                    "id": "swimmask",
+                    "id": "watermelondrink",
                     "row": 1,
                     "slot": 0
                 },
@@ -259,7 +259,7 @@
             "id": "container_6",
             "position": {
                 "x": 200.0,
-                "y": 505.0
+                "y": 516.0
             },
             "container_type": "standard",
             "container_image": "island_single_slot_container",
@@ -281,7 +281,7 @@
             "despawn_on_match": false,
             "initial_items": [
                 {
-                    "id": "piratepopsicle",
+                    "id": "strawberrydaiquiri",
                     "row": 0,
                     "slot": 0
                 },
@@ -296,7 +296,7 @@
             "id": "container_7",
             "position": {
                 "x": 540.0,
-                "y": 505.0
+                "y": 516.0
             },
             "container_type": "standard",
             "container_image": "island_container",
@@ -318,7 +318,7 @@
             "despawn_on_match": false,
             "initial_items": [
                 {
-                    "id": "maitai",
+                    "id": "vanillaicecreamcone",
                     "row": 0,
                     "slot": 1
                 },
@@ -333,12 +333,12 @@
                     "slot": 2
                 },
                 {
-                    "id": "swimmask",
+                    "id": "watermelondrink",
                     "row": 1,
                     "slot": 2
                 },
                 {
-                    "id": "piratepopsicle",
+                    "id": "strawberrydaiquiri",
                     "row": 2,
                     "slot": 2
                 }
@@ -348,7 +348,7 @@
             "id": "container_8",
             "position": {
                 "x": 880.0,
-                "y": 505.0
+                "y": 516.0
             },
             "container_type": "standard",
             "container_image": "island_single_slot_container",
@@ -385,7 +385,7 @@
             "id": "container_9",
             "position": {
                 "x": 540.0,
-                "y": 760.0
+                "y": 782.0
             },
             "container_type": "standard",
             "container_image": "island_container",
@@ -407,7 +407,7 @@
             "despawn_on_match": false,
             "initial_items": [
                 {
-                    "id": "maitai",
+                    "id": "vanillaicecreamcone",
                     "row": 0,
                     "slot": 0
                 },

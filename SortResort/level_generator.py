@@ -132,7 +132,7 @@ def select_items(rng, available, n_types, item_usage):
 # Base slot: 83px × uniform_scale(1.14) × border_scale(1.2)
 CONTAINER_WIDTH_3SLOT = 83 * 1.14 * 3 * 1.2   # ~341px
 CONTAINER_WIDTH_1SLOT = 83 * 1.14 * 1 * 1.2   # ~114px
-SLOT_HEIGHT = 166 * 1.14                        # ~189px
+SLOT_HEIGHT = 166 * 1.14 * 1.2                   # ~227px (includes border_scale)
 ROW_DEPTH_OFFSET = 4 * 1.14                     # ~4.56px per extra row
 MIN_CONTAINER_GAP = 30  # minimum gap between container edges (pixels)
 
@@ -142,7 +142,7 @@ SCREEN_MIN_Y, SCREEN_MAX_Y = 250, 1600
 
 # Carousel horizontal spacing (edge-to-edge + small gap)
 CAROUSEL_H_SPACING = int(CONTAINER_WIDTH_3SLOT) + 15  # ~356px
-CAROUSEL_V_SPACING = int(SLOT_HEIGHT) + MIN_CONTAINER_GAP             # ~219px
+CAROUSEL_V_SPACING = int(SLOT_HEIGHT) + MIN_CONTAINER_GAP             # ~257px
 
 
 def _container_half_width(slot_count):
@@ -593,14 +593,32 @@ def get_level_spec(level):
     use_carousel = "carousel" in active_mechanics
     use_despawn = "despawn" in active_mechanics
 
+    # Carousel and despawn cannot coexist: horizontal carousel path at Y=200
+    # overlaps the despawn stack extending upward through that zone, and vertical
+    # carousel occupies the same center column. Prefer whichever is in intro range.
+    if use_carousel and use_despawn:
+        car_in_intro = (level - UNLOCK_CAROUSEL) < INTRO_RANGE
+        desp_in_intro = (level - UNLOCK_DESPAWN) < INTRO_RANGE
+        if car_in_intro and not desp_in_intro:
+            use_despawn = False
+        elif desp_in_intro and not car_in_intro:
+            use_carousel = False
+        else:
+            # Neither or both in intro — coin flip
+            if rng.random() < 0.5:
+                use_despawn = False
+            else:
+                use_carousel = False
+
     # Locked: count and matches scale with level
     locked_count = 0
     locked_matches_range = (0, 0)
     if use_locked:
         locked_count = 1 + (level - UNLOCK_LOCKED) // 15
         locked_count = min(locked_count, max(1, n_containers // 4))
-        lo = min(3, 2 + (level - UNLOCK_LOCKED) // 15)
-        hi = min(3, lo + 1)
+        # Lock matches range 1-9, widening with level for per-container variance
+        lo = max(1, 1 + (level - UNLOCK_LOCKED) // 20)
+        hi = min(9, lo + 2 + (level - UNLOCK_LOCKED) // 12)
         locked_matches_range = (lo, hi)
 
     # Single-slot: count scales
@@ -621,11 +639,11 @@ def get_level_spec(level):
         carousel_count = 3 + (level - UNLOCK_CAROUSEL) // 20
         carousel_count = min(carousel_count, 5)
 
-    # Despawn: count scales
+    # Despawn: 5-12 containers high (some off-screen, cascade falling)
     despawn_count = 0
     if use_despawn:
-        despawn_count = 2 + (level - UNLOCK_DESPAWN) // 15
-        despawn_count = min(despawn_count, 4)
+        despawn_count = 5 + (level - UNLOCK_DESPAWN) // 8
+        despawn_count = min(despawn_count, 12)
 
     return {
         "level": level, "n_containers": n_containers, "max_rows": max_rows,
@@ -675,11 +693,11 @@ def build_containers(spec, config):
             car_x = 540
             hh = _container_half_height(car_mr)
 
-            # Start positions fully off-screen
+            # Start positions fully off-screen (100px margin to prevent early despawn)
             if car_dir == "down":
-                start_y = -(hh + 30)
+                start_y = -(hh + 100)
             else:
-                start_y = 1920 + hh + 30
+                start_y = 1920 + hh + 100
 
             for i in range(n_car):
                 if car_dir == "down":
@@ -705,11 +723,11 @@ def build_containers(spec, config):
             spacing = CAROUSEL_H_SPACING
             car_y = 200
 
-            # Start positions: first container fully off-screen
+            # Start positions: first container fully off-screen (100px margin)
             if car_dir == "right":
-                start_x = -(hw + 30)
+                start_x = -(hw + 100)
             else:
-                start_x = 1080 + hw + 30
+                start_x = 1080 + hw + 100
 
             for i in range(n_car):
                 if car_dir == "right":
@@ -732,30 +750,36 @@ def build_containers(spec, config):
     # Despawn containers (single-column vertical stack at center X=540)
     # Bottom container visible, upper containers stacked above (some off-screen).
     # When bottom is cleared, containers above fall down into view.
+    # Stack is 5-12 containers tall; bottom 3-4 have full depth, upper ones single-row.
     if spec["use_despawn"]:
-        n_desp = min(spec["despawn_count"], 4)
-        static_count -= n_desp
+        n_desp = spec["despawn_count"]  # 5-12 total stack height
+        # Only budget a reasonable number from statics (rest are additional containers)
+        n_desp_budgeted = min(n_desp, 4)
+        static_count -= n_desp_budgeted
         desp_mr = min(spec["max_rows"], 2)
         vis_h = int(SLOT_HEIGHT + ROW_DEPTH_OFFSET * max(0, desp_mr - 1))
         v_spacing = vis_h + 5   # edge-to-edge with minimal gap
 
         center_col_occupied = True
 
-        # Single-slot despawn for levels 50+ (30% chance for last container)
+        # Single-slot despawn for levels 50+ (30% chance for topmost container)
         desp_single_last = level >= 50 and rng.random() < 0.30
 
-        # Single-column stack at X=540, bottom container at play area top
+        # Single-column stack at X=540, bottom container in play area
         desp_x = 540
         desp_y_bottom = SCREEN_MIN_Y + y_offset  # bottom of stack (visible)
 
         for i in range(n_desp):
             desp_y = desp_y_bottom - i * v_spacing  # stack upward
 
-            is_last = (i == n_desp - 1)
-            slot_count = 1 if (desp_single_last and is_last) else 3
+            is_top = (i == n_desp - 1)
+            slot_count = 1 if (desp_single_last and is_top) else 3
+            # Bottom 3 containers have full depth; upper ones are single-row
+            # to keep total item count reasonable
+            this_mr = desp_mr if i < 3 else 1
             c = make_container(
                 f"despawn_{idx}", desp_x, desp_y, config,
-                slot_count=slot_count, max_rows=desp_mr,
+                slot_count=slot_count, max_rows=this_mr,
                 despawn=True, is_single_slot=(slot_count == 1)
             )
             containers.append(c)

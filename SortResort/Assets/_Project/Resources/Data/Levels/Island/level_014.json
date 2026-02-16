@@ -36,7 +36,7 @@
             "despawn_on_match": false,
             "initial_items": [
                 {
-                    "id": "popsiclemintchocolate",
+                    "id": "icecreamparfait",
                     "row": 1,
                     "slot": 0
                 },
@@ -51,7 +51,7 @@
                     "slot": 1
                 },
                 {
-                    "id": "icecreamparfait",
+                    "id": "piratepopsicle",
                     "row": 2,
                     "slot": 1
                 },
@@ -160,7 +160,7 @@
             "despawn_on_match": false,
             "initial_items": [
                 {
-                    "id": "lemonadepitcher",
+                    "id": "vanilladrink",
                     "row": 0,
                     "slot": 0
                 },
@@ -170,12 +170,12 @@
                     "slot": 0
                 },
                 {
-                    "id": "piratepopsicle",
+                    "id": "popsiclemintchocolate",
                     "row": 2,
                     "slot": 0
                 },
                 {
-                    "id": "popsiclemintchocolate",
+                    "id": "icecreamparfait",
                     "row": 1,
                     "slot": 1
                 },
@@ -212,7 +212,7 @@
             "despawn_on_match": false,
             "initial_items": [
                 {
-                    "id": "vanilladrink",
+                    "id": "lemonadepitcher",
                     "row": 0,
                     "slot": 0
                 },
@@ -222,7 +222,7 @@
                     "slot": 0
                 },
                 {
-                    "id": "vanilladrink",
+                    "id": "lemonadepitcher",
                     "row": 2,
                     "slot": 0
                 },
@@ -232,12 +232,12 @@
                     "slot": 1
                 },
                 {
-                    "id": "icecreamparfait",
+                    "id": "piratepopsicle",
                     "row": 2,
                     "slot": 1
                 },
                 {
-                    "id": "lemonadepitcher",
+                    "id": "vanilladrink",
                     "row": 0,
                     "slot": 2
                 },
@@ -247,7 +247,7 @@
                     "slot": 2
                 },
                 {
-                    "id": "popsiclemintchocolate",
+                    "id": "icecreamparfait",
                     "row": 2,
                     "slot": 2
                 }
@@ -408,7 +408,7 @@
                     "slot": 0
                 },
                 {
-                    "id": "icecreamparfait",
+                    "id": "piratepopsicle",
                     "row": 2,
                     "slot": 0
                 },
@@ -423,7 +423,7 @@
                     "slot": 1
                 },
                 {
-                    "id": "lemonadepitcher",
+                    "id": "vanilladrink",
                     "row": 0,
                     "slot": 2
                 },
@@ -470,7 +470,7 @@
                     "slot": 0
                 },
                 {
-                    "id": "piratepopsicle",
+                    "id": "popsiclemintchocolate",
                     "row": 2,
                     "slot": 0
                 },
@@ -485,12 +485,12 @@
                     "slot": 1
                 },
                 {
-                    "id": "vanilladrink",
+                    "id": "lemonadepitcher",
                     "row": 0,
                     "slot": 2
                 },
                 {
-                    "id": "piratepopsicle",
+                    "id": "popsiclemintchocolate",
                     "row": 2,
                     "slot": 2
                 }

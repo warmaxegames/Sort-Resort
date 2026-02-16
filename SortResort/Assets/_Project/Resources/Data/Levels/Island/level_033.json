@@ -13,7 +13,7 @@
         {
             "id": "carousel_1",
             "position": {
-                "x": -200.31599999999997,
+                "x": -270.316,
                 "y": 200.0
             },
             "container_type": "standard",
@@ -65,7 +65,7 @@
         {
             "id": "carousel_2",
             "position": {
-                "x": 154.68400000000003,
+                "x": 84.68400000000003,
                 "y": 200.0
             },
             "container_type": "standard",
@@ -112,7 +112,7 @@
         {
             "id": "carousel_3",
             "position": {
-                "x": 509.684,
+                "x": 439.684,
                 "y": 200.0
             },
             "container_type": "standard",
@@ -164,7 +164,7 @@
         {
             "id": "carousel_4",
             "position": {
-                "x": 864.684,
+                "x": 794.684,
                 "y": 200.0
             },
             "container_type": "standard",
@@ -211,7 +211,7 @@
         {
             "id": "carousel_5",
             "position": {
-                "x": 1219.684,
+                "x": 1149.684,
                 "y": 200.0
             },
             "container_type": "standard",
@@ -323,7 +323,7 @@
             "slot_count": 3,
             "max_rows_per_slot": 3,
             "is_locked": true,
-            "unlock_matches_required": 3,
+            "unlock_matches_required": 2,
             "lock_overlay_image": "island_lockoverlay",
             "unlock_animation": "",
             "is_moving": false,
@@ -370,7 +370,7 @@
             "slot_count": 3,
             "max_rows_per_slot": 3,
             "is_locked": true,
-            "unlock_matches_required": 3,
+            "unlock_matches_required": 2,
             "lock_overlay_image": "island_lockoverlay",
             "unlock_animation": "",
             "is_moving": false,
