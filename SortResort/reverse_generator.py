@@ -28,6 +28,9 @@ from level_generator import (
     WorldConfig, get_level_spec, build_containers,
     get_available_items, select_items, calc_timer,
     get_target_fill_ratio, get_target_types,
+    _get_bounding_box, _boxes_overlap, _get_travel_box,
+    SCREEN_MIN_X, SCREEN_MAX_X, SCREEN_MIN_Y, SCREEN_MAX_Y,
+    MIN_CONTAINER_GAP,
 )
 from level_solver import solve_level
 
@@ -266,6 +269,7 @@ def reverse_place_items(containers, item_ids, max_rows, rng, level=1):
     all_playable = unlocked + locked
     _fix_starting_triples(grid, all_playable, rng, c_rows)
     _ensure_no_empty_containers(grid, all_playable, rng, c_rows)
+    _ensure_singleslot_depth(grid, all_playable, rng, c_rows)
 
     # ── Convert grid → initial_items ───────────────────────────────────
     for c in containers:
@@ -353,6 +357,65 @@ def _ensure_no_empty_containers(grid, pool, rng, c_rows):
                 grid[fullest["id"]][s][0] = None
                 grid[cid][0][0] = item
                 break
+
+
+def _ensure_singleslot_depth(grid, containers, rng, c_rows):
+    """Ensure single-slot containers with max_rows >= 2 have depth.
+
+    For each single-slot container with room for back rows, ensure at least
+    1 item is in a back row (so the player must clear front to reveal it).
+    Steals items from the fullest other unlocked container if needed.
+    """
+    unlocked = [c for c in containers if not c["is_locked"]]
+
+    for c in containers:
+        if c["slot_count"] != 1:
+            continue
+        cid = c["id"]
+        mr = c_rows[cid]
+        if mr < 2:
+            continue
+
+        # Count items in this container
+        items_here = sum(1 for r in range(mr) if grid[cid][0][r] is not None)
+        back_items = sum(1 for r in range(1, mr) if grid[cid][0][r] is not None)
+
+        if items_here >= 2 and back_items >= 1:
+            continue  # Already has depth
+
+        # Need at least 2 items total with at least 1 in back row
+        if items_here < 2:
+            # Steal items from fullest unlocked container
+            donors = sorted(unlocked, key=lambda x: sum(
+                1 for s in range(x["slot_count"])
+                for r in range(c_rows[x["id"]])
+                if grid[x["id"]][s][r] is not None
+            ), reverse=True)
+
+            for donor in donors:
+                if donor["id"] == cid:
+                    continue
+                did = donor["id"]
+                for s in range(donor["slot_count"]):
+                    if grid[did][s][0] is not None and items_here < 2:
+                        item = grid[did][s][0]
+                        grid[did][s][0] = None
+                        # Place in first empty row
+                        for r in range(mr):
+                            if grid[cid][0][r] is None:
+                                grid[cid][0][r] = item
+                                items_here += 1
+                                break
+                if items_here >= 2:
+                    break
+
+        # Ensure at least 1 item is in a back row
+        back_items = sum(1 for r in range(1, mr) if grid[cid][0][r] is not None)
+        if back_items == 0 and items_here >= 2:
+            # Move front item to row 1
+            if grid[cid][0][0] is not None and grid[cid][0][1] is None:
+                grid[cid][0][1] = grid[cid][0][0]
+                grid[cid][0][0] = None
 
 
 # ── Capacity Calculation ─────────────────────────────────────────────────────
@@ -454,6 +517,7 @@ def generate_levels(config, output_dir, count=100):
 
     stats = []
     errors = []
+    mechanic_histogram = {}
 
     MAX_ATTEMPTS = 20
 
@@ -501,6 +565,10 @@ def generate_levels(config, output_dir, count=100):
         if n_items % 3 != 0:
             errors.append(f"L{level}: {n_items} items (NOT multiple of 3!)")
 
+        # Collect bounding boxes for overlap/collision checks
+        static_boxes = []  # (box, container_id)
+        bf_boxes = []      # (travel_box, container_id)
+
         for c in level_data["containers"]:
             if c["slot_count"] >= 3:
                 max_row = c["max_rows_per_slot"]
@@ -514,10 +582,44 @@ def generate_levels(config, output_dir, count=100):
                         errors.append(
                             f"L{level}: {c['id']} has triple at row {row}!")
 
+            cx, cy = c["position"]["x"], c["position"]["y"]
+            mr = c["max_rows_per_slot"]
+
             if not c["is_moving"] and not c["despawn_on_match"]:
-                x, y = c["position"]["x"], c["position"]["y"]
-                if x < 150 or x > 930 or y < 150 or y > 1700:
-                    errors.append(f"L{level}: {c['id']} at ({x},{y}) off-screen")
+                # Full AABB screen bounds check against actual screen pixels
+                # Screen is 1080x1920; allow 20px margin outside actual edges
+                box = _get_bounding_box(cx, cy, c["slot_count"], mr)
+                x_min, x_max, y_min, y_max = box
+                if (x_min < -20 or x_max > 1100 or
+                        y_min < -20 or y_max > 1700):
+                    errors.append(
+                        f"L{level}: {c['id']} bbox ({x_min:.0f}-{x_max:.0f}, "
+                        f"{y_min:.0f}-{y_max:.0f}) off-screen")
+                static_boxes.append((box, c["id"]))
+
+            if c["is_moving"] and c["move_type"] == "back_and_forth":
+                tbox = _get_travel_box(cx, cy, c["slot_count"], mr,
+                                       c["move_direction"], c["move_distance"])
+                bf_boxes.append((tbox, c["id"]))
+
+        # Static overlap detection (allow up to 10px edge overlap since grid
+        # positions naturally have containers touching at edges)
+        for i in range(len(static_boxes)):
+            for j in range(i + 1, len(static_boxes)):
+                box_a, id_a = static_boxes[i]
+                box_b, id_b = static_boxes[j]
+                if _boxes_overlap(box_a, box_b, gap=-10):
+                    errors.append(
+                        f"L{level}: {id_a} and {id_b} overlap!")
+
+        # B&F path collision with static containers
+        for tbox, bf_id in bf_boxes:
+            for sbox, s_id in static_boxes:
+                if s_id == bf_id:
+                    continue
+                if _boxes_overlap(tbox, sbox, gap=-10):
+                    errors.append(
+                        f"L{level}: B&F {bf_id} sweep collides with {s_id}")
 
         total_cap = sum(c["slot_count"] * c["max_rows_per_slot"]
                         for c in level_data["containers"])
@@ -542,6 +644,10 @@ def generate_levels(config, output_dir, count=100):
                 mechanics.add("single")
             max_r = max(max_r, c["max_rows_per_slot"])
 
+        # Track mechanic usage for histogram
+        for m in mechanics:
+            mechanic_histogram[m] = mechanic_histogram.get(m, 0) + 1
+
         attempt_str = f" (attempt {attempt + 1})" if attempt > 0 else ""
         solver_str = f", solver={best_moves}m" if best_moves else ", UNSOLVED"
         stat = (f"L{level:3d}: {n_containers:2d}c, {n_types:2d}t, "
@@ -564,6 +670,11 @@ def generate_levels(config, output_dir, count=100):
     else:
         print(f"All {len(all_items)} items used!")
 
+    # Mechanic histogram
+    print(f"\nMechanic histogram (levels using each):")
+    for mech in sorted(mechanic_histogram.keys()):
+        print(f"  {mech}: {mechanic_histogram[mech]}/{count}")
+
     if errors:
         print(f"\nERRORS ({len(errors)}):")
         for e in errors:
@@ -584,6 +695,9 @@ def generate_levels(config, output_dir, count=100):
         f_out.write(f"\nItem usage: min={min_used}, max={max_used}\n")
         if unused:
             f_out.write(f"UNUSED: {unused}\n")
+        f_out.write(f"\nMechanic histogram:\n")
+        for mech in sorted(mechanic_histogram.keys()):
+            f_out.write(f"  {mech}: {mechanic_histogram[mech]}/{count}\n")
         if errors:
             f_out.write(f"\nErrors:\n")
             for e in errors:

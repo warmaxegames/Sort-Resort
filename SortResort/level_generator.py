@@ -50,6 +50,7 @@ class WorldConfig:
     container_image: str = ""
     single_slot_image: str = ""
     lock_overlay_image: str = ""
+    single_slot_lock_overlay_image: str = ""
 
     def __post_init__(self):
         if not self.container_image:
@@ -58,6 +59,8 @@ class WorldConfig:
             self.single_slot_image = f"{self.world_id}_single_slot_container"
         if not self.lock_overlay_image:
             self.lock_overlay_image = f"{self.world_id}_lockoverlay"
+        if not self.single_slot_lock_overlay_image:
+            self.single_slot_lock_overlay_image = f"{self.world_id}_single_slot_lockoverlay"
 
     @property
     def all_items(self):
@@ -125,19 +128,315 @@ def select_items(rng, available, n_types, item_usage):
     return selected
 
 
+# ── Container Dimensions (Godot Pixels) ─────────────────────────────────────
+# Base slot: 83px × uniform_scale(1.14) × border_scale(1.2)
+CONTAINER_WIDTH_3SLOT = 83 * 1.14 * 3 * 1.2   # ~341px
+CONTAINER_WIDTH_1SLOT = 83 * 1.14 * 1 * 1.2   # ~114px
+SLOT_HEIGHT = 166 * 1.14                        # ~189px
+ROW_DEPTH_OFFSET = 4 * 1.14                     # ~4.56px per extra row
+MIN_CONTAINER_GAP = 30  # minimum gap between container edges (pixels)
+
+# Screen safe bounds (Godot pixels) — container centers must keep edges inside
+SCREEN_MIN_X, SCREEN_MAX_X = 200, 880
+SCREEN_MIN_Y, SCREEN_MAX_Y = 250, 1600
+
+# Carousel horizontal spacing (edge-to-edge + small gap)
+CAROUSEL_H_SPACING = int(CONTAINER_WIDTH_3SLOT) + 15  # ~356px
+CAROUSEL_V_SPACING = int(SLOT_HEIGHT) + MIN_CONTAINER_GAP             # ~219px
+
+
+def _container_half_width(slot_count):
+    """Half-width of a container in Godot pixels."""
+    if slot_count == 1:
+        return CONTAINER_WIDTH_1SLOT / 2
+    return CONTAINER_WIDTH_3SLOT / 2
+
+
+def _container_half_height(max_rows):
+    """Half visual height of a container in Godot pixels."""
+    base = SLOT_HEIGHT
+    extra = ROW_DEPTH_OFFSET * max(0, max_rows - 1)
+    return (base + extra) / 2
+
+
+def _get_bounding_box(cx, cy, slot_count, max_rows):
+    """Return (x_min, x_max, y_min, y_max) bounding box for a container."""
+    hw = _container_half_width(slot_count)
+    hh = _container_half_height(max_rows)
+    return (cx - hw, cx + hw, cy - hh, cy + hh)
+
+
+def _boxes_overlap(box_a, box_b, gap=MIN_CONTAINER_GAP):
+    """Check if two AABB bounding boxes overlap (with gap)."""
+    ax_min, ax_max, ay_min, ay_max = box_a
+    bx_min, bx_max, by_min, by_max = box_b
+    return (ax_min - gap < bx_max and ax_max + gap > bx_min and
+            ay_min - gap < by_max and ay_max + gap > by_min)
+
+
+def _get_travel_box(cx, cy, slot_count, max_rows, move_dir, distance):
+    """Swept bounding box for a moving container over its full travel path."""
+    hw = _container_half_width(slot_count)
+    hh = _container_half_height(max_rows)
+    if move_dir == "right":
+        return (cx - hw, cx + distance + hw, cy - hh, cy + hh)
+    elif move_dir == "left":
+        return (cx - distance - hw, cx + hw, cy - hh, cy + hh)
+    elif move_dir == "down":
+        return (cx - hw, cx + hw, cy - hh, cy + distance + hh)
+    elif move_dir == "up":
+        return (cx - hw, cx + hw, cy - distance - hh, cy + hh)
+    return (cx - hw, cx + hw, cy - hh, cy + hh)
+
+
+def _get_safe_backforth_distance(px, py, slot_count, max_rows, move_dir, placed_ranges):
+    """Compute the max safe back-and-forth distance that won't overlap neighbors.
+
+    Uses full 2D bounding box overlap checks against ALL containers (not just
+    same-row). This prevents movers from passing through statics on adjacent rows.
+
+    Args:
+        px, py: container center position (Godot pixels)
+        slot_count: number of slots (1 or 3)
+        max_rows: row depth for height calculation
+        move_dir: "left" or "right"
+        placed_ranges: list of tuples (x_min, x_max, y_min, y_max, idx)
+
+    Returns:
+        max safe move_distance in pixels (may be 0 if no room)
+    """
+    hw = _container_half_width(slot_count)
+    hh = _container_half_height(max_rows)
+
+    # Screen bounds (container edge must stay on-screen)
+    if move_dir == "right":
+        screen_max_dist = SCREEN_MAX_X - px
+    else:
+        screen_max_dist = px - SCREEN_MIN_X
+
+    max_dist = max(0, screen_max_dist)
+
+    # Binary-search style: check decreasing distances against all neighbors
+    # For efficiency, compute analytically per neighbor
+    my_y_min = py - hh
+    my_y_max = py + hh
+
+    for r in placed_ranges:
+        rx_min, rx_max, ry_min, ry_max, _idx = r
+
+        # Skip if no vertical overlap (with gap)
+        if my_y_max + MIN_CONTAINER_GAP <= ry_min or my_y_min - MIN_CONTAINER_GAP >= ry_max:
+            continue
+
+        if move_dir == "right":
+            # Moving right: right edge at distance d = px + d + hw
+            # Must not reach neighbor's left edge minus gap
+            if rx_min > px + hw:
+                safe = rx_min - hw - MIN_CONTAINER_GAP - px
+                max_dist = min(max_dist, max(0, safe))
+        else:
+            # Moving left: left edge at distance d = px - d - hw
+            # Must not reach neighbor's right edge plus gap
+            if rx_max < px - hw:
+                safe = px - rx_max - hw - MIN_CONTAINER_GAP
+                max_dist = min(max_dist, max(0, safe))
+
+    return max_dist
+
+
+# ── Symmetric Back-and-Forth Parameters ─────────────────────────────────────
+
+def _compute_bf_params(positions, single_indices, locked_indices, spec, placed_ranges, rng):
+    """Pre-compute symmetric back-and-forth parameters per row group.
+
+    Groups b&f candidates by row (Y position), then assigns equal move_distance
+    to containers on the same row so movement looks visually balanced.
+
+    Args:
+        positions: list of (x, y) tuples for all static containers
+        single_indices: set of position indices that are single-slot
+        locked_indices: set of position indices that are locked
+        spec: level spec dict
+        placed_ranges: list of tuples (x_min, x_max, y_min, y_max, idx)
+        rng: random.Random instance
+
+    Returns:
+        dict mapping position index -> (direction, distance, speed)
+    """
+    level = spec["level"]
+    max_rows = spec["max_rows"]
+    bf_speed = 40 + level * 0.4
+    Y_ROW_TOLERANCE = 150  # for grouping b&f candidates into visual rows
+
+    # Identify which position indices are back-and-forth movers
+    bf_indices = []
+    if spec["use_backforth"]:
+        for i in range(min(spec["backforth_count"], len(positions))):
+            if i not in locked_indices:
+                bf_indices.append(i)
+
+    if not bf_indices:
+        return {}
+
+    # Group b&f indices by row (Y position within tolerance)
+    row_groups = []  # list of lists of indices
+    assigned = set()
+    for i in bf_indices:
+        if i in assigned:
+            continue
+        group = [i]
+        assigned.add(i)
+        _, iy = positions[i]
+        for j in bf_indices:
+            if j not in assigned and abs(positions[j][1] - iy) <= Y_ROW_TOLERANCE:
+                group.append(j)
+                assigned.add(j)
+        row_groups.append(group)
+
+    bf_params = {}  # index -> (direction, distance, speed)
+
+    def _update_range(idx, direction, dist, slots):
+        """Update placed_ranges entry for a mover's travel bounds."""
+        hw = _container_half_width(slots)
+        for ri, r in enumerate(placed_ranges):
+            if r[4] == idx:
+                x_min, x_max, y_min, y_max, _ = r
+                if direction == "right":
+                    x_max = positions[idx][0] + dist + hw
+                else:
+                    x_min = positions[idx][0] - dist - hw
+                placed_ranges[ri] = (x_min, x_max, y_min, y_max, idx)
+                break
+
+    for group in row_groups:
+        if len(group) == 1:
+            i = group[0]
+            px, py = positions[i]
+            slot_count = 1 if i in single_indices else 3
+            preferred_dir = rng.choice(["left", "right"])
+            desired_dist = 150 + rng.randint(0, 100)
+            other_ranges = [r for r in placed_ranges if r[4] != i]
+
+            for try_dir in [preferred_dir, "left" if preferred_dir == "right" else "right"]:
+                safe = _get_safe_backforth_distance(
+                    px, py, slot_count, max_rows, try_dir, other_ranges)
+                capped = min(desired_dist, int(safe))
+                if capped >= 50:
+                    bf_params[i] = (try_dir, capped, bf_speed)
+                    _update_range(i, try_dir, capped, slot_count)
+                    break
+
+        elif len(group) >= 2:
+            group.sort(key=lambda idx: positions[idx][0])
+            pair_idx = 0
+            while pair_idx + 1 < len(group):
+                left_i = group[pair_idx]
+                right_i = group[pair_idx + 1]
+                lx, ly = positions[left_i]
+                rx, ry = positions[right_i]
+                left_slots = 1 if left_i in single_indices else 3
+                right_slots = 1 if right_i in single_indices else 3
+                left_hw = _container_half_width(left_slots)
+                right_hw = _container_half_width(right_slots)
+
+                other_ranges = [r for r in placed_ranges
+                                if r[4] != left_i and r[4] != right_i]
+
+                desired_dist = 150 + rng.randint(0, 100)
+
+                # Option A: Inward movement
+                inner_gap = rx - right_hw - (lx + left_hw) - MIN_CONTAINER_GAP * 2
+                inward_max = max(0, int(inner_gap / 2))
+                left_inward_safe = _get_safe_backforth_distance(
+                    lx, ly, left_slots, max_rows, "right", other_ranges)
+                right_inward_safe = _get_safe_backforth_distance(
+                    rx, ry, right_slots, max_rows, "left", other_ranges)
+                inward_dist = min(desired_dist, inward_max,
+                                  int(left_inward_safe), int(right_inward_safe))
+
+                # Option B: Outward movement
+                left_outward_safe = _get_safe_backforth_distance(
+                    lx, ly, left_slots, max_rows, "left", other_ranges)
+                right_outward_safe = _get_safe_backforth_distance(
+                    rx, ry, right_slots, max_rows, "right", other_ranges)
+                outward_dist = min(desired_dist,
+                                   int(left_outward_safe), int(right_outward_safe))
+
+                if inward_dist >= 50 and inward_dist >= outward_dist:
+                    sym_dist = inward_dist
+                    left_dir, right_dir = "right", "left"
+                elif outward_dist >= 50:
+                    sym_dist = outward_dist
+                    left_dir, right_dir = "left", "right"
+                elif inward_dist >= 50:
+                    sym_dist = inward_dist
+                    left_dir, right_dir = "right", "left"
+                else:
+                    pair_idx += 2
+                    continue
+
+                bf_params[left_i] = (left_dir, sym_dist, bf_speed)
+                bf_params[right_i] = (right_dir, sym_dist, bf_speed)
+                _update_range(left_i, left_dir, sym_dist, left_slots)
+                _update_range(right_i, right_dir, sym_dist, right_slots)
+
+                pair_idx += 2
+
+            # Handle odd leftover
+            if pair_idx < len(group):
+                i = group[pair_idx]
+                px, py = positions[i]
+                slot_count = 1 if i in single_indices else 3
+                preferred_dir = rng.choice(["left", "right"])
+                desired_dist = 150 + rng.randint(0, 100)
+                other_ranges_single = [r for r in placed_ranges if r[4] != i]
+
+                for try_dir in [preferred_dir, "left" if preferred_dir == "right" else "right"]:
+                    safe = _get_safe_backforth_distance(
+                        px, py, slot_count, max_rows, try_dir, other_ranges_single)
+                    capped = min(desired_dist, int(safe))
+                    if capped >= 50:
+                        bf_params[i] = (try_dir, capped, bf_speed)
+                        _update_range(i, try_dir, capped, slot_count)
+                        break
+
+    return bf_params
+
+
 # ── Container Positions ──────────────────────────────────────────────────────
 
-def get_static_positions(count, max_rows, y_offset=0):
-    """Grid positions for static containers. All within safe screen bounds.
-    Screen: 1080x1920, safe X: 200-880, safe Y: 250-1600."""
-    y_gap = {1: 250, 2: 300, 3: 350}.get(max_rows, 300)
+def get_y_gap(max_rows, n_containers=0, level=1):
+    """Dynamic vertical spacing between container rows.
+
+    Base gaps are tighter than the old fixed values. Reduces further at
+    higher levels and higher container counts to fit more on screen.
+    Minimum gap ensures containers never overlap.
+    """
+    base = {1: 220, 2: 260, 3: 300}.get(max_rows, 260)
+
+    # Tighter at higher levels
+    if level >= 40:
+        base = int(base * 0.85)
+
+    # Tighter with many containers
+    if n_containers >= 10:
+        base = int(base * 0.85)
+
+    # Minimum: visual height + gap
+    min_gap = int(SLOT_HEIGHT + ROW_DEPTH_OFFSET * max(0, max_rows - 1)) + MIN_CONTAINER_GAP
+    return max(min_gap, base)
+
+
+def get_static_positions(count, max_rows, y_offset=0, level=1):
+    """Grid positions for static containers. All within safe screen bounds."""
+    y_gap = get_y_gap(max_rows, count, level)
     cols_3 = [200, 540, 880]
     cols_2 = [370, 710]
 
     n_rows_needed = math.ceil(count / 3)
     total_height = (n_rows_needed - 1) * y_gap
-    y_min = 250 + y_offset
-    y_max = 1600
+    y_min = SCREEN_MIN_Y + y_offset
+    y_max = SCREEN_MAX_Y
     available = y_max - y_min
     if total_height > available and n_rows_needed > 1:
         y_gap = available // (n_rows_needed - 1)
@@ -159,7 +458,8 @@ def get_static_positions(count, max_rows, y_offset=0):
             remaining -= 1
         row += 1
 
-    return [(max(200, min(880, x)), max(250, min(1600, y))) for x, y in positions]
+    return [(max(SCREEN_MIN_X, min(SCREEN_MAX_X, x)),
+             max(SCREEN_MIN_Y, min(SCREEN_MAX_Y, y))) for x, y in positions]
 
 
 # ── Container Builder ────────────────────────────────────────────────────────
@@ -170,7 +470,11 @@ def make_container(cid, x, y, config, slot_count=3, max_rows=1, is_locked=False,
                    despawn=False, is_single_slot=False):
     """Create a container dict for level JSON."""
     cont_img = config.single_slot_image if is_single_slot else config.container_image
-    lock_img = config.lock_overlay_image if is_locked else ""
+    if is_locked:
+        lock_img = (config.single_slot_lock_overlay_image if is_single_slot
+                    else config.lock_overlay_image)
+    else:
+        lock_img = ""
     return {
         "id": cid,
         "position": {"x": float(x), "y": float(y)},
@@ -199,96 +503,134 @@ def make_container(cid, x, y, config, slot_count=3, max_rows=1, is_locked=False,
 # ── Level Spec ───────────────────────────────────────────────────────────────
 
 def get_level_spec(level):
-    """Determine level parameters based on level number."""
+    """Determine level parameters based on level number.
+
+    Uses a cumulative mechanic availability system: each mechanic has an
+    unlock level and persists thereafter (probability-based). A complexity
+    cap prevents overwhelming early levels.
+    """
     rng = random.Random(level * 42 + 7)
 
-    # Container count ramp
-    if level <= 3:
-        n_containers = level + 2                                  # 3, 4, 5
-    elif level <= 10:
-        n_containers = min(4 + (level - 1) // 2, 7)
-    elif level <= 20:
-        n_containers = min(5 + (level - 5) // 3, 8)
-    elif level <= 40:
-        n_containers = min(6 + (level - 10) // 5, 10)
-    elif level <= 70:
-        n_containers = min(8 + (level - 40) // 10, 11)
+    # ── Faster container count ramp ────────────────────────────────────
+    if level <= 1:
+        n_containers = 3
+    elif level <= 3:
+        n_containers = level + 2                          # 4, 5
+    elif level <= 7:
+        n_containers = min(5 + (level - 4) // 2, 7)      # 5-7
+    elif level <= 15:
+        n_containers = min(7 + (level - 8) // 4, 9)      # 7-9
+    elif level <= 30:
+        n_containers = min(8 + (level - 16) // 7, 10)    # 8-10
+    elif level <= 60:
+        n_containers = min(9 + (level - 31) // 15, 11)   # 9-11
     else:
-        n_containers = min(9 + (level - 60) // 15, 12)
+        n_containers = min(10 + (level - 61) // 20, 12)  # 10-12
 
     max_rows = get_max_rows(level)
 
-    # Mechanics configuration
-    use_locked = False; locked_count = 0; locked_matches = 0
-    use_singleslot = False; singleslot_count = 0
-    use_carousel = False; carousel_count = 0
-    use_backforth = False; backforth_count = 0
-    use_despawn = False; despawn_count = 0
+    # ── Mechanic unlock levels ─────────────────────────────────────────
+    UNLOCK_LOCKED    = 11
+    UNLOCK_SINGLE    = 16
+    UNLOCK_BACKFORTH = 26
+    UNLOCK_CAROUSEL  = 31
+    UNLOCK_DESPAWN   = 36
+    INTRO_RANGE      = 5  # levels after unlock where mechanic is guaranteed
 
-    if 11 <= level <= 15:
-        use_locked = True
-        locked_count = 1 + (level - 11) // 2
-        locked_matches = 1 + (level - 11) // 3
-    elif 16 <= level <= 20:
-        use_singleslot = True
-        singleslot_count = 1 + (level - 16) // 2
-        if level >= 18:
-            use_locked = True; locked_count = 1; locked_matches = 1
-    elif 21 <= level <= 25:
-        if level >= 23:
-            use_locked = True
-            locked_count = 1 + (level - 23)
-            locked_matches = 1
-    elif 26 <= level <= 30:
-        use_backforth = True
-        backforth_count = 1 + (level - 26) // 2
-        if level >= 28:
-            use_locked = True; locked_count = 1; locked_matches = 1 + (level - 28)
-    elif 31 <= level <= 35:
-        use_carousel = True
-        carousel_count = 3 + (level - 31) // 2
-        if level >= 33:
-            use_locked = True; locked_count = 1; locked_matches = 1
-    elif 36 <= level <= 40:
-        use_despawn = True
-        despawn_count = 2 + (level - 36) // 2
-        if level >= 38:
-            use_locked = True; locked_count = 1; locked_matches = 2
-    elif level >= 41:
-        combo = (level - 41) % 7
-        if combo in (0, 6):
-            use_locked = True
-            locked_count = 1 + level // 30
-            locked_matches = 1 + level // 40
-        if combo in (1, 5):
-            use_carousel = True
-            carousel_count = 3 + level // 30
-        if combo in (2, 4):
-            use_backforth = True
-            backforth_count = 1 + level // 30
-        if combo in (3, 6):
-            use_despawn = True
-            despawn_count = 2 + level // 30
-        if combo == 5 or level >= 70:
-            use_singleslot = True
-            singleslot_count = 1 + level // 50
-        if level >= 60:
-            use_locked = True
-            locked_count = max(locked_count, 1 + (level - 60) // 15)
-            locked_matches = max(locked_matches, 1 + (level - 60) // 20)
-        if level >= 80:
-            extra = rng.choice(["carousel", "backforth", "despawn"])
-            if extra == "carousel" and not use_carousel:
-                use_carousel = True; carousel_count = 3
-            elif extra == "backforth" and not use_backforth:
-                use_backforth = True; backforth_count = 2
-            elif extra == "despawn" and not use_despawn:
-                use_despawn = True; despawn_count = 2
+    # ── Cumulative mechanic availability ───────────────────────────────
+    # Each mechanic: (unlock_level, name)
+    mechanics_available = []
+    for unlock, name in [
+        (UNLOCK_LOCKED,    "locked"),
+        (UNLOCK_SINGLE,    "singleslot"),
+        (UNLOCK_BACKFORTH, "backforth"),
+        (UNLOCK_CAROUSEL,  "carousel"),
+        (UNLOCK_DESPAWN,   "despawn"),
+    ]:
+        if level >= unlock:
+            mechanics_available.append((unlock, name))
+
+    # Determine which mechanics are active this level
+    active_mechanics = set()
+    for unlock, name in mechanics_available:
+        levels_since = level - unlock
+        if levels_since < INTRO_RANGE:
+            # Introduction range: guaranteed
+            active_mechanics.add(name)
+        else:
+            # Post-introduction: probability scales 30% -> 70%
+            prob = min(0.70, 0.30 + (levels_since - INTRO_RANGE) * 0.005)
+            if rng.random() < prob:
+                active_mechanics.add(name)
+
+    # ── Complexity cap (early levels only) ─────────────────────────────
+    # max 1 mechanic at L11-15, max 2 at L16-25, max 3 at L26-40, no cap L41+
+    if level < 16:
+        max_mechanics = 1
+    elif level < 26:
+        max_mechanics = 2
+    elif level < 41:
+        max_mechanics = 3
+    else:
+        max_mechanics = 99
+
+    # If over cap, remove newest non-intro mechanics first
+    while len(active_mechanics) > max_mechanics:
+        # Find the mechanic with the highest unlock level that isn't in intro
+        removable = []
+        for unlock, name in reversed(mechanics_available):
+            if name in active_mechanics and (level - unlock) >= INTRO_RANGE:
+                removable.append(name)
+        if removable:
+            active_mechanics.discard(removable[0])
+        else:
+            break  # All remaining are in intro range, can't remove
+
+    # ── Configure each mechanic's parameters ───────────────────────────
+    use_locked = "locked" in active_mechanics
+    use_singleslot = "singleslot" in active_mechanics
+    use_backforth = "backforth" in active_mechanics
+    use_carousel = "carousel" in active_mechanics
+    use_despawn = "despawn" in active_mechanics
+
+    # Locked: count and matches scale with level
+    locked_count = 0
+    locked_matches_range = (0, 0)
+    if use_locked:
+        locked_count = 1 + (level - UNLOCK_LOCKED) // 15
+        locked_count = min(locked_count, max(1, n_containers // 4))
+        lo = min(3, 2 + (level - UNLOCK_LOCKED) // 15)
+        hi = min(3, lo + 1)
+        locked_matches_range = (lo, hi)
+
+    # Single-slot: count scales
+    singleslot_count = 0
+    if use_singleslot:
+        singleslot_count = 1 + (level - UNLOCK_SINGLE) // 25
+        singleslot_count = min(singleslot_count, max(1, n_containers // 3))
+
+    # Back-and-forth: count scales
+    backforth_count = 0
+    if use_backforth:
+        backforth_count = 1 + (level - UNLOCK_BACKFORTH) // 20
+        backforth_count = min(backforth_count, 3)
+
+    # Carousel: count scales
+    carousel_count = 0
+    if use_carousel:
+        carousel_count = 3 + (level - UNLOCK_CAROUSEL) // 20
+        carousel_count = min(carousel_count, 5)
+
+    # Despawn: count scales
+    despawn_count = 0
+    if use_despawn:
+        despawn_count = 2 + (level - UNLOCK_DESPAWN) // 15
+        despawn_count = min(despawn_count, 4)
 
     return {
         "level": level, "n_containers": n_containers, "max_rows": max_rows,
         "use_locked": use_locked, "locked_count": locked_count,
-        "locked_matches": locked_matches,
+        "locked_matches_range": locked_matches_range,
         "use_singleslot": use_singleslot, "singleslot_count": singleslot_count,
         "use_carousel": use_carousel, "carousel_count": carousel_count,
         "use_backforth": use_backforth, "backforth_count": backforth_count,
@@ -307,39 +649,114 @@ def build_containers(spec, config):
     idx = 1
     static_count = spec["n_containers"]
     y_offset = 0
+    center_col_occupied = False  # True when despawn or vertical carousel uses X=540
 
     # Carousel containers (allowed off-screen, they scroll in)
     if spec["use_carousel"]:
-        n_car = min(spec["carousel_count"], 5)
-        static_count -= n_car
-        spacing = 297
-        car_dir = rng.choice(["right", "left"])
         car_speed = 60 + level * 0.3
-        car_y = 200
-        for i in range(n_car):
-            cx = (-150 + i * spacing) if car_dir == "right" else (1230 - i * spacing)
-            c = make_container(
-                f"carousel_{idx}", cx, car_y, config,
-                slot_count=3, max_rows=min(spec["max_rows"], 2),
-                is_moving=True, move_type="carousel",
-                move_direction=car_dir, move_speed=car_speed,
-                move_distance=n_car * spacing
-            )
-            containers.append(c)
-            idx += 1
-        y_offset = 250 if spec["max_rows"] <= 2 else 300
+        car_mr = min(spec["max_rows"], 2)
+        hw = CONTAINER_WIDTH_3SLOT / 2  # ~170
 
-    # Despawn containers (stacked vertically, allowed off-screen)
+        # For levels 50+, randomly choose vertical or horizontal carousel
+        use_vertical_carousel = level >= 50 and rng.random() < 0.4
+
+        if use_vertical_carousel:
+            # Vertical carousel at X=540: disable despawn (shares center column)
+            spec["use_despawn"] = False
+            center_col_occupied = True
+
+            # Subtract only the budgeted carousel_count from statics (rest are free)
+            carousel_subtract = min(spec["carousel_count"], 3)
+            static_count -= carousel_subtract
+
+            n_car = 10  # Fixed count for seamless vertical wrapping
+            car_dir = rng.choice(["up", "down"])
+            spacing = CAROUSEL_V_SPACING
+            car_x = 540
+            hh = _container_half_height(car_mr)
+
+            # Start positions fully off-screen
+            if car_dir == "down":
+                start_y = -(hh + 30)
+            else:
+                start_y = 1920 + hh + 30
+
+            for i in range(n_car):
+                if car_dir == "down":
+                    cy = start_y + i * spacing
+                else:
+                    cy = start_y - i * spacing
+                c = make_container(
+                    f"carousel_{idx}", car_x, cy, config,
+                    slot_count=3, max_rows=car_mr,
+                    is_moving=True, move_type="carousel",
+                    move_direction=car_dir, move_speed=car_speed,
+                    move_distance=n_car * spacing
+                )
+                containers.append(c)
+                idx += 1
+            y_offset = 0  # vertical carousel doesn't push static layout down
+        else:
+            # Horizontal carousel: enforce minimum 5 for seamless wrapping
+            n_car = max(5, min(spec["carousel_count"], 5))
+            static_count -= n_car
+
+            car_dir = rng.choice(["right", "left"])
+            spacing = CAROUSEL_H_SPACING
+            car_y = 200
+
+            # Start positions: first container fully off-screen
+            if car_dir == "right":
+                start_x = -(hw + 30)
+            else:
+                start_x = 1080 + hw + 30
+
+            for i in range(n_car):
+                if car_dir == "right":
+                    cx = start_x + i * spacing
+                else:
+                    cx = start_x - i * spacing
+                c = make_container(
+                    f"carousel_{idx}", cx, car_y, config,
+                    slot_count=3, max_rows=car_mr,
+                    is_moving=True, move_type="carousel",
+                    move_direction=car_dir, move_speed=car_speed,
+                    move_distance=n_car * spacing
+                )
+                containers.append(c)
+                idx += 1
+
+            # Push statics below carousel with proper dynamic gap
+            y_offset = get_y_gap(spec["max_rows"], static_count, level)
+
+    # Despawn containers (single-column vertical stack at center X=540)
+    # Bottom container visible, upper containers stacked above (some off-screen).
+    # When bottom is cleared, containers above fall down into view.
     if spec["use_despawn"]:
         n_desp = min(spec["despawn_count"], 4)
         static_count -= n_desp
+        desp_mr = min(spec["max_rows"], 2)
+        vis_h = int(SLOT_HEIGHT + ROW_DEPTH_OFFSET * max(0, desp_mr - 1))
+        v_spacing = vis_h + 5   # edge-to-edge with minimal gap
+
+        center_col_occupied = True
+
+        # Single-slot despawn for levels 50+ (30% chance for last container)
+        desp_single_last = level >= 50 and rng.random() < 0.30
+
+        # Single-column stack at X=540, bottom container at play area top
         desp_x = 540
-        desp_y_base = 500 + y_offset
+        desp_y_bottom = SCREEN_MIN_Y + y_offset  # bottom of stack (visible)
+
         for i in range(n_desp):
+            desp_y = desp_y_bottom - i * v_spacing  # stack upward
+
+            is_last = (i == n_desp - 1)
+            slot_count = 1 if (desp_single_last and is_last) else 3
             c = make_container(
-                f"despawn_{idx}", desp_x, desp_y_base + i * 198, config,
-                slot_count=3, max_rows=min(spec["max_rows"], 2),
-                despawn=True
+                f"despawn_{idx}", desp_x, desp_y, config,
+                slot_count=slot_count, max_rows=desp_mr,
+                despawn=True, is_single_slot=(slot_count == 1)
             )
             containers.append(c)
             idx += 1
@@ -347,57 +764,158 @@ def build_containers(spec, config):
     # Static containers (must be fully on-screen)
     static_count = max(2, static_count)
 
-    if spec["use_despawn"]:
-        # Despawn uses center column, so static uses 2-column layout
-        positions = []
-        cols = [200, 880]
-        y_gap = {1: 250, 2: 300, 3: 350}.get(spec["max_rows"], 300)
-        y0 = 300 + y_offset
-        remaining = static_count
-        row = 0
-        while remaining > 0:
-            y = y0 + row * y_gap
-            if remaining >= 2:
-                positions.extend([(x, min(1600, y)) for x in cols])
-                remaining -= 2
-            else:
-                positions.append((200, min(1600, y)))
-                remaining -= 1
-            row += 1
-    else:
-        positions = get_static_positions(static_count, spec["max_rows"], y_offset)
-
     # Determine which static indices are locked or single-slot
+    # (must be computed before position generation to inform b&f layout)
     locked_indices = set()
     single_indices = set()
 
     if spec["use_locked"]:
         lc = min(spec["locked_count"], static_count)
-        for i in range(max(0, static_count - lc), static_count):
+        # Randomize locked indices from positions 1+ (never lock position 0)
+        lock_candidates = list(range(1, static_count))
+        rng.shuffle(lock_candidates)
+        for i in lock_candidates[:lc]:
             locked_indices.add(i)
 
     if spec["use_singleslot"]:
-        candidates = [i for i in range(static_count) if i not in locked_indices]
+        # Allow locked single-slots (remove the locked exclusion filter)
+        candidates = list(range(static_count))
+        rng.shuffle(candidates)
         n_single = min(spec["singleslot_count"], len(candidates))
-        for i in candidates[-n_single:]:
+        for i in candidates[:n_single]:
             single_indices.add(i)
+
+    # Count back-and-forth containers (first N non-locked positions)
+    n_bf = 0
+    if spec["use_backforth"]:
+        for i in range(min(spec["backforth_count"], static_count)):
+            if i not in locked_indices:
+                n_bf += 1
+
+    y_gap = get_y_gap(spec["max_rows"], static_count, level)
+
+    if n_bf > 0:
+        # Back-and-forth containers need dedicated wide-spacing rows
+        # (max 2 per row at screen edges, or 1 centered) so they have
+        # room to move without overlapping neighbors.
+        bf_positions = []
+        bf_y = SCREEN_MIN_Y + y_offset
+        bf_remaining = n_bf
+        while bf_remaining > 0:
+            if bf_remaining >= 2:
+                bf_positions.extend([(200, min(SCREEN_MAX_Y, bf_y)),
+                                     (880, min(SCREEN_MAX_Y, bf_y))])
+                bf_remaining -= 2
+            else:
+                # Odd b&f: use left column if center is occupied
+                odd_x = 200 if center_col_occupied else 540
+                bf_positions.append((odd_x, min(SCREEN_MAX_Y, bf_y)))
+                bf_remaining -= 1
+            bf_y += y_gap
+
+        bf_rows_used = math.ceil(n_bf / 2)
+        n_static_only = static_count - n_bf
+
+        if center_col_occupied:
+            # Remaining static in 2-column layout (center occupied by despawn/carousel)
+            cols = [200, 880]
+            y0 = SCREEN_MIN_Y + y_offset + bf_rows_used * y_gap
+            static_positions = []
+            remaining = n_static_only
+            row = 0
+            while remaining > 0:
+                y = y0 + row * y_gap
+                if remaining >= 2:
+                    static_positions.extend([(x, min(SCREEN_MAX_Y, y)) for x in cols])
+                    remaining -= 2
+                else:
+                    static_positions.append((200, min(SCREEN_MAX_Y, y)))
+                    remaining -= 1
+                row += 1
+        else:
+            # Remaining static in standard 3-column layout
+            if n_static_only > 0:
+                static_y_offset = y_offset + bf_rows_used * y_gap
+                static_positions = get_static_positions(
+                    n_static_only, spec["max_rows"], static_y_offset, level)
+            else:
+                static_positions = []
+
+        positions = bf_positions + static_positions
+
+    elif center_col_occupied:
+        # 2-column layout (center occupied by despawn or vertical carousel)
+        positions = []
+        cols = [200, 880]
+        y0 = SCREEN_MIN_Y + y_offset
+        remaining = static_count
+        row = 0
+        while remaining > 0:
+            y = y0 + row * y_gap
+            if remaining >= 2:
+                positions.extend([(x, min(SCREEN_MAX_Y, y)) for x in cols])
+                remaining -= 2
+            else:
+                positions.append((200, min(SCREEN_MAX_Y, y)))
+                remaining -= 1
+            row += 1
+    else:
+        # Standard 3-column layout
+        positions = get_static_positions(static_count, spec["max_rows"], y_offset, level)
+
+    # ── Bounds validation: clamp container centers to safe screen area ──
+    # Centers stay within SCREEN_MIN/MAX bounds; edges naturally extend beyond
+    clamped = []
+    for i, (px, py) in enumerate(positions):
+        cx = max(SCREEN_MIN_X, min(SCREEN_MAX_X, px))
+        cy = max(SCREEN_MIN_Y, min(SCREEN_MAX_Y, py))
+        clamped.append((cx, cy))
+    positions = clamped
+
+    # Track bounding ranges of all containers for overlap prevention.
+    # Each entry: (x_min, x_max, y_min, y_max, idx) where idx is the
+    # position index (or -1 for carousel/despawn).
+    placed_ranges = []
+
+    # Pre-populate with carousel/despawn containers already placed
+    for c in containers:
+        cx = c["position"]["x"]
+        cy = c["position"]["y"]
+        mr = c.get("max_rows_per_slot", spec["max_rows"])
+        if c["is_moving"] and c["move_type"] == "carousel":
+            # Carousel containers sweep the full screen; skip overlap checks
+            pass
+        else:
+            box = _get_bounding_box(cx, cy, c["slot_count"], mr)
+            placed_ranges.append((*box, -1))
+
+    # Pre-populate with ALL static positions (as static bounding boxes)
+    for i, (px, py) in enumerate(positions):
+        slot_count = 1 if i in single_indices else 3
+        box = _get_bounding_box(px, py, slot_count, spec["max_rows"])
+        placed_ranges.append((*box, i))
+
+    # Pre-compute symmetric back-and-forth parameters per row group
+    bf_params = _compute_bf_params(
+        positions, single_indices, locked_indices, spec, placed_ranges, rng)
 
     for i, (px, py) in enumerate(positions):
         slot_count = 1 if i in single_indices else 3
         is_locked = i in locked_indices
-        unlock_matches = spec["locked_matches"] if is_locked else 0
+        if is_locked:
+            lo, hi = spec["locked_matches_range"]
+            unlock_matches = rng.randint(lo, hi) if lo <= hi else lo
+        else:
+            unlock_matches = 0
 
-        # Back-and-forth movement
+        # Back-and-forth movement (pre-computed symmetrically)
         is_moving = False; move_type = ""; move_dir = ""
         move_speed = 50.0; move_dist = 200.0
 
-        if spec["use_backforth"] and i < spec["backforth_count"] and not is_locked:
+        if i in bf_params:
             is_moving = True
             move_type = "back_and_forth"
-            move_dir = rng.choice(["left", "right"])
-            move_speed = 40 + level * 0.4
-            max_d = (880 - px) if move_dir == "right" else (px - 200)
-            move_dist = min(150 + rng.randint(0, 100), max(50, int(max_d)))
+            move_dir, move_dist, move_speed = bf_params[i]
 
         c = make_container(
             f"container_{idx}", px, py, config,

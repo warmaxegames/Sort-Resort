@@ -51,12 +51,12 @@
                     "slot": 1
                 },
                 {
-                    "id": "sandpale_blue",
+                    "id": "beachball_yellowblue",
                     "row": 1,
                     "slot": 1
                 },
                 {
-                    "id": "sandpale_green",
+                    "id": "beachball_mixed",
                     "row": 1,
                     "slot": 2
                 }
@@ -98,7 +98,7 @@
                     "slot": 2
                 },
                 {
-                    "id": "beachball_mixed",
+                    "id": "sandpale_green",
                     "row": 1,
                     "slot": 2
                 }
@@ -130,7 +130,7 @@
             "despawn_on_match": false,
             "initial_items": [
                 {
-                    "id": "beachball_mixed",
+                    "id": "sandpale_green",
                     "row": 0,
                     "slot": 0
                 },
@@ -155,7 +155,7 @@
             "id": "container_4",
             "position": {
                 "x": 200.0,
-                "y": 550.0
+                "y": 510.0
             },
             "container_type": "standard",
             "container_image": "island_container",
@@ -197,7 +197,7 @@
                     "slot": 2
                 },
                 {
-                    "id": "beachball_mixed",
+                    "id": "sandpale_green",
                     "row": 1,
                     "slot": 2
                 }
@@ -207,7 +207,7 @@
             "id": "container_5",
             "position": {
                 "x": 540.0,
-                "y": 550.0
+                "y": 510.0
             },
             "container_type": "standard",
             "container_image": "island_container",
@@ -229,7 +229,7 @@
             "despawn_on_match": false,
             "initial_items": [
                 {
-                    "id": "sandpale_blue",
+                    "id": "beachball_yellowblue",
                     "row": 0,
                     "slot": 0
                 },
@@ -244,7 +244,7 @@
                     "slot": 1
                 },
                 {
-                    "id": "sandpale_green",
+                    "id": "beachball_mixed",
                     "row": 0,
                     "slot": 2
                 }
@@ -254,7 +254,7 @@
             "id": "container_6",
             "position": {
                 "x": 880.0,
-                "y": 550.0
+                "y": 510.0
             },
             "container_type": "standard",
             "container_image": "island_container",
@@ -306,7 +306,7 @@
             "id": "container_7",
             "position": {
                 "x": 540.0,
-                "y": 850.0
+                "y": 770.0
             },
             "container_type": "standard",
             "container_image": "island_container",
@@ -328,12 +328,12 @@
             "despawn_on_match": false,
             "initial_items": [
                 {
-                    "id": "sandpale_green",
+                    "id": "beachball_mixed",
                     "row": 0,
                     "slot": 0
                 },
                 {
-                    "id": "sandpale_blue",
+                    "id": "beachball_yellowblue",
                     "row": 1,
                     "slot": 0
                 },
