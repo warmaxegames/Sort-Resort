@@ -95,7 +95,7 @@ namespace SortResort
         private void BuildAvailableTabs()
         {
             availableTabs.Clear();
-            availableTabs.Add(Achievement.TAB_ALL);
+            availableTabs.Add(Achievement.TAB_RECENT);
             availableTabs.Add(Achievement.TAB_GENERAL);
             foreach (var world in RegisteredWorlds)
             {
@@ -109,6 +109,11 @@ namespace SortResort
 
         private void InitializeAchievements()
         {
+            // ==========================================
+            // GENERAL - 3-Star Levels (NEW)
+            // ==========================================
+            CreateThreeStarLevelAchievements();
+
             // ==========================================
             // GENERAL - Global Level Completion
             // ==========================================
@@ -141,21 +146,39 @@ namespace SortResort
         }
 
         /// <summary>
-        /// Global level completion achievements (count across all worlds)
+        /// 3-Star level achievements (unique levels where player earned 3 stars)
         /// </summary>
-        private void CreateLevelCompletionAchievements()
+        private void CreateThreeStarLevelAchievements()
         {
-            var milestones = new[] { 1, 5, 10, 25, 50, 100, 250, 500 };
-            var names = new[] { "First Steps", "Getting Started", "On Your Way", "Dedicated Player",
-                               "Halfway Hero", "Century Club", "Sorting Expert", "Sorting Master" };
-            var tiers = new[] { AchievementTier.Bronze, AchievementTier.Bronze, AchievementTier.Silver,
-                               AchievementTier.Silver, AchievementTier.Gold, AchievementTier.Gold,
-                               AchievementTier.Platinum, AchievementTier.Platinum };
+            var milestones = new[] { 100, 250, 500 };
+            var names = new[] { "Star Student", "Star Scholar", "Star Savant" };
+            var tiers = new[] { AchievementTier.Bronze, AchievementTier.Silver, AchievementTier.Gold };
 
             for (int i = 0; i < milestones.Length; i++)
             {
                 AddAchievement(new Achievement(
-                    $"levels_total_{milestones[i]}", names[i], $"Complete {milestones[i]} level{(milestones[i] > 1 ? "s" : "")}",
+                    $"3star_levels_total_{milestones[i]}", names[i], $"3 Star {milestones[i]} Levels",
+                    AchievementCategory.Mastery, tiers[i], milestones[i],
+                    new[] { new AchievementReward(RewardType.Coins, milestones[i] * 2) },
+                    AchievementTrackingType.Unique,
+                    groupId: "3star_levels_total", groupOrder: i + 1, tab: Achievement.TAB_GENERAL
+                ));
+            }
+        }
+
+        /// <summary>
+        /// Global level completion achievements (count across all worlds)
+        /// </summary>
+        private void CreateLevelCompletionAchievements()
+        {
+            var milestones = new[] { 10, 100, 500 };
+            var names = new[] { "Getting Started", "Century Club", "Sorting Master" };
+            var tiers = new[] { AchievementTier.Bronze, AchievementTier.Silver, AchievementTier.Gold };
+
+            for (int i = 0; i < milestones.Length; i++)
+            {
+                AddAchievement(new Achievement(
+                    $"levels_total_{milestones[i]}", names[i], $"Complete {milestones[i]} Levels",
                     AchievementCategory.Progression, tiers[i], milestones[i],
                     new[] { new AchievementReward(RewardType.Coins, milestones[i] * 5) },
                     AchievementTrackingType.Unique,
@@ -169,16 +192,14 @@ namespace SortResort
         /// </summary>
         private void CreateMatchMilestoneAchievements()
         {
-            var milestones = new[] { 10, 50, 100, 500, 1000, 5000 };
-            var names = new[] { "First Matches", "Match Maker", "Sorting Spree",
-                               "Match Maniac", "Thousand Sorts", "Sorting Legend" };
-            var tiers = new[] { AchievementTier.Bronze, AchievementTier.Bronze, AchievementTier.Silver,
-                               AchievementTier.Gold, AchievementTier.Gold, AchievementTier.Platinum };
+            var milestones = new[] { 100, 1000, 5000 };
+            var names = new[] { "Match Maker", "Thousand Sorts", "Sorting Legend" };
+            var tiers = new[] { AchievementTier.Bronze, AchievementTier.Silver, AchievementTier.Gold };
 
             for (int i = 0; i < milestones.Length; i++)
             {
                 AddAchievement(new Achievement(
-                    $"matches_total_{milestones[i]}", names[i], $"Make {milestones[i]} matches",
+                    $"matches_total_{milestones[i]}", names[i], $"Make {milestones[i]} Matches",
                     AchievementCategory.Milestone, tiers[i], milestones[i],
                     new[] { new AchievementReward(RewardType.Coins, milestones[i] / 2) },
                     AchievementTrackingType.Total,
@@ -192,16 +213,14 @@ namespace SortResort
         /// </summary>
         private void CreateStarCollectionAchievements()
         {
-            var milestones = new[] { 10, 50, 100, 250, 500, 1000 };
-            var names = new[] { "Stargazer", "Rising Star", "Star Collector",
-                               "Stellar Performance", "Galaxy of Stars", "Supernova" };
-            var tiers = new[] { AchievementTier.Bronze, AchievementTier.Silver, AchievementTier.Silver,
-                               AchievementTier.Gold, AchievementTier.Gold, AchievementTier.Platinum };
+            var milestones = new[] { 50, 500, 1000 };
+            var names = new[] { "Rising Star", "Galaxy of Stars", "Supernova" };
+            var tiers = new[] { AchievementTier.Bronze, AchievementTier.Silver, AchievementTier.Gold };
 
             for (int i = 0; i < milestones.Length; i++)
             {
                 AddAchievement(new Achievement(
-                    $"stars_total_{milestones[i]}", names[i], $"Earn {milestones[i]} stars",
+                    $"stars_total_{milestones[i]}", names[i], $"Earn {milestones[i]} Stars",
                     AchievementCategory.Mastery, tiers[i], milestones[i],
                     new[] { new AchievementReward(RewardType.Coins, milestones[i]) },
                     AchievementTrackingType.Total,
@@ -217,15 +236,15 @@ namespace SortResort
         {
             // Visit X different worlds
             AddAchievement(new Achievement(
-                "worlds_visited_2", "World Traveler", "Visit 2 different worlds",
-                AchievementCategory.Exploration, AchievementTier.Bronze, 2,
-                new[] { new AchievementReward(RewardType.Coins, 25) },
+                "worlds_visited_1", "First Explorer", "Visit 1 World",
+                AchievementCategory.Exploration, AchievementTier.Bronze, 1,
+                new[] { new AchievementReward(RewardType.Coins, 10) },
                 AchievementTrackingType.Unique,
                 groupId: "world_explorer", groupOrder: 1, tab: Achievement.TAB_GENERAL
             ));
 
             AddAchievement(new Achievement(
-                "worlds_visited_3", "Globe Trotter", "Visit 3 different worlds",
+                "worlds_visited_3", "Globe Trotter", "Visit 3 Worlds",
                 AchievementCategory.Exploration, AchievementTier.Silver, 3,
                 new[] { new AchievementReward(RewardType.Coins, 50) },
                 AchievementTrackingType.Unique,
@@ -233,7 +252,7 @@ namespace SortResort
             ));
 
             AddAchievement(new Achievement(
-                "worlds_visited_all", "World Champion", $"Visit all {RegisteredWorlds.Length} worlds",
+                "worlds_visited_all", "World Champion", $"Visit All {RegisteredWorlds.Length} Worlds",
                 AchievementCategory.Exploration, AchievementTier.Gold, RegisteredWorlds.Length,
                 new[] { new AchievementReward(RewardType.Coins, 100) },
                 AchievementTrackingType.Unique,
@@ -248,24 +267,18 @@ namespace SortResort
         {
             string worldName = Achievement.GetTabDisplayName(worldId);
 
-            // Level completion in this world
-            var levelMilestones = new[] { 1, 5, 10, 25, 50, 100 };
-            var levelNames = new[] { "First Visit", "Getting Comfortable", "Making Progress",
-                                     "Dedicated Explorer", "Halfway There", "World Complete" };
-            var levelTiers = new[] { AchievementTier.Bronze, AchievementTier.Bronze, AchievementTier.Silver,
-                                     AchievementTier.Silver, AchievementTier.Gold, AchievementTier.Platinum };
+            // Level completion in this world (3 milestones)
+            var levelMilestones = new[] { 25, 50, 100 };
+            var levelNames = new[] { "Making Progress", "Halfway There", "World Complete" };
+            var levelTiers = new[] { AchievementTier.Bronze, AchievementTier.Silver, AchievementTier.Gold };
 
             for (int i = 0; i < levelMilestones.Length; i++)
             {
-                // Skip 100-level achievement if LEVELS_PER_WORLD is less
                 if (levelMilestones[i] > LEVELS_PER_WORLD) continue;
 
-                string desc = levelMilestones[i] == 1
-                    ? $"Complete your first level in {worldName}"
-                    : $"Complete {levelMilestones[i]} levels in {worldName}";
-
                 AddAchievement(new Achievement(
-                    $"{worldId}_levels_{levelMilestones[i]}", $"{worldName}: {levelNames[i]}", desc,
+                    $"{worldId}_levels_{levelMilestones[i]}", $"{worldName}: {levelNames[i]}",
+                    $"Complete {levelMilestones[i]} Levels in {worldName}",
                     AchievementCategory.Progression, levelTiers[i], levelMilestones[i],
                     new[] { new AchievementReward(RewardType.Coins, levelMilestones[i] * 3) },
                     AchievementTrackingType.Unique,
@@ -274,21 +287,18 @@ namespace SortResort
                 ));
             }
 
-            // Stars in this world
-            var starMilestones = new[] { 10, 25, 50, 100, 150, 300 };
-            var starNames = new[] { "Shining Start", "Star Seeker", "Star Gatherer",
-                                    "Star Hoarder", "Star Master", "Perfect World" };
-            var starTiers = new[] { AchievementTier.Bronze, AchievementTier.Silver, AchievementTier.Silver,
-                                    AchievementTier.Gold, AchievementTier.Gold, AchievementTier.Platinum };
+            // Stars in this world (3 milestones)
+            var starMilestones = new[] { 100, 200, 300 };
+            var starNames = new[] { "Star Hoarder", "Star Master", "Perfect World" };
+            var starTiers = new[] { AchievementTier.Bronze, AchievementTier.Silver, AchievementTier.Gold };
 
             for (int i = 0; i < starMilestones.Length; i++)
             {
-                // Skip if milestone exceeds max possible stars (3 per level)
                 if (starMilestones[i] > LEVELS_PER_WORLD * 3) continue;
 
                 AddAchievement(new Achievement(
                     $"{worldId}_stars_{starMilestones[i]}", $"{worldName}: {starNames[i]}",
-                    $"Earn {starMilestones[i]} stars in {worldName}",
+                    $"Earn {starMilestones[i]} Stars in {worldName}",
                     AchievementCategory.Mastery, starTiers[i], starMilestones[i],
                     new[] { new AchievementReward(RewardType.Coins, starMilestones[i]) },
                     AchievementTrackingType.Total,
@@ -296,16 +306,6 @@ namespace SortResort
                     groupId: $"{worldId}_stars", groupOrder: i + 1, tab: worldId
                 ));
             }
-
-            // First 3-star in this world
-            AddAchievement(new Achievement(
-                $"{worldId}_first_3star", $"{worldName}: Perfect Start",
-                $"Earn 3 stars on any level in {worldName}",
-                AchievementCategory.Mastery, AchievementTier.Bronze, 1,
-                new[] { new AchievementReward(RewardType.Coins, 15) },
-                AchievementTrackingType.OneTime,
-                targetWorldId: worldId, tab: worldId
-            ));
         }
 
         private void AddAchievement(Achievement achievement)
@@ -347,7 +347,7 @@ namespace SortResort
                 SaveProgress();
 
                 // Update world exploration achievements
-                IncrementProgressUnique("worlds_visited_2", worldId);
+                IncrementProgressUnique("worlds_visited_1", worldId);
                 IncrementProgressUnique("worlds_visited_3", worldId);
                 IncrementProgressUnique("worlds_visited_all", worldId);
 
@@ -405,10 +405,14 @@ namespace SortResort
                     }
                 }
 
-                // First 3-star in world
+                // Track 3-star level completions
                 if (stars == 3)
                 {
-                    TriggerOneTime($"{worldId}_first_3star");
+                    foreach (var a in achievements.Values)
+                    {
+                        if (a.groupId == "3star_levels_total")
+                            IncrementProgressUnique(a.id, levelIdentifier);
+                    }
                 }
 
                 totalStarsEarned += stars;
@@ -730,7 +734,7 @@ namespace SortResort
             var result = new List<Achievement>();
             foreach (var a in achievements.Values)
             {
-                if (tab == Achievement.TAB_ALL || a.tab == tab)
+                if (tab == Achievement.TAB_ALL || tab == Achievement.TAB_RECENT || a.tab == tab)
                     result.Add(a);
             }
             return result;
@@ -782,6 +786,143 @@ namespace SortResort
         public bool IsUnlocked(string achievementId)
         {
             return progress.TryGetValue(achievementId, out var p) && p.isUnlocked;
+        }
+
+        // Map from groupId to the art resource key used for sprite loading
+        private static readonly Dictionary<string, string> groupArtKeys = new Dictionary<string, string>
+        {
+            { "3star_levels_total", "3star_levels" },
+            { "levels_total", "levels" },
+            { "matches_total", "matches" },
+            { "stars_total", "stars" },
+            { "world_explorer", "visit_worlds" },
+        };
+
+        /// <summary>
+        /// Get the art resource key for a group (e.g., "levels", "matches", "world_levels")
+        /// </summary>
+        public string GetGroupArtKey(string groupId)
+        {
+            if (groupArtKeys.TryGetValue(groupId, out var key))
+                return key;
+
+            // Per-world groups: "{worldId}_levels" -> "world_levels", "{worldId}_stars" -> "world_stars"
+            foreach (var worldId in RegisteredWorlds)
+            {
+                if (groupId == $"{worldId}_levels") return "world_levels";
+                if (groupId == $"{worldId}_stars") return "world_stars";
+            }
+
+            return groupId;
+        }
+
+        /// <summary>
+        /// Get current tier for a group based on unlocked milestones (null if none unlocked = grey)
+        /// </summary>
+        public AchievementTier? GetGroupCurrentTier(string groupId)
+        {
+            var group = GetAchievementsByGroup(groupId);
+            AchievementTier? highestTier = null;
+
+            // Walk in order; the last unlocked milestone determines the tier
+            for (int i = group.Count - 1; i >= 0; i--)
+            {
+                var prog = GetProgress(group[i].id);
+                if (prog != null && prog.isUnlocked)
+                {
+                    highestTier = group[i].tier;
+                    break;
+                }
+            }
+
+            return highestTier;
+        }
+
+        /// <summary>
+        /// Get next uncompleted milestone in a group (or null if all complete)
+        /// </summary>
+        public Achievement GetNextMilestone(string groupId)
+        {
+            var group = GetAchievementsByGroup(groupId);
+            foreach (var a in group)
+            {
+                var prog = GetProgress(a.id);
+                if (prog == null || !prog.isUnlocked)
+                    return a;
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// Get the current progress value for the group (shared across milestones in group)
+        /// </summary>
+        public int GetGroupProgress(string groupId)
+        {
+            var group = GetAchievementsByGroup(groupId);
+            int maxProgress = 0;
+            foreach (var a in group)
+            {
+                var prog = GetProgress(a.id);
+                if (prog != null && prog.currentValue > maxProgress)
+                    maxProgress = prog.currentValue;
+            }
+            return maxProgress;
+        }
+
+        /// <summary>
+        /// Get date of most recently unlocked milestone in group
+        /// </summary>
+        public DateTime? GetGroupLastUnlockDate(string groupId)
+        {
+            var group = GetAchievementsByGroup(groupId);
+            DateTime? latest = null;
+            foreach (var a in group)
+            {
+                var prog = GetProgress(a.id);
+                if (prog != null && prog.isUnlocked)
+                {
+                    if (latest == null || prog.unlockedAt > latest.Value)
+                        latest = prog.unlockedAt;
+                }
+            }
+            return latest;
+        }
+
+        /// <summary>
+        /// Get all recently unlocked achievements sorted by date descending
+        /// </summary>
+        public List<(Achievement achievement, AchievementProgress progress)> GetRecentlyUnlocked(int maxCount = 50)
+        {
+            var result = new List<(Achievement, AchievementProgress)>();
+            foreach (var a in achievements.Values)
+            {
+                var prog = GetProgress(a.id);
+                if (prog != null && prog.isUnlocked)
+                {
+                    result.Add((a, prog));
+                }
+            }
+            result.Sort((a, b) => b.Item2.unlockedAt.CompareTo(a.Item2.unlockedAt));
+            if (result.Count > maxCount)
+                result.RemoveRange(maxCount, result.Count - maxCount);
+            return result;
+        }
+
+        /// <summary>
+        /// Get all unique group IDs for a specific tab
+        /// </summary>
+        public List<string> GetGroupIdsForTab(string tab)
+        {
+            var groups = new List<string>();
+            var seen = new HashSet<string>();
+            foreach (var a in achievements.Values)
+            {
+                if (!string.IsNullOrEmpty(a.groupId) && a.tab == tab && seen.Add(a.groupId))
+                {
+                    groups.Add(a.groupId);
+                }
+            }
+            return groups;
         }
 
         // Resource usage

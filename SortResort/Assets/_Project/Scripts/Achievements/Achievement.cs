@@ -92,6 +92,7 @@ namespace SortResort
     {
         // Reserved tab names
         public const string TAB_ALL = "all";
+        public const string TAB_RECENT = "recent";
         public const string TAB_GENERAL = "general";
 
         public string id;
@@ -187,6 +188,7 @@ namespace SortResort
         {
             if (string.IsNullOrEmpty(tab)) return "General";
             if (tab == TAB_ALL) return "All";
+            if (tab == TAB_RECENT) return "Recent";
             if (tab == TAB_GENERAL) return "General";
             // Capitalize first letter for world names
             return char.ToUpper(tab[0]) + tab.Substring(1).ToLower();

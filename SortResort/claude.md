@@ -34,7 +34,7 @@
 - World-specific backgrounds, music, and ambient audio
 - Save/load progress (PlayerPrefs), undo system, timer format M:SS.CC
 - **4 Game Modes** - Free Play (green, no limits), Star Mode (pink, move-based stars), Timer Mode (blue, beat the clock), Hard Mode (gold, stars + timer). Separate progress per mode, mode selector tabs on level select, mode-specific portal tinting, mode-specific vortex animations (green/pink/blue/gold per mode), mode-specific level complete animations (stopwatch count-up for timer, "New Record!" pulse), mode-specific HUD visibility, Hard Mode locked per-world until Star+Timer 100% complete, debug unlock/lock button on level select
-- Achievement system (88 achievements with UI, notifications with achievement sound, rewards)
+- Achievement system (45 achievements across 7 categories with card-based UI, tier art rectangles, notifications with achievement sound, rewards)
 - Level solver tool (Editor window + in-game auto-solve button)
 - **Dialogue system** - Typewriter text with Animal Crossing-style voices, mascot portraits, voice toggle in settings, timer pauses during dialogue. Full story content: 5 worlds × 11 checkpoints (welcome + every 10 levels), 4 mode tutorial dialogues, 5 hard mode unlock dialogues. Story is mode-agnostic (fires in any mode, plays once). Dr. Miller overarching mystery across all worlds.
 - **Level complete screen** - Mode-specific animations: Star Mode has rays, curtains, star ribbon, grey/gold star animations, dancing stars (3-star); Timer Mode has stopwatch count-up animation with "New Record!" bounce; Free Play skips stars; Hard Mode combines stars + timer. All modes: mascot thumbsup (Island), bottom board animation, sprite-based buttons
@@ -48,7 +48,7 @@
 - **Sprite-based mode tabs** - Level select mode tabs use custom sprite images (`free_tab`, `stars_tab`, `timer_tab`, `hard_tab`) with baked-in text. Selected=white tint, unselected=60% grey, locked=30% grey.
 - **Sprite-based pause menu** - Fullscreen 1080x1920 overlay sprites for board background and 4 buttons (Resume, Restart, Settings, Quit) with pressed states. `LoadFullRectSprite()` bypasses Unity's alpha-trimming import. EventTrigger-based press feedback swaps normal/pressed sprites. Invisible hit areas positioned at exact pixel coordinates via anchor-based sizing.
 - **Achievement sound** - Dedicated `achievement_sound.mp3` plays at 1.3x volume when achievement notification slides in. Plays per-notification so multiple queued achievements each get the sound.
-- **World-specific dialogue boxes** - Island, Tavern, Space worlds have custom dialogue box sprites (`dialoguebox_{worldId}`). Auto-loaded by `DialogueUI.LoadDialogueBoxForWorld()`.
+- **World-specific dialogue boxes** - Island, Tavern, Space, Farm worlds have custom dialogue box sprites (`dialoguebox_{worldId}`). Auto-loaded by `DialogueUI.LoadDialogueBoxForWorld()`.
 
 ---
 
@@ -65,7 +65,6 @@
    - Supermarket
    - Space
 4. **World-Specific Dialogue Boxes** - Need custom designs for:
-   - Farm
    - Supermarket
 5. **Generate Levels for Remaining Worlds** - Create world config files like `generate_island_levels.py`:
    - Farm
@@ -243,11 +242,54 @@ Container border scale: 1.2 (17% border around slots)
 - Fonts: `Resources/Fonts/` (Benzin-Bold/SemiBold/Medium/ExtraBold SDF assets), source TTFs in `_Project/Fonts/`
 - Pause Menu: `Resources/Sprites/UI/PauseMenu/` (`pause_board`, `pause_resume`, `pause_resume_pressed`, `pause_restart`, `pause_restart_pressed`, `pause_settings`, `pause_settings_pressed`, `pause_quit`, `pause_quit_pressed`)
 - Portal Overlays: `Resources/Sprites/UI/Icons/` (`1star_portal`, `2star_portal`, `3star_portal`, `timer_portal`, `free_portal`)
-- Dialogue Boxes: `Resources/Sprites/UI/Dialogue/` (`dialoguebox_island`, `dialoguebox_tavern`, `dialoguebox_space`)
+- Dialogue Boxes: `Resources/Sprites/UI/Dialogue/` (`dialoguebox_island`, `dialoguebox_tavern`, `dialoguebox_space`, `dialoguebox_farm`)
+- Achievement Art: `Resources/Sprites/UI/Achievements/` (`{artKey}_{tier}.png` - 7 categories × 4 tiers = 28 images)
 - Audio: `Resources/Audio/{Music|SFX|UI}/` (includes `achievement_sound` in SFX)
 - Prefabs: `Resources/Prefabs/`
 - Level Data: `Resources/Data/Levels/{World}/`
 - Dialogue Data: `Resources/Data/Dialogue/`
+
+### Achievement System
+- **Total**: 45 achievements (15 general + 30 per-world), down from 88
+- **Structure**: Each achievement group has exactly 3 milestones (Bronze/Silver/Gold)
+- **Files**: `Achievement.cs` (data types, enums, constants), `AchievementManager.cs` (singleton, tracking, events)
+- **Tabs**: Recent, General, Island, Supermarket, Farm, Tavern, Space (horizontal scrollable)
+- **Recent tab**: Shows individually unlocked milestones sorted by date descending
+- **Category tabs**: Shows achievement cards grouped by category
+
+#### General Tab - 5 Groups (15 achievements)
+| Group ID | Description | Bronze | Silver | Gold | Tracking |
+|----------|-------------|--------|--------|------|----------|
+| `3star_levels_total` | 3 Star X Levels | 100 | 250 | 500 | Unique |
+| `levels_total` | Complete X Levels | 10 | 100 | 500 | Unique |
+| `matches_total` | Make X Matches | 100 | 1000 | 5000 | Total |
+| `stars_total` | Earn X Stars | 50 | 500 | 1000 | Total |
+| `world_explorer` | Visit X Worlds | 1 | 3 | 5 | Unique |
+
+#### Per-World Tabs - 2 Groups Each (6 achievements × 5 worlds = 30)
+| Group ID | Description | Bronze | Silver | Gold | Tracking |
+|----------|-------------|--------|--------|------|----------|
+| `{worldId}_levels` | Complete X Levels in World | 25 | 50 | 100 | Unique |
+| `{worldId}_stars` | Earn X Stars in World | 100 | 200 | 300 | Total |
+
+#### Art Assets
+- 28 rectangle images: 7 art keys × 4 tiers (grey/bronze/silver/gold)
+- Art keys: `3star_levels`, `levels`, `matches`, `stars`, `visit_worlds`, `world_levels`, `world_stars`
+- Path: `Resources/Sprites/UI/Achievements/{artKey}_{tier}.png`
+- Loaded via `LoadFullRectSprite()` to bypass Unity alpha-trimming
+
+#### Card-Based UI
+- Fullscreen overlay (Canvas sortingOrder=5200, dark background 0.7 alpha)
+- Centered 1000×1700 content panel with header, horizontal tab bar, scrollable card list
+- Each card: tier-appropriate rectangle art (left ~58%), title (Benzin Bold 21), description, progress "X / Y", date
+- Rectangle upgrades: grey → bronze → silver → gold as milestones are unlocked
+- `AchievementManager` helper methods: `GetGroupArtKey()`, `GetGroupCurrentTier()`, `GetNextMilestone()`, `GetGroupProgress()`, `GetGroupLastUnlockDate()`, `GetRecentlyUnlocked()`, `GetGroupIdsForTab()`
+
+#### Notification System (unchanged)
+- `CreateAchievementNotificationPanel` slides in from top on unlock
+- Achievement detail panel on tap
+- `achievement_sound.mp3` at 1.3× volume per notification
+- Queue system for multiple simultaneous unlocks
 
 ### Font System
 - **Font family**: Benzin (Bold, SemiBold, Medium, ExtraBold) - TTFs in `Assets/_Project/Fonts/`
