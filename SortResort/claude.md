@@ -177,8 +177,9 @@ Container border scale: 1.2 (17% border around slots)
 ### Carousel Train Configuration
 | Layout | Spacing | Containers | move_distance | Notes |
 |--------|---------|------------|---------------|-------|
-| Horizontal | ~356px (X) | 5 min | 5 × spacing | First container fully off-screen at spawn |
-| Vertical | ~219px (Y) | 10 fixed | 10 × spacing | L50+, 40% chance. Disables despawn. Statics use 2-col |
+| Horizontal | ~356px (X) | 5 min | 5 × spacing | First container 100px off-screen at spawn |
+| Vertical | ~257px (Y) | 10 fixed | 10 × spacing | L50+, 40% chance. Statics use 2-col |
+- **Mutual exclusion**: Carousel and despawn never appear on the same level (spatial conflict: carousel path at Y=200 overlaps despawn stack). When both selected by probability, prefer whichever is in its introduction range; otherwise coin flip.
 
 ### Layer Configuration
 - Layer 6: "Items" - for item raycasting
@@ -314,38 +315,38 @@ Container border scale: 1.2 (17% border around slots)
 - **To add a new world**: Create `generate_{world}_levels.py` with a `WorldConfig` defining item groups, then run it.
 
 #### Cumulative Mechanic System
-Mechanics unlock at fixed levels and persist via probability (30-70%). A complexity cap prevents overwhelming early levels (max 1 at L11-15, max 2 at L16-25, max 3 at L26-40, no cap at L41+). Introduction range (5 levels after unlock) guarantees the mechanic appears.
+Mechanics unlock at fixed levels and persist via probability (30-70%). A complexity cap prevents overwhelming early levels (max 1 at L11-15, max 2 at L16-25, max 3 at L26-40, no cap at L41+). Introduction range (5 levels after unlock) guarantees the mechanic appears. Carousel and despawn are mutually exclusive (spatial conflict).
 
 #### Container Dimension Constants
 - `CONTAINER_WIDTH_3SLOT`: ~341px, `CONTAINER_WIDTH_1SLOT`: ~114px
-- `SLOT_HEIGHT`: ~189px, `ROW_DEPTH_OFFSET`: ~4.56px per extra row
-- `CAROUSEL_H_SPACING`: ~356px (15px gap), `CAROUSEL_V_SPACING`: ~219px
+- `SLOT_HEIGHT`: ~227px (includes border_scale 1.2), `ROW_DEPTH_OFFSET`: ~4.56px per extra row
+- `CAROUSEL_H_SPACING`: ~356px (15px gap), `CAROUSEL_V_SPACING`: ~257px
 - `MIN_CONTAINER_GAP`: 30px between container edges
 - Screen safe bounds: X: 200-880, Y: 250-1600 (container centers)
 
 #### Spatial Layout Design
 - **Standard layout**: 3-column grid (X=200, 540, 880) with dynamic vertical spacing via `get_y_gap()`
-- **Despawn layout**: Despawn containers stack vertically at X=540 (single-column). Bottom container visible, upper containers extend off-screen above. When bottom is cleared, containers above fall down (cascade mechanic). Statics use 2-column layout (X=200, 880) to avoid center.
-- **Vertical carousel layout**: 10 containers at X=540 scrolling up/down. Disables despawn (both need center column). Statics use 2-column layout. Only subtracts budgeted carousel_count from static pool.
-- **Horizontal carousel layout**: 5+ containers scrolling left/right at Y=200. First container starts fully off-screen. Static y_offset computed dynamically via `get_y_gap()`.
+- **Despawn layout**: 5-12 containers stacked vertically at X=540 (single-column). Bottom container visible at Y=250, upper containers extend off-screen above (~236px spacing). When bottom is cleared, containers above fall down (cascade mechanic). Bottom 3 have full depth; upper ones are single-row to limit item count. Statics use 2-column layout (X=200, 880) to avoid center. Only 4 despawn containers come from static budget; rest are additional.
+- **Vertical carousel layout**: 10 containers at X=540 scrolling up/down. Statics use 2-column layout. Only subtracts budgeted carousel_count from static pool.
+- **Horizontal carousel layout**: 5+ containers scrolling left/right at Y=200. First container starts 100px off-screen. Static y_offset computed dynamically via `get_y_gap()`.
 - **B&F layout**: Back-and-forth movers get dedicated wide-spacing rows at screen edges (X=200, 880). If center column is occupied, odd B&F containers use left column instead.
 - **2D AABB collision**: `_get_bounding_box()`, `_boxes_overlap()`, `_get_travel_box()` for overlap prevention between statics and B&F sweep paths.
 
 #### Lock System
 - `WorldConfig` supports both `lock_overlay_image` and `single_slot_lock_overlay_image` (defaults to `{world_id}_single_slot_lockoverlay`)
-- Lock match range: `lo = min(3, 2 + (level-11)//15)`, `hi = min(3, lo+1)`
-- L11-25: 2-3 matches per lock, L26+: always 3. Per-container randomization via `rng.randint(lo, hi)`.
+- Lock match range 1-9: `lo = max(1, 1 + (level-11)//20)`, `hi = min(9, lo + 2 + (level-11)//12)`
+- L11: 1-3 matches, L26: 2-5, L36: 2-6, L51: 3-8, L75: 4-9. Per-container randomization via `rng.randint(lo, hi)` ensures different values on the same level.
 
 ### Level Structure (All Worlds)
 - level_001: 3 containers, 2 item types, intro (hardcoded 2-move tutorial)
 - Levels 2-10: 4-7 containers, increasing item types, multi-row
-- Levels 11+: locked containers introduced (2-3 matches to unlock)
+- Levels 11+: locked containers introduced (1-9 matches to unlock, widening with level)
 - Levels 16+: single-slot containers (can also be locked, uses own lock overlay)
 - Levels 26+: back-and-forth movement (symmetric pairs, 2D collision-checked)
-- Levels 31+: carousel movement (horizontal 5+ containers, fully off-screen spawn/despawn)
-- Levels 36+: despawn-on-match (single-column stack at X=540, cascade falling)
+- Levels 31+: carousel movement (horizontal 5+ containers, 100px off-screen spawn; mutually exclusive with despawn)
+- Levels 36+: despawn-on-match (5-12 containers stacked at X=540, cascade falling; mutually exclusive with carousel)
 - Levels 41+: all mechanics combined (probability-based, no complexity cap)
-- Levels 50+: vertical carousel possible (10 containers, 40% chance, disables despawn)
+- Levels 50+: vertical carousel possible (10 containers, 40% chance)
 - Fill ratios: 50-83% across levels, 50 item types per world
 
 ### Level Solver
