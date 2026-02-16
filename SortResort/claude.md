@@ -175,10 +175,10 @@ Container border scale: 1.2 (17% border around slots)
 | `LevelValidator.cs` | Position validation |
 
 ### Carousel Train Configuration
-| Layout | Spacing | Containers | move_distance |
-|--------|---------|------------|---------------|
-| Vertical | 198px (Y) | 10 each | 1980 |
-| Horizontal | 297px (X) | 5 each | 1485 |
+| Layout | Spacing | Containers | move_distance | Notes |
+|--------|---------|------------|---------------|-------|
+| Horizontal | ~356px (X) | 5 min | 5 × spacing | First container fully off-screen at spawn |
+| Vertical | ~219px (Y) | 10 fixed | 10 × spacing | L50+, 40% chance. Disables despawn. Statics use 2-col |
 
 ### Layer Configuration
 - Layer 6: "Items" - for item raycasting
@@ -310,19 +310,43 @@ Container border scale: 1.2 (17% border around slots)
 - **Usage**: `python generate_island_levels.py` (creates 100 levels in `Resources/Data/Levels/Island/`)
 - **Algorithm**: Reverse-play construction V2 (no work container). For each triple: pick random container, push existing items deeper, place triple at front, scatter 1-3 items to other containers. Each scatter = 1 forward move.
 - **Locked containers**: Participate in reverse-play loop with cutoff timing. Last `unlock_matches_required` triples exclude locked container (those forward triples unlock it).
-- **Validation**: No starting triples at ANY row depth. Solver verifies each level; retries with different seed on failure (up to 20 attempts). Star thresholds use solver's actual move count.
+- **Validation**: No starting triples at ANY row depth. Solver verifies each level; retries with different seed on failure (up to 20 attempts). Star thresholds use solver's actual move count. Full AABB bounding box checks for overlap and off-screen detection.
 - **To add a new world**: Create `generate_{world}_levels.py` with a `WorldConfig` defining item groups, then run it.
+
+#### Cumulative Mechanic System
+Mechanics unlock at fixed levels and persist via probability (30-70%). A complexity cap prevents overwhelming early levels (max 1 at L11-15, max 2 at L16-25, max 3 at L26-40, no cap at L41+). Introduction range (5 levels after unlock) guarantees the mechanic appears.
+
+#### Container Dimension Constants
+- `CONTAINER_WIDTH_3SLOT`: ~341px, `CONTAINER_WIDTH_1SLOT`: ~114px
+- `SLOT_HEIGHT`: ~189px, `ROW_DEPTH_OFFSET`: ~4.56px per extra row
+- `CAROUSEL_H_SPACING`: ~356px (15px gap), `CAROUSEL_V_SPACING`: ~219px
+- `MIN_CONTAINER_GAP`: 30px between container edges
+- Screen safe bounds: X: 200-880, Y: 250-1600 (container centers)
+
+#### Spatial Layout Design
+- **Standard layout**: 3-column grid (X=200, 540, 880) with dynamic vertical spacing via `get_y_gap()`
+- **Despawn layout**: Despawn containers stack vertically at X=540 (single-column). Bottom container visible, upper containers extend off-screen above. When bottom is cleared, containers above fall down (cascade mechanic). Statics use 2-column layout (X=200, 880) to avoid center.
+- **Vertical carousel layout**: 10 containers at X=540 scrolling up/down. Disables despawn (both need center column). Statics use 2-column layout. Only subtracts budgeted carousel_count from static pool.
+- **Horizontal carousel layout**: 5+ containers scrolling left/right at Y=200. First container starts fully off-screen. Static y_offset computed dynamically via `get_y_gap()`.
+- **B&F layout**: Back-and-forth movers get dedicated wide-spacing rows at screen edges (X=200, 880). If center column is occupied, odd B&F containers use left column instead.
+- **2D AABB collision**: `_get_bounding_box()`, `_boxes_overlap()`, `_get_travel_box()` for overlap prevention between statics and B&F sweep paths.
+
+#### Lock System
+- `WorldConfig` supports both `lock_overlay_image` and `single_slot_lock_overlay_image` (defaults to `{world_id}_single_slot_lockoverlay`)
+- Lock match range: `lo = min(3, 2 + (level-11)//15)`, `hi = min(3, lo+1)`
+- L11-25: 2-3 matches per lock, L26+: always 3. Per-container randomization via `rng.randint(lo, hi)`.
 
 ### Level Structure (All Worlds)
 - level_001: 3 containers, 2 item types, intro (hardcoded 2-move tutorial)
 - Levels 2-10: 4-7 containers, increasing item types, multi-row
-- Levels 11+: locked containers introduced
-- Levels 16+: single-slot containers
-- Levels 26+: back-and-forth movement
-- Levels 31+: carousel movement
-- Levels 36+: despawn-on-match
-- Levels 41+: all mechanics combined
-- Fill ratios: 57-87% across levels, 50 item types per world
+- Levels 11+: locked containers introduced (2-3 matches to unlock)
+- Levels 16+: single-slot containers (can also be locked, uses own lock overlay)
+- Levels 26+: back-and-forth movement (symmetric pairs, 2D collision-checked)
+- Levels 31+: carousel movement (horizontal 5+ containers, fully off-screen spawn/despawn)
+- Levels 36+: despawn-on-match (single-column stack at X=540, cascade falling)
+- Levels 41+: all mechanics combined (probability-based, no complexity cap)
+- Levels 50+: vertical carousel possible (10 containers, 40% chance, disables despawn)
+- Fill ratios: 50-83% across levels, 50 item types per world
 
 ### Level Solver
 - Editor: Tools > Sort Resort > Solver > Solve Level...
