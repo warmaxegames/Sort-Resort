@@ -22,7 +22,7 @@
 
 ## Current Status
 
-**Last Updated:** 2026-02-09
+**Last Updated:** 2026-02-17
 
 ### Working Features (Unity)
 - Splash screen → Level select with fade transition
@@ -34,7 +34,7 @@
 - World-specific backgrounds, music, and ambient audio
 - Save/load progress (PlayerPrefs), undo system, timer format M:SS.CC
 - **4 Game Modes** - Free Play (green, no limits), Star Mode (pink, move-based stars), Timer Mode (blue, beat the clock), Hard Mode (gold, stars + timer). Separate progress per mode, mode selector tabs on level select, mode-specific portal tinting, mode-specific vortex animations (green/pink/blue/gold per mode), mode-specific level complete animations (stopwatch count-up for timer, "New Record!" pulse), mode-specific HUD visibility, Hard Mode locked per-world until Star+Timer 100% complete, debug unlock/lock button on level select
-- Achievement system (45 achievements across 7 categories with card-based UI, tier art rectangles, notifications with achievement sound, rewards)
+- **Achievement system** (COMPLETE) - 45 achievements across 7 categories with card-based UI, tier art rectangles, notifications with achievement sound, rewards. Sprite-based progress bar (`progress_bar.png` frame with green fill, aspect-matched to achievement rectangles). Text wrapping for long titles/descriptions (`FormatTextForWrapping` helper). Close button with pressed state (`closebutton_2`/`closebutton_pressed`, 118x118, positioned at exact pixel coords). Cards and bars centered with 30px left offset. "Achievement Points" title bar text (48pt Benzin ExtraBold). Per-world descriptions use "in this World" instead of specific world names.
 - Level solver tool (Editor window + in-game auto-solve button)
 - **Dialogue system** - Typewriter text with Animal Crossing-style voices, mascot portraits, voice toggle in settings, timer pauses during dialogue. Full story content: 5 worlds × 11 checkpoints (welcome + every 10 levels), 4 mode tutorial dialogues, 5 hard mode unlock dialogues. Story is mode-agnostic (fires in any mode, plays once). Dr. Miller overarching mystery across all worlds.
 - **Level complete screen** - Mode-specific animations: Star Mode has rays, curtains, star ribbon, grey/gold star animations, dancing stars (3-star); Timer Mode has stopwatch count-up animation with "New Record!" bounce; Free Play skips stars; Hard Mode combines stars + timer. All modes: mascot thumbsup (Island), bottom board animation, sprite-based buttons
@@ -244,7 +244,7 @@ Container border scale: 1.2 (17% border around slots)
 - Pause Menu: `Resources/Sprites/UI/PauseMenu/` (`pause_board`, `pause_resume`, `pause_resume_pressed`, `pause_restart`, `pause_restart_pressed`, `pause_settings`, `pause_settings_pressed`, `pause_quit`, `pause_quit_pressed`)
 - Portal Overlays: `Resources/Sprites/UI/Icons/` (`1star_portal`, `2star_portal`, `3star_portal`, `timer_portal`, `free_portal`)
 - Dialogue Boxes: `Resources/Sprites/UI/Dialogue/` (`dialoguebox_island`, `dialoguebox_tavern`, `dialoguebox_space`, `dialoguebox_farm`)
-- Achievement Art: `Resources/Sprites/UI/Achievements/` (`{artKey}_{tier}.png` - 7 categories × 4 tiers = 28 images)
+- Achievement Art: `Resources/Sprites/UI/Achievements/` (`{artKey}_{tier}.png` - 7 categories × 4 tiers = 28 images, plus `progress_bar.png`, `closebutton_2.png`, `closebutton_pressed.png`)
 - Audio: `Resources/Audio/{Music|SFX|UI}/` (includes `achievement_sound` in SFX)
 - Prefabs: `Resources/Prefabs/`
 - Level Data: `Resources/Data/Levels/{World}/`
@@ -279,11 +279,17 @@ Container border scale: 1.2 (17% border around slots)
 - Path: `Resources/Sprites/UI/Achievements/{artKey}_{tier}.png`
 - Loaded via `LoadFullRectSprite()` to bypass Unity alpha-trimming
 
-#### Card-Based UI
+#### Card-Based UI (COMPLETE - 2026-02-17)
 - Fullscreen overlay (Canvas sortingOrder=5200, dark background 0.7 alpha)
 - Centered 1000×1700 content panel with header, horizontal tab bar, scrollable card list
-- Each card: tier-appropriate rectangle art (left ~58%), title (Benzin Bold 21), description, progress "X / Y", date
+- Each card: tier-appropriate rectangle art (687×301, preserveAspect), title (Benzin Bold 24), description, sprite-based progress bar
 - Rectangle upgrades: grey → bronze → silver → gold as milestones are unlocked
+- **Progress bar**: `progress_bar.png` (457×98) metallic frame with green fill behind it. Bar width matches rendered rect width exactly (~494px). Green fill inset by corner radius (~14px) to stay inside rounded frame edges. Progress text "X/Y" centered on bar.
+- **Text wrapping**: `FormatTextForWrapping(text, maxChars)` inserts line breaks at best word boundary. Title threshold: 13 chars ("Globe Trotter"). Description threshold: 18 chars ("Make 1000 Matches"). Title/description shifted 10px left from original anchors.
+- **Close button**: 118×118 `closebutton_2` sprite at anchor (0.9019, 0.8880) with `closebutton_pressed` swap on PointerDown/PointerUp via EventTrigger.
+- **Card centering**: Rect image and progress bar both offset 30px left to center on board.
+- **Title bar**: "Achievement Points" at 48pt Benzin ExtraBold (with shadow). Points text shifted 5px higher.
+- **Per-world descriptions**: Use "in this World" instead of specific world names (context from tab).
 - `AchievementManager` helper methods: `GetGroupArtKey()`, `GetGroupCurrentTier()`, `GetNextMilestone()`, `GetGroupProgress()`, `GetGroupLastUnlockDate()`, `GetRecentlyUnlocked()`, `GetGroupIdsForTab()`
 
 #### Notification System (unchanged)

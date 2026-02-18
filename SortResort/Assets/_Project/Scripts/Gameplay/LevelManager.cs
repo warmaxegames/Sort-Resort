@@ -42,6 +42,8 @@ namespace SortResort
 
         // Background
         private SpriteRenderer backgroundRenderer;
+        private SpriteRenderer colorBackgroundRenderer;
+        private Coroutine colorFadeCoroutine;
 
         // Tracking
         private int totalItemsAtStart;
@@ -125,6 +127,14 @@ namespace SortResort
             backgroundGO.transform.localPosition = new Vector3(0, 0, 10f); // Behind everything
             backgroundRenderer = backgroundGO.AddComponent<SpriteRenderer>();
             backgroundRenderer.sortingOrder = -100; // Far back
+
+            // Create color background overlay (slightly in front of mono, starts invisible)
+            var colorBgGO = new GameObject("BackgroundColor");
+            colorBgGO.transform.SetParent(gameWorldGO.transform);
+            colorBgGO.transform.localPosition = new Vector3(0, 0, 9f);
+            colorBackgroundRenderer = colorBgGO.AddComponent<SpriteRenderer>();
+            colorBackgroundRenderer.sortingOrder = -99;
+            colorBackgroundRenderer.color = new Color(1f, 1f, 1f, 0f);
 
             // Register with ScreenManager for responsive scaling
             StartCoroutine(RegisterWithScreenManager(gameWorldGO.transform));
@@ -539,6 +549,27 @@ namespace SortResort
             {
                 Debug.LogWarning($"[LevelManager] No background found for world: {worldId}");
             }
+
+            // Try to load color variant for progressive reveal effect
+            if (colorBackgroundRenderer != null)
+            {
+                Sprite colorSprite = Resources.Load<Sprite>($"Sprites/Backgrounds/{worldId}_background_color");
+                if (colorSprite != null)
+                {
+                    colorBackgroundRenderer.sprite = colorSprite;
+                    colorBackgroundRenderer.color = new Color(1f, 1f, 1f, 0f);
+                    colorBackgroundRenderer.enabled = true;
+
+                    // Apply same scale as mono background
+                    colorBackgroundRenderer.transform.localScale = backgroundRenderer.transform.localScale;
+
+                    Debug.Log($"[LevelManager] Loaded color background for progressive reveal: {worldId}");
+                }
+                else
+                {
+                    colorBackgroundRenderer.enabled = false;
+                }
+            }
         }
 
         /// <summary>
@@ -574,6 +605,17 @@ namespace SortResort
                 isRecording = false;
             }
             recordedMoves.Clear();
+
+            // Reset color background overlay
+            if (colorFadeCoroutine != null)
+            {
+                StopCoroutine(colorFadeCoroutine);
+                colorFadeCoroutine = null;
+            }
+            if (colorBackgroundRenderer != null)
+            {
+                colorBackgroundRenderer.color = new Color(1f, 1f, 1f, 0f);
+            }
 
             // Reset timer
             timerActive = false;
@@ -709,6 +751,38 @@ namespace SortResort
                     c.IncrementUnlockProgress();
                 }
             }
+
+            // Progressive color reveal on match
+            if (colorBackgroundRenderer != null && colorBackgroundRenderer.enabled)
+            {
+                int totalMatches = totalItemsAtStart / 3;
+                if (totalMatches > 0)
+                {
+                    float targetAlpha = Mathf.Clamp01(matchesMade / (float)totalMatches);
+                    if (colorFadeCoroutine != null) StopCoroutine(colorFadeCoroutine);
+                    colorFadeCoroutine = StartCoroutine(FadeColorBackground(targetAlpha, 0.3f));
+                }
+            }
+        }
+
+        private System.Collections.IEnumerator FadeColorBackground(float targetAlpha, float duration)
+        {
+            Color color = colorBackgroundRenderer.color;
+            float startAlpha = color.a;
+            float elapsed = 0f;
+
+            while (elapsed < duration)
+            {
+                elapsed += Time.unscaledDeltaTime;
+                float t = elapsed / duration;
+                color.a = Mathf.Lerp(startAlpha, targetAlpha, t);
+                colorBackgroundRenderer.color = color;
+                yield return null;
+            }
+
+            color.a = targetAlpha;
+            colorBackgroundRenderer.color = color;
+            colorFadeCoroutine = null;
         }
 
         private void OnContainerBecameEmpty(ItemContainer container)
@@ -1083,7 +1157,8 @@ namespace SortResort
             // Log to console with warning level (yellow in Unity)
             Debug.LogWarning(report);
 
-            // Also write to file for later review
+            // Also write to file for later review (not supported on WebGL)
+#if !UNITY_WEBGL
             try
             {
                 string logDir = System.IO.Path.Combine(Application.persistentDataPath, "SolverAlerts");
@@ -1102,6 +1177,7 @@ namespace SortResort
             {
                 Debug.LogError($"[SOLVER ALERT] Failed to write log file: {e.Message}");
             }
+#endif
         }
 
         #endregion

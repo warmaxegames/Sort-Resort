@@ -178,17 +178,22 @@ namespace SortResort
         private Button autoSolveButton;
         private Button recordButton;
         private bool isRecordingMoves = false;
+        private Button devPrevLevelButton;
+        private Button devNextLevelButton;
 #endif
 
         // Achievements screen
         private GameObject achievementsPanel;
         private Transform achievementsListContent;
-        private TextMeshProUGUI achievementsHeaderText;
-        private TextMeshProUGUI achievementsCountText;
-        private string currentAchievementTab = Achievement.TAB_RECENT;
+        private string currentAchievementTab = Achievement.TAB_GENERAL;
         private Dictionary<string, Button> achievementTabButtons = new Dictionary<string, Button>();
-        private Dictionary<string, Image> achievementTabImages = new Dictionary<string, Image>();
+        private Dictionary<string, Image> achievementTabSpriteImages = new Dictionary<string, Image>();
         private Transform achievementTabsContainer;
+        private Image achievementWorldIconImage;
+        private TextMeshProUGUI achievementTitleBarText;
+        private TextMeshProUGUI achievementPointsText;
+        private Sprite achvTabSprite;
+        private Sprite achvTabPressedSprite;
 
         // Achievement notification
         private GameObject achievementNotificationPanel;
@@ -788,6 +793,7 @@ namespace SortResort
             profileRect.sizeDelta = new Vector2(700, 240); // Even larger
 
             var profileImg = profileGO.AddComponent<Image>();
+            profileImg.raycastTarget = false;
             var profileSprite = Resources.Load<Sprite>("Sprites/UI/Overlays/profile_overlay");
             if (profileSprite != null)
             {
@@ -814,6 +820,7 @@ namespace SortResort
             playerNameText.fontStyle = FontStyles.Bold;
             playerNameText.alignment = TextAlignmentOptions.MidlineLeft;
             playerNameText.color = Color.white;
+            playerNameText.raycastTarget = false;
 
             // ============================================
             // WORLD DISPLAY AREA - Large world image with navigation arrows
@@ -1344,6 +1351,9 @@ namespace SortResort
             // Auto-Solve button (debug feature) - solves level automatically
             autoSolveButton = CreateButton(buttonsGO.transform, "AutoSolve", "Solve", OnAutoSolveClicked, 60, 50);
             autoSolveButton.GetComponentInChildren<TextMeshProUGUI>().color = new Color(0.5f, 1f, 0.5f); // Green tint
+
+            // Dev level navigation buttons - bottom of screen
+            CreateDevNavButtons();
 #endif
 
             // Settings/Undo overlay - sibling of hudPanel, renders on top
@@ -1696,6 +1706,92 @@ namespace SortResort
             {
                 Debug.LogWarning("[UIManager] Auto-Solve failed to complete the level!");
             }
+        }
+
+        private void CreateDevNavButtons()
+        {
+            // Container anchored at bottom-center of screen
+            var navGO = new GameObject("Dev Nav Buttons");
+            navGO.transform.SetParent(hudPanel.transform, false);
+
+            var navRect = navGO.AddComponent<RectTransform>();
+            navRect.anchorMin = new Vector2(0.5f, 0f);
+            navRect.anchorMax = new Vector2(0.5f, 0f);
+            navRect.pivot = new Vector2(0.5f, 0f);
+            navRect.anchoredPosition = new Vector2(0, 20);
+            navRect.sizeDelta = new Vector2(300, 50);
+
+            var layout = navGO.AddComponent<HorizontalLayoutGroup>();
+            layout.spacing = 160;
+            layout.childAlignment = TextAnchor.MiddleCenter;
+            layout.childForceExpandWidth = false;
+
+            // Previous level button (left side)
+            devPrevLevelButton = CreateButton(navGO.transform, "DevPrev", "< Prev", OnDevPrevLevelClicked, 70, 44);
+            devPrevLevelButton.GetComponentInChildren<TextMeshProUGUI>().color = new Color(1f, 0.85f, 0.5f);
+            devPrevLevelButton.GetComponentInChildren<TextMeshProUGUI>().fontSize = 18;
+
+            // Next level button (right side)
+            devNextLevelButton = CreateButton(navGO.transform, "DevNext", "Next >", OnDevNextLevelClicked, 70, 44);
+            devNextLevelButton.GetComponentInChildren<TextMeshProUGUI>().color = new Color(1f, 0.85f, 0.5f);
+            devNextLevelButton.GetComponentInChildren<TextMeshProUGUI>().fontSize = 18;
+
+            // Disable prev if on level 1
+            int currentLevel = GameManager.Instance?.CurrentLevelNumber ?? 1;
+            if (currentLevel <= 1 && devPrevLevelButton != null)
+                devPrevLevelButton.interactable = false;
+
+            // Disable next if no next level exists
+            string worldId = GameManager.Instance?.CurrentWorldId ?? "island";
+            if (LevelDataLoader.LoadLevel(worldId, currentLevel + 1) == null && devNextLevelButton != null)
+                devNextLevelButton.interactable = false;
+        }
+
+        private void DevLoadLevel(int levelNumber)
+        {
+            string worldId = GameManager.Instance?.CurrentWorldId ?? "island";
+            Debug.Log($"[UIManager] Dev nav: loading {worldId} level {levelNumber}");
+
+            TransitionManager.Instance?.FadeOut(() =>
+            {
+                if (GameManager.Instance != null)
+                {
+                    var flags = System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance;
+                    typeof(GameManager).GetField("currentLevelNumber", flags)?.SetValue(GameManager.Instance, levelNumber);
+                    GameManager.Instance.SetState(GameState.Playing);
+                }
+
+                ShowGameplay();
+                LevelManager.Instance?.LoadLevel(worldId, levelNumber);
+
+                // Update dev nav button states for new level
+                if (devPrevLevelButton != null)
+                    devPrevLevelButton.interactable = levelNumber > 1;
+                if (devNextLevelButton != null)
+                    devNextLevelButton.interactable = LevelDataLoader.LoadLevel(worldId, levelNumber + 1) != null;
+
+                TransitionManager.Instance?.FadeIn();
+            });
+        }
+
+        private void OnDevPrevLevelClicked()
+        {
+            int currentLevel = GameManager.Instance?.CurrentLevelNumber ?? 1;
+            if (currentLevel <= 1) return;
+            DevLoadLevel(currentLevel - 1);
+        }
+
+        private void OnDevNextLevelClicked()
+        {
+            int currentLevel = GameManager.Instance?.CurrentLevelNumber ?? 1;
+            string worldId = GameManager.Instance?.CurrentWorldId ?? "island";
+            int nextLevel = currentLevel + 1;
+            if (LevelDataLoader.LoadLevel(worldId, nextLevel) == null)
+            {
+                Debug.LogWarning($"[UIManager] Dev nav: no level {nextLevel} in {worldId}");
+                return;
+            }
+            DevLoadLevel(nextLevel);
         }
 #endif
 
@@ -4951,9 +5047,15 @@ Antonia and Joakim Engfors
             achievementsPanel.AddComponent<GraphicRaycaster>();
 
             // CanvasGroup for fade
-            var canvasGroup = achievementsPanel.AddComponent<CanvasGroup>();
+            achievementsPanel.AddComponent<CanvasGroup>();
 
-            // Dark overlay background
+            // Cache tab sprites
+            achvTabSprite = LoadFullRectSprite("Sprites/UI/Achievements/achv_tab");
+            achvTabPressedSprite = LoadFullRectSprite("Sprites/UI/Achievements/achv_tab_pressed");
+
+            // ============================================
+            // Layer 0: Dark background (95% opacity to reduce distraction)
+            // ============================================
             var dimBg = new GameObject("DimBg");
             dimBg.transform.SetParent(achievementsPanel.transform, false);
             var dimBgRect = dimBg.AddComponent<RectTransform>();
@@ -4962,175 +5064,53 @@ Antonia and Joakim Engfors
             dimBgRect.offsetMin = Vector2.zero;
             dimBgRect.offsetMax = Vector2.zero;
             var dimBgImg = dimBg.AddComponent<Image>();
-            dimBgImg.color = new Color(0, 0, 0, 0.7f);
+            dimBgImg.color = new Color(0, 0, 0, 0.95f);
             dimBgImg.raycastTarget = true;
 
-            // Content panel (centered, 1000x1700 in 1080x1920 space)
-            var contentGO = new GameObject("Content");
-            contentGO.transform.SetParent(achievementsPanel.transform, false);
-            var contentRect = contentGO.AddComponent<RectTransform>();
-            contentRect.anchorMin = new Vector2(0.5f, 0.5f);
-            contentRect.anchorMax = new Vector2(0.5f, 0.5f);
-            contentRect.pivot = new Vector2(0.5f, 0.5f);
-            contentRect.sizeDelta = new Vector2(1000, 1700);
-
-            var contentBg = contentGO.AddComponent<Image>();
-            contentBg.sprite = CreateRoundedRectSprite(100, 100, 20, new Color(0.15f, 0.13f, 0.18f, 1f));
-            contentBg.type = Image.Type.Sliced;
+            // ============================================
+            // Layer 1: Board (wooden backdrop)
+            // ============================================
+            var boardGO = new GameObject("Board");
+            boardGO.transform.SetParent(achievementsPanel.transform, false);
+            var boardRect = boardGO.AddComponent<RectTransform>();
+            boardRect.anchorMin = Vector2.zero;
+            boardRect.anchorMax = Vector2.one;
+            boardRect.offsetMin = Vector2.zero;
+            boardRect.offsetMax = Vector2.zero;
+            var boardImg = boardGO.AddComponent<Image>();
+            boardImg.sprite = LoadFullRectSprite("Sprites/UI/Achievements/achv_board");
+            boardImg.preserveAspect = true;
+            boardImg.raycastTarget = false;
 
             // ============================================
-            // HEADER
+            // Layer 2: Yellow background panel
             // ============================================
-            var headerGO = new GameObject("Header");
-            headerGO.transform.SetParent(contentGO.transform, false);
-            var headerRect = headerGO.AddComponent<RectTransform>();
-            headerRect.anchorMin = new Vector2(0, 1);
-            headerRect.anchorMax = new Vector2(1, 1);
-            headerRect.pivot = new Vector2(0.5f, 1);
-            headerRect.anchoredPosition = Vector2.zero;
-            headerRect.sizeDelta = new Vector2(0, 90);
-
-            var headerBg = headerGO.AddComponent<Image>();
-            headerBg.sprite = CreateRoundedRectSprite(100, 90, 20, new Color(0.1f, 0.08f, 0.12f, 1f));
-            headerBg.type = Image.Type.Sliced;
-
-            // Header title
-            var titleGO = new GameObject("Title");
-            titleGO.transform.SetParent(headerGO.transform, false);
-            var titleRect = titleGO.AddComponent<RectTransform>();
-            titleRect.anchorMin = new Vector2(0, 0);
-            titleRect.anchorMax = new Vector2(0.5f, 1);
-            titleRect.offsetMin = new Vector2(25, 0);
-            titleRect.offsetMax = Vector2.zero;
-
-            achievementsHeaderText = titleGO.AddComponent<TextMeshProUGUI>();
-            achievementsHeaderText.text = "ACHIEVEMENTS";
-            achievementsHeaderText.fontSize = 38;
-            achievementsHeaderText.fontStyle = FontStyles.Bold;
-            achievementsHeaderText.alignment = TextAlignmentOptions.MidlineLeft;
-            achievementsHeaderText.color = new Color(0.95f, 0.8f, 0.2f, 1f);
-            FontManager.ApplyBold(achievementsHeaderText);
-
-            // Unlocked count
-            var countGO = new GameObject("Count");
-            countGO.transform.SetParent(headerGO.transform, false);
-            var countRect = countGO.AddComponent<RectTransform>();
-            countRect.anchorMin = new Vector2(0.5f, 0);
-            countRect.anchorMax = new Vector2(0.85f, 1);
-            countRect.offsetMin = Vector2.zero;
-            countRect.offsetMax = Vector2.zero;
-
-            achievementsCountText = countGO.AddComponent<TextMeshProUGUI>();
-            achievementsCountText.text = "0 / 0";
-            achievementsCountText.fontSize = 28;
-            achievementsCountText.fontStyle = FontStyles.Bold;
-            achievementsCountText.alignment = TextAlignmentOptions.Center;
-            achievementsCountText.color = Color.white;
-            FontManager.ApplyBold(achievementsCountText);
-
-            // Close button
-            var closeBtnGO = new GameObject("CloseButton");
-            closeBtnGO.transform.SetParent(headerGO.transform, false);
-            var closeBtnRect = closeBtnGO.AddComponent<RectTransform>();
-            closeBtnRect.anchorMin = new Vector2(1, 0.5f);
-            closeBtnRect.anchorMax = new Vector2(1, 0.5f);
-            closeBtnRect.pivot = new Vector2(1, 0.5f);
-            closeBtnRect.anchoredPosition = new Vector2(-15, 0);
-            closeBtnRect.sizeDelta = new Vector2(60, 60);
-
-            var closeBtnImg = closeBtnGO.AddComponent<Image>();
-            closeBtnImg.sprite = CreateRoundedRectSprite(60, 60, 30, new Color(0.5f, 0.15f, 0.15f, 1f));
-
-            var closeBtn = closeBtnGO.AddComponent<Button>();
-            closeBtn.targetGraphic = closeBtnImg;
-            closeBtn.onClick.AddListener(HideAchievements);
-
-            var closeTextGO = new GameObject("X");
-            closeTextGO.transform.SetParent(closeBtnGO.transform, false);
-            var closeTextRect = closeTextGO.AddComponent<RectTransform>();
-            closeTextRect.anchorMin = Vector2.zero;
-            closeTextRect.anchorMax = Vector2.one;
-            closeTextRect.offsetMin = Vector2.zero;
-            closeTextRect.offsetMax = Vector2.zero;
-            var closeText = closeTextGO.AddComponent<TextMeshProUGUI>();
-            closeText.text = "X";
-            closeText.fontSize = 32;
-            closeText.fontStyle = FontStyles.Bold;
-            closeText.alignment = TextAlignmentOptions.Center;
-            closeText.color = Color.white;
+            var bgYellowGO = new GameObject("BgYellow");
+            bgYellowGO.transform.SetParent(achievementsPanel.transform, false);
+            var bgYellowRect = bgYellowGO.AddComponent<RectTransform>();
+            bgYellowRect.anchorMin = Vector2.zero;
+            bgYellowRect.anchorMax = Vector2.one;
+            bgYellowRect.offsetMin = Vector2.zero;
+            bgYellowRect.offsetMax = Vector2.zero;
+            var bgYellowImg = bgYellowGO.AddComponent<Image>();
+            bgYellowImg.sprite = LoadFullRectSprite("Sprites/UI/Achievements/achv_bg_yellow");
+            bgYellowImg.preserveAspect = true;
+            bgYellowImg.raycastTarget = false;
 
             // ============================================
-            // TAB BAR - Horizontal tabs
-            // ============================================
-            var tabBarGO = new GameObject("TabBar");
-            tabBarGO.transform.SetParent(contentGO.transform, false);
-            var tabBarRect = tabBarGO.AddComponent<RectTransform>();
-            tabBarRect.anchorMin = new Vector2(0, 1);
-            tabBarRect.anchorMax = new Vector2(1, 1);
-            tabBarRect.pivot = new Vector2(0.5f, 1);
-            tabBarRect.anchoredPosition = new Vector2(0, -90);
-            tabBarRect.sizeDelta = new Vector2(-20, 55);
-
-            // Tab bar scroll view for horizontal scrolling
-            var tabScrollGO = new GameObject("TabScroll");
-            tabScrollGO.transform.SetParent(tabBarGO.transform, false);
-            var tabScrollRect = tabScrollGO.AddComponent<RectTransform>();
-            tabScrollRect.anchorMin = Vector2.zero;
-            tabScrollRect.anchorMax = Vector2.one;
-            tabScrollRect.offsetMin = Vector2.zero;
-            tabScrollRect.offsetMax = Vector2.zero;
-
-            var tabScrollView = tabScrollGO.AddComponent<ScrollRect>();
-            tabScrollView.horizontal = true;
-            tabScrollView.vertical = false;
-            tabScrollView.movementType = ScrollRect.MovementType.Elastic;
-            tabScrollView.scrollSensitivity = 30f;
-
-            var tabViewportGO = new GameObject("TabViewport");
-            tabViewportGO.transform.SetParent(tabScrollGO.transform, false);
-            var tabViewportRect = tabViewportGO.AddComponent<RectTransform>();
-            tabViewportRect.anchorMin = Vector2.zero;
-            tabViewportRect.anchorMax = Vector2.one;
-            tabViewportRect.offsetMin = Vector2.zero;
-            tabViewportRect.offsetMax = Vector2.zero;
-            tabViewportGO.AddComponent<RectMask2D>();
-            tabScrollView.viewport = tabViewportRect;
-
-            var tabsContainerGO = new GameObject("TabsContainer");
-            tabsContainerGO.transform.SetParent(tabViewportGO.transform, false);
-            var tabsContainerRect = tabsContainerGO.AddComponent<RectTransform>();
-            tabsContainerRect.anchorMin = new Vector2(0, 0);
-            tabsContainerRect.anchorMax = new Vector2(0, 1);
-            tabsContainerRect.pivot = new Vector2(0, 0.5f);
-            tabsContainerRect.anchoredPosition = Vector2.zero;
-            tabsContainerRect.sizeDelta = new Vector2(0, 0);
-
-            var tabsLayout = tabsContainerGO.AddComponent<HorizontalLayoutGroup>();
-            tabsLayout.spacing = 6;
-            tabsLayout.padding = new RectOffset(5, 5, 3, 3);
-            tabsLayout.childAlignment = TextAnchor.MiddleLeft;
-            tabsLayout.childForceExpandWidth = false;
-            tabsLayout.childForceExpandHeight = true;
-
-            var tabsSizeFitter = tabsContainerGO.AddComponent<ContentSizeFitter>();
-            tabsSizeFitter.horizontalFit = ContentSizeFitter.FitMode.PreferredSize;
-
-            tabScrollView.content = tabsContainerRect;
-
-            achievementTabButtons.Clear();
-            achievementTabImages.Clear();
-            achievementTabsContainer = tabsContainerGO.transform;
-
-            // ============================================
-            // MAIN CONTENT - Scrollable Achievement Cards
+            // Layer 3: Scroll Area (achievement cards)
+            // Positioned within the yellow bg bounds: x(132-938), y(520-1802) in 1080x1920
+            // With extra left padding (~100px) so cards don't hide behind tabs
             // ============================================
             var scrollAreaGO = new GameObject("ScrollArea");
-            scrollAreaGO.transform.SetParent(contentGO.transform, false);
+            scrollAreaGO.transform.SetParent(achievementsPanel.transform, false);
             var scrollAreaRect = scrollAreaGO.AddComponent<RectTransform>();
-            scrollAreaRect.anchorMin = new Vector2(0, 0);
-            scrollAreaRect.anchorMax = new Vector2(1, 1);
-            scrollAreaRect.offsetMin = new Vector2(10, 10);
-            scrollAreaRect.offsetMax = new Vector2(-10, -155); // Below header(90) + tabs(55) + gap(10)
+            // left=232/1080≈0.215, right=938/1080≈0.869
+            // bottom=1-1802/1920≈0.061, top=1-520/1920≈0.729
+            scrollAreaRect.anchorMin = new Vector2(0.215f, 0.061f);
+            scrollAreaRect.anchorMax = new Vector2(0.869f, 0.729f);
+            scrollAreaRect.offsetMin = Vector2.zero;
+            scrollAreaRect.offsetMax = Vector2.zero;
 
             var scrollRect = scrollAreaGO.AddComponent<ScrollRect>();
             scrollRect.horizontal = false;
@@ -5168,7 +5148,7 @@ Antonia and Joakim Engfors
 
             var vertLayout = listContentGO.AddComponent<VerticalLayoutGroup>();
             vertLayout.spacing = 15;
-            vertLayout.padding = new RectOffset(10, 10, 10, 10);
+            vertLayout.padding = new RectOffset(10, 10, 50, 10);
             vertLayout.childAlignment = TextAnchor.UpperCenter;
             vertLayout.childForceExpandWidth = true;
             vertLayout.childForceExpandHeight = false;
@@ -5177,7 +5157,193 @@ Antonia and Joakim Engfors
 
             scrollRect.content = listContentRect;
 
-            Debug.Log("[UIManager] Achievements panel created (card-based UI)");
+            // ============================================
+            // Layer 4: Tab Container (left side, vertical)
+            // Positioned at x≈10-228, y≈550-1290 in 1080x1920
+            // ============================================
+            var tabContainerGO = new GameObject("TabContainer");
+            tabContainerGO.transform.SetParent(achievementsPanel.transform, false);
+            var tabContainerRect = tabContainerGO.AddComponent<RectTransform>();
+            // x: 0 (touch screen edge) to 251/1080≈0.232 (15% wider than original 218px)
+            // y: shifted down 20px from original: bottom=1-1310/1920≈0.318, top=1-570/1920≈0.704
+            tabContainerRect.anchorMin = new Vector2(0f, 0.318f);
+            tabContainerRect.anchorMax = new Vector2(0.232f, 0.704f);
+            tabContainerRect.offsetMin = Vector2.zero;
+            tabContainerRect.offsetMax = Vector2.zero;
+
+            var tabLayout = tabContainerGO.AddComponent<VerticalLayoutGroup>();
+            tabLayout.spacing = 0;
+            tabLayout.padding = new RectOffset(0, 0, 0, 0);
+            tabLayout.childAlignment = TextAnchor.UpperCenter;
+            tabLayout.childForceExpandWidth = true;
+            tabLayout.childForceExpandHeight = false;
+            tabLayout.childControlWidth = true;
+            tabLayout.childControlHeight = false;
+
+            achievementTabButtons.Clear();
+            achievementTabSpriteImages.Clear();
+            achievementTabsContainer = tabContainerGO.transform;
+
+            // ============================================
+            // Layer 5: Title Bar (metallic bar with world name)
+            // ============================================
+            var titleBarGO = new GameObject("TitleBar");
+            titleBarGO.transform.SetParent(achievementsPanel.transform, false);
+            var titleBarRect = titleBarGO.AddComponent<RectTransform>();
+            titleBarRect.anchorMin = Vector2.zero;
+            titleBarRect.anchorMax = Vector2.one;
+            titleBarRect.offsetMin = Vector2.zero;
+            titleBarRect.offsetMax = Vector2.zero;
+            var titleBarImg = titleBarGO.AddComponent<Image>();
+            titleBarImg.sprite = LoadFullRectSprite("Sprites/UI/Achievements/achv_title_bar");
+            titleBarImg.preserveAspect = true;
+            titleBarImg.raycastTarget = false;
+
+            // Title bar text - centered within the bar content area x(247-897), y(302-494)
+            var titleBarTextGO = new GameObject("TitleBarText");
+            titleBarTextGO.transform.SetParent(titleBarGO.transform, false);
+            var titleBarTextRect = titleBarTextGO.AddComponent<RectTransform>();
+            // x: 320/1080≈0.296, 897/1080≈0.831 (shifted right to leave room for icon)
+            // y: 1-494/1920≈0.743, 1-302/1920≈0.843
+            titleBarTextRect.anchorMin = new Vector2(0.296f, 0.743f);
+            titleBarTextRect.anchorMax = new Vector2(0.831f, 0.843f);
+            titleBarTextRect.offsetMin = Vector2.zero;
+            titleBarTextRect.offsetMax = Vector2.zero;
+
+            achievementTitleBarText = titleBarTextGO.AddComponent<TextMeshProUGUI>();
+            achievementTitleBarText.text = "Achievement\nPoints";
+            achievementTitleBarText.fontSize = 48;
+            achievementTitleBarText.fontStyle = FontStyles.Bold;
+            achievementTitleBarText.alignment = TextAlignmentOptions.Center;
+            achievementTitleBarText.color = Color.white;
+            achievementTitleBarText.enableAutoSizing = true;
+            achievementTitleBarText.fontSizeMin = 28;
+            achievementTitleBarText.fontSizeMax = 48;
+            achievementTitleBarText.lineSpacing = -30f;
+            if (FontManager.ExtraBold != null)
+                achievementTitleBarText.font = FontManager.ExtraBold;
+
+            // Title bar text shadow (stronger black, larger offset)
+            var titleBarShadowGO = new GameObject("TitleBarShadow");
+            titleBarShadowGO.transform.SetParent(titleBarGO.transform, false);
+            var titleBarShadowRect = titleBarShadowGO.AddComponent<RectTransform>();
+            titleBarShadowRect.anchorMin = new Vector2(0.296f, 0.743f);
+            titleBarShadowRect.anchorMax = new Vector2(0.831f, 0.843f);
+            titleBarShadowRect.offsetMin = new Vector2(3, -3);
+            titleBarShadowRect.offsetMax = new Vector2(3, -3);
+            var shadowText = titleBarShadowGO.AddComponent<TextMeshProUGUI>();
+            shadowText.text = "Achievement\nPoints";
+            shadowText.fontSize = 48;
+            shadowText.fontStyle = FontStyles.Bold;
+            shadowText.alignment = TextAlignmentOptions.Center;
+            shadowText.color = new Color(0, 0, 0, 0.85f);
+            shadowText.enableAutoSizing = true;
+            shadowText.fontSizeMin = 28;
+            shadowText.fontSizeMax = 48;
+            shadowText.lineSpacing = -30f;
+            if (FontManager.ExtraBold != null)
+                shadowText.font = FontManager.ExtraBold;
+            // Shadow renders behind main text
+            titleBarShadowGO.transform.SetSiblingIndex(titleBarTextGO.transform.GetSiblingIndex());
+            titleBarTextGO.transform.SetAsLastSibling();
+
+            // ============================================
+            // Layer 6: Title Banner ("ACHIEVEMENTS" decorative banner)
+            // Placed before world icon so icon renders on top of banner stars
+            // ============================================
+            var titleBannerGO = new GameObject("TitleBanner");
+            titleBannerGO.transform.SetParent(achievementsPanel.transform, false);
+            var titleBannerRect = titleBannerGO.AddComponent<RectTransform>();
+            titleBannerRect.anchorMin = Vector2.zero;
+            titleBannerRect.anchorMax = Vector2.one;
+            titleBannerRect.offsetMin = Vector2.zero;
+            titleBannerRect.offsetMax = Vector2.zero;
+            var titleBannerImg = titleBannerGO.AddComponent<Image>();
+            titleBannerImg.sprite = LoadFullRectSprite("Sprites/UI/Achievements/achv_title");
+            titleBannerImg.preserveAspect = true;
+            titleBannerImg.raycastTarget = false;
+
+            // ============================================
+            // Layer 7: World Icon (200x202px, positioned in title bar area)
+            // Centered at roughly x=270, y=398 in 1080x1920 (middle of icon bbox x(171-370), y(303-504))
+            // ============================================
+            var worldIconGO = new GameObject("WorldIcon");
+            worldIconGO.transform.SetParent(achievementsPanel.transform, false);
+            var worldIconRect = worldIconGO.AddComponent<RectTransform>();
+            // Center anchor at (270/1080, 1-398/1920) = (0.250, 0.793)
+            worldIconRect.anchorMin = new Vector2(0.250f, 0.793f);
+            worldIconRect.anchorMax = new Vector2(0.250f, 0.793f);
+            worldIconRect.pivot = new Vector2(0.5f, 0.5f);
+            worldIconRect.sizeDelta = new Vector2(200, 202);
+            achievementWorldIconImage = worldIconGO.AddComponent<Image>();
+            var generalIconSprite = LoadFullRectSprite("Sprites/UI/Achievements/achv_general_icon");
+            if (generalIconSprite != null)
+                achievementWorldIconImage.sprite = generalIconSprite;
+            achievementWorldIconImage.preserveAspect = true;
+            achievementWorldIconImage.raycastTarget = false;
+
+            // ============================================
+            // Layer 8: Points text - positioned below/beside icon for General tab
+            // Same area as icon: x(171-370), y(303-504)
+            // ============================================
+            var pointsTextGO = new GameObject("PointsText");
+            pointsTextGO.transform.SetParent(achievementsPanel.transform, false);
+            var pointsTextRect = pointsTextGO.AddComponent<RectTransform>();
+            // x: 171/1080≈0.158, 370/1080≈0.343
+            // y: 1-504/1920≈0.738, 1-303/1920≈0.842
+            // Shifted 5px higher (5/1920 ≈ 0.0026) from original Y anchors
+            pointsTextRect.anchorMin = new Vector2(0.158f, 0.7406f);
+            pointsTextRect.anchorMax = new Vector2(0.343f, 0.8446f);
+            pointsTextRect.offsetMin = Vector2.zero;
+            pointsTextRect.offsetMax = Vector2.zero;
+
+            achievementPointsText = pointsTextGO.AddComponent<TextMeshProUGUI>();
+            achievementPointsText.text = "0";
+            achievementPointsText.fontSize = 42;
+            achievementPointsText.fontStyle = FontStyles.Bold;
+            achievementPointsText.alignment = TextAlignmentOptions.Center;
+            achievementPointsText.color = Color.black;
+            achievementPointsText.enableAutoSizing = true;
+            achievementPointsText.fontSizeMin = 20;
+            achievementPointsText.fontSizeMax = 42;
+            if (FontManager.ExtraBold != null)
+                achievementPointsText.font = FontManager.ExtraBold;
+
+            // ============================================
+            // Layer 9: Close Button (X in upper-right)
+            // 118×118 sprite centered at pixel (974, 215) in 1080×1920 → anchor (0.9019, 0.8880)
+            // ============================================
+            var closeBtnGO = new GameObject("CloseButton");
+            closeBtnGO.transform.SetParent(achievementsPanel.transform, false);
+            var closeBtnRect = closeBtnGO.AddComponent<RectTransform>();
+            closeBtnRect.anchorMin = new Vector2(0.9019f, 0.8880f);
+            closeBtnRect.anchorMax = new Vector2(0.9019f, 0.8880f);
+            closeBtnRect.pivot = new Vector2(0.5f, 0.5f);
+            closeBtnRect.sizeDelta = new Vector2(118, 118);
+
+            var closeBtnNormalSprite = Resources.Load<Sprite>("Sprites/UI/Achievements/closebutton_2");
+            var closeBtnPressedSprite = Resources.Load<Sprite>("Sprites/UI/Achievements/closebutton_pressed");
+            var closeBtnImg = closeBtnGO.AddComponent<Image>();
+            closeBtnImg.sprite = closeBtnNormalSprite;
+            closeBtnImg.raycastTarget = true;
+
+            var closeBtn = closeBtnGO.AddComponent<Button>();
+            closeBtn.targetGraphic = closeBtnImg;
+            closeBtn.transition = Selectable.Transition.None;
+            closeBtn.onClick.AddListener(HideAchievements);
+
+            // Swap sprite on press (normal ↔ pressed)
+            var closePressHandler = closeBtnGO.AddComponent<UnityEngine.EventSystems.EventTrigger>();
+            var closePointerDown = new UnityEngine.EventSystems.EventTrigger.Entry();
+            closePointerDown.eventID = UnityEngine.EventSystems.EventTriggerType.PointerDown;
+            closePointerDown.callback.AddListener((data) => { closeBtnImg.sprite = closeBtnPressedSprite ?? closeBtnNormalSprite; });
+            closePressHandler.triggers.Add(closePointerDown);
+            var closePointerUp = new UnityEngine.EventSystems.EventTrigger.Entry();
+            closePointerUp.eventID = UnityEngine.EventSystems.EventTriggerType.PointerUp;
+            closePointerUp.callback.AddListener((data) => { closeBtnImg.sprite = closeBtnNormalSprite; });
+            closePressHandler.triggers.Add(closePointerUp);
+
+            Debug.Log("[UIManager] Achievements panel created (sprite-based UI)");
         }
 
         private void CreateAchievementTab(Transform parent, string tabId, string label)
@@ -5185,39 +5351,46 @@ Antonia and Joakim Engfors
             var tabGO = new GameObject($"Tab_{tabId}");
             tabGO.transform.SetParent(parent, false);
 
-            var tabLayout = tabGO.AddComponent<LayoutElement>();
-            tabLayout.minWidth = 120;
-            tabLayout.preferredWidth = 130;
-            tabLayout.minHeight = 45;
+            var tabLayoutElem = tabGO.AddComponent<LayoutElement>();
+            tabLayoutElem.preferredHeight = 63; // 109px tab at ~58% screen scale (15% larger)
+            tabLayoutElem.minHeight = 63;
 
             var tabImg = tabGO.AddComponent<Image>();
-            tabImg.sprite = CreateRoundedRectSprite(120, 45, 10, new Color(0.2f, 0.19f, 0.25f, 1f));
-            tabImg.type = Image.Type.Sliced;
+            tabImg.sprite = achvTabSprite;
+            tabImg.preserveAspect = true;
 
             var tabBtn = tabGO.AddComponent<Button>();
             tabBtn.targetGraphic = tabImg;
+            tabBtn.transition = UnityEngine.UI.Selectable.Transition.None;
 
             var capturedTab = tabId;
             tabBtn.onClick.AddListener(() => OnAchievementTabClicked(capturedTab));
 
+            // Tab label text
             var tabTextGO = new GameObject("Text");
             tabTextGO.transform.SetParent(tabGO.transform, false);
             var tabTextRect = tabTextGO.AddComponent<RectTransform>();
             tabTextRect.anchorMin = Vector2.zero;
             tabTextRect.anchorMax = Vector2.one;
-            tabTextRect.offsetMin = Vector2.zero;
-            tabTextRect.offsetMax = Vector2.zero;
+            tabTextRect.offsetMin = new Vector2(10, 0);
+            tabTextRect.offsetMax = new Vector2(-5, 0);
 
             var tabText = tabTextGO.AddComponent<TextMeshProUGUI>();
             tabText.text = label;
-            tabText.fontSize = 22;
+            tabText.fontSize = 16;
             tabText.fontStyle = FontStyles.Bold;
             tabText.alignment = TextAlignmentOptions.Center;
             tabText.color = Color.white;
-            FontManager.ApplyBold(tabText);
+            tabText.enableAutoSizing = true;
+            tabText.fontSizeMin = 8;
+            tabText.fontSizeMax = 16;
+            tabText.enableWordWrapping = true;
+            tabText.overflowMode = TextOverflowModes.Truncate;
+            if (FontManager.ExtraBold != null)
+                tabText.font = FontManager.ExtraBold;
 
             achievementTabButtons[tabId] = tabBtn;
-            achievementTabImages[tabId] = tabImg;
+            achievementTabSpriteImages[tabId] = tabImg;
         }
 
         private void OnAchievementTabClicked(string tab)
@@ -5225,17 +5398,16 @@ Antonia and Joakim Engfors
             AudioManager.Instance?.PlayButtonClick();
             currentAchievementTab = tab;
             UpdateAchievementTabVisuals();
+            UpdateAchievementTitleBar();
             RefreshAchievementsPanel();
         }
 
         private void UpdateAchievementTabVisuals()
         {
-            foreach (var kvp in achievementTabImages)
+            foreach (var kvp in achievementTabSpriteImages)
             {
                 bool isSelected = kvp.Key == currentAchievementTab;
-                kvp.Value.color = isSelected
-                    ? new Color(0.3f, 0.5f, 0.3f, 1f)
-                    : new Color(0.2f, 0.19f, 0.25f, 1f);
+                kvp.Value.sprite = isSelected ? achvTabPressedSprite : achvTabSprite;
             }
         }
 
@@ -5248,12 +5420,12 @@ Antonia and Joakim Engfors
                 Destroy(child.gameObject);
             }
             achievementTabButtons.Clear();
-            achievementTabImages.Clear();
+            achievementTabSpriteImages.Clear();
 
             foreach (var tabId in AchievementManager.Instance.AvailableTabs)
             {
-                string displayName = Achievement.GetTabDisplayName(tabId);
-                CreateAchievementTab(achievementTabsContainer, tabId, displayName);
+                string shortName = Achievement.GetTabShortName(tabId);
+                CreateAchievementTab(achievementTabsContainer, tabId, shortName);
             }
         }
 
@@ -5261,9 +5433,10 @@ Antonia and Joakim Engfors
         {
             if (achievementsPanel == null) return;
 
-            currentAchievementTab = Achievement.TAB_RECENT;
+            currentAchievementTab = Achievement.TAB_GENERAL;
             PopulateAchievementTabs();
             UpdateAchievementTabVisuals();
+            UpdateAchievementTitleBar();
             RefreshAchievementsPanel();
             achievementsPanel.SetActive(true);
             Debug.Log("[UIManager] Showing achievements panel");
@@ -5288,50 +5461,88 @@ Antonia and Joakim Engfors
                 Destroy(child.gameObject);
             }
 
-            // Update header count
-            int unlockedCount = AchievementManager.Instance.GetUnlockedCount();
-            int totalCount = AchievementManager.Instance.GetTotalCount();
-            if (achievementsCountText != null)
+            // Update points text
+            if (achievementPointsText != null && AchievementManager.Instance != null)
             {
-                achievementsCountText.text = $"{unlockedCount} / {totalCount}";
+                achievementPointsText.text = $"{AchievementManager.Instance.GetEarnedPoints()}";
             }
 
-            if (currentAchievementTab == Achievement.TAB_RECENT)
+            // All tabs show category-grouped cards (no more Recent tab)
+            RefreshCategoryTab(currentAchievementTab);
+        }
+
+        private void UpdateAchievementTitleBar()
+        {
+            if (achievementTitleBarText == null) return;
+
+            bool isGeneral = currentAchievementTab == Achievement.TAB_GENERAL;
+            var shadowText = achievementTitleBarText.transform.parent.Find("TitleBarShadow")?.GetComponent<TextMeshProUGUI>();
+
+            if (isGeneral)
             {
-                // Recent tab: show recently unlocked individual milestones
-                RefreshRecentTab();
+                achievementTitleBarText.text = "Achievement\nPoints";
+                if (shadowText != null) shadowText.text = "Achievement\nPoints";
+
+                // Show points text, show general icon
+                if (achievementPointsText != null)
+                {
+                    achievementPointsText.gameObject.SetActive(true);
+                    achievementPointsText.text = AchievementManager.Instance != null
+                        ? $"{AchievementManager.Instance.GetEarnedPoints()}"
+                        : "0";
+                }
+                if (achievementWorldIconImage != null)
+                {
+                    var generalIcon = LoadFullRectSprite("Sprites/UI/Achievements/achv_general_icon");
+                    if (generalIcon != null)
+                    {
+                        achievementWorldIconImage.sprite = generalIcon;
+                        achievementWorldIconImage.enabled = true;
+                    }
+                    else
+                    {
+                        achievementWorldIconImage.enabled = false;
+                    }
+                }
             }
             else
             {
-                // Category tabs: show achievement cards grouped by category
-                RefreshCategoryTab(currentAchievementTab);
+                // World tab: show world name on title bar
+                string displayName = GetWorldTitleBarName(currentAchievementTab);
+                achievementTitleBarText.text = displayName;
+                if (shadowText != null) shadowText.text = displayName;
+
+                // Hide points text
+                if (achievementPointsText != null)
+                    achievementPointsText.gameObject.SetActive(false);
+
+                // Show world icon
+                if (achievementWorldIconImage != null)
+                {
+                    var iconSprite = LoadFullRectSprite($"Sprites/UI/Achievements/achv_{currentAchievementTab}_icon");
+                    if (iconSprite != null)
+                    {
+                        achievementWorldIconImage.sprite = iconSprite;
+                        achievementWorldIconImage.enabled = true;
+                    }
+                    else
+                    {
+                        achievementWorldIconImage.enabled = false;
+                    }
+                }
             }
         }
 
-        private void RefreshRecentTab()
+        private static string GetWorldTitleBarName(string worldId)
         {
-            var recentlyUnlocked = AchievementManager.Instance.GetRecentlyUnlocked(50);
-
-            if (recentlyUnlocked.Count == 0)
+            switch (worldId)
             {
-                // Show empty state message
-                var emptyGO = new GameObject("EmptyState");
-                emptyGO.transform.SetParent(achievementsListContent, false);
-                var emptyLayout = emptyGO.AddComponent<LayoutElement>();
-                emptyLayout.minHeight = 200;
-                emptyLayout.preferredHeight = 200;
-                var emptyText = emptyGO.AddComponent<TextMeshProUGUI>();
-                emptyText.text = "No achievements unlocked yet.\nPlay levels to earn achievements!";
-                emptyText.fontSize = 24;
-                emptyText.alignment = TextAlignmentOptions.Center;
-                emptyText.color = new Color(0.5f, 0.5f, 0.55f, 1f);
-                FontManager.ApplyBold(emptyText);
-                return;
-            }
-
-            foreach (var (achievement, prog) in recentlyUnlocked)
-            {
-                CreateAchievementCard(achievement.groupId, achievement, prog);
+                case "island": return "St. Games\nIsland";
+                case "supermarket": return "Superstore";
+                case "farm": return "Wilty Acres";
+                case "tavern": return "The Oink\n& Anchor";
+                case "space": return "Space\nStation";
+                default: return Achievement.GetTabDisplayName(worldId);
             }
         }
 
@@ -5346,8 +5557,35 @@ Antonia and Joakim Engfors
         }
 
         /// <summary>
+        /// Inserts a line break at the best word boundary if text exceeds maxSingleLineChars.
+        /// Title reference: "Globe Trotter" (13 chars). Description reference: "Make 1000 Matches" (18 chars).
+        /// </summary>
+        private string FormatTextForWrapping(string text, int maxSingleLineChars)
+        {
+            if (text.Length <= maxSingleLineChars)
+                return text;
+
+            // Find the best word break point near the middle for balanced wrapping
+            int mid = text.Length / 2;
+            int bestBreak = -1;
+            for (int offset = 0; offset <= mid; offset++)
+            {
+                if (mid + offset < text.Length && text[mid + offset] == ' ')
+                { bestBreak = mid + offset; break; }
+                if (mid - offset > 0 && text[mid - offset] == ' ')
+                { bestBreak = mid - offset; break; }
+            }
+
+            if (bestBreak > 0)
+                return text.Substring(0, bestBreak) + "\n" + text.Substring(bestBreak + 1);
+
+            return text;
+        }
+
+        /// <summary>
         /// Creates a single achievement card for a group.
-        /// Shows the rectangle art at the current tier, with title, description, progress, and date.
+        /// Large rectangle art with title/description centered in the open area.
+        /// Progress bar with text below the rectangle.
         /// </summary>
         private void CreateAchievementCard(string groupId, Achievement specificAchievement = null, AchievementProgress specificProgress = null)
         {
@@ -5356,9 +5594,7 @@ Antonia and Joakim Engfors
             AchievementTier? currentTier = mgr.GetGroupCurrentTier(groupId);
             Achievement nextMilestone = mgr.GetNextMilestone(groupId);
             int groupProgress = mgr.GetGroupProgress(groupId);
-            DateTime? lastUnlockDate = mgr.GetGroupLastUnlockDate(groupId);
 
-            // If showing a specific milestone (recent tab), use that achievement for display
             Achievement displayAchievement = specificAchievement ?? nextMilestone ?? mgr.GetAchievementsByGroup(groupId)[0];
             bool isSpecificUnlocked = specificProgress != null && specificProgress.isUnlocked;
 
@@ -5366,7 +5602,6 @@ Antonia and Joakim Engfors
             string tierSuffix = "grey";
             if (isSpecificUnlocked && specificAchievement != null)
             {
-                // For recent tab, show the specific tier that was unlocked
                 tierSuffix = specificAchievement.tier.ToString().ToLower();
             }
             else if (currentTier.HasValue)
@@ -5376,8 +5611,25 @@ Antonia and Joakim Engfors
 
             string spritePath = $"Sprites/UI/Achievements/{artKey}_{tierSuffix}";
 
-            // Card container
-            float cardHeight = 180;
+            // Card container (no background — sits directly on yellow panel)
+            // Compute card height dynamically so progress bar matches rect width exactly.
+            // Rect art is 687×301 (aspect 2.283). Progress bar is 457×98 (aspect 4.663).
+            // Both are centered at the same width, derived from rect's rendered height.
+            const float RECT_ASPECT = 687f / 301f;  // 2.283
+            const float RECT_DISPLAY_HEIGHT = 216f;  // fixed height for the rectangle image
+            float renderedRectWidth = RECT_DISPLAY_HEIGHT * RECT_ASPECT; // ~494px
+
+            // Load progress bar sprite early to compute its aspect-correct height
+            var progressBarSprite = LoadFullRectSprite("Sprites/UI/Achievements/progress_bar");
+            const float BAR_ASPECT = 457f / 98f; // 4.663 fallback
+            float barAspect = BAR_ASPECT;
+            if (progressBarSprite != null)
+                barAspect = (float)progressBarSprite.texture.width / progressBarSprite.texture.height;
+            float barDisplayHeight = renderedRectWidth / barAspect; // ~106px
+
+            float cardHeight = RECT_DISPLAY_HEIGHT + barDisplayHeight;
+            float barFraction = barDisplayHeight / cardHeight; // bottom portion for bar
+
             var cardGO = new GameObject($"Card_{groupId}_{displayAchievement.id}");
             var cardRect = cardGO.AddComponent<RectTransform>();
             cardGO.transform.SetParent(achievementsListContent, false);
@@ -5387,21 +5639,18 @@ Antonia and Joakim Engfors
             cardLayout.minHeight = cardHeight;
             cardLayout.preferredHeight = cardHeight;
 
-            // Card background
-            var cardBg = cardGO.AddComponent<Image>();
-            cardBg.sprite = CreateRoundedRectSprite(100, 100, 12, new Color(0.12f, 0.11f, 0.15f, 1f));
-            cardBg.type = Image.Type.Sliced;
-
             // ============================================
-            // Achievement rectangle image (left side, ~55% of card width)
+            // Achievement rectangle image (upper portion, centered)
+            // Uses preserveAspect so rendered width = RECT_DISPLAY_HEIGHT × RECT_ASPECT
             // ============================================
             var rectImgGO = new GameObject("RectImage");
             rectImgGO.transform.SetParent(cardGO.transform, false);
             var rectImgRect = rectImgGO.AddComponent<RectTransform>();
-            rectImgRect.anchorMin = new Vector2(0, 0);
-            rectImgRect.anchorMax = new Vector2(0.58f, 1);
-            rectImgRect.offsetMin = new Vector2(8, 8);
-            rectImgRect.offsetMax = new Vector2(0, -8);
+            rectImgRect.anchorMin = new Vector2(0, barFraction);
+            rectImgRect.anchorMax = new Vector2(1, 1);
+            // Shift 30px left to center on the board
+            rectImgRect.offsetMin = new Vector2(-30, 0);
+            rectImgRect.offsetMax = new Vector2(-30, 0);
 
             var rectImg = rectImgGO.AddComponent<Image>();
             var rectSprite = LoadFullRectSprite(spritePath);
@@ -5412,114 +5661,144 @@ Antonia and Joakim Engfors
             }
             else
             {
-                rectImg.color = new Color(0.2f, 0.2f, 0.25f, 1f);
+                rectImg.color = new Color(0.7f, 0.7f, 0.7f, 1f);
             }
 
-            // ============================================
-            // Text area (right side, ~42% of card width)
-            // ============================================
-            var textAreaGO = new GameObject("TextArea");
-            textAreaGO.transform.SetParent(cardGO.transform, false);
-            var textAreaRect = textAreaGO.AddComponent<RectTransform>();
-            textAreaRect.anchorMin = new Vector2(0.60f, 0);
-            textAreaRect.anchorMax = new Vector2(1, 1);
-            textAreaRect.offsetMin = new Vector2(0, 10);
-            textAreaRect.offsetMax = new Vector2(-10, -10);
-
-            // Title (Benzin Bold, size 21)
+            // Title text ON the rectangle — centered in the open area right of the badge
+            // Badge circle occupies ~38% of rectangle width, text area is 38%-97%
+            // Shifted 10px left (10/687 ≈ 0.0146) from original anchors
             var titleGO = new GameObject("Title");
-            titleGO.transform.SetParent(textAreaGO.transform, false);
+            titleGO.transform.SetParent(rectImgGO.transform, false);
             var titleTextRect = titleGO.AddComponent<RectTransform>();
-            titleTextRect.anchorMin = new Vector2(0, 0.65f);
-            titleTextRect.anchorMax = new Vector2(1, 1);
+            titleTextRect.anchorMin = new Vector2(0.397f, 0.49f);
+            titleTextRect.anchorMax = new Vector2(0.867f, 0.756f);
             titleTextRect.offsetMin = Vector2.zero;
             titleTextRect.offsetMax = Vector2.zero;
 
             var titleText = titleGO.AddComponent<TextMeshProUGUI>();
-            titleText.text = displayAchievement.name;
-            titleText.fontSize = 21;
+            // Strip world name prefix from titles (e.g., "Tavern: Making Progress" → "Making Progress")
+            string titleStr = displayAchievement.name;
+            if (titleStr.Contains(": "))
+                titleStr = titleStr.Substring(titleStr.IndexOf(": ") + 2);
+            // Word-wrap titles longer than "Globe Trotter" (13 chars max single-line width)
+            titleStr = FormatTextForWrapping(titleStr, 13);
+            titleText.text = titleStr;
+            titleText.fontSize = 24;
             titleText.fontStyle = FontStyles.Bold;
-            titleText.alignment = TextAlignmentOptions.TopLeft;
-            titleText.color = Color.white;
+            titleText.alignment = TextAlignmentOptions.Center;
+            titleText.color = Color.black;
             titleText.enableWordWrapping = true;
+            titleText.enableAutoSizing = true;
+            titleText.fontSizeMin = 14;
+            titleText.fontSizeMax = 24;
             FontManager.ApplyBold(titleText);
 
-            // Description (Arial, size 18)
+            // Description text ON the rectangle (below title, centered in open area)
+            // Shifted 10px left (10/687 ≈ 0.0146) from original anchors
             var descGO = new GameObject("Description");
-            descGO.transform.SetParent(textAreaGO.transform, false);
+            descGO.transform.SetParent(rectImgGO.transform, false);
             var descTextRect = descGO.AddComponent<RectTransform>();
-            descTextRect.anchorMin = new Vector2(0, 0.35f);
-            descTextRect.anchorMax = new Vector2(1, 0.65f);
+            descTextRect.anchorMin = new Vector2(0.397f, 0.227f);
+            descTextRect.anchorMax = new Vector2(0.867f, 0.49f);
             descTextRect.offsetMin = Vector2.zero;
             descTextRect.offsetMax = Vector2.zero;
 
             var descText = descGO.AddComponent<TextMeshProUGUI>();
-            descText.text = displayAchievement.description;
+            // Word-wrap descriptions longer than "Make 1000 Matches" (18 chars max single-line width)
+            string descStr = FormatTextForWrapping(displayAchievement.description, 18);
+            descText.text = descStr;
             descText.fontSize = 18;
-            descText.alignment = TextAlignmentOptions.TopLeft;
-            descText.color = new Color(0.6f, 0.6f, 0.65f, 1f);
+            descText.alignment = TextAlignmentOptions.Center;
+            descText.color = new Color(0.2f, 0.2f, 0.2f, 1f);
             descText.enableWordWrapping = true;
-            // Arial is the default TMP font if not overridden; for Benzin override use FontManager.ApplyBold
-            // Leaving this as default (inherits TMP default which is Benzin Bold per project setup)
+            descText.enableAutoSizing = true;
+            descText.fontSizeMin = 12;
+            descText.fontSizeMax = 18;
 
-            // Progress text "X / Y"
-            var progressGO = new GameObject("Progress");
-            progressGO.transform.SetParent(textAreaGO.transform, false);
-            var progressTextRect = progressGO.AddComponent<RectTransform>();
-            progressTextRect.anchorMin = new Vector2(0, 0.05f);
-            progressTextRect.anchorMax = new Vector2(0.55f, 0.35f);
-            progressTextRect.offsetMin = Vector2.zero;
-            progressTextRect.offsetMax = Vector2.zero;
-
-            var progressText = progressGO.AddComponent<TextMeshProUGUI>();
-
-            // Determine what to show for progress
-            if (specificAchievement != null && isSpecificUnlocked)
+            // ============================================
+            // Progress bar area (below rectangle)
+            // ============================================
+            int progressCurrent;
+            int progressTarget;
+            if (nextMilestone != null)
             {
-                // Recent tab: show the completed milestone target
-                progressText.text = $"{specificProgress.currentValue} / {specificAchievement.targetValue}";
-            }
-            else if (nextMilestone != null)
-            {
-                // Working toward next milestone
-                progressText.text = $"{groupProgress} / {nextMilestone.targetValue}";
+                progressCurrent = groupProgress;
+                progressTarget = nextMilestone.targetValue;
             }
             else
             {
-                // All milestones complete - show last milestone
                 var allInGroup = mgr.GetAchievementsByGroup(groupId);
                 var lastMilestone = allInGroup[allInGroup.Count - 1];
-                progressText.text = $"{groupProgress} / {lastMilestone.targetValue}";
+                progressCurrent = groupProgress;
+                progressTarget = lastMilestone.targetValue;
             }
+            float progressFraction = progressTarget > 0 ? Mathf.Clamp01((float)progressCurrent / progressTarget) : 0f;
 
-            progressText.fontSize = 22;
-            progressText.fontStyle = FontStyles.Bold;
-            progressText.alignment = TextAlignmentOptions.BottomLeft;
-            progressText.color = currentTier.HasValue ? GetTierColor(currentTier.Value) : new Color(0.5f, 0.5f, 0.55f, 1f);
-            FontManager.ApplyBold(progressText);
+            // Progress bar container — centered below rect, exact same pixel width
+            // Uses fixed sizeDelta so it matches the rendered rect width exactly
+            var barContainerGO = new GameObject("ProgressBar");
+            barContainerGO.transform.SetParent(cardGO.transform, false);
+            var barContainerRect = barContainerGO.AddComponent<RectTransform>();
+            barContainerRect.anchorMin = new Vector2(0.5f, 0);
+            barContainerRect.anchorMax = new Vector2(0.5f, 0);
+            barContainerRect.pivot = new Vector2(0.5f, 0);
+            barContainerRect.sizeDelta = new Vector2(renderedRectWidth, barDisplayHeight);
+            // Shift 30px left to match rect image centering
+            barContainerRect.anchoredPosition = new Vector2(-30, 0);
 
-            // Date text
-            DateTime? dateToShow = specificProgress != null && specificProgress.isUnlocked
-                ? specificProgress.unlockedAt
-                : lastUnlockDate;
-
-            if (dateToShow.HasValue)
+            // Green fill behind the bar frame (visible through transparent center)
+            // Inset to stay inside rounded corners of frame (457×98 sprite, ~14px corner radius)
+            const float FILL_INSET_X = 14f / 457f; // ~3% horizontal padding for rounded corners
+            const float FILL_INSET_Y = 14f / 98f;  // ~14% vertical padding for rounded corners
+            float fillLeft = FILL_INSET_X;
+            float fillRight = 1f - FILL_INSET_X;
+            float fillWidth = fillRight - fillLeft;
+            if (progressFraction > 0f)
             {
-                var dateGO = new GameObject("Date");
-                dateGO.transform.SetParent(textAreaGO.transform, false);
-                var dateTextRect = dateGO.AddComponent<RectTransform>();
-                dateTextRect.anchorMin = new Vector2(0.55f, 0.05f);
-                dateTextRect.anchorMax = new Vector2(1, 0.35f);
-                dateTextRect.offsetMin = Vector2.zero;
-                dateTextRect.offsetMax = Vector2.zero;
-
-                var dateText = dateGO.AddComponent<TextMeshProUGUI>();
-                dateText.text = dateToShow.Value.ToString("MMM d, yyyy");
-                dateText.fontSize = 16;
-                dateText.alignment = TextAlignmentOptions.BottomRight;
-                dateText.color = new Color(0.5f, 0.5f, 0.55f, 1f);
-                FontManager.ApplyBold(dateText);
+                var barFillGO = new GameObject("ProgressBarFill");
+                barFillGO.transform.SetParent(barContainerGO.transform, false);
+                var barFillRect = barFillGO.AddComponent<RectTransform>();
+                barFillRect.anchorMin = new Vector2(fillLeft, FILL_INSET_Y);
+                barFillRect.anchorMax = new Vector2(fillLeft + progressFraction * fillWidth, 1f - FILL_INSET_Y);
+                barFillRect.offsetMin = Vector2.zero;
+                barFillRect.offsetMax = Vector2.zero;
+                var barFillImg = barFillGO.AddComponent<Image>();
+                barFillImg.color = new Color(0.25f, 0.72f, 0.20f, 1f); // Green
             }
+
+            // Progress bar frame sprite (fills container exactly — container is already aspect-correct)
+            var barFrameGO = new GameObject("ProgressBarFrame");
+            barFrameGO.transform.SetParent(barContainerGO.transform, false);
+            var barFrameRect = barFrameGO.AddComponent<RectTransform>();
+            barFrameRect.anchorMin = Vector2.zero;
+            barFrameRect.anchorMax = Vector2.one;
+            barFrameRect.offsetMin = Vector2.zero;
+            barFrameRect.offsetMax = Vector2.zero;
+            var barFrameImg = barFrameGO.AddComponent<Image>();
+            if (progressBarSprite != null)
+            {
+                barFrameImg.sprite = progressBarSprite;
+            }
+
+            // Progress text centered on the bar
+            var progressTextGO = new GameObject("ProgressText");
+            progressTextGO.transform.SetParent(barContainerGO.transform, false);
+            var progressTextRect = progressTextGO.AddComponent<RectTransform>();
+            progressTextRect.anchorMin = Vector2.zero;
+            progressTextRect.anchorMax = Vector2.one;
+            progressTextRect.offsetMin = Vector2.zero;
+            progressTextRect.offsetMax = Vector2.zero;
+
+            var progressText = progressTextGO.AddComponent<TextMeshProUGUI>();
+            progressText.text = $"{progressCurrent}/{progressTarget}";
+            progressText.fontSize = 20;
+            progressText.fontStyle = FontStyles.Bold;
+            progressText.alignment = TextAlignmentOptions.Center;
+            progressText.color = Color.white;
+            progressText.enableAutoSizing = true;
+            progressText.fontSizeMin = 12;
+            progressText.fontSizeMax = 20;
+            FontManager.ApplyBold(progressText);
         }
 
         private Color GetTierColor(AchievementTier tier)

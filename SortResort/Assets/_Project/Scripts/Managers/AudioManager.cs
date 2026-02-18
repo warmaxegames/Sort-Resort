@@ -33,8 +33,14 @@ namespace SortResort
         [SerializeField] private AudioClip failureClip;
         [SerializeField] private AudioClip buttonClickClip;
         [SerializeField] private AudioClip starEarnedClip;
+        [SerializeField] private AudioClip star1Clip;
+        [SerializeField] private AudioClip star2Clip;
+        [SerializeField] private AudioClip star3Clip;
+        [SerializeField] private AudioClip levelCompleteClip;
+        [SerializeField] private AudioClip timerCountUpClip;
         [SerializeField] private AudioClip warpClip;
         [SerializeField] private AudioClip achievementClip;
+        [SerializeField] private AudioClip portalClip;
 
         private bool isUsingSourceA = true;
         private Coroutine crossfadeCoroutine;
@@ -88,6 +94,16 @@ namespace SortResort
                 victoryClip = Resources.Load<AudioClip>("Audio/SFX/victory");
             if (starEarnedClip == null)
                 starEarnedClip = Resources.Load<AudioClip>("Audio/SFX/3star");
+            if (star1Clip == null)
+                star1Clip = Resources.Load<AudioClip>("Audio/SFX/1star");
+            if (star2Clip == null)
+                star2Clip = Resources.Load<AudioClip>("Audio/SFX/2star");
+            if (star3Clip == null)
+                star3Clip = Resources.Load<AudioClip>("Audio/SFX/3star");
+            if (levelCompleteClip == null)
+                levelCompleteClip = Resources.Load<AudioClip>("Audio/SFX/levelcompletesound");
+            if (timerCountUpClip == null)
+                timerCountUpClip = Resources.Load<AudioClip>("Audio/SFX/timer");
 
             // UI
             if (buttonClickClip == null)
@@ -96,8 +112,10 @@ namespace SortResort
                 warpClip = Resources.Load<AudioClip>("Audio/UI/warp");
             if (achievementClip == null)
                 achievementClip = Resources.Load<AudioClip>("Audio/SFX/achievement_sound");
+            if (portalClip == null)
+                portalClip = Resources.Load<AudioClip>("Audio/SFX/portal");
 
-            Debug.Log($"[AudioManager] Audio clips loaded - match:{matchClip != null}, unlock:{unlockClip != null}, victory:{victoryClip != null}, button:{buttonClickClip != null}, warp:{warpClip != null}, achievement:{achievementClip != null}");
+            Debug.Log($"[AudioManager] Audio clips loaded - match:{matchClip != null}, unlock:{unlockClip != null}, victory:{victoryClip != null}, button:{buttonClickClip != null}, warp:{warpClip != null}, achievement:{achievementClip != null}, portal:{portalClip != null}");
         }
 
         private void InitializeAudioSources()
@@ -581,8 +599,21 @@ namespace SortResort
         public void PlayFailureSound() => PlaySFX(failureClip);
         public void PlayButtonClick() => PlayUI(buttonClickClip);
         public void PlayStarEarned() => PlaySFX(starEarnedClip);
-        public void PlayWarpSound() => PlayUI(warpClip);
+        public void PlayLevelCompleteSound() => PlaySFX(levelCompleteClip);
+        public void PlayTimerCountUp() => PlaySFX(timerCountUpClip);
+        public void PlayStarEarned(int starNumber)
+        {
+            switch (starNumber)
+            {
+                case 1: PlaySFX(star1Clip); break;
+                case 2: PlaySFX(star2Clip); break;
+                case 3: PlaySFX(star3Clip); break;
+                default: PlaySFX(starEarnedClip); break;
+            }
+        }
+        public void PlayWarpSound() => PlayUI(portalClip ?? warpClip);
         public void PlayAchievementSound() => PlaySFX(achievementClip, 1.3f);
+        public void PlayPortalSound() => PlaySFX(portalClip);
 
         /// <summary>
         /// Play victory sound (stops gameplay audio first)

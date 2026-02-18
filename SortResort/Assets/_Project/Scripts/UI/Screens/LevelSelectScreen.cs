@@ -61,9 +61,12 @@ namespace SortResort.UI
         private CanvasGroup tooltipCanvasGroup;
         private Coroutine tooltipCoroutine;
 
+#if UNITY_EDITOR
         // Debug: hard mode override
         private HashSet<string> debugUnlockedWorlds = new HashSet<string>();
         private TextMeshProUGUI debugButtonText;
+        private TextMeshProUGUI debugUnlockLevelsText;
+#endif
         private Transform topBarTransform;
 
         public System.Action<string, int> OnLevelSelected;
@@ -86,7 +89,10 @@ namespace SortResort.UI
             LoadPortalSprites();
             SetupWorldNavigation();
             CreateModeTabs();
+#if UNITY_EDITOR
+            CreateDebugUnlockLevelsButton();
             CreateDebugButton();
+#endif
             CreateTooltip();
             CreateLevelGrid();
 
@@ -249,7 +255,9 @@ namespace SortResort.UI
 
         private bool IsHardModeEffectivelyUnlocked(string worldId)
         {
+#if UNITY_EDITOR
             if (debugUnlockedWorlds.Contains(worldId)) return true;
+#endif
             return SaveManager.Instance?.IsHardModeUnlocked(worldId) ?? false;
         }
 
@@ -333,8 +341,10 @@ namespace SortResort.UI
                 }
             }
 
+#if UNITY_EDITOR
             // Update debug button text
             UpdateDebugButtonText();
+#endif
         }
 
         // ============================================
@@ -514,7 +524,7 @@ namespace SortResort.UI
             lockRect.offsetMax = Vector2.zero;
 
             var lockBg = lockGO.AddComponent<Image>();
-            lockBg.color = new Color(0, 0, 0, 0.6f);
+            lockBg.color = new Color(0, 0, 0, 0f);
 
             // Create LevelButton component
             var levelBtn = btnGO.AddComponent<LevelButton>();
@@ -754,6 +764,76 @@ namespace SortResort.UI
             topBarTransform = topBar;
         }
 
+#if UNITY_EDITOR
+        private void CreateDebugUnlockLevelsButton()
+        {
+            Transform parent = topBarTransform ?? modeTabContainer?.parent;
+            if (parent == null) return;
+
+            var btnGO = new GameObject("DebugUnlockLevelsBtn");
+            btnGO.transform.SetParent(parent, false);
+            var rect = btnGO.AddComponent<RectTransform>();
+
+            if (topBarTransform != null)
+            {
+                // Position to the left of the hard mode button (which is at -325)
+                rect.anchorMin = new Vector2(1, 0.5f);
+                rect.anchorMax = new Vector2(1, 0.5f);
+                rect.pivot = new Vector2(1, 0.5f);
+                rect.anchoredPosition = new Vector2(-425, 0);
+                rect.sizeDelta = new Vector2(90, 90);
+            }
+            else
+            {
+                rect.anchorMin = new Vector2(0.35f, 0.96f);
+                rect.anchorMax = new Vector2(0.64f, 0.995f);
+                rect.offsetMin = Vector2.zero;
+                rect.offsetMax = Vector2.zero;
+            }
+
+            var bg = btnGO.AddComponent<Image>();
+            bg.color = new Color(0.4f, 0.4f, 0.4f, 0.8f);
+
+            var btn = btnGO.AddComponent<Button>();
+            btn.targetGraphic = bg;
+            btn.onClick.AddListener(OnDebugUnlockLevelsClicked);
+
+            var textGO = new GameObject("Text");
+            textGO.transform.SetParent(btnGO.transform, false);
+            var textRect = textGO.AddComponent<RectTransform>();
+            textRect.anchorMin = Vector2.zero;
+            textRect.anchorMax = Vector2.one;
+            textRect.offsetMin = new Vector2(4, 2);
+            textRect.offsetMax = new Vector2(-4, -2);
+
+            debugUnlockLevelsText = textGO.AddComponent<TextMeshProUGUI>();
+            debugUnlockLevelsText.text = "UNLOCK\nLEVELS";
+            debugUnlockLevelsText.fontSize = 16;
+            debugUnlockLevelsText.fontStyle = FontStyles.Bold;
+            debugUnlockLevelsText.alignment = TextAlignmentOptions.Center;
+            debugUnlockLevelsText.color = new Color(0.5f, 1f, 0.5f);
+        }
+
+        private void OnDebugUnlockLevelsClicked()
+        {
+            if (SaveManager.Instance == null) return;
+
+            string worldId = worldIds[currentWorldIndex];
+
+            for (int i = 1; i <= levelsPerWorld; i++)
+            {
+                if (!SaveManager.Instance.IsLevelCompleted(worldId, i))
+                {
+                    SaveManager.Instance.SaveLevelProgress(worldId, i, 1, 60f);
+                }
+            }
+
+            AudioManager.Instance?.PlayButtonClick();
+            RefreshDisplay();
+            UpdateModeTabVisuals();
+            Debug.Log($"[LevelSelectScreen] Debug: Unlocked all {levelsPerWorld} levels for {worldId} in mode {selectedMode}");
+        }
+
         private void CreateDebugButton()
         {
             // Place in topBar if available, otherwise fall back to level select panel
@@ -842,6 +922,7 @@ namespace SortResort.UI
             RefreshDisplay();
             Debug.Log($"[LevelSelectScreen] Debug Hard Mode toggle: {worldId} now {(IsHardModeEffectivelyUnlocked(worldId) ? "UNLOCKED" : "LOCKED")}");
         }
+#endif
 
         private void OnDestroy()
         {

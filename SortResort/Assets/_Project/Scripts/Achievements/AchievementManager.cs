@@ -95,7 +95,6 @@ namespace SortResort
         private void BuildAvailableTabs()
         {
             availableTabs.Clear();
-            availableTabs.Add(Achievement.TAB_RECENT);
             availableTabs.Add(Achievement.TAB_GENERAL);
             foreach (var world in RegisteredWorlds)
             {
@@ -278,7 +277,7 @@ namespace SortResort
 
                 AddAchievement(new Achievement(
                     $"{worldId}_levels_{levelMilestones[i]}", $"{worldName}: {levelNames[i]}",
-                    $"Complete {levelMilestones[i]} Levels in {worldName}",
+                    $"Complete {levelMilestones[i]} Levels in this World",
                     AchievementCategory.Progression, levelTiers[i], levelMilestones[i],
                     new[] { new AchievementReward(RewardType.Coins, levelMilestones[i] * 3) },
                     AchievementTrackingType.Unique,
@@ -298,7 +297,7 @@ namespace SortResort
 
                 AddAchievement(new Achievement(
                     $"{worldId}_stars_{starMilestones[i]}", $"{worldName}: {starNames[i]}",
-                    $"Earn {starMilestones[i]} Stars in {worldName}",
+                    $"Earn {starMilestones[i]} Stars in this World",
                     AchievementCategory.Mastery, starTiers[i], starMilestones[i],
                     new[] { new AchievementReward(RewardType.Coins, starMilestones[i]) },
                     AchievementTrackingType.Total,

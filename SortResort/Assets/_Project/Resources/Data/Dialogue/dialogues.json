@@ -278,7 +278,7 @@
             "triggerId": "farm_first_play",
             "playOnce": true,
             "lines": [
-                { "mascotId": "chicken", "expression": "worried", "text": "Oh! A visitor! I'm sorry everything's such a mess!" },
+                { "mascotId": "chicken", "expression": "eggs", "text": "Oh! A visitor! I'm sorry everything's such a mess!" },
                 { "mascotId": "chicken", "expression": "default", "text": "I'm Mara. This was a lovely farm before the portals started mixing everything up." },
                 { "mascotId": "chicken", "expression": "worried", "text": "Dimensional turnips in the wheat field, space rocks in the chicken coop... please, can you help?" }
             ]
@@ -288,7 +288,7 @@
             "triggerId": "farm_level_10_complete",
             "playOnce": true,
             "lines": [
-                { "mascotId": "chicken", "expression": "happy", "text": "Oh, that's so much better! Thank you!" },
+                { "mascotId": "chicken", "expression": "eggs", "text": "Oh, that's so much better! Thank you!" },
                 { "mascotId": "chicken", "expression": "default", "text": "Yes, I was in Dr. Miller's lab. The alpaca by the window." },
                 { "mascotId": "chicken", "expression": "worried", "text": "I still have nightmares about that day. Everything just... tore apart." }
             ]
@@ -299,7 +299,7 @@
             "playOnce": true,
             "lines": [
                 { "mascotId": "chicken", "expression": "default", "text": "I landed here and the farm sort of... grew around me." },
-                { "mascotId": "chicken", "expression": "default", "text": "The dimensional energy made everything fertile. Too fertile." },
+                { "mascotId": "chicken", "expression": "tired", "text": "The dimensional energy made everything fertile. Too fertile." },
                 { "mascotId": "chicken", "expression": "worried", "text": "Things grow where they shouldn't. Crops from worlds I've never seen." }
             ]
         },
@@ -308,7 +308,7 @@
             "triggerId": "farm_level_30_complete",
             "playOnce": true,
             "lines": [
-                { "mascotId": "chicken", "expression": "happy", "text": "Tommy sent his regards? That grumpy raccoon!" },
+                { "mascotId": "chicken", "expression": "eggs", "text": "Tommy sent his regards? That grumpy raccoon!" },
                 { "mascotId": "chicken", "expression": "default", "text": "We used to share a wall in the lab. He'd steal food through the bars." },
                 { "mascotId": "chicken", "expression": "worried", "text": "I hope he's eating properly. Raccoons are terrible at nutrition." }
             ]
@@ -318,7 +318,7 @@
             "triggerId": "farm_level_40_complete",
             "playOnce": true,
             "lines": [
-                { "mascotId": "chicken", "expression": "worried", "text": "I need to show you something. I found it in the north field." },
+                { "mascotId": "chicken", "expression": "tired", "text": "I need to show you something. I found it in the north field." },
                 { "mascotId": "chicken", "expression": "default", "text": "A notebook. It drifted through a portal about a year ago." },
                 { "mascotId": "chicken", "expression": "default", "text": "It's Dr. Miller's handwriting. I'd recognize it anywhere." }
             ]
@@ -341,7 +341,7 @@
             "lines": [
                 { "mascotId": "chicken", "expression": "default", "text": "There's more in the notebook. She wrote about us." },
                 { "mascotId": "chicken", "expression": "default", "text": "\"If my animals survived, they'll try to help. They always did.\"" },
-                { "mascotId": "chicken", "expression": "happy", "text": "She knew we'd come looking for her." },
+                { "mascotId": "chicken", "expression": "eggs", "text": "She knew we'd come looking for her." },
                 { "mascotId": "chicken", "expression": "worried", "text": "But she also wrote \"Don't rush. The multiverse is fragile.\"" }
             ]
         },
@@ -361,7 +361,7 @@
             "triggerId": "farm_level_80_complete",
             "playOnce": true,
             "lines": [
-                { "mascotId": "chicken", "expression": "happy", "text": "The farm is really coming together! Look at those fields!" },
+                { "mascotId": "chicken", "expression": "eggs", "text": "The farm is really coming together! Look at those fields!" },
                 { "mascotId": "chicken", "expression": "worried", "text": "But I've noticed the portals are changing. Getting... organized." },
                 { "mascotId": "chicken", "expression": "default", "text": "Almost like something is guiding them into patterns." }
             ]
@@ -374,7 +374,7 @@
                 { "mascotId": "chicken", "expression": "default", "text": "I can feel new portal signatures forming." },
                 { "mascotId": "chicken", "expression": "default", "text": "One of them smells like old wood and spilled ale." },
                 { "mascotId": "chicken", "expression": "happy", "text": "A tavern! Mason always did love the kitchen at the lab." },
-                { "mascotId": "chicken", "expression": "worried", "text": "Be careful. The portals ahead feel stronger than anything we've seen." }
+                { "mascotId": "chicken", "expression": "tired", "text": "Be careful. The portals ahead feel stronger than anything we've seen." }
             ]
         },
         {
@@ -382,7 +382,7 @@
             "triggerId": "farm_level_100_complete",
             "playOnce": true,
             "lines": [
-                { "mascotId": "chicken", "expression": "happy", "text": "The farm is saved! Thank you, truly." },
+                { "mascotId": "chicken", "expression": "eggs", "text": "The farm is saved! Thank you, truly." },
                 { "mascotId": "chicken", "expression": "default", "text": "Take the notebook. You'll need it more than me." },
                 { "mascotId": "chicken", "expression": "worried", "text": "And please... find Dr. Miller. Tell her we're okay." },
                 { "mascotId": "chicken", "expression": "happy", "text": "Tell her the alpaca by the window still misses her." }
@@ -679,7 +679,7 @@
             "triggerId": "hardmode_farm_unlock",
             "playOnce": true,
             "lines": [
-                { "mascotId": "chicken", "expression": "happy", "text": "Oh my! You've completed both Star and Timer modes!" },
+                { "mascotId": "chicken", "expression": "eggs", "text": "Oh my! You've completed both Star and Timer modes!" },
                 { "mascotId": "chicken", "expression": "default", "text": "Hard Mode is unlocked. I believe in you!" }
             ]
         },

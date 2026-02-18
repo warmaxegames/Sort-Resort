@@ -193,6 +193,23 @@ namespace SortResort
             // Capitalize first letter for world names
             return char.ToUpper(tab[0]) + tab.Substring(1).ToLower();
         }
+
+        /// <summary>
+        /// Get tab label for the vertical sprite tabs (uses world display names)
+        /// </summary>
+        public static string GetTabShortName(string tab)
+        {
+            if (string.IsNullOrEmpty(tab) || tab == TAB_GENERAL) return "GENERAL";
+            switch (tab)
+            {
+                case "island": return "ST. GAMES\nISLAND";
+                case "supermarket": return "SUPERSTORE";
+                case "farm": return "WILTY\nACRES";
+                case "tavern": return "THE OINK\n& ANCHOR";
+                case "space": return "SPACE\nSTATION";
+                default: return tab.ToUpper();
+            }
+        }
     }
 
     /// <summary>

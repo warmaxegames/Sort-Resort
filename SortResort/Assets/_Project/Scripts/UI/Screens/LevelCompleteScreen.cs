@@ -196,6 +196,8 @@ namespace SortResort.UI
                     mascotAnimator = mascotImage.gameObject.AddComponent<MascotAnimator>();
                 }
 
+                mascotAnimator.FrameRate = MascotAnimator.GetVictoryAnimationFPS(worldId);
+
                 if (mascotAnimator.LoadFrames(worldFolder, animationName))
                 {
                     Debug.Log("[LevelCompleteScreen] Mascot animation loaded successfully, playing...");

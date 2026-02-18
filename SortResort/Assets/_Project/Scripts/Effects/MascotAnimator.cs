@@ -12,7 +12,7 @@ namespace SortResort
     public class MascotAnimator : MonoBehaviour
     {
         [Header("Animation Settings")]
-        [SerializeField] private float frameRate = 24f;
+        [SerializeField] private float frameRate = 30f;
         [SerializeField] private bool loop = false;
         [SerializeField] private bool playOnEnable = false;
 
@@ -140,6 +140,11 @@ namespace SortResort
         public bool IsPlaying => isPlaying;
 
         /// <summary>
+        /// Set the frame rate for this animator instance
+        /// </summary>
+        public float FrameRate { get => frameRate; set => frameRate = value; }
+
+        /// <summary>
         /// Get the total duration of the animation in seconds
         /// </summary>
         public float Duration => frames != null ? frames.Length / frameRate : 0f;
@@ -184,10 +189,24 @@ namespace SortResort
                 "island" => "whiskerthumbsup",
                 // Add more worlds as animations are created
                 // "supermarket" => "tommythumbsup",
-                // "farm" => "marathumbsup",
+                "farm" => "marathumbsup",
                 // "tavern" => "hogthumbsup",
                 // "space" => "leikathumbsup",
                 _ => null
+            };
+        }
+
+        /// <summary>
+        /// Get the frame rate for a world's victory animation.
+        /// Tuned so all animations complete in approximately the same duration (~1.87s).
+        /// </summary>
+        public static float GetVictoryAnimationFPS(string worldId)
+        {
+            return worldId?.ToLower() switch
+            {
+                "island" => 30f,  // 56 frames / 30fps = 1.87s
+                "farm" => 44f,    // 83 frames / 44fps = 1.89s
+                _ => 30f
             };
         }
 
