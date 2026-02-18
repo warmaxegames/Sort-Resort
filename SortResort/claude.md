@@ -48,25 +48,26 @@
 ## TODO List
 
 ### Priority Items
-1. **Level Complete Screen** - Remaining:
+1. **Improve Solver for Heavily-Locked Levels** - Solver scores 115 moves on L77, player achieves 81 (34 moves / 30% better). Player move sequence captured in `SolverAlerts/solver_alert_island_level_077_2026-02-17_23-16-13.txt`. Greedy solver makes poor unlock ordering decisions on levels with many locked containers (L77: 5 locked, 34 total unlock matches). Likely affects other high-locked levels too.
+2. **Level Complete Screen** - Remaining:
    - Animated mascot art assets for each world (currently only Island has thumbsup animation)
    - Audio: music and sound effects for each scenario (1-star, 2-star, 3-star)
-2. **Level Failed Screen** - Remaining:
+3. **Level Failed Screen** - Remaining:
    - Sound effect audio for failed screen
-3. **World-Specific Lock Overlays** - Need custom designs for:
+4. **World-Specific Lock Overlays** - Need custom designs for:
    - Farm
    - Supermarket
    - Space
-4. **World-Specific Dialogue Boxes** - Need custom designs for:
+5. **World-Specific Dialogue Boxes** - Need custom designs for:
    - Supermarket
-5. **Generate Levels for Remaining Worlds** - Create world config files like `generate_island_levels.py`:
+6. **Generate Levels for Remaining Worlds** - Create world config files like `generate_island_levels.py`:
    - Farm
    - Supermarket
    - Tavern
    - Space
-6. **World Icon Assets** - HUD world icons for non-Island worlds:
+7. **World Icon Assets** - HUD world icons for non-Island worlds:
    - Supermarket, Farm, Tavern, Space
-7. **Mobile/Device Testing** - Test performance on mobile devices, tablets, different screen sizes
+8. **Mobile/Device Testing** - Test performance on mobile devices, tablets, different screen sizes
 
 ### Future Lower Priority Items
 8. **Trophy Room** - World-specific and achievement trophies:

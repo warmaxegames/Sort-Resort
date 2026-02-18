@@ -836,7 +836,9 @@ namespace SortResort
             if (itemsRemaining > 0) return;
 
             // All items cleared!
-            Debug.Log("[LevelManager] Level complete!");
+            var mode = GameManager.Instance?.CurrentGameMode ?? GameMode.FreePlay;
+            int movesUsed = GameManager.Instance?.CurrentMoveCount ?? 0;
+            Debug.LogWarning($"[LevelManager] === LEVEL COMPLETE === Mode: {mode}, Moves: {movesUsed}, Recording: {isRecording}, Thresholds: {(starThresholds != null ? string.Join(",", starThresholds) : "NULL")}");
 
             // Stop recording and print moves if recording was active
             if (isRecording)
@@ -850,19 +852,21 @@ namespace SortResort
             OnLevelCleared?.Invoke();
 
             // Calculate stars based on mode
-            var mode = GameManager.Instance?.CurrentGameMode ?? GameMode.FreePlay;
-            int movesUsed = GameManager.Instance?.CurrentMoveCount ?? 0;
             int stars = 0;
 
             if (mode == GameMode.StarMode || mode == GameMode.HardMode)
             {
                 stars = CalculateStars(movesUsed);
+            }
 
-                // ALERT: Player beat the solver's score! This indicates the solver may not be optimal.
-                if (starThresholds != null && starThresholds.Length > 0 && movesUsed < starThresholds[0])
-                {
-                    LogSolverAlert(movesUsed, starThresholds[0]);
-                }
+            // ALERT: Player beat the solver's score! Log in ALL modes for solver improvement.
+            if (starThresholds != null && starThresholds.Length > 0 && movesUsed < starThresholds[0])
+            {
+                LogSolverAlert(movesUsed, starThresholds[0]);
+            }
+            else
+            {
+                Debug.Log($"[LevelManager] Solver alert NOT triggered: thresholds={(starThresholds != null ? "valid" : "NULL")}, length={(starThresholds?.Length ?? 0)}, movesUsed={movesUsed}, threshold[0]={(starThresholds != null && starThresholds.Length > 0 ? starThresholds[0].ToString() : "N/A")}");
             }
 
             // Complete the level with elapsed time
@@ -1164,11 +1168,11 @@ namespace SortResort
             // Log to console with warning level (yellow in Unity)
             Debug.LogWarning(report);
 
-            // Also write to file for later review (not supported on WebGL)
-#if !UNITY_WEBGL
+            // Also write to file for later review
             try
             {
                 string logDir = System.IO.Path.Combine(Application.persistentDataPath, "SolverAlerts");
+                Debug.LogWarning($"[SOLVER ALERT] Writing to: {logDir}");
                 if (!System.IO.Directory.Exists(logDir))
                 {
                     System.IO.Directory.CreateDirectory(logDir);
@@ -1178,13 +1182,12 @@ namespace SortResort
                 string filepath = System.IO.Path.Combine(logDir, filename);
                 System.IO.File.WriteAllText(filepath, report);
 
-                Debug.Log($"[SOLVER ALERT] Report saved to: {filepath}");
+                Debug.LogWarning($"[SOLVER ALERT] Report saved to: {filepath}");
             }
             catch (System.Exception e)
             {
-                Debug.LogError($"[SOLVER ALERT] Failed to write log file: {e.Message}");
+                Debug.LogWarning($"[SOLVER ALERT] FAILED to write log file: {e.Message}\n{e.StackTrace}");
             }
-#endif
         }
 
         #endregion
