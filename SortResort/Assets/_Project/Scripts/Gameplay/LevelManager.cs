@@ -22,8 +22,8 @@ namespace SortResort
         [SerializeField] private Transform floatingItemsParent;
 
         [Header("Item Pool")]
-        [SerializeField] private int initialPoolSize = 50;
-        [SerializeField] private int maxPoolSize = 100;
+        [SerializeField] private int initialPoolSize = 120;
+        [SerializeField] private int maxPoolSize = 250;
 
         // Level data
         private LevelData currentLevel;
@@ -721,6 +721,13 @@ namespace SortResort
                         container.PlaceItemInRow(item, placement.slot, placement.row);
                     }
                 }
+            }
+
+            // Advance rows on all containers in case any have empty front rows
+            // (generator post-processing may move front items to deeper rows)
+            foreach (var container in containers)
+            {
+                container.CheckAndAdvanceAllRows();
             }
         }
 

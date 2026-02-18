@@ -29,8 +29,9 @@ from level_generator import (
     get_available_items, select_items, calc_timer,
     get_target_fill_ratio, get_target_types,
     _get_bounding_box, _boxes_overlap, _get_travel_box,
+    _container_half_height,
     SCREEN_MIN_X, SCREEN_MAX_X, SCREEN_MIN_Y, SCREEN_MAX_Y,
-    MIN_CONTAINER_GAP,
+    MIN_CONTAINER_GAP, HUD_BAR_BOTTOM_Y,
 )
 from level_solver import solve_level
 
@@ -68,7 +69,8 @@ def reverse_place_items(containers, item_ids, max_rows, rng, level=1):
         grid[c["id"]] = [[None] * mr for _ in range(c["slot_count"])]
 
     all_triples = list(item_ids)
-    rng.shuffle(all_triples)
+    # NOTE: Do NOT shuffle here — caller controls placement order
+    # (duplicates first = buried deep, originals later = near surface)
     total_planned = len(all_triples)
 
     # Per locked container: after this many triples placed (in reverse order),
@@ -79,6 +81,20 @@ def reverse_place_items(containers, item_ids, max_rows, rng, level=1):
     for lc in locked:
         unlock_req = lc.get("unlock_matches_required", 1)
         lock_cutoffs[lc["id"]] = total_planned - unlock_req
+
+    # Identify off-screen containers (top edge above HUD bar).
+    # Items can be placed IN these (they become accessible after cascade)
+    # but scattered items should NOT go TO them (players can't reach them).
+    off_screen_ids = set()
+    for c in containers:
+        cy = c["position"]["y"]
+        mr = c.get("max_rows_per_slot", max_rows)
+        half_h = _container_half_height(mr)
+        # In Godot Y coords: smaller Y = higher on screen
+        # Container's top edge (smallest Y) is above HUD bar bottom
+        top_edge = cy - half_h
+        if top_edge < HUD_BAR_BOTTOM_Y:
+            off_screen_ids.add(c["id"])
 
     # ── Helpers ────────────────────────────────────────────────────────
 
@@ -110,11 +126,14 @@ def reverse_place_items(containers, item_ids, max_rows, rng, level=1):
             grid[cid][s][0] = None
 
     def get_scatter_dests(exclude_cid, triples_placed):
-        """Get empty front slots in other active containers."""
+        """Get empty front slots in other active on-screen containers.
+        Excludes off-screen containers (players can't reach them)."""
         dests = []
         for c in get_active_containers(triples_placed):
             if c["id"] == exclude_cid:
                 continue
+            if c["id"] in off_screen_ids:
+                continue  # Don't scatter to off-screen containers
             for s in range(c["slot_count"]):
                 if grid[c["id"]][s][0] is None:
                     dests.append((c["id"], s))
@@ -217,6 +236,8 @@ def reverse_place_items(containers, item_ids, max_rows, rng, level=1):
             active_now = get_active_containers(total_triples)
             sources = []
             for c in active_now:
+                if c["id"] in off_screen_ids:
+                    continue  # Don't move from off-screen
                 for s in range(c["slot_count"]):
                     if grid[c["id"]][s][0] is not None:
                         sources.append((c["id"], s))
@@ -225,7 +246,7 @@ def reverse_place_items(containers, item_ids, max_rows, rng, level=1):
                 for src_cid, src_s in sources:
                     var_dests = [
                         (c["id"], s) for c in active_now
-                        if c["id"] != src_cid
+                        if c["id"] != src_cid and c["id"] not in off_screen_ids
                         for s in range(c["slot_count"])
                         if grid[c["id"]][s][0] is None
                     ]
@@ -466,19 +487,36 @@ def generate_level(level, config, item_usage, seed_offset=0):
     max_placeable = get_max_triples(containers, spec["max_rows"])
 
     target_fill = get_target_fill_ratio(level)
-    fill_types = max(2, math.ceil(total_capacity * target_fill / 3))
+    target_triples = max(2, math.ceil(total_capacity * target_fill / 3))
     variety_types = get_target_types(level)
 
     available = get_available_items(config, level)
-    n_types = max(fill_types, variety_types)
-    n_types = min(n_types, max_placeable, len(available))
-    n_types = max(2, n_types)
+    # Number of unique item types (capped by available pool, usually 50)
+    n_unique = max(target_triples, variety_types)
+    n_unique = min(n_unique, max_placeable, len(available))
+    n_unique = max(2, n_unique)
 
-    selected = select_items(rng, available, n_types, item_usage)
+    selected = select_items(rng, available, n_unique, item_usage)
+
+    # If target requires more triples than unique types, add duplicate triples.
+    # All 50 unique items are used first; duplicates are only added beyond that.
+    # Duplicates are placed FIRST in reverse construction so they end up buried
+    # deep beneath their originals — preventing easy surface-level double matches.
+    n_total_triples = min(target_triples, max_placeable)
+    duplicates = []
+    if n_total_triples > len(selected):
+        extra = n_total_triples - len(selected)
+        duplicates = [rng.choice(selected) for _ in range(extra)]
+
+    # Build placement order: duplicates first (buried deep), then unique items
+    # (near surface). Within each group, shuffle for variety.
+    rng.shuffle(duplicates)
+    rng.shuffle(selected)
+    placement_order = duplicates + selected
 
     # Place items via reverse construction
     total_triples, construction_moves = reverse_place_items(
-        containers, selected, spec["max_rows"], rng, level)
+        containers, placement_order, spec["max_rows"], rng, level)
 
     n_items = sum(len(c["initial_items"]) for c in containers)
     timer = calc_timer(level, n_items)

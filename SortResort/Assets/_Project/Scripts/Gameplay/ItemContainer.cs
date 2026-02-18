@@ -967,7 +967,8 @@ namespace SortResort
             // Create countdown text - positioned to center in lock overlay image
             var countdownGO = new GameObject("CountdownText");
             countdownGO.transform.SetParent(lockOverlay.transform);
-            countdownGO.transform.localPosition = new Vector3(0, 0.55f, -0.1f);
+            float countdownY = slotCount == 1 ? 0.53f : 0.60f;
+            countdownGO.transform.localPosition = new Vector3(0, countdownY, -0.1f);
 
             // Use TextMeshPro for the countdown
             lockCountText = countdownGO.AddComponent<TMPro.TextMeshPro>();

@@ -33,22 +33,15 @@
 - Carousel movement, despawn-on-match stacking containers
 - World-specific backgrounds, music, and ambient audio
 - Save/load progress (PlayerPrefs), undo system, timer format M:SS.CC
-- **4 Game Modes** - Free Play (green, no limits), Star Mode (pink, move-based stars), Timer Mode (blue, beat the clock), Hard Mode (gold, stars + timer). Separate progress per mode, mode selector tabs on level select, mode-specific portal tinting, mode-specific vortex animations (green/pink/blue/gold per mode), mode-specific level complete animations (stopwatch count-up for timer, "New Record!" pulse), mode-specific HUD visibility, Hard Mode locked per-world until Star+Timer 100% complete, debug unlock/lock button on level select
-- **Achievement system** (COMPLETE) - 45 achievements across 7 categories with card-based UI, tier art rectangles, notifications with achievement sound, rewards. Sprite-based progress bar (`progress_bar.png` frame with green fill, aspect-matched to achievement rectangles). Text wrapping for long titles/descriptions (`FormatTextForWrapping` helper). Close button with pressed state (`closebutton_2`/`closebutton_pressed`, 118x118, positioned at exact pixel coords). Cards and bars centered with 30px left offset. "Achievement Points" title bar text (48pt Benzin ExtraBold). Per-world descriptions use "in this World" instead of specific world names.
+- **4 Game Modes** - FreePlay (green), StarMode (pink), TimerMode (blue), HardMode (gold). Separate progress, mode-specific HUD/portal/animations. Hard Mode locked until Star+Timer 100%.
+- **Achievement system** - 45 achievements, card-based UI, tier art, sprite progress bars, notifications with sound
+- **Dialogue system** - 65 sequences (5 worlds × 11 checkpoints + mode tutorials + hard mode unlocks), typewriter text, Animal Crossing voices, mode-agnostic story
+- **Level complete/failed screens** - Mode-specific animations (stars, timer count-up), mascot thumbsup, sprite-based buttons
+- **HUD overlay** - Per-mode ui_top bars, counter text, sprite gear/undo buttons, pause menu
+- **Portal overlays** - Mode-specific completion indicators on level select portals
+- **Level generator** - Python reverse-play generator, solver-verified, 100 Island levels
+- **Benzin font system** - FontManager utility, TMP default, ApplyBold() on 8 scripts
 - Level solver tool (Editor window + in-game auto-solve button)
-- **Dialogue system** - Typewriter text with Animal Crossing-style voices, mascot portraits, voice toggle in settings, timer pauses during dialogue. Full story content: 5 worlds × 11 checkpoints (welcome + every 10 levels), 4 mode tutorial dialogues, 5 hard mode unlock dialogues. Story is mode-agnostic (fires in any mode, plays once). Dr. Miller overarching mystery across all worlds.
-- **Level complete screen** - Mode-specific animations: Star Mode has rays, curtains, star ribbon, grey/gold star animations, dancing stars (3-star); Timer Mode has stopwatch count-up animation with "New Record!" bounce; Free Play skips stars; Hard Mode combines stars + timer. All modes: mascot thumbsup (Island), bottom board animation, sprite-based buttons
-- **Level failed screen** - Fullscreen fail_screen.png background, reason text ("Out of Moves"/"Out of Time"), animated bottom board, sprite-based buttons (retry, level select)
-- **Fail-before-last-move** - Level fails after second-to-last move if not complete (prevents awkward final-move-still-fails scenario)
-- **Star threshold separation** - All thresholds guaranteed at least 1 move apart
-- **Mode-specific HUD overlay** - All 4 modes have custom ui_top bar overlays (free_ui_top, stars_ui_top, timer_ui_top, hard_mode_UI_top) with mode-specific counter text positions. World icon overlay (island only). Sprite-based settings gear button (116x116, with pressed state) and undo button (142x62, with pressed state) positioned on the overlay. Settings gear opens sprite-based pause menu
-- **Portal completion overlays** - Mode-specific portal overlays on level select: free_portal (checkmark) for FreePlay, 1/2/3star_portal for StarMode, timer_portal (with best time text) for TimerMode, both star+timer overlays layered for HardMode
-- **Level generator** - Python reverse-play generator (`reverse_generator.py`) builds levels backwards, guaranteeing solvability. Solver-verified with retry mechanism (up to 20 seeds). Star thresholds derived from solver's actual move count. 100 Island levels generated and verified. Locked containers participate in reverse-play with unlock-timing cutoffs.
-- **Benzin font system** - Custom Benzin-Bold font across all UI text. FontManager static utility with lazy-loaded font properties (Bold, SemiBold, Medium, ExtraBold). Editor script generates TMP SDF font assets. TMP default font set to Benzin-Bold so dynamic text auto-inherits. ApplyBold() calls on 8 scripts with serialized TMP fields.
-- **Sprite-based mode tabs** - Level select mode tabs use custom sprite images (`free_tab`, `stars_tab`, `timer_tab`, `hard_tab`) with baked-in text. Selected=white tint, unselected=60% grey, locked=30% grey.
-- **Sprite-based pause menu** - Fullscreen 1080x1920 overlay sprites for board background and 4 buttons (Resume, Restart, Settings, Quit) with pressed states. `LoadFullRectSprite()` bypasses Unity's alpha-trimming import. EventTrigger-based press feedback swaps normal/pressed sprites. Invisible hit areas positioned at exact pixel coordinates via anchor-based sizing.
-- **Achievement sound** - Dedicated `achievement_sound.mp3` plays at 1.3x volume when achievement notification slides in. Plays per-notification so multiple queued achievements each get the sound.
-- **World-specific dialogue boxes** - Island, Tavern, Space, Farm worlds have custom dialogue box sprites (`dialoguebox_{worldId}`). Auto-loaded by `DialogueUI.LoadDialogueBoxForWorld()`.
 
 ---
 
@@ -126,7 +119,7 @@
 ## Technical Reference
 
 ### Key Patterns
-- **Object Pooling**: 50-60 item pool for mobile performance
+- **Object Pooling**: 120-250 item pool for mobile performance
 - **Event System**: C# events/Actions for decoupled communication
 - **Singleton Managers**: GameManager, AudioManager, SaveManager, UIManager, ScreenManager
 - **Data-Driven**: JSON files for levels, items, worlds
@@ -163,10 +156,6 @@ Container border scale: 1.2 (17% border around slots)
 | Center   | 540     | 0       |
 | Right    | 880     | +3.4    |
 
-#### Safe Position Bounds (Godot Pixels)
-- **3-slot containers**: X: 186-894, Y: 150-1696
-- **1-slot containers**: X: 72-1008
-
 #### Key Files
 | File | Purpose |
 |------|---------|
@@ -177,8 +166,8 @@ Container border scale: 1.2 (17% border around slots)
 ### Carousel Train Configuration
 | Layout | Spacing | Containers | move_distance | Notes |
 |--------|---------|------------|---------------|-------|
-| Horizontal | ~356px (X) | 5 min | 5 × spacing | First container 100px off-screen at spawn |
-| Vertical | ~257px (Y) | 10 fixed | 10 × spacing | L50+, 40% chance. Statics use 2-col |
+| Horizontal | ~351px (X) | 5 min | 5 × spacing | First container 100px off-screen at spawn |
+| Vertical | ~227px (Y) | 10 fixed | 10 × spacing | L50+, 40% chance. Edge-to-edge positioning. Statics use 2-col |
 - **Mutual exclusion**: Carousel and despawn never appear on the same level (spatial conflict: carousel path at Y=200 overlaps despawn stack). When both selected by probability, prefer whichever is in its introduction range; otherwise coin flip.
 
 ### Layer Configuration
@@ -194,9 +183,9 @@ Container border scale: 1.2 (17% border around slots)
 - **Level Select**: Mode tabs with sprite-based tab images (`free_tab`, `stars_tab`, `timer_tab`, `hard_tab`), portal tinting per mode
 - **Level Complete**: Mode-branched animation sequence (PlayStarSequence, PlayTimerCountUpAnimation)
 - **HUD**: Star display hidden in FreePlay/TimerMode; timer only for TimerMode/HardMode
-- **HUD Overlay**: All 4 modes have per-mode fullscreen bar overlay (`free_ui_top`, `stars_ui_top`, `timer_ui_top`, `hard_mode_UI_top`). Counter texts positioned per mode (FreePlay: level only; StarMode: level+moves; TimerMode: level+timer; HardMode: level+moves+timer). World icon overlay (`{worldId}_icon_UI_top`, currently island only). White counter text color.
-- **HUD Buttons**: Record (debug), Solve (debug) in button row. Settings gear (116x116 sprite with pressed state) and Undo (142x62 sprite with pressed state) on settings overlay. Settings gear opens pause menu.
-- **Pause Menu**: Sprite-based fullscreen overlays (1080x1920). Board background + 4 buttons (Resume, Restart, Settings, Quit) each with normal/pressed sprites. Loaded via `LoadFullRectSprite()` (Texture2D → full-rect Sprite.Create) to avoid Unity alpha-trimming. Button hit areas use anchor-based positioning at exact pixel coords: Resume Y=877, Restart Y=1055, Settings Y=1229, Quit Y=1404 (all centered at X=534). EventTrigger swaps sprites on PointerDown/PointerUp. Canvas sortingOrder=5200.
+- **HUD Overlay**: Per-mode fullscreen bar overlay with counter texts (FreePlay: level; StarMode: level+moves; TimerMode: level+timer; HardMode: all three). World icon overlay (island only). Sprite gear/undo buttons.
+- **HUD Buttons**: Settings gear opens pause menu. Debug: Record, Solve buttons.
+- **Pause Menu**: Sprite-based fullscreen overlays (1080x1920). Board + 4 buttons with pressed states. `LoadFullRectSprite()` bypasses alpha-trimming. Canvas sortingOrder=5200.
 - **Portal Overlays**: Level select portals show completion status: `free_portal` (checkmark) for FreePlay, `1/2/3star_portal` for StarMode, `timer_portal` (with best time text) for TimerMode, both star+timer layered for HardMode.
 - **World Unlocks**: Shared across all modes via `GetWorldCompletedLevelCountAnyMode()`
 - **LevelCompletionData**: Struct with levelNumber, starsEarned, timeTaken, mode, isNewBestTime
@@ -279,35 +268,19 @@ Container border scale: 1.2 (17% border around slots)
 - Path: `Resources/Sprites/UI/Achievements/{artKey}_{tier}.png`
 - Loaded via `LoadFullRectSprite()` to bypass Unity alpha-trimming
 
-#### Card-Based UI (COMPLETE - 2026-02-17)
-- Fullscreen overlay (Canvas sortingOrder=5200, dark background 0.7 alpha)
-- Centered 1000×1700 content panel with header, horizontal tab bar, scrollable card list
-- Each card: tier-appropriate rectangle art (687×301, preserveAspect), title (Benzin Bold 24), description, sprite-based progress bar
-- Rectangle upgrades: grey → bronze → silver → gold as milestones are unlocked
-- **Progress bar**: `progress_bar.png` (457×98) metallic frame with green fill behind it. Bar width matches rendered rect width exactly (~494px). Green fill inset by corner radius (~14px) to stay inside rounded frame edges. Progress text "X/Y" centered on bar.
-- **Text wrapping**: `FormatTextForWrapping(text, maxChars)` inserts line breaks at best word boundary. Title threshold: 13 chars ("Globe Trotter"). Description threshold: 18 chars ("Make 1000 Matches"). Title/description shifted 10px left from original anchors.
-- **Close button**: 118×118 `closebutton_2` sprite at anchor (0.9019, 0.8880) with `closebutton_pressed` swap on PointerDown/PointerUp via EventTrigger.
-- **Card centering**: Rect image and progress bar both offset 30px left to center on board.
-- **Title bar**: "Achievement Points" at 48pt Benzin ExtraBold (with shadow). Points text shifted 5px higher.
-- **Per-world descriptions**: Use "in this World" instead of specific world names (context from tab).
-- `AchievementManager` helper methods: `GetGroupArtKey()`, `GetGroupCurrentTier()`, `GetNextMilestone()`, `GetGroupProgress()`, `GetGroupLastUnlockDate()`, `GetRecentlyUnlocked()`, `GetGroupIdsForTab()`
-
-#### Notification System (unchanged)
-- `CreateAchievementNotificationPanel` slides in from top on unlock
-- Achievement detail panel on tap
-- `achievement_sound.mp3` at 1.3× volume per notification
-- Queue system for multiple simultaneous unlocks
+#### Card-Based UI (COMPLETE)
+- Fullscreen overlay (Canvas sortingOrder=5200), header with tabs, scrollable card list
+- Cards: tier art rectangle (grey→bronze→silver→gold), title, description, sprite progress bar
+- `FormatTextForWrapping(text, maxChars)` for long titles/descriptions
+- Per-world descriptions use "in this World" (context from active tab)
+- Helper methods: `GetGroupArtKey()`, `GetGroupCurrentTier()`, `GetNextMilestone()`, `GetGroupProgress()`, `GetRecentlyUnlocked()`, `GetGroupIdsForTab()`
+- Notification: slides in from top, `achievement_sound.mp3` at 1.3× volume, queue for multiples
 
 ### Font System
-- **Font family**: Benzin (Bold, SemiBold, Medium, ExtraBold) - TTFs in `Assets/_Project/Fonts/`
-- **SDF assets**: Generated via `Tools > Sort Resort > Fonts > Generate Benzin SDF Fonts` into `Resources/Fonts/`
-- **TMP default**: Set via `Tools > Sort Resort > Fonts > Set Benzin-Bold as TMP Default` - all dynamic TMP text auto-inherits
-- **FontManager.cs**: Static utility in `Assets/_Project/Scripts/Managers/` - lazy-loads from `Resources/Fonts/BENZIN-{WEIGHT} SDF`
-- **Properties**: `FontManager.Bold`, `.SemiBold`, `.Medium`, `.ExtraBold`
-- **Helper**: `FontManager.ApplyBold(TMP_Text text)` - overrides serialized Inspector fields with Benzin-Bold at runtime
-- **Applied in**: GameHUDScreen, LevelCompleteScreen, LevelFailedScreen, SettingsScreen, DialogueUI, WorldSelectionScreen, LevelSelectionScreen, LevelNode (8 scripts)
-- **Not needed in**: UIManager, LevelSelectScreen, ItemContainer (dynamic TMP creation inherits TMP default)
-- **Editor script**: `Assets/_Project/Scripts/Editor/FontAssetGenerator.cs` - sampling size 90, atlas 1024x1024
+- **Font family**: Benzin (Bold, SemiBold, Medium, ExtraBold) - TTFs in `Assets/_Project/Fonts/`, SDF assets in `Resources/Fonts/`
+- **FontManager.cs**: Static utility with lazy-loaded properties (`.Bold`, `.SemiBold`, `.Medium`, `.ExtraBold`). `ApplyBold()` called in 8 scripts with serialized TMP fields.
+- **TMP default**: Benzin-Bold set as TMP default so dynamically-created text auto-inherits
+- **Editor tools**: `Tools > Sort Resort > Fonts` for SDF generation and setting TMP default
 
 ### Level Generator (Python)
 - **Infrastructure**: `level_generator.py` - WorldConfig, progression curves, container builder, specs
@@ -326,17 +299,21 @@ Mechanics unlock at fixed levels and persist via probability (30-70%). A complex
 #### Container Dimension Constants
 - `CONTAINER_WIDTH_3SLOT`: ~341px, `CONTAINER_WIDTH_1SLOT`: ~114px
 - `SLOT_HEIGHT`: ~227px (includes border_scale 1.2), `ROW_DEPTH_OFFSET`: ~4.56px per extra row
-- `CAROUSEL_H_SPACING`: ~356px (15px gap), `CAROUSEL_V_SPACING`: ~257px
+- `CAROUSEL_H_SPACING`: ~351px (10px gap), `CAROUSEL_V_SPACING`: ~227px (touching, no gap)
 - `MIN_CONTAINER_GAP`: 30px between container edges
-- Screen safe bounds: X: 200-880, Y: 250-1600 (container centers)
+- `HUD_BAR_BOTTOM_Y`: -230 (Godot coords, above visible screen top)
+- `SCREEN_BOTTOM_Y`: 1560px (Godot, bottom of visible area)
+- Screen safe bounds: X: 200-880, Y: 100-1430 (container centers)
 
 #### Spatial Layout Design
 - **Standard layout**: 3-column grid (X=200, 540, 880) with dynamic vertical spacing via `get_y_gap()`
-- **Despawn layout**: 5-12 containers stacked vertically at X=540 (single-column). Bottom container visible at Y=250, upper containers extend off-screen above (~236px spacing). When bottom is cleared, containers above fall down (cascade mechanic). Bottom 3 have full depth; upper ones are single-row to limit item count. Statics use 2-column layout (X=200, 880) to avoid center. Only 4 despawn containers come from static budget; rest are additional.
-- **Vertical carousel layout**: 10 containers at X=540 scrolling up/down. Statics use 2-column layout. Only subtracts budgeted carousel_count from static pool.
+- **Despawn layout**: Full-screen stacked columns, 1-3 columns based on level. Bottom container at SCREEN_BOTTOM_Y, stacks upward to HUD bar, then extends off-screen above. Per-column count: `n_visible_per_col + 3`. Bottom 3 have full depth; upper ones single-row. Only `min(4, n_columns * 2)` from static budget; rest additional. L36-50: 1 column (X=540). L51-70: 1-2 columns (67%/33%). L71+: 1-3 columns (25%/50%/25%). Column positions: `{1: [540], 2: [200, 880], 3: [200, 540, 880]}`. Each column cascades independently (ContainerMovement uses X-tolerance matching).
+- **Off-screen scatter exclusion**: Containers whose top edge is above HUD_BAR_BOTTOM_Y (-230) are excluded from scatter destinations in reverse-play. Triples CAN be placed in off-screen containers, but scattered items cannot go TO them.
+- **Vertical carousel layout**: 10 containers at X=540 scrolling up/down. Edge-to-edge positioning (first container at visible screen edge + half-height). Statics use 2-column layout. Only subtracts budgeted carousel_count from static pool. X=540 tracked in `occupied_col_xs`.
 - **Horizontal carousel layout**: 5+ containers scrolling left/right at Y=200. First container starts 100px off-screen. Static y_offset computed dynamically via `get_y_gap()`.
-- **B&F layout**: Back-and-forth movers get dedicated wide-spacing rows at screen edges (X=200, 880). If center column is occupied, odd B&F containers use left column instead.
-- **2D AABB collision**: `_get_bounding_box()`, `_boxes_overlap()`, `_get_travel_box()` for overlap prevention between statics and B&F sweep paths.
+- **B&F layout**: Back-and-forth movers (L26-50 only) get dedicated wide-spacing rows at screen edges (X=200, 880). If center column is occupied, odd B&F containers use left column instead. Disabled after L50 to free screen space for more containers at higher levels.
+- **2D AABB collision**: `_get_bounding_box()`, `_boxes_overlap()`, `_get_travel_box()` for overlap prevention between statics, B&F sweep paths, AND carousel swept bounding boxes. Carousel containers now included in `placed_ranges` (horizontal: full-width sweep at carousel Y; vertical: full-height sweep at carousel X).
+- **Screen-fit cap**: Static container count is capped by `max_rows_fit * n_cols` to prevent overflow when container count ramp produces more containers than screen can fit.
 
 #### Lock System
 - `WorldConfig` supports both `lock_overlay_image` and `single_slot_lock_overlay_image` (defaults to `{world_id}_single_slot_lockoverlay`)
@@ -345,14 +322,16 @@ Mechanics unlock at fixed levels and persist via probability (30-70%). A complex
 
 ### Level Structure (All Worlds)
 - level_001: 3 containers, 2 item types, intro (hardcoded 2-move tutorial)
-- Levels 2-10: 4-7 containers, increasing item types, multi-row
+- Levels 2-7: 4-9 containers, increasing item types, multi-row
+- Levels 8-15: 8-12 containers
 - Levels 11+: locked containers introduced (1-9 matches to unlock, widening with level)
 - Levels 16+: single-slot containers (can also be locked, uses own lock overlay)
-- Levels 26+: back-and-forth movement (symmetric pairs, 2D collision-checked)
+- Levels 26-50: back-and-forth movement (symmetric pairs, 2D collision-checked; disabled after L50 to make room for more containers)
 - Levels 31+: carousel movement (horizontal 5+ containers, 100px off-screen spawn; mutually exclusive with despawn)
-- Levels 36+: despawn-on-match (5-12 containers stacked at X=540, cascade falling; mutually exclusive with carousel)
+- Levels 36+: despawn-on-match (full-screen stacked columns, 1-3 columns, cascade falling; mutually exclusive with carousel)
 - Levels 41+: all mechanics combined (probability-based, no complexity cap)
-- Levels 50+: vertical carousel possible (10 containers, 40% chance)
+- Levels 50+: vertical carousel possible (10 containers, 40% chance). Container count 17-26
+- Levels 61+: container count 17-26 (screen-fit capped)
 - Fill ratios: 50-83% across levels, 50 item types per world
 
 ### Level Solver

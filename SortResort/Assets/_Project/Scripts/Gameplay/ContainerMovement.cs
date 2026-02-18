@@ -36,7 +36,7 @@ namespace SortResort
         [SerializeField] private float fallSpeed = 100f;
         [SerializeField] private float fallTargetY;
         [SerializeField] private bool despawnOnMatch;
-        [SerializeField] private float stackFallDistance = 1.98f; // Height of one container in Unity units (198px)
+        [SerializeField] private float stackFallDistance = 2.27f; // Height of one container in Unity units (SLOT_HEIGHT=227px)
 
         [Header("State")]
         [SerializeField] private bool isMoving = true;
@@ -264,8 +264,8 @@ namespace SortResort
             // For seamless train effect:
             // - Detect wrap when container exits screen edge
             // - Wrap BY the train length (moveDistance) to maintain spacing between containers
-            float screenLeftEdge = -6.5f;   // A bit past left edge
-            float screenRightEdge = 6.5f;   // A bit past right edge
+            float screenLeftEdge = -7.5f;   // Fully past left edge (5.4 + 1.7 half-width + 0.4 buffer)
+            float screenRightEdge = 7.5f;   // Fully past right edge
             float trainLength = moveDistance / 100f; // Use configured move_distance as train length
 
             Vector3 pos = transform.position;
@@ -292,7 +292,7 @@ namespace SortResort
             {
                 // Moving down - wrap by train length only (no extra offset)
                 // Position enough containers in JSON to cover visible area + buffer
-                float screenBottom = -10f;
+                float screenBottom = -11.5f;  // Fully below screen (9.6 + 1.14 half-height + 0.76 buffer)
                 if (pos.y < screenBottom)
                 {
                     pos.y += trainLength;
@@ -302,7 +302,7 @@ namespace SortResort
             else if (moveDirection == MoveDirection.Up)
             {
                 // Moving up - wrap by train length only
-                float screenTop = 10f;
+                float screenTop = 11.5f;  // Fully above screen (9.6 + 1.14 half-height + 0.76 buffer)
                 if (pos.y > screenTop)
                 {
                     pos.y -= trainLength;

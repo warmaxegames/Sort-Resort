@@ -1484,13 +1484,13 @@ namespace SortResort
             // Counter text elements - positions will be set per-mode at level start
             // Bubble diameter: ~120px (small) / ~174px (timer), centered at anchor Y=0.9188
             overlayLevelText = CreateOverlayCounterText(hudModeOverlay.transform, "Overlay Level",
-                new Vector2(0.5f, 0.9188f), 120f, 120f, 72);
+                new Vector2(0.5f, 0.9162f), 120f, 120f, 69);
 
             overlayMovesText = CreateOverlayCounterText(hudModeOverlay.transform, "Overlay Moves",
-                new Vector2(0.5f, 0.9188f), 120f, 120f, 72);
+                new Vector2(0.5f, 0.9162f), 120f, 120f, 69);
 
             overlayTimerText = CreateOverlayCounterText(hudModeOverlay.transform, "Overlay Timer",
-                new Vector2(0.5f, 0.9188f), 174f, 120f, 45);
+                new Vector2(0.5f, 0.9162f), 174f, 120f, 45);
 
             hudModeOverlay.SetActive(false);
         }
@@ -1509,31 +1509,31 @@ namespace SortResort
             {
                 case GameMode.FreePlay:
                     // Level only, centered
-                    SetOverlayTextAnchor(overlayLevelText, new Vector2(0.500f, 0.9188f));
+                    SetOverlayTextAnchor(overlayLevelText, new Vector2(0.500f, 0.9162f));
                     if (overlayLevelText != null) overlayLevelText.gameObject.SetActive(true);
                     break;
 
                 case GameMode.StarMode:
                     // Level + Moves
-                    SetOverlayTextAnchor(overlayLevelText, new Vector2(0.389f, 0.9188f));
-                    SetOverlayTextAnchor(overlayMovesText, new Vector2(0.614f, 0.9188f));
+                    SetOverlayTextAnchor(overlayLevelText, new Vector2(0.389f, 0.9162f));
+                    SetOverlayTextAnchor(overlayMovesText, new Vector2(0.614f, 0.9162f));
                     if (overlayLevelText != null) overlayLevelText.gameObject.SetActive(true);
                     if (overlayMovesText != null) overlayMovesText.gameObject.SetActive(true);
                     break;
 
                 case GameMode.TimerMode:
                     // Level + Timer
-                    SetOverlayTextAnchor(overlayLevelText, new Vector2(0.381f, 0.9188f));
-                    SetOverlayTextAnchor(overlayTimerText, new Vector2(0.621f, 0.9188f));
+                    SetOverlayTextAnchor(overlayLevelText, new Vector2(0.381f, 0.9162f));
+                    SetOverlayTextAnchor(overlayTimerText, new Vector2(0.621f, 0.9162f));
                     if (overlayLevelText != null) overlayLevelText.gameObject.SetActive(true);
                     if (overlayTimerText != null) overlayTimerText.gameObject.SetActive(true);
                     break;
 
                 case GameMode.HardMode:
                     // Level + Moves + Timer
-                    SetOverlayTextAnchor(overlayLevelText, new Vector2(0.276f, 0.9188f));
-                    SetOverlayTextAnchor(overlayMovesText, new Vector2(0.500f, 0.9188f));
-                    SetOverlayTextAnchor(overlayTimerText, new Vector2(0.732f, 0.9188f));
+                    SetOverlayTextAnchor(overlayLevelText, new Vector2(0.276f, 0.9162f));
+                    SetOverlayTextAnchor(overlayMovesText, new Vector2(0.500f, 0.9162f));
+                    SetOverlayTextAnchor(overlayTimerText, new Vector2(0.732f, 0.9162f));
                     if (overlayLevelText != null) overlayLevelText.gameObject.SetActive(true);
                     if (overlayMovesText != null) overlayMovesText.gameObject.SetActive(true);
                     if (overlayTimerText != null) overlayTimerText.gameObject.SetActive(true);
@@ -1583,6 +1583,9 @@ namespace SortResort
             text.enableWordWrapping = false;
             text.overflowMode = TextOverflowModes.Overflow;
             text.raycastTarget = false;
+            text.enableAutoSizing = true;
+            text.fontSizeMin = 28;
+            text.fontSizeMax = fontSize;
 
             return text;
         }

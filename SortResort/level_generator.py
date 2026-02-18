@@ -137,12 +137,22 @@ ROW_DEPTH_OFFSET = 4 * 1.14                     # ~4.56px per extra row
 MIN_CONTAINER_GAP = 30  # minimum gap between container edges (pixels)
 
 # Screen safe bounds (Godot pixels) — container centers must keep edges inside
+# Camera at Unity Y=0, orthoSize=9.6 → visible Godot Y range: -360 to 1560
+# SCREEN_MIN_Y accounts for HUD bar (~130px from screen top at Godot Y=-360)
+# SCREEN_MAX_Y ensures container bottom edges stay above visible bottom (1560)
 SCREEN_MIN_X, SCREEN_MAX_X = 200, 880
-SCREEN_MIN_Y, SCREEN_MAX_Y = 250, 1600
+SCREEN_MIN_Y, SCREEN_MAX_Y = 100, 1430
+
+# HUD bar: bottom edge of wood bar in Godot Y coordinates
+# Screen top is at Godot Y=-360, HUD bar extends ~130px down → bottom at -230
+HUD_BAR_BOTTOM_Y = -230
+# Screen bottom edge (Godot Y pixels) — below this is off-screen
+# Unity Y=-9.6 → Godot Y = 600 + 960 = 1560
+SCREEN_BOTTOM_Y = 1560
 
 # Carousel horizontal spacing (edge-to-edge + small gap)
-CAROUSEL_H_SPACING = int(CONTAINER_WIDTH_3SLOT) + 15  # ~356px
-CAROUSEL_V_SPACING = int(SLOT_HEIGHT) + MIN_CONTAINER_GAP             # ~257px
+CAROUSEL_H_SPACING = int(CONTAINER_WIDTH_3SLOT) + 10  # ~351px
+CAROUSEL_V_SPACING = int(SLOT_HEIGHT)                                 # ~227px (touching, not overlapping)
 
 
 def _container_half_width(slot_count):
@@ -231,13 +241,14 @@ def _get_safe_backforth_distance(px, py, slot_count, max_rows, move_dir, placed_
         if move_dir == "right":
             # Moving right: right edge at distance d = px + d + hw
             # Must not reach neighbor's left edge minus gap
-            if rx_min > px + hw:
+            # Use >= to catch neighbors at exact boundary (within 2px tolerance)
+            if rx_min >= px + hw - 2:
                 safe = rx_min - hw - MIN_CONTAINER_GAP - px
                 max_dist = min(max_dist, max(0, safe))
         else:
             # Moving left: left edge at distance d = px - d - hw
             # Must not reach neighbor's right edge plus gap
-            if rx_max < px - hw:
+            if rx_max <= px - hw + 2:
                 safe = px - rx_max - hw - MIN_CONTAINER_GAP
                 max_dist = min(max_dist, max(0, safe))
 
@@ -422,8 +433,9 @@ def get_y_gap(max_rows, n_containers=0, level=1):
     if n_containers >= 10:
         base = int(base * 0.85)
 
-    # Minimum: visual height + gap
-    min_gap = int(SLOT_HEIGHT + ROW_DEPTH_OFFSET * max(0, max_rows - 1)) + MIN_CONTAINER_GAP
+    # Minimum: visual height + gap (tighter gap at high levels)
+    gap = MIN_CONTAINER_GAP if level < 60 else max(10, MIN_CONTAINER_GAP // 2)
+    min_gap = int(SLOT_HEIGHT + ROW_DEPTH_OFFSET * max(0, max_rows - 1)) + gap
     return max(min_gap, base)
 
 
@@ -517,15 +529,15 @@ def get_level_spec(level):
     elif level <= 3:
         n_containers = level + 2                          # 4, 5
     elif level <= 7:
-        n_containers = min(5 + (level - 4) // 2, 7)      # 5-7
+        n_containers = min(5 + (level - 4), 9)            # 5-9
     elif level <= 15:
-        n_containers = min(7 + (level - 8) // 4, 9)      # 7-9
+        n_containers = min(8 + (level - 8) // 2, 12)     # 8-12
     elif level <= 30:
-        n_containers = min(8 + (level - 16) // 7, 10)    # 8-10
+        n_containers = min(10 + (level - 16) // 3, 16)   # 10-16
     elif level <= 60:
-        n_containers = min(9 + (level - 31) // 15, 11)   # 9-11
+        n_containers = min(14 + (level - 31) // 5, 20)   # 14-20
     else:
-        n_containers = min(10 + (level - 61) // 20, 12)  # 10-12
+        n_containers = min(18 + (level - 61) // 8, 24)   # 18-24
 
     max_rows = get_max_rows(level)
 
@@ -589,7 +601,7 @@ def get_level_spec(level):
     # ── Configure each mechanic's parameters ───────────────────────────
     use_locked = "locked" in active_mechanics
     use_singleslot = "singleslot" in active_mechanics
-    use_backforth = "backforth" in active_mechanics
+    use_backforth = "backforth" in active_mechanics and level <= 50
     use_carousel = "carousel" in active_mechanics
     use_despawn = "despawn" in active_mechanics
 
@@ -639,11 +651,18 @@ def get_level_spec(level):
         carousel_count = 3 + (level - UNLOCK_CAROUSEL) // 20
         carousel_count = min(carousel_count, 5)
 
-    # Despawn: 5-12 containers high (some off-screen, cascade falling)
+    # Despawn: full-screen stacked columns, multi-column at higher levels
     despawn_count = 0
+    despawn_columns = 1
     if use_despawn:
-        despawn_count = 5 + (level - UNLOCK_DESPAWN) // 8
-        despawn_count = min(despawn_count, 12)
+        # Column count scales with level
+        if level >= 71:
+            despawn_columns = rng.choice([1, 2, 2, 3])  # 25% 1-col, 50% 2-col, 25% 3-col
+        elif level >= 51:
+            despawn_columns = rng.choice([1, 1, 2])      # 67% 1-col, 33% 2-col
+        # Per-column count fills visible screen + off-screen buffer
+        # Computed dynamically in build_containers based on v_spacing
+        despawn_count = -1  # sentinel: computed in build_containers
 
     return {
         "level": level, "n_containers": n_containers, "max_rows": max_rows,
@@ -653,6 +672,7 @@ def get_level_spec(level):
         "use_carousel": use_carousel, "carousel_count": carousel_count,
         "use_backforth": use_backforth, "backforth_count": backforth_count,
         "use_despawn": use_despawn, "despawn_count": despawn_count,
+        "despawn_columns": despawn_columns if use_despawn else 1,
         "rng": rng,
     }
 
@@ -668,6 +688,7 @@ def build_containers(spec, config):
     static_count = spec["n_containers"]
     y_offset = 0
     center_col_occupied = False  # True when despawn or vertical carousel uses X=540
+    occupied_col_xs = set()     # Track X positions occupied by despawn/carousel columns
 
     # Carousel containers (allowed off-screen, they scroll in)
     if spec["use_carousel"]:
@@ -682,6 +703,7 @@ def build_containers(spec, config):
             # Vertical carousel at X=540: disable despawn (shares center column)
             spec["use_despawn"] = False
             center_col_occupied = True
+            occupied_col_xs.add(540)
 
             # Subtract only the budgeted carousel_count from statics (rest are free)
             carousel_subtract = min(spec["carousel_count"], 3)
@@ -693,11 +715,15 @@ def build_containers(spec, config):
             car_x = 540
             hh = _container_half_height(car_mr)
 
-            # Start positions fully off-screen (100px margin to prevent early despawn)
+            # Position first container just off the entry edge of the visible screen
+            # Visible screen: Godot Y [-360, 1560]. Place center at edge + half-height
+            # so container is fully off-screen but immediately adjacent to visible area.
             if car_dir == "down":
-                start_y = -(hh + 100)
+                # Entry from top: center just above visible top (-360)
+                start_y = -360 - hh
             else:
-                start_y = 1920 + hh + 100
+                # Entry from bottom: center just below visible bottom (1560)
+                start_y = 1560 + hh
 
             for i in range(n_car):
                 if car_dir == "down":
@@ -744,56 +770,88 @@ def build_containers(spec, config):
                 containers.append(c)
                 idx += 1
 
-            # Push statics below carousel with proper dynamic gap
-            y_offset = get_y_gap(spec["max_rows"], static_count, level)
+            # Push statics below carousel: ensure first static starts below
+            # carousel's bottom edge (not just SCREEN_MIN_Y + gap)
+            car_half_h = _container_half_height(car_mr)
+            static_half_h = _container_half_height(spec["max_rows"])
+            carousel_bottom = car_y + car_half_h
+            min_first_static_y = carousel_bottom + MIN_CONTAINER_GAP + static_half_h
+            y_offset = int(max(
+                get_y_gap(spec["max_rows"], static_count, level),
+                min_first_static_y - SCREEN_MIN_Y
+            ))
 
-    # Despawn containers (single-column vertical stack at center X=540)
-    # Bottom container visible, upper containers stacked above (some off-screen).
-    # When bottom is cleared, containers above fall down into view.
-    # Stack is 5-12 containers tall; bottom 3-4 have full depth, upper ones single-row.
+    # Despawn containers: full-screen stacked columns, cascading downward.
+    # Bottom containers visible near screen bottom, stacking upward to HUD bar,
+    # with additional off-screen containers above. Multi-column at higher levels.
+    # despawn columns also tracked in occupied_col_xs
     if spec["use_despawn"]:
-        n_desp = spec["despawn_count"]  # 5-12 total stack height
-        # Only budget a reasonable number from statics (rest are additional containers)
-        n_desp_budgeted = min(n_desp, 4)
-        static_count -= n_desp_budgeted
+        n_desp_columns = spec["despawn_columns"]
         desp_mr = min(spec["max_rows"], 2)
         vis_h = int(SLOT_HEIGHT + ROW_DEPTH_OFFSET * max(0, desp_mr - 1))
-        v_spacing = vis_h + 5   # edge-to-edge with minimal gap
+        v_spacing = int(SLOT_HEIGHT)   # base slot height for tight stacking
+
+        # Calculate how many containers fit on screen (from bottom to HUD bar)
+        half_h = _container_half_height(desp_mr)
+        top_visible_center_y = HUD_BAR_BOTTOM_Y + half_h
+        n_visible_per_col = max(1, int((SCREEN_BOTTOM_Y - HUD_BAR_BOTTOM_Y) / v_spacing))
+        n_offscreen = 3  # additional containers above screen
+        per_column_count = n_visible_per_col + n_offscreen
+
+        n_desp_total = per_column_count * n_desp_columns
+
+        # Budget from statics: min(4, columns * 2)
+        n_desp_budgeted = min(4, n_desp_columns * 2)
+        static_count -= n_desp_budgeted
 
         center_col_occupied = True
 
-        # Single-slot despawn for levels 50+ (30% chance for topmost container)
-        desp_single_last = level >= 50 and rng.random() < 0.30
+        # Assign column X positions
+        column_xs = {1: [540], 2: [200, 880], 3: [200, 540, 880]}
+        desp_col_positions = column_xs.get(n_desp_columns, [540])
+        occupied_col_xs.update(desp_col_positions)
 
-        # Single-column stack at X=540, bottom container in play area
-        desp_x = 540
-        desp_y_bottom = SCREEN_MIN_Y + y_offset  # bottom of stack (visible)
+        for col_idx, desp_x in enumerate(desp_col_positions):
+            # Bottom container near screen bottom, stack upward
+            bottom_y = SCREEN_BOTTOM_Y - half_h
 
-        for i in range(n_desp):
-            desp_y = desp_y_bottom - i * v_spacing  # stack upward
+            for i in range(per_column_count):
+                desp_y = bottom_y - i * v_spacing  # stack upward (decreasing Y in Godot)
 
-            is_top = (i == n_desp - 1)
-            slot_count = 1 if (desp_single_last and is_top) else 3
-            # Bottom 3 containers have full depth; upper ones are single-row
-            # to keep total item count reasonable
-            this_mr = desp_mr if i < 3 else 1
-            c = make_container(
-                f"despawn_{idx}", desp_x, desp_y, config,
-                slot_count=slot_count, max_rows=this_mr,
-                despawn=True, is_single_slot=(slot_count == 1)
-            )
-            containers.append(c)
-            idx += 1
+                # All despawn containers use full depth (desp_mr=2) for dense item placement
+                this_mr = desp_mr
+                slot_count = 3
+                c = make_container(
+                    f"despawn_{idx}", desp_x, desp_y, config,
+                    slot_count=slot_count, max_rows=this_mr,
+                    despawn=True, is_single_slot=False
+                )
+                containers.append(c)
+                idx += 1
 
     # Static containers (must be fully on-screen)
-    static_count = max(2, static_count)
+    # When 3 despawn columns occupy all standard positions, set statics to 0
+    all_standard_cols = {200, 540, 880}
+    available_cols = sorted(all_standard_cols - occupied_col_xs)
+    if not available_cols and spec["use_despawn"]:
+        static_count = 0  # All columns occupied by despawn
+    else:
+        static_count = max(2, static_count)
+        # Cap statics to fit on screen: use actual y_gap (includes MIN_CONTAINER_GAP)
+        # to compute how many rows fit, then multiply by available columns
+        actual_y_gap = get_y_gap(spec["max_rows"], static_count, level)
+        avail_height = SCREEN_MAX_Y - SCREEN_MIN_Y - y_offset
+        max_rows_fit = max(1, avail_height // actual_y_gap + 1)
+        n_cols = len(available_cols) if available_cols else 3
+        max_statics_fit = max_rows_fit * n_cols
+        static_count = min(static_count, max_statics_fit)
 
     # Determine which static indices are locked or single-slot
     # (must be computed before position generation to inform b&f layout)
     locked_indices = set()
     single_indices = set()
 
-    if spec["use_locked"]:
+    if spec["use_locked"] and static_count > 0:
         lc = min(spec["locked_count"], static_count)
         # Randomize locked indices from positions 1+ (never lock position 0)
         lock_candidates = list(range(1, static_count))
@@ -801,7 +859,7 @@ def build_containers(spec, config):
         for i in lock_candidates[:lc]:
             locked_indices.add(i)
 
-    if spec["use_singleslot"]:
+    if spec["use_singleslot"] and static_count > 0:
         # Allow locked single-slots (remove the locked exclusion filter)
         candidates = list(range(static_count))
         rng.shuffle(candidates)
@@ -810,82 +868,90 @@ def build_containers(spec, config):
             single_indices.add(i)
 
     # Count back-and-forth containers (first N non-locked positions)
+    # B&F needs at least 2 available columns to have room to move
     n_bf = 0
-    if spec["use_backforth"]:
+    if spec["use_backforth"] and static_count > 0 and len(available_cols) >= 2:
         for i in range(min(spec["backforth_count"], static_count)):
             if i not in locked_indices:
                 n_bf += 1
 
-    y_gap = get_y_gap(spec["max_rows"], static_count, level)
+    if static_count == 0:
+        positions = []
+    else:
+        y_gap = get_y_gap(spec["max_rows"], static_count, level)
 
-    if n_bf > 0:
-        # Back-and-forth containers need dedicated wide-spacing rows
-        # (max 2 per row at screen edges, or 1 centered) so they have
-        # room to move without overlapping neighbors.
-        bf_positions = []
-        bf_y = SCREEN_MIN_Y + y_offset
-        bf_remaining = n_bf
-        while bf_remaining > 0:
-            if bf_remaining >= 2:
-                bf_positions.extend([(200, min(SCREEN_MAX_Y, bf_y)),
-                                     (880, min(SCREEN_MAX_Y, bf_y))])
-                bf_remaining -= 2
+        # Determine which columns statics can use (exclude despawn-occupied columns)
+        static_cols = available_cols if available_cols else [200, 540, 880]
+
+        if n_bf > 0:
+            # Back-and-forth containers need dedicated wide-spacing rows
+            # Use only available columns for B&F positions
+            bf_edge_cols = [x for x in [200, 880] if x in set(static_cols)]
+            if not bf_edge_cols:
+                bf_edge_cols = static_cols[:2] if len(static_cols) >= 2 else static_cols
+
+            bf_positions = []
+            bf_y = SCREEN_MIN_Y + y_offset
+            bf_remaining = n_bf
+            while bf_remaining > 0:
+                if bf_remaining >= 2 and len(bf_edge_cols) >= 2:
+                    bf_positions.extend([(bf_edge_cols[0], min(SCREEN_MAX_Y, bf_y)),
+                                         (bf_edge_cols[-1], min(SCREEN_MAX_Y, bf_y))])
+                    bf_remaining -= 2
+                else:
+                    # Odd b&f: use first available column
+                    odd_x = bf_edge_cols[0] if center_col_occupied else 540
+                    if odd_x not in set(static_cols):
+                        odd_x = static_cols[0]
+                    bf_positions.append((odd_x, min(SCREEN_MAX_Y, bf_y)))
+                    bf_remaining -= 1
+                bf_y += y_gap
+
+            bf_rows_used = math.ceil(n_bf / 2)
+            n_static_only = static_count - n_bf
+
+            if len(static_cols) <= 2 or center_col_occupied:
+                # Limited column layout (columns occupied by despawn/carousel)
+                cols = static_cols[:2] if len(static_cols) >= 2 else static_cols
+                y0 = SCREEN_MIN_Y + y_offset + bf_rows_used * y_gap
+                static_positions = []
+                remaining = n_static_only
+                row = 0
+                while remaining > 0:
+                    y = y0 + row * y_gap
+                    n_this_row = min(remaining, len(cols))
+                    static_positions.extend([(cols[ci], min(SCREEN_MAX_Y, y))
+                                             for ci in range(n_this_row)])
+                    remaining -= n_this_row
+                    row += 1
             else:
-                # Odd b&f: use left column if center is occupied
-                odd_x = 200 if center_col_occupied else 540
-                bf_positions.append((odd_x, min(SCREEN_MAX_Y, bf_y)))
-                bf_remaining -= 1
-            bf_y += y_gap
+                # Remaining static in standard 3-column layout
+                if n_static_only > 0:
+                    static_y_offset = y_offset + bf_rows_used * y_gap
+                    static_positions = get_static_positions(
+                        n_static_only, spec["max_rows"], static_y_offset, level)
+                else:
+                    static_positions = []
 
-        bf_rows_used = math.ceil(n_bf / 2)
-        n_static_only = static_count - n_bf
+            positions = bf_positions + static_positions
 
-        if center_col_occupied:
-            # Remaining static in 2-column layout (center occupied by despawn/carousel)
-            cols = [200, 880]
-            y0 = SCREEN_MIN_Y + y_offset + bf_rows_used * y_gap
-            static_positions = []
-            remaining = n_static_only
+        elif len(static_cols) <= 2 or center_col_occupied:
+            # Limited column layout (columns occupied by despawn or vertical carousel)
+            positions = []
+            cols = static_cols[:2] if len(static_cols) >= 2 else static_cols
+            y0 = SCREEN_MIN_Y + y_offset
+            remaining = static_count
             row = 0
             while remaining > 0:
                 y = y0 + row * y_gap
-                if remaining >= 2:
-                    static_positions.extend([(x, min(SCREEN_MAX_Y, y)) for x in cols])
-                    remaining -= 2
-                else:
-                    static_positions.append((200, min(SCREEN_MAX_Y, y)))
-                    remaining -= 1
+                n_this_row = min(remaining, len(cols))
+                positions.extend([(cols[ci], min(SCREEN_MAX_Y, y))
+                                  for ci in range(n_this_row)])
+                remaining -= n_this_row
                 row += 1
         else:
-            # Remaining static in standard 3-column layout
-            if n_static_only > 0:
-                static_y_offset = y_offset + bf_rows_used * y_gap
-                static_positions = get_static_positions(
-                    n_static_only, spec["max_rows"], static_y_offset, level)
-            else:
-                static_positions = []
-
-        positions = bf_positions + static_positions
-
-    elif center_col_occupied:
-        # 2-column layout (center occupied by despawn or vertical carousel)
-        positions = []
-        cols = [200, 880]
-        y0 = SCREEN_MIN_Y + y_offset
-        remaining = static_count
-        row = 0
-        while remaining > 0:
-            y = y0 + row * y_gap
-            if remaining >= 2:
-                positions.extend([(x, min(SCREEN_MAX_Y, y)) for x in cols])
-                remaining -= 2
-            else:
-                positions.append((200, min(SCREEN_MAX_Y, y)))
-                remaining -= 1
-            row += 1
-    else:
-        # Standard 3-column layout
-        positions = get_static_positions(static_count, spec["max_rows"], y_offset, level)
+            # Standard 3-column layout
+            positions = get_static_positions(static_count, spec["max_rows"], y_offset, level)
 
     # ── Bounds validation: clamp container centers to safe screen area ──
     # Centers stay within SCREEN_MIN/MAX bounds; edges naturally extend beyond
@@ -907,8 +973,18 @@ def build_containers(spec, config):
         cy = c["position"]["y"]
         mr = c.get("max_rows_per_slot", spec["max_rows"])
         if c["is_moving"] and c["move_type"] == "carousel":
-            # Carousel containers sweep the full screen; skip overlap checks
-            pass
+            # Add swept bounding box for carousel's full travel path
+            # so B&F containers don't cross carousel tracks
+            if c["move_direction"] in ("right", "left"):
+                # Horizontal carousel: full-width swept box at carousel Y
+                sweep_box = (-200, 1280, cy - _container_half_height(mr),
+                             cy + _container_half_height(mr))
+            else:
+                # Vertical carousel: full-height swept box at carousel X
+                sweep_box = (cx - _container_half_width(c["slot_count"]),
+                             cx + _container_half_width(c["slot_count"]),
+                             -200, 2120)
+            placed_ranges.append((*sweep_box, -1))
         else:
             box = _get_bounding_box(cx, cy, c["slot_count"], mr)
             placed_ranges.append((*box, -1))
@@ -1255,21 +1331,32 @@ def generate_level(level, config, item_usage):
     target_fill = get_target_fill_ratio(level)
     target_items = math.ceil(total_capacity * target_fill)
     target_items = ((target_items + 2) // 3) * 3     # Round up to nearest multiple of 3
+    target_triples = target_items // 3
 
     available = get_available_items(config, level)
     max_types = max(2, (total_capacity - 3) // 3)     # Leave at least 1 slot buffer
-    fill_types = max(2, target_items // 3)
+    fill_types = max(2, target_triples)
     variety_types = get_target_types(level)
 
-    n_types = max(fill_types, variety_types)
-    n_types = min(n_types, max_types, len(available))
+    # Number of unique item types for variety
+    n_unique = max(fill_types, variety_types)
+    n_unique = min(n_unique, max_types, len(available))
     # Cap to actual placeable triple count (per-row rounding loses some slots)
     max_triples = get_max_triple_count(containers, spec["max_rows"])
-    n_types = min(n_types, max_triples)
-    n_types = max(2, n_types)
-    n_items = n_types * 3
+    n_unique = min(n_unique, max_triples)
+    n_unique = max(2, n_unique)
 
-    selected = select_items(rng, available, n_types, item_usage)
+    selected = select_items(rng, available, n_unique, item_usage)
+
+    # If target requires more triples than unique types, add duplicate triples
+    # This ensures dense levels (18-24 containers) stay full even with 50 item types
+    n_total_triples = min(target_triples, max_triples)
+    if n_total_triples > len(selected):
+        extra = n_total_triples - len(selected)
+        selected = selected + [rng.choice(selected) for _ in range(extra)]
+
+    n_items = len(selected) * 3
+
     construction_moves = place_items(containers, selected, spec["max_rows"], rng, level)
 
     actual = sum(len(c["initial_items"]) for c in containers)
