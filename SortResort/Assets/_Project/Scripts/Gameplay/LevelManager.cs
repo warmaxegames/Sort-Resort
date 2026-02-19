@@ -237,7 +237,6 @@ namespace SortResort
             // Try paths in order of likelihood
             string[] paths = {
                 $"Sprites/Items/{worldFolder}/{itemId}",      // Resources/Sprites/Items/Island/coconut
-                $"Art/Items/{worldFolder}/{itemId}",          // Resources/Art/Items/Island/coconut
                 $"Items/{worldFolder}/{itemId}",              // Resources/Items/Island/coconut
             };
 

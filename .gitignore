@@ -70,3 +70,10 @@ Thumbs.db
 # Plastic SCM
 .plastic/
 .plastic.ignore
+
+# Python build artifacts
+__pycache__/
+*.pyc
+
+# Solver output
+solver_output.txt

@@ -495,11 +495,6 @@ namespace SortResort
 
             // Load splash screen background sprite
             var splashSprite = Resources.Load<Sprite>("Sprites/UI/Backgrounds/splashscreen");
-            if (splashSprite == null)
-            {
-                // Try alternate path
-                splashSprite = Resources.Load<Sprite>("Art/UI/Backgrounds/splashscreen");
-            }
 
             // Background image
             var bgImage = splashPanel.AddComponent<Image>();
@@ -519,11 +514,6 @@ namespace SortResort
             // Load play button sprites
             var playNormalSprite = Resources.Load<Sprite>("Sprites/UI/Buttons/play_button");
             var playPressedSprite = Resources.Load<Sprite>("Sprites/UI/Buttons/play_button_pressed");
-            if (playNormalSprite == null)
-            {
-                playNormalSprite = Resources.Load<Sprite>("Art/UI/Buttons/play_button");
-                playPressedSprite = Resources.Load<Sprite>("Art/UI/Buttons/play_button_pressed");
-            }
 
             // Play button container (for positioning)
             var playBtnContainer = new GameObject("PlayButtonContainer");

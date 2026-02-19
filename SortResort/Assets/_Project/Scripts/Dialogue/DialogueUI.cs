@@ -1,7 +1,7 @@
 using System.Collections;
 using UnityEngine;
-using UnityEngine.UI;
 using UnityEngine.InputSystem;
+using UnityEngine.UI;
 using TMPro;
 
 namespace SortResort
