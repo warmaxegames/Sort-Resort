@@ -2378,7 +2378,13 @@ namespace SortResort
             // Load sprites
             var boardSprite = Resources.Load<Sprite>("Sprites/UI/Settings/board");
             var headerSprite = Resources.Load<Sprite>("Sprites/UI/Settings/settings_header");
-            var audioPanelSprite = Resources.Load<Sprite>("Sprites/UI/Settings/audio_panel");
+            // Load soundpanel as Texture2D, create sprite with same sub-sprite rect as old audio_panel
+            Sprite audioPanelSprite = null;
+            var soundPanelTex = Resources.Load<Texture2D>("Sprites/UI/Settings/soundpanel");
+            if (soundPanelTex != null)
+                audioPanelSprite = Sprite.Create(soundPanelTex, new Rect(44, 152, 512, 318), new Vector2(0.5f, 0.5f), 100f);
+            else
+                audioPanelSprite = Resources.Load<Sprite>("Sprites/UI/Settings/audio_panel"); // fallback
             var backNormalSprite = Resources.Load<Sprite>("Sprites/UI/Settings/back_button");
             var backPressedSprite = Resources.Load<Sprite>("Sprites/UI/Settings/back_button_pressed");
             var checkboxSprite = Resources.Load<Sprite>("Sprites/UI/Settings/checkbox");
@@ -2463,6 +2469,29 @@ namespace SortResort
             {
                 audioPanelImg.color = new Color(0.95f, 0.85f, 0.75f, 1f); // Beige fallback
             }
+
+            // Mute button (music note icon, positioned where old baked-in icon was)
+            var muteBtnSprite = LoadFullRectSprite("Sprites/UI/Settings/mutebutton");
+            var unmuteBtnSprite = LoadFullRectSprite("Sprites/UI/Settings/unmutebutton");
+
+            var muteBtnGO = new GameObject("MuteButton");
+            muteBtnGO.transform.SetParent(audioPanelGO.transform, false);
+            var muteBtnRect = muteBtnGO.AddComponent<RectTransform>();
+            muteBtnRect.anchorMin = new Vector2(0.5f, 1f);
+            muteBtnRect.anchorMax = new Vector2(0.5f, 1f);
+            muteBtnRect.pivot = new Vector2(0.5f, 0.5f);
+            muteBtnRect.anchoredPosition = new Vector2(-19f, -57f);
+            muteBtnRect.sizeDelta = new Vector2(146f, 134f);
+
+            var muteBtnImg = muteBtnGO.AddComponent<Image>();
+            if (muteBtnSprite != null)
+            {
+                muteBtnImg.sprite = muteBtnSprite;
+                muteBtnImg.preserveAspect = true;
+            }
+            var muteBtn = muteBtnGO.AddComponent<Button>();
+            muteBtn.targetGraphic = muteBtnImg;
+            muteBtn.transition = Selectable.Transition.None;
 
             // Audio sliders container
             var slidersContainer = new GameObject("SlidersContainer");
@@ -2662,7 +2691,8 @@ namespace SortResort
                 resetBtn, creditsBtn,
                 confirmDialog, confirmYes, confirmNo,
                 creditsPanel, creditsClose,
-                dimBg
+                dimBg,
+                muteBtn, muteBtnImg, muteBtnSprite, unmuteBtnSprite
             );
 
             // Subscribe to progress reset to refresh level select

@@ -52,6 +52,16 @@ namespace SortResort.UI
         [SerializeField] private Image dimBackground;
         [SerializeField] private Color dimColor = new Color(0, 0, 0, 0.7f);
 
+        [Header("Mute Button")]
+        [SerializeField] private Button muteButton;
+        [SerializeField] private Image muteButtonImage;
+        private Sprite unmutedSprite; // music note (normal state)
+        private Sprite mutedSprite;   // X over music note (muted state)
+        private bool isMuted;
+        private float savedMasterVolume = 1f;
+        private float savedMusicVolume = 1f;
+        private float savedSFXVolume = 1f;
+
         // Events
         public event Action OnCreditsClicked;
         public event Action OnResetConfirmed;
@@ -108,6 +118,11 @@ namespace SortResort.UI
             if (creditsCloseButton != null)
             {
                 creditsCloseButton.onClick.AddListener(OnCreditsCloseClicked);
+            }
+
+            if (muteButton != null)
+            {
+                muteButton.onClick.AddListener(OnMuteToggled);
             }
         }
 
@@ -231,6 +246,40 @@ namespace SortResort.UI
 
             // Play preview sound
             AudioManager.Instance?.PlayButtonClick();
+        }
+
+        private void OnMuteToggled()
+        {
+            AudioManager.Instance?.PlayButtonClick();
+            isMuted = !isMuted;
+
+            if (isMuted)
+            {
+                // Save current volumes before muting
+                if (masterVolumeSlider != null) savedMasterVolume = masterVolumeSlider.value;
+                if (musicVolumeSlider != null) savedMusicVolume = musicVolumeSlider.value;
+                if (sfxVolumeSlider != null) savedSFXVolume = sfxVolumeSlider.value;
+
+                // Set all sliders to 0
+                if (masterVolumeSlider != null) masterVolumeSlider.value = 0f;
+                if (musicVolumeSlider != null) musicVolumeSlider.value = 0f;
+                if (sfxVolumeSlider != null) sfxVolumeSlider.value = 0f;
+
+                // Show muted icon
+                if (muteButtonImage != null && mutedSprite != null)
+                    muteButtonImage.sprite = mutedSprite;
+            }
+            else
+            {
+                // Restore saved volumes
+                if (masterVolumeSlider != null) masterVolumeSlider.value = savedMasterVolume;
+                if (musicVolumeSlider != null) musicVolumeSlider.value = savedMusicVolume;
+                if (sfxVolumeSlider != null) sfxVolumeSlider.value = savedSFXVolume;
+
+                // Show unmuted icon
+                if (muteButtonImage != null && unmutedSprite != null)
+                    muteButtonImage.sprite = unmutedSprite;
+            }
         }
 
         private void UpdateVolumeLabel(TextMeshProUGUI label, float value)
@@ -406,7 +455,9 @@ namespace SortResort.UI
             Button resetBtn, Button creditsBtn,
             GameObject confirmDialog, Button confirmYes, Button confirmNo,
             GameObject credits, Button creditsClose,
-            Image dimBg)
+            Image dimBg,
+            Button muteBtn = null, Image muteBtnImg = null,
+            Sprite unmutedSpr = null, Sprite mutedSpr = null)
         {
             closeButton = close;
             masterVolumeSlider = masterSlider;
@@ -442,6 +493,10 @@ namespace SortResort.UI
             creditsPanel = credits;
             creditsCloseButton = creditsClose;
             dimBackground = dimBg;
+            muteButton = muteBtn;
+            muteButtonImage = muteBtnImg;
+            unmutedSprite = unmutedSpr;
+            mutedSprite = mutedSpr;
 
             SetupButtons();
             SetupSliders();
@@ -472,6 +527,7 @@ namespace SortResort.UI
             if (confirmYesButton != null) confirmYesButton.onClick.RemoveAllListeners();
             if (confirmNoButton != null) confirmNoButton.onClick.RemoveAllListeners();
             if (creditsCloseButton != null) creditsCloseButton.onClick.RemoveAllListeners();
+            if (muteButton != null) muteButton.onClick.RemoveAllListeners();
         }
     }
 }
