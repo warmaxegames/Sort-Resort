@@ -81,7 +81,7 @@ namespace SortResort
                         return;
                     }
 
-                    var result = solver.SolveLevel(levelData);
+                    var result = solver.SolveLevelBest(levelData);
 
                     if (result.Success)
                     {
@@ -174,7 +174,7 @@ namespace SortResort
                     );
                 };
 
-                var result = solver.SolveLevel(levelData);
+                var result = solver.SolveLevelBest(levelData);
 
                 if (result.FailureReason != null && result.FailureReason.StartsWith("Cancelled"))
                 {
@@ -385,7 +385,7 @@ namespace SortResort
 
             try
             {
-                lastResult = solver.SolveLevel(lastLevelData);
+                lastResult = solver.SolveLevelBest(lastLevelData);
             }
             finally
             {

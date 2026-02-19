@@ -55,6 +55,16 @@ namespace SortResort.UI
         private List<LevelButton> levelButtons = new List<LevelButton>();
         private bool isPortalAnimating = false;
 
+        // World lock/buy overlay
+        private GameObject worldLockOverlay;
+        private Image lockPadlockImage;
+        private Button buyButton;
+        private Dictionary<string, Sprite> lockedWorldSprites = new Dictionary<string, Sprite>();
+
+        // World unlock animation
+        private Sprite[] unlockAnimFrames;
+        private Coroutine unlockAnimCoroutine;
+
         // Tooltip
         private GameObject tooltipPanel;
         private TextMeshProUGUI tooltipText;
@@ -66,6 +76,7 @@ namespace SortResort.UI
         private HashSet<string> debugUnlockedWorlds = new HashSet<string>();
         private TextMeshProUGUI debugButtonText;
         private TextMeshProUGUI debugUnlockLevelsText;
+        private TextMeshProUGUI debugWorldLockText;
 #endif
         private Transform topBarTransform;
 
@@ -87,11 +98,13 @@ namespace SortResort.UI
             selectedMode = SaveManager.Instance?.GetActiveGameMode() ?? GameMode.FreePlay;
 
             LoadPortalSprites();
+            unlockAnimFrames = LoadUnlockAnimationFrames();
             SetupWorldNavigation();
             CreateModeTabs();
 #if UNITY_EDITOR
             CreateDebugUnlockLevelsButton();
             CreateDebugButton();
+            CreateDebugWorldLockButton();
 #endif
             CreateTooltip();
             CreateLevelGrid();
@@ -344,6 +357,7 @@ namespace SortResort.UI
 #if UNITY_EDITOR
             // Update debug button text
             UpdateDebugButtonText();
+            UpdateDebugWorldLockText();
 #endif
         }
 
@@ -582,9 +596,20 @@ namespace SortResort.UI
         {
             string worldId = worldIds[currentWorldIndex];
             Sprite modePortalSprite = GetPortalSpriteForMode();
+            bool worldUnlocked = IsWorldUnlocked(worldId);
 
             // Update world sprite image
             LoadWorldImage(worldId);
+
+            // Show/hide lock overlay and buy button
+            if (worldLockOverlay != null)
+                worldLockOverlay.SetActive(!worldUnlocked);
+
+            // Show/hide level grid and mode tabs when world is locked
+            if (levelScrollRect != null)
+                levelScrollRect.gameObject.SetActive(worldUnlocked);
+            if (modeTabContainer != null)
+                modeTabContainer.gameObject.SetActive(worldUnlocked);
 
             // Update navigation buttons
             if (prevWorldButton != null)
@@ -623,19 +648,33 @@ namespace SortResort.UI
         {
             if (worldImage == null) return;
 
-            var sprite = Resources.Load<Sprite>($"Sprites/UI/Worlds/{worldId}_world");
-            if (sprite == null)
-                sprite = Resources.Load<Sprite>($"Sprites/UI/Worlds/resort_world");
+            bool unlocked = IsWorldUnlocked(worldId);
 
-            if (sprite != null)
+            if (unlocked)
             {
+                // Use full-rect sprite to avoid alpha-trim mismatch with locked version
+                var sprite = LoadSpriteFromTexture($"Sprites/UI/Worlds/{worldId}_world");
+                if (sprite == null)
+                    sprite = LoadSpriteFromTexture("Sprites/UI/Worlds/resort_world");
                 worldImage.sprite = sprite;
-                worldImage.enabled = true;
+                worldImage.enabled = sprite != null;
             }
             else
             {
-                worldImage.enabled = false;
+                var lockedSprite = GetLockedWorldSprite(worldId);
+                if (lockedSprite != null)
+                {
+                    worldImage.sprite = lockedSprite;
+                    worldImage.enabled = true;
+                }
+                else
+                {
+                    var sprite = LoadSpriteFromTexture($"Sprites/UI/Worlds/{worldId}_world");
+                    worldImage.sprite = sprite;
+                    worldImage.enabled = sprite != null;
+                }
             }
+            worldImage.color = Color.white;
         }
 
         private bool IsLevelUnlocked(string worldId, int levelNumber)
@@ -762,6 +801,193 @@ namespace SortResort.UI
         public void SetTopBar(Transform topBar)
         {
             topBarTransform = topBar;
+        }
+
+        /// <summary>
+        /// Set the world lock overlay references (called from UIManager).
+        /// </summary>
+        public void SetWorldLockOverlay(GameObject overlay, Image padlock, Button buyBtn)
+        {
+            worldLockOverlay = overlay;
+            lockPadlockImage = padlock;
+            buyButton = buyBtn;
+            if (buyButton != null)
+                buyButton.onClick.AddListener(OnBuyWorldClicked);
+        }
+
+        private bool IsWorldUnlocked(string worldId)
+        {
+            if (worldId == "island") return true;
+            return SaveManager.Instance?.IsWorldUnlocked(worldId) ?? false;
+        }
+
+        private Sprite GetLockedWorldSprite(string worldId)
+        {
+            if (lockedWorldSprites.TryGetValue(worldId, out Sprite cached))
+                return cached;
+
+            // Use full-rect sprite (LoadSpriteFromTexture) to match color version sizing
+            var sprite = LoadSpriteFromTexture($"Sprites/UI/Worlds/{worldId}_world_locked");
+            if (sprite != null)
+                lockedWorldSprites[worldId] = sprite;
+            return sprite;
+        }
+
+        private void OnBuyWorldClicked()
+        {
+            string worldId = worldIds[currentWorldIndex];
+            Debug.Log($"[LevelSelectScreen] Buy world: {worldId}");
+
+            // TODO: Connect to real IAP purchase flow later
+            AudioManager.Instance?.PlayUnlockSound();
+            SaveManager.Instance?.UnlockWorld(worldId);
+
+            // Play unlock animation instead of immediate refresh
+            if (unlockAnimCoroutine != null)
+                StopCoroutine(unlockAnimCoroutine);
+            unlockAnimCoroutine = StartCoroutine(PlayWorldUnlockAnimation(worldId));
+        }
+
+        private Sprite[] LoadUnlockAnimationFrames()
+        {
+            var textures = Resources.LoadAll<Texture2D>("Sprites/UI/WorldUnlock");
+            if (textures.Length == 0)
+            {
+                Debug.LogWarning("[LevelSelectScreen] No world unlock animation frames found");
+                return new Sprite[0];
+            }
+            System.Array.Sort(textures, (a, b) => a.name.CompareTo(b.name));
+            var sprites = new Sprite[textures.Length];
+            for (int i = 0; i < textures.Length; i++)
+            {
+                var tex = textures[i];
+                sprites[i] = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), new Vector2(0.5f, 0.5f), 100f);
+            }
+            Debug.Log($"[LevelSelectScreen] Loaded {sprites.Length} world unlock animation frames");
+            return sprites;
+        }
+
+        private IEnumerator PlayWorldUnlockAnimation(string worldId)
+        {
+            // Disable buy button during animation
+            if (buyButton != null) buyButton.interactable = false;
+
+            // Get the locked sprite before switching to unlocked
+            Sprite lockedSprite = worldImage != null ? worldImage.sprite : null;
+            Sprite unlockedSprite = LoadSpriteFromTexture($"Sprites/UI/Worlds/{worldId}_world");
+
+            // Create a temporary overlay with the locked sprite for cross-fade
+            GameObject fadeOverlayGO = null;
+            CanvasGroup fadeCanvasGroup = null;
+            if (lockedSprite != null && worldImage != null && unlockedSprite != null)
+            {
+                // Set actual world image to unlocked immediately (hidden by overlay)
+                worldImage.sprite = unlockedSprite;
+
+                // Create overlay showing locked sprite on top, will fade out
+                fadeOverlayGO = new GameObject("LockedFadeOverlay");
+                fadeOverlayGO.transform.SetParent(worldImage.transform.parent, false);
+                fadeOverlayGO.transform.SetSiblingIndex(worldImage.transform.GetSiblingIndex() + 1);
+                var fadeRect = fadeOverlayGO.AddComponent<RectTransform>();
+                var srcRect = worldImage.rectTransform;
+                fadeRect.anchorMin = srcRect.anchorMin;
+                fadeRect.anchorMax = srcRect.anchorMax;
+                fadeRect.offsetMin = srcRect.offsetMin;
+                fadeRect.offsetMax = srcRect.offsetMax;
+                fadeRect.pivot = srcRect.pivot;
+                fadeRect.anchoredPosition = srcRect.anchoredPosition;
+                fadeRect.sizeDelta = srcRect.sizeDelta;
+
+                var fadeImage = fadeOverlayGO.AddComponent<Image>();
+                fadeImage.sprite = lockedSprite;
+                fadeImage.preserveAspect = worldImage.preserveAspect;
+                fadeImage.raycastTarget = false;
+
+                fadeCanvasGroup = fadeOverlayGO.AddComponent<CanvasGroup>();
+                fadeCanvasGroup.alpha = 1f;
+                fadeCanvasGroup.blocksRaycasts = false;
+            }
+
+            // Hide lock overlay (padlock + buy button) immediately
+            if (worldLockOverlay != null)
+                worldLockOverlay.SetActive(false);
+
+            // Create fullscreen animation overlay canvas
+            GameObject animCanvasGO = null;
+            Image animImage = null;
+            if (unlockAnimFrames != null && unlockAnimFrames.Length > 0)
+            {
+                animCanvasGO = new GameObject("WorldUnlockAnimCanvas");
+                animCanvasGO.transform.SetParent(transform.root, false);
+                var animCanvas = animCanvasGO.AddComponent<Canvas>();
+                animCanvas.renderMode = RenderMode.ScreenSpaceOverlay;
+                animCanvas.sortingOrder = 5100;
+                var scaler = animCanvasGO.AddComponent<UnityEngine.UI.CanvasScaler>();
+                scaler.uiScaleMode = UnityEngine.UI.CanvasScaler.ScaleMode.ScaleWithScreenSize;
+                scaler.referenceResolution = new Vector2(1080, 1920);
+                scaler.matchWidthOrHeight = 0.5f;
+
+                var animGO = new GameObject("UnlockAnimFrame");
+                animGO.transform.SetParent(animCanvasGO.transform, false);
+                var animRect = animGO.AddComponent<RectTransform>();
+                animRect.anchorMin = Vector2.zero;
+                animRect.anchorMax = Vector2.one;
+                animRect.offsetMin = Vector2.zero;
+                animRect.offsetMax = Vector2.zero;
+
+                animImage = animGO.AddComponent<Image>();
+                animImage.sprite = unlockAnimFrames[0];
+                animImage.preserveAspect = true;
+                animImage.raycastTarget = false;
+            }
+
+            // Play animation + cross-fade
+            // Fade starts when "UNLOCKED!" text appears (~frame 10 = 0.4s) and lasts 1.5s
+            float animFps = 24f;
+            float frameDuration = 1f / animFps;
+            float fadeDelay = 0.4f;
+            float fadeDuration = 1.5f;
+            int totalFrames = unlockAnimFrames?.Length ?? 0;
+            float totalDuration = Mathf.Max(totalFrames * frameDuration, fadeDelay + fadeDuration);
+            float elapsed = 0f;
+            float frameTimer = 0f;
+            int currentFrame = 0;
+
+            while (elapsed < totalDuration)
+            {
+                elapsed += Time.unscaledDeltaTime;
+
+                // Cross-fade locked → unlocked: starts after delay, lasts 1.5s
+                if (fadeCanvasGroup != null && elapsed > fadeDelay)
+                    fadeCanvasGroup.alpha = Mathf.Clamp01(1f - (elapsed - fadeDelay) / fadeDuration);
+
+                // Advance animation frames
+                if (animImage != null && totalFrames > 0)
+                {
+                    frameTimer += Time.unscaledDeltaTime;
+                    while (frameTimer >= frameDuration && currentFrame < totalFrames - 1)
+                    {
+                        frameTimer -= frameDuration;
+                        currentFrame++;
+                        animImage.sprite = unlockAnimFrames[currentFrame];
+                    }
+                }
+
+                yield return null;
+            }
+
+            // Cleanup temporary objects
+            if (fadeOverlayGO != null) Destroy(fadeOverlayGO);
+            if (animCanvasGO != null) Destroy(animCanvasGO);
+
+            // Re-enable buy button for future use (e.g. after debug lock/unlock cycle)
+            if (buyButton != null) buyButton.interactable = true;
+
+            // Full refresh to show unlocked state with level grid, mode tabs, etc.
+            RefreshDisplay();
+            UpdateModeTabVisuals();
+
+            unlockAnimCoroutine = null;
         }
 
 #if UNITY_EDITOR
@@ -921,6 +1147,98 @@ namespace SortResort.UI
             UpdateModeTabVisuals();
             RefreshDisplay();
             Debug.Log($"[LevelSelectScreen] Debug Hard Mode toggle: {worldId} now {(IsHardModeEffectivelyUnlocked(worldId) ? "UNLOCKED" : "LOCKED")}");
+        }
+
+        private void CreateDebugWorldLockButton()
+        {
+            Transform parent = topBarTransform ?? modeTabContainer?.parent;
+            if (parent == null) return;
+
+            var btnGO = new GameObject("DebugWorldLockBtn");
+            btnGO.transform.SetParent(parent, false);
+            var rect = btnGO.AddComponent<RectTransform>();
+
+            if (topBarTransform != null)
+            {
+                rect.anchorMin = new Vector2(1, 0.5f);
+                rect.anchorMax = new Vector2(1, 0.5f);
+                rect.pivot = new Vector2(1, 0.5f);
+                rect.anchoredPosition = new Vector2(-525, 0);
+                rect.sizeDelta = new Vector2(90, 90);
+            }
+            else
+            {
+                rect.anchorMin = new Vector2(0.05f, 0.96f);
+                rect.anchorMax = new Vector2(0.34f, 0.995f);
+                rect.offsetMin = Vector2.zero;
+                rect.offsetMax = Vector2.zero;
+            }
+
+            var bg = btnGO.AddComponent<Image>();
+            bg.color = new Color(0.4f, 0.4f, 0.4f, 0.8f);
+
+            var btn = btnGO.AddComponent<Button>();
+            btn.targetGraphic = bg;
+            btn.onClick.AddListener(OnDebugWorldLockToggle);
+
+            var textGO = new GameObject("Text");
+            textGO.transform.SetParent(btnGO.transform, false);
+            var textRect = textGO.AddComponent<RectTransform>();
+            textRect.anchorMin = Vector2.zero;
+            textRect.anchorMax = Vector2.one;
+            textRect.offsetMin = new Vector2(4, 2);
+            textRect.offsetMax = new Vector2(-4, -2);
+
+            debugWorldLockText = textGO.AddComponent<TextMeshProUGUI>();
+            debugWorldLockText.fontSize = 16;
+            debugWorldLockText.fontStyle = FontStyles.Bold;
+            debugWorldLockText.alignment = TextAlignmentOptions.Center;
+            debugWorldLockText.color = Color.white;
+            UpdateDebugWorldLockText();
+        }
+
+        private void UpdateDebugWorldLockText()
+        {
+            if (debugWorldLockText == null) return;
+            string worldId = worldIds[currentWorldIndex];
+            bool unlocked = IsWorldUnlocked(worldId);
+            debugWorldLockText.text = unlocked ? "LOCK\nWORLD" : "UNLOCK\nWORLD";
+            debugWorldLockText.color = unlocked ? new Color(1f, 0.5f, 0.5f) : new Color(0.5f, 1f, 0.5f);
+        }
+
+        private void OnDebugWorldLockToggle()
+        {
+            string worldId = worldIds[currentWorldIndex];
+            if (worldId == "island")
+            {
+                ShowTooltip("Island cannot be locked");
+                AudioManager.Instance?.PlayButtonClick();
+                return;
+            }
+
+            bool currentlyUnlocked = IsWorldUnlocked(worldId);
+
+            if (currentlyUnlocked)
+            {
+                SaveManager.Instance?.LockWorld(worldId);
+                AudioManager.Instance?.PlayButtonClick();
+                UpdateDebugWorldLockText();
+                UpdateModeTabVisuals();
+                RefreshDisplay();
+            }
+            else
+            {
+                AudioManager.Instance?.PlayUnlockSound();
+                SaveManager.Instance?.UnlockWorld(worldId);
+                AudioManager.Instance?.PlayButtonClick();
+                UpdateDebugWorldLockText();
+                // Play unlock animation
+                if (unlockAnimCoroutine != null)
+                    StopCoroutine(unlockAnimCoroutine);
+                unlockAnimCoroutine = StartCoroutine(PlayWorldUnlockAnimation(worldId));
+            }
+
+            Debug.Log($"[LevelSelectScreen] Debug World Lock toggle: {worldId} now {(IsWorldUnlocked(worldId) ? "UNLOCKED" : "LOCKED")}");
         }
 #endif
 

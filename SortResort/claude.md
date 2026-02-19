@@ -22,7 +22,7 @@
 
 ## Current Status
 
-**Last Updated:** 2026-02-17
+**Last Updated:** 2026-02-18
 
 ### Working Features (Unity)
 - Splash screen → Level select with fade transition
@@ -48,7 +48,7 @@
 ## TODO List
 
 ### Priority Items
-1. **Improve Solver for Heavily-Locked Levels** - Solver scores 115 moves on L77, player achieves 81 (34 moves / 30% better). Player move sequence captured in `SolverAlerts/solver_alert_island_level_077_2026-02-17_23-16-13.txt`. Greedy solver makes poor unlock ordering decisions on levels with many locked containers (L77: 5 locked, 34 total unlock matches). Likely affects other high-locked levels too.
+1. ~~**Improve Solver for Heavily-Locked Levels**~~ - DONE. Ensemble solver (5 strategies × 4 runs = 20 attempts) + 6 heuristic improvements. Total: 5,969 moves across 100 levels (was 6,182). Zero regressions.
 2. **Level Complete Screen** - Remaining:
    - Animated mascot art assets for each world (currently only Island has thumbsup animation)
    - Audio: music and sound effects for each scenario (1-star, 2-star, 3-star)
@@ -338,13 +338,22 @@ Mechanics unlock at fixed levels and persist via probability (30-70%). A complex
 ### Level Solver
 - Editor: Tools > Sort Resort > Solver > Solve Level...
 - In-game: "Solve" button in HUD
-- Greedy algorithm with heuristics for pairing and row advancement
+- **Ensemble solver**: `SolveLevelBest()` runs 5 strategies × 4 runs (1 clean + 3 noise) = 20 attempts per level, takes best result
+  - Strategies: Balanced (default), PairFocused (pair=1.4, reveal=0.85), RevealFocused (pair=0.85, reveal=1.4), Cautious (caution=1.6), Aggressive (pair=1.1, reveal=1.3, caution=0.5)
+  - Category tracking: `pairContrib`, `revealContrib`, `penaltyContrib` scaled by strategy weights
+  - Noise restarts: ±8 random score perturbation per move for diversity (seeded for reproducibility)
+  - Early termination: `construction_moves` from level JSON as initial upper bound, `move_limit` tightens as better results found
+  - C#: `LevelSolver.SolveLevelBest(levelData)`, Python: `solve_level_best(level_dict)`
+- Greedy algorithm with heuristics for pairing, row advancement, deadlock prevention
 - Alerts saved when player beats solver score (`{persistentDataPath}/SolverAlerts/`)
 - Move sequence output includes scores, reasons, and top 3 runner-ups for debugging
-- Key heuristics added:
-  - **Self-blocking penalty**: -200 when pair's 3rd item is hidden behind the pair at same container (fires even in enables-match path)
-  - **Room-will-open**: +30 for pairs at full containers when non-matching items are fully accessible types (will clear soon, opening room). Also exempts "fills container" penalty.
-- Solver matches player optimal on Levels 8 (19), 9 (21), 10 (23)
+- Key heuristics:
+  - **Self-blocking penalty**: -200 when pair's 3rd item is hidden behind the pair at same container
+  - **Room-will-open**: +30 for pairs at full containers when non-matching items are fully accessible
+  - **Source pair bonus**: +40 for revealing pairs at source on row advance, +25 for exposing source pairs
+  - **Deadlock prevention**: -500/-150/-100/-30 graduated penalties for reducing empty front slots to 0/1/2/few
+  - **Follow-up quality**: +20+count*10 for reveals from follow-up matches, +15 for chain matches
+- Total: 5,969 moves across 100 Island levels (ensemble best)
 
 ### Star Thresholds & Move Limits
 Thresholds are based on solver optimal move count:

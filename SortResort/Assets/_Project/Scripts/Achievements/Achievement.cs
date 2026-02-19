@@ -203,7 +203,7 @@ namespace SortResort
             switch (tab)
             {
                 case "island": return "ST. GAMES\nISLAND";
-                case "supermarket": return "SUPERSTORE";
+                case "supermarket": return "SUPER\nSTORE";
                 case "farm": return "WILTY\nACRES";
                 case "tavern": return "THE OINK\n& ANCHOR";
                 case "space": return "SPACE\nSTATION";

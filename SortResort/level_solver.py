@@ -12,6 +12,7 @@ The two implementations must stay in sync to produce identical results.
 """
 
 import copy
+import random
 import time
 from dataclasses import dataclass, field
 from typing import List, Optional, Dict, Tuple
@@ -140,16 +141,87 @@ class SolveResult:
     solve_time_ms: float = 0.0
 
 
+@dataclass
+class SolverStrategy:
+    """Weight profile for ensemble solving. Defaults reproduce baseline behavior."""
+    name: str = "Balanced"
+    pair_weight: float = 1.0      # Scales pair creation/destruction bonuses
+    reveal_weight: float = 1.0    # Scales reveal/row-advance bonuses
+    caution_weight: float = 1.0   # Scales penalties (higher = more cautious)
+    noise_magnitude: int = 0      # Random noise ±N added to each move score
+
+
+BALANCED = SolverStrategy("Balanced")
+PAIR_FOCUSED = SolverStrategy("PairFocused", pair_weight=1.4, reveal_weight=0.85)
+REVEAL_FOCUSED = SolverStrategy("RevealFocused", pair_weight=0.85, reveal_weight=1.4)
+CAUTIOUS = SolverStrategy("Cautious", reveal_weight=0.9, caution_weight=1.6)
+AGGRESSIVE = SolverStrategy("Aggressive", pair_weight=1.1, reveal_weight=1.3, caution_weight=0.5)
+ALL_STRATEGIES = [BALANCED, PAIR_FOCUSED, REVEAL_FOCUSED, CAUTIOUS, AGGRESSIVE]
+
+
 # ── Solver ───────────────────────────────────────────────────────────────────
 
 MAX_MOVES = 500
 PATTERN_WINDOW = 10
 
 
-def solve_level(level_dict, verbose=False):
+def solve_level_best(level_dict, noise_runs_per_strategy=3, noise_magnitude=8, verbose=False):
+    """Solve a level using multiple strategies + noise restarts, return the best result."""
+    start = time.perf_counter()
+    best = None
+    move_limit = level_dict.get("construction_moves",
+                 level_dict.get("_construction_moves", MAX_MOVES))
+    if not move_limit or move_limit <= 0:
+        move_limit = MAX_MOVES
+    best_strategy_name = ""
+
+    for strat in ALL_STRATEGIES:
+        # Clean run (no noise)
+        result = solve_level(level_dict, strategy=strat, move_limit=move_limit)
+        if result.success and (best is None or result.total_moves < best.total_moves):
+            best = result
+            move_limit = best.total_moves
+            best_strategy_name = strat.name
+
+        # Noise restarts
+        for run in range(1, noise_runs_per_strategy + 1):
+            noise_strat = SolverStrategy(
+                name=f"{strat.name}_n{run}",
+                pair_weight=strat.pair_weight,
+                reveal_weight=strat.reveal_weight,
+                caution_weight=strat.caution_weight,
+                noise_magnitude=noise_magnitude,
+            )
+            result = solve_level(level_dict, strategy=noise_strat, noise_seed=run,
+                                 move_limit=move_limit)
+            if result.success and (best is None or result.total_moves < best.total_moves):
+                best = result
+                move_limit = best.total_moves
+                best_strategy_name = noise_strat.name
+
+    if best is None:
+        best = solve_level(level_dict)
+
+    best.solve_time_ms = (time.perf_counter() - start) * 1000
+
+    if verbose and best.success:
+        print(f"  Best: {best.total_moves} moves via {best_strategy_name} "
+              f"({best.solve_time_ms:.1f}ms total)")
+
+    return best
+
+
+def solve_level(level_dict, verbose=False, strategy=None, noise_seed=0, move_limit=0):
     """Solve a level from its JSON dict. Returns SolveResult."""
     start = time.perf_counter()
     result = SolveResult()
+
+    effective_limit = move_limit if move_limit > 0 else MAX_MOVES
+
+    # Set up noise RNG
+    noise_rng = None
+    if strategy and strategy.noise_magnitude > 0:
+        noise_rng = random.Random(noise_seed)
 
     state = _initialize_state(level_dict)
     if state is None:
@@ -163,8 +235,9 @@ def solve_level(level_dict, verbose=False):
     last_move = None
     recent_moves = []
 
-    while not state.is_complete() and state.move_count < MAX_MOVES:
-        best = _find_best_move(state, last_move, recent_moves, verbose)
+    while not state.is_complete() and state.move_count < effective_limit:
+        best = _find_best_move(state, last_move, recent_moves, verbose,
+                               strategy=strategy, noise_rng=noise_rng)
 
         if best is None:
             result.failure_reason = f"No valid moves. {state.get_total_item_count()} items remaining."
@@ -235,7 +308,8 @@ def _initialize_state(level_dict):
 
 # ── Move Finding ─────────────────────────────────────────────────────────────
 
-def _find_best_move(state, last_move, recent_moves, verbose=False):
+def _find_best_move(state, last_move, recent_moves, verbose=False,
+                    strategy=None, noise_rng=None):
     """Find the best move using greedy heuristics."""
     # RULE 1: Always take 1-move matches
     one_move = _find_one_move_match(state)
@@ -261,7 +335,7 @@ def _find_best_move(state, last_move, recent_moves, verbose=False):
     # RULE 4: Score all moves
     scored = []
     for move in all_moves:
-        score, reason = _score_move_unified(state, move, item_status)
+        score, reason = _score_move_unified(state, move, item_status, strategy=strategy)
 
         # RULE 5: Reversal penalty
         if last_move and _is_reversal_move(move, last_move):
@@ -273,6 +347,11 @@ def _find_best_move(state, last_move, recent_moves, verbose=False):
         if reverse_key in recent_set:
             score -= 500
             reason += ", PATTERN PENALTY"
+
+        # Apply noise for ensemble diversity
+        if noise_rng is not None and strategy and strategy.noise_magnitude > 0:
+            noise = noise_rng.randint(-strategy.noise_magnitude, strategy.noise_magnitude)
+            score += noise
 
         scored.append((score, move, reason))
 
@@ -293,7 +372,7 @@ def _analyze_item_accessibility(state):
     # Containers close to unlocking
     near_unlock = set()
     for ci, c in enumerate(state.containers):
-        if c.is_locked and c.unlock_matches_required - c.current_unlock_progress <= 1:
+        if c.is_locked and c.unlock_matches_required - c.current_unlock_progress <= 2:
             near_unlock.add(ci)
 
     # Containers close to row advance
@@ -330,10 +409,15 @@ def _analyze_item_accessibility(state):
 
 # ── Move Scoring ─────────────────────────────────────────────────────────────
 
-def _score_move_unified(state, move, item_status):
+def _score_move_unified(state, move, item_status, strategy=None):
     """Score a move on a unified scale. Returns (score, reason_string)."""
     score = 0
     reasons = []
+
+    # Category subtotals for strategy weight adjustments
+    pair_contrib = 0
+    reveal_contrib = 0
+    penalty_contrib = 0
 
     from_c = state.containers[move.from_container]
     to_c = state.containers[move.to_container]
@@ -366,6 +450,28 @@ def _score_move_unified(state, move, item_status):
                 score += 40
                 reasons.append("enables match (temp location)")
 
+            # Follow-up quality: evaluate how good the enabled match is
+            fu_from_c = test_state.containers[follow_up.from_container]
+            fu_from_occ = sum(1 for s in range(fu_from_c.slot_count)
+                              if not fu_from_c.is_front_slot_empty(s))
+
+            # Bonus if the follow-up move triggers row advance at its source
+            if fu_from_occ == 1 and fu_from_c.has_back_row_items():
+                revealed_by_fu = _get_items_that_would_advance(fu_from_c)
+                fu_reveal_bonus = 20 + len(revealed_by_fu) * 10
+                score += fu_reveal_bonus; reveal_contrib += fu_reveal_bonus
+                reasons.append(f"follow-up reveals {len(revealed_by_fu)} items")
+
+            # Check if follow-up creates chain matches
+            fu_state = test_state.clone()
+            _execute_move(fu_state, follow_up)
+            _process_all_matches(fu_state)
+
+            chain_match = _find_one_move_match(fu_state)
+            if chain_match is not None:
+                score += 15; reveal_contrib += 15
+                reasons.append("follow-up chains into match")
+
     # === PAIRING BONUS ===
     already_credited_pair = "enables match + creates pair" in reasons
     pair_room_will_open = False
@@ -377,24 +483,24 @@ def _score_move_unified(state, move, item_status):
         has_room_for_third = empty_at_dest >= 2
 
         if third_accessible and has_room_for_third:
-            score += 180
+            score += 180; pair_contrib += 180
             reasons.append("creates completable pair")
         elif third_accessible and not has_room_for_third:
-            score -= 50
+            score -= 50; pair_contrib -= 50
             reasons.append("creates BLOCKED pair (no room for 3rd)")
         elif third_nearly and has_room_for_third:
             hidden_at_dest = to_c.get_back_row_item_types()
             if move.item_id in hidden_at_dest:
-                score -= 200
+                score -= 200; pair_contrib -= 200
                 reasons.append("SELF-BLOCKING pair (3rd hidden HERE)")
             else:
-                score += 100
+                score += 100; pair_contrib += 100
                 reasons.append("creates near-completable pair (3rd nearly accessible)")
         elif not third_accessible and has_room_for_third:
-            score += 20
+            score += 20; pair_contrib += 20
             reasons.append("creates waiting pair (3rd hidden)")
             if to_c.has_back_row_items():
-                score -= 80
+                score -= 80; pair_contrib -= 80
                 reasons.append("pair blocks reveals")
         else:
             # WORST PAIR: 3rd hidden AND no room
@@ -406,22 +512,22 @@ def _score_move_unified(state, move, item_status):
             )
 
             if room_will_open:
-                score += 30
+                score += 30; pair_contrib += 30
                 pair_room_will_open = True
                 reasons.append("creates pair (room will open - blocking type clearable)")
             else:
-                score -= 100
+                score -= 100; pair_contrib -= 100
                 reasons.append("creates useless pair (hidden + blocked)")
 
     elif matching_at_dest == 0 and len(dest_items) > 0 and "enables match (temp location)" not in reasons:
-        score -= 10
+        score -= 10; penalty_contrib -= 10
         reasons.append("mixes items")
 
     # === SELF-BLOCKING PAIR PENALTY (enables-match path) ===
     if matching_at_dest >= 1 and already_credited_pair:
         hidden_at_dest = to_c.get_back_row_item_types()
         if move.item_id in hidden_at_dest:
-            score -= 200
+            score -= 200; pair_contrib -= 200
             reasons.append("SELF-BLOCKING pair (3rd hidden HERE)")
 
     # === ACTIONABILITY ===
@@ -432,7 +538,7 @@ def _score_move_unified(state, move, item_status):
         has_useful = any(r.startswith("creates match") or r.startswith("enables match") or
                          r == "creates pair" for r in reasons)
         if not has_useful:
-            score -= 40
+            score -= 40; penalty_contrib -= 40
             reasons.append("stuck item shuffle")
 
     # === PAIR DESTRUCTION PENALTY ===
@@ -445,10 +551,10 @@ def _score_move_unified(state, move, item_status):
             has_room = source_empty >= 1
             third_acc = acc >= 3
             if third_acc and has_room:
-                score -= 150
+                score -= 150; pair_contrib -= 150
                 reasons.append("DESTROYS completable pair")
             elif third_acc and not has_room:
-                score -= 30
+                score -= 30; pair_contrib -= 30
                 reasons.append("breaks blocked pair")
 
     # === ROW ADVANCEMENT BONUS ===
@@ -456,29 +562,87 @@ def _score_move_unified(state, move, item_status):
 
     if from_occupied == 1 and from_c.has_back_row_items():
         revealed = _get_items_that_would_advance(from_c)
-        score += 100 + len(revealed) * 25
+        row_adv_bonus = 100 + len(revealed) * 25
+        score += row_adv_bonus; reveal_contrib += row_adv_bonus
         reasons.append(f"triggers row advance ({len(revealed)} items)")
 
         for rev_item in revealed:
             if _has_waiting_pair_for_item(state, rev_item):
-                score += 80
+                score += 80; reveal_contrib += 80
                 reasons.append(f"reveals {rev_item} for waiting pair")
                 break
 
+        # Combo bonus: pair + reveal (widened to include near-completable)
         if matching_at_dest == 1 and acc >= 3:
-            score += 50
-            reasons.append("combo: pair + reveal")
+            score += 60; reveal_contrib += 60
+            reasons.append("combo: completable pair + reveal")
+        elif matching_at_dest == 1 and (acc + near) >= 3:
+            score += 50; reveal_contrib += 50
+            reasons.append("combo: near-pair + reveal")
 
     elif from_c.has_back_row_items():
         back_count = from_c.get_back_row_item_count()
-        score += 30 + back_count * 10
+        progress_bonus = 30 + back_count * 10
+        score += progress_bonus; reveal_contrib += progress_bonus
         reasons.append(f"progress toward reveal ({back_count} hidden)")
+
+    # === SOURCE PAIR BONUS (Double-Pair Recognition) ===
+    # When row advance reveals a pair at source
+    if from_occupied == 1 and from_c.has_back_row_items():
+        revealed_for_pair = _get_items_that_would_advance(from_c)
+        revealed_counts = {}
+        for ri in revealed_for_pair:
+            revealed_counts[ri] = revealed_counts.get(ri, 0) + 1
+        for ri_type, ri_cnt in revealed_counts.items():
+            if ri_cnt >= 2:
+                score += 40; pair_contrib += 40
+                reasons.append(f"reveals source pair ({ri_type})")
+                break
+    elif from_occupied > 1:
+        # Check if remaining front items at source form a pair
+        remaining_counts = {}
+        for s in range(from_c.slot_count):
+            fi = from_c.get_front_item(s)
+            if fi is not None and s != move.from_slot:
+                remaining_counts[fi] = remaining_counts.get(fi, 0) + 1
+        for ri_type, ri_cnt in remaining_counts.items():
+            if ri_cnt >= 2:
+                score += 25; pair_contrib += 25
+                reasons.append(f"exposes source pair ({ri_type})")
+                break
 
     # === DESTINATION QUALITY ===
     dest_empty = to_c.get_empty_front_slot_count()
     if dest_empty <= 1 and not pair_room_will_open:
-        score -= 15
+        score -= 15; penalty_contrib -= 15
         reasons.append("fills container")
+
+    # === DEADLOCK PREVENTION ===
+    # Check if this move would leave dangerously few empty front slots globally
+    deadlock_test = test_state.clone()
+    matches_from_move = _process_all_matches(deadlock_test)
+    total_empty_slots = 0
+    for c in deadlock_test.containers:
+        if not c.is_locked:
+            total_empty_slots += c.get_empty_front_slot_count()
+
+    # Count containers about to unlock (within 2 matches)
+    near_unlock_count = sum(1 for c in deadlock_test.containers
+                            if c.is_locked and c.unlock_matches_required - c.current_unlock_progress <= 2)
+
+    if matches_from_move == 0:
+        if total_empty_slots == 0 and near_unlock_count == 0:
+            score -= 500; penalty_contrib -= 500
+            reasons.append("DEADLOCK: leaves 0 empty slots")
+        elif total_empty_slots == 0 and near_unlock_count > 0:
+            score -= 150; penalty_contrib -= 150
+            reasons.append("tight board (unlocks coming)")
+        elif total_empty_slots == 1 and near_unlock_count == 0:
+            score -= 100; penalty_contrib -= 100
+            reasons.append("near-deadlock: only 1 empty slot left")
+        elif total_empty_slots <= 2 and near_unlock_count == 0:
+            score -= 30; penalty_contrib -= 30
+            reasons.append("low slots remaining")
 
     # === STAGING MOVE ===
     if len(dest_items) == 0 and matching_at_dest == 0:
@@ -486,7 +650,8 @@ def _score_move_unified(state, move, item_status):
             score += 20
             reasons.append("productive staging")
         else:
-            score -= 5
+            # Pure staging with no reveal - not great but sometimes necessary
+            score -= 5; penalty_contrib -= 5
             reasons.append("staging move")
 
     # === MATCH-IN-PLACE CONSIDERATION ===
@@ -494,21 +659,28 @@ def _score_move_unified(state, move, item_status):
     making_good_pair = matching_at_dest == 1 and acc >= 3
     triggering_reveal = from_occupied == 1 and from_c.has_back_row_items()
     if from_empty >= 2 and is_actionable and matching_at_dest == 0 and not triggering_reveal:
-        score -= 35
+        score -= 35; penalty_contrib -= 35
         reasons.append("disrupts match-in-place potential")
 
     # === MATCH-AT-REVEALING-CONTAINER BONUS ===
     will_complete = matching_at_dest >= 2 or (matching_at_dest == 1 and acc >= 3)
     if to_c.has_back_row_items() and matching_at_dest >= 1 and will_complete:
         hidden_count = to_c.get_back_row_item_count()
-        score += 50 + hidden_count * 20
+        triple_reveal_bonus = 50 + hidden_count * 20
+        score += triple_reveal_bonus; reveal_contrib += triple_reveal_bonus
         reasons.append(f"triple reveals {hidden_count} hidden item(s)")
 
         hidden_items = to_c.get_back_row_item_types()
         unique_hidden = set(h for h in hidden_items if h != move.item_id)
         if unique_hidden:
-            score += 30
+            score += 30; reveal_contrib += 30
             reasons.append("clears container for revealed items")
+
+    # === STRATEGY WEIGHT ADJUSTMENTS ===
+    if strategy is not None:
+        score += int(pair_contrib * (strategy.pair_weight - 1.0))
+        score += int(reveal_contrib * (strategy.reveal_weight - 1.0))
+        score += int(penalty_contrib * (strategy.caution_weight - 1.0))
 
     reason = ", ".join(reasons) if reasons else "neutral"
     return score, reason
@@ -739,23 +911,28 @@ if __name__ == "__main__":
     import sys
 
     if len(sys.argv) < 2:
-        print("Usage: python level_solver.py <level_json_file> [--verbose]")
+        print("Usage: python level_solver.py <level_json_file> [--verbose] [--best]")
         sys.exit(1)
 
     path = sys.argv[1]
     verbose = "--verbose" in sys.argv
+    use_best = "--best" in sys.argv
 
     with open(path) as f:
         level = json.load(f)
 
     print(f"Solving: {path}")
-    result = solve_level(level, verbose=verbose)
+    if use_best:
+        result = solve_level_best(level, verbose=True)
+    else:
+        result = solve_level(level, verbose=verbose)
 
     if result.success:
         print(f"SOLVED: {result.total_moves} moves, {result.total_matches} matches "
               f"({result.solve_time_ms:.1f}ms)")
-        for i, m in enumerate(result.move_sequence):
-            print(f"  {i+1:3d}. {m.item_id:20s} : C[{m.from_container}].S[{m.from_slot}] -> "
-                  f"C[{m.to_container}].S[{m.to_slot}]  (score: {m.score}, {m.reason})")
+        if verbose:
+            for i, m in enumerate(result.move_sequence):
+                print(f"  {i+1:3d}. {m.item_id:20s} : C[{m.from_container}].S[{m.from_slot}] -> "
+                      f"C[{m.to_container}].S[{m.to_slot}]  (score: {m.score}, {m.reason})")
     else:
         print(f"FAILED: {result.failure_reason} ({result.solve_time_ms:.1f}ms)")

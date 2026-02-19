@@ -42,7 +42,7 @@ namespace SortResort
                     }
 
                     totalLevels++;
-                    var result = solver.SolveLevel(levelData);
+                    var result = solver.SolveLevelBest(levelData);
                     totalTime += result.SolveTimeMs;
 
                     if (result.Success)
@@ -89,7 +89,7 @@ namespace SortResort
             var solver = new LevelSolver();
             solver.VerboseLogging = true; // Enable verbose for single level
 
-            var result = solver.SolveLevel(levelData);
+            var result = solver.SolveLevelBest(levelData);
 
             Debug.Log($"\n=== RESULT: {result} ===");
 
@@ -122,7 +122,7 @@ namespace SortResort
                 if (levelData == null) break;
 
                 totalCount++;
-                var result = solver.SolveLevel(levelData);
+                var result = solver.SolveLevelBest(levelData);
 
                 if (result.Success)
                 {

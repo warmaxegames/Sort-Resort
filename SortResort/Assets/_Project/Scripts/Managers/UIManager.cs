@@ -880,6 +880,67 @@ namespace SortResort
             if (defaultWorldSprite != null)
                 worldSpriteImg.sprite = defaultWorldSprite;
 
+            // ============================================
+            // WORLD LOCK OVERLAY - Padlock + Buy button for locked worlds
+            // ============================================
+            var lockOverlayGO = new GameObject("WorldLockOverlay");
+            lockOverlayGO.transform.SetParent(worldArea.transform, false);
+            var lockOverlayRect = lockOverlayGO.AddComponent<RectTransform>();
+            // Same position as world sprite
+            lockOverlayRect.anchorMin = new Vector2(0.12f, 0);
+            lockOverlayRect.anchorMax = new Vector2(0.88f, 1);
+            lockOverlayRect.offsetMin = Vector2.zero;
+            lockOverlayRect.offsetMax = Vector2.zero;
+
+            // Padlock image (centered, slightly above middle)
+            var padlockGO = new GameObject("LockPadlock");
+            padlockGO.transform.SetParent(lockOverlayGO.transform, false);
+            var padlockRect = padlockGO.AddComponent<RectTransform>();
+            padlockRect.anchorMin = new Vector2(0.5f, 0.5f);
+            padlockRect.anchorMax = new Vector2(0.5f, 0.5f);
+            padlockRect.pivot = new Vector2(0.5f, 0.5f);
+            padlockRect.sizeDelta = new Vector2(200, 200);
+            padlockRect.anchoredPosition = new Vector2(0, 30);
+
+            var padlockImg = padlockGO.AddComponent<Image>();
+            var padlockSprite = LoadSpriteFromTexture("Sprites/UI/Worlds/locked_worlds_overlay");
+            if (padlockSprite != null)
+            {
+                padlockImg.sprite = padlockSprite;
+                padlockImg.preserveAspect = true;
+            }
+            padlockImg.raycastTarget = false;
+
+            // Buy button (below padlock)
+            var buyBtnGO = new GameObject("BuyButton");
+            buyBtnGO.transform.SetParent(lockOverlayGO.transform, false);
+            var buyBtnRect = buyBtnGO.AddComponent<RectTransform>();
+            buyBtnRect.anchorMin = new Vector2(0.5f, 0.5f);
+            buyBtnRect.anchorMax = new Vector2(0.5f, 0.5f);
+            buyBtnRect.pivot = new Vector2(0.5f, 0.5f);
+            buyBtnRect.sizeDelta = new Vector2(280, 90);
+            buyBtnRect.anchoredPosition = new Vector2(0, -100);
+
+            var buyBtnImg = buyBtnGO.AddComponent<Image>();
+            var buyNormalSprite = LoadSpriteFromTexture("Sprites/UI/Buttons/buy_button");
+            var buyPressedSprite = LoadSpriteFromTexture("Sprites/UI/Buttons/buy_button_pressed");
+            if (buyNormalSprite != null)
+            {
+                buyBtnImg.sprite = buyNormalSprite;
+                buyBtnImg.preserveAspect = true;
+            }
+
+            var buyBtn = buyBtnGO.AddComponent<Button>();
+            buyBtn.targetGraphic = buyBtnImg;
+            if (buyPressedSprite != null)
+            {
+                buyBtn.transition = Selectable.Transition.SpriteSwap;
+                var buySpriteState = new SpriteState { pressedSprite = buyPressedSprite };
+                buyBtn.spriteState = buySpriteState;
+            }
+
+            lockOverlayGO.SetActive(false); // Starts hidden, LevelSelectScreen controls visibility
+
             // Next world button (larger)
             var nextBtnGO = new GameObject("NextWorld Button");
             nextBtnGO.transform.SetParent(worldArea.transform, false);
@@ -1071,9 +1132,10 @@ namespace SortResort
             screenType.GetField("levelGridParent", flags)?.SetValue(levelSelectScreen, content.transform);
             screenType.GetField("levelScrollRect", flags)?.SetValue(levelSelectScreen, scrollView);
 
-            // Wire mode tab container and topBar reference
+            // Wire mode tab container, topBar, and world lock overlay references
             levelSelectScreen.SetModeTabContainer(modeTabContainerGO.transform);
             levelSelectScreen.SetTopBar(topBar.transform);
+            levelSelectScreen.SetWorldLockOverlay(lockOverlayGO, padlockImg, buyBtn);
 
             // Initialize level select screen (creates grid, loads portals, etc.)
             levelSelectScreen.Initialize();
@@ -1586,6 +1648,9 @@ namespace SortResort
             text.enableAutoSizing = true;
             text.fontSizeMin = 28;
             text.fontSizeMax = fontSize;
+
+            // Scale down 10% after auto-sizing for a slightly smaller look
+            go.transform.localScale = new Vector3(0.8f, 0.8f, 1f);
 
             return text;
         }
@@ -5167,18 +5232,18 @@ Antonia and Joakim Engfors
             var tabContainerGO = new GameObject("TabContainer");
             tabContainerGO.transform.SetParent(achievementsPanel.transform, false);
             var tabContainerRect = tabContainerGO.AddComponent<RectTransform>();
-            // x: 0 (touch screen edge) to 251/1080≈0.232 (15% wider than original 218px)
+            // x: 0 (touch screen edge) to 218/1080≈0.202 (native sprite width)
             // y: shifted down 20px from original: bottom=1-1310/1920≈0.318, top=1-570/1920≈0.704
             tabContainerRect.anchorMin = new Vector2(0f, 0.318f);
-            tabContainerRect.anchorMax = new Vector2(0.232f, 0.704f);
+            tabContainerRect.anchorMax = new Vector2(0.202f, 0.704f);
             tabContainerRect.offsetMin = Vector2.zero;
             tabContainerRect.offsetMax = Vector2.zero;
 
             var tabLayout = tabContainerGO.AddComponent<VerticalLayoutGroup>();
             tabLayout.spacing = 0;
             tabLayout.padding = new RectOffset(0, 0, 0, 0);
-            tabLayout.childAlignment = TextAnchor.UpperCenter;
-            tabLayout.childForceExpandWidth = true;
+            tabLayout.childAlignment = TextAnchor.UpperLeft;
+            tabLayout.childForceExpandWidth = false;
             tabLayout.childForceExpandHeight = false;
             tabLayout.childControlWidth = true;
             tabLayout.childControlHeight = false;
@@ -5355,12 +5420,13 @@ Antonia and Joakim Engfors
             tabGO.transform.SetParent(parent, false);
 
             var tabLayoutElem = tabGO.AddComponent<LayoutElement>();
-            tabLayoutElem.preferredHeight = 63; // 109px tab at ~58% screen scale (15% larger)
-            tabLayoutElem.minHeight = 63;
+            tabLayoutElem.preferredHeight = 109; // native sprite height (218x109)
+            tabLayoutElem.minHeight = 109;
+            tabLayoutElem.preferredWidth = 218; // native sprite width (218x109)
 
             var tabImg = tabGO.AddComponent<Image>();
             tabImg.sprite = achvTabSprite;
-            tabImg.preserveAspect = true;
+            tabImg.preserveAspect = false; // rect matches aspect ratio, no centering gap
 
             var tabBtn = tabGO.AddComponent<Button>();
             tabBtn.targetGraphic = tabImg;
@@ -5375,18 +5441,19 @@ Antonia and Joakim Engfors
             var tabTextRect = tabTextGO.AddComponent<RectTransform>();
             tabTextRect.anchorMin = Vector2.zero;
             tabTextRect.anchorMax = Vector2.one;
-            tabTextRect.offsetMin = new Vector2(10, 0);
+            tabTextRect.offsetMin = new Vector2(5, 0);
             tabTextRect.offsetMax = new Vector2(-5, 0);
+            tabTextRect.anchoredPosition = new Vector2(-10, 0); // shift text 10px left
 
             var tabText = tabTextGO.AddComponent<TextMeshProUGUI>();
             tabText.text = label;
-            tabText.fontSize = 16;
+            tabText.fontSize = 18;
             tabText.fontStyle = FontStyles.Bold;
             tabText.alignment = TextAlignmentOptions.Center;
             tabText.color = Color.white;
             tabText.enableAutoSizing = true;
-            tabText.fontSizeMin = 8;
-            tabText.fontSizeMax = 16;
+            tabText.fontSizeMin = 9;
+            tabText.fontSizeMax = 18;
             tabText.enableWordWrapping = true;
             tabText.overflowMode = TextOverflowModes.Truncate;
             if (FontManager.ExtraBold != null)
@@ -5694,6 +5761,7 @@ Antonia and Joakim Engfors
             titleText.enableAutoSizing = true;
             titleText.fontSizeMin = 14;
             titleText.fontSizeMax = 24;
+            titleText.lineSpacing = -15f;
             FontManager.ApplyBold(titleText);
 
             // Description text ON the rectangle (below title, centered in open area)
@@ -5717,6 +5785,7 @@ Antonia and Joakim Engfors
             descText.enableAutoSizing = true;
             descText.fontSizeMin = 12;
             descText.fontSizeMax = 18;
+            descText.lineSpacing = -15f;
 
             // ============================================
             // Progress bar area (below rectangle)
@@ -5903,7 +5972,7 @@ Antonia and Joakim Engfors
             textRect.anchorMin = new Vector2(0, 0);
             textRect.anchorMax = new Vector2(1, 1);
             textRect.offsetMin = new Vector2(40, 30);   // Close to left edge
-            textRect.offsetMax = new Vector2(-30, -70); // Right and top padding (push text below border)
+            textRect.offsetMax = new Vector2(-30, -80); // Right and top padding (push text below border, +10px down)
 
             // Dialogue text
             var dialogueTextGO = new GameObject("Dialogue Text");
@@ -5917,10 +5986,12 @@ Antonia and Joakim Engfors
             dialogueText = dialogueTextGO.AddComponent<TextMeshProUGUI>();
             dialogueText.text = "";
             dialogueText.fontSize = 42;
-            dialogueText.fontStyle = FontStyles.Bold;
+            dialogueText.fontStyle = FontStyles.Normal;
             dialogueText.color = new Color(0.1f, 0.1f, 0.1f, 1f); // Dark/black text
             dialogueText.alignment = TextAlignmentOptions.TopLeft;
             dialogueText.enableWordWrapping = true;
+            dialogueText.lineSpacing = -15f;
+            dialogueText.paragraphSpacing = -20f;
 
             // Continue indicator (blinking arrow or "tap to continue")
             var continueGO = new GameObject("Continue Indicator");

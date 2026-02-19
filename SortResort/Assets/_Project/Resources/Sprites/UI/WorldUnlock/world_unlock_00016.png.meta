@@ -1,0 +1,468 @@
+fileFormatVersion: 2
+guid: c2796b419a1a5784a94e8df5c2bcb61f
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 5297653021587568518
+    second: world_unlock_00016_0
+  - first:
+      213: -3603752959210749727
+    second: world_unlock_00016_1
+  - first:
+      213: 5987067057709035283
+    second: world_unlock_00016_2
+  - first:
+      213: -4962286841168017659
+    second: world_unlock_00016_3
+  - first:
+      213: 7295671139383931792
+    second: world_unlock_00016_4
+  - first:
+      213: 1030701746856731877
+    second: world_unlock_00016_5
+  - first:
+      213: 7755268833807321857
+    second: world_unlock_00016_6
+  - first:
+      213: 3140313576409215888
+    second: world_unlock_00016_7
+  - first:
+      213: -7068260218906362476
+    second: world_unlock_00016_8
+  - first:
+      213: 8599659881477360647
+    second: world_unlock_00016_9
+  - first:
+      213: -8013581061854853002
+    second: world_unlock_00016_10
+  - first:
+      213: -918932716631699329
+    second: world_unlock_00016_11
+  - first:
+      213: 4045622476909468014
+    second: world_unlock_00016_12
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: world_unlock_00016_0
+      rect:
+        serializedVersion: 2
+        x: 537
+        y: 1722
+        width: 8
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 687700fda5b058940800000000000000
+      internalID: 5297653021587568518
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: world_unlock_00016_1
+      rect:
+        serializedVersion: 2
+        x: 445
+        y: 1502
+        width: 64
+        height: 108
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1e00bffe6c5ecfdc0800000000000000
+      internalID: -3603752959210749727
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: world_unlock_00016_2
+      rect:
+        serializedVersion: 2
+        x: 617
+        y: 1584
+        width: 25
+        height: 44
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 31fa035a4c5561350800000000000000
+      internalID: 5987067057709035283
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: world_unlock_00016_3
+      rect:
+        serializedVersion: 2
+        x: 193
+        y: 1508
+        width: 45
+        height: 25
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 507c596c86a622bb0800000000000000
+      internalID: -4962286841168017659
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: world_unlock_00016_4
+      rect:
+        serializedVersion: 2
+        x: 302
+        y: 1506
+        width: 43
+        height: 30
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0937c054f3e6f3560800000000000000
+      internalID: 7295671139383931792
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: world_unlock_00016_5
+      rect:
+        serializedVersion: 2
+        x: 828
+        y: 1523
+        width: 74
+        height: 49
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5e425c227c9cd4e00800000000000000
+      internalID: 1030701746856731877
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: world_unlock_00016_6
+      rect:
+        serializedVersion: 2
+        x: 176
+        y: 1288
+        width: 13
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 10b4eb84aef30ab60800000000000000
+      internalID: 7755268833807321857
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: world_unlock_00016_7
+      rect:
+        serializedVersion: 2
+        x: 272
+        y: 1244
+        width: 593
+        height: 193
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 09335354f82a49b20800000000000000
+      internalID: 3140313576409215888
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: world_unlock_00016_8
+      rect:
+        serializedVersion: 2
+        x: 434
+        y: 1213
+        width: 34
+        height: 52
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 49dbf08b7ce78ed90800000000000000
+      internalID: -7068260218906362476
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: world_unlock_00016_9
+      rect:
+        serializedVersion: 2
+        x: 232
+        y: 1197
+        width: 17
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 70cc2a86911285770800000000000000
+      internalID: 8599659881477360647
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: world_unlock_00016_10
+      rect:
+        serializedVersion: 2
+        x: 516
+        y: 1146
+        width: 30
+        height: 40
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 67808556b7a0ac090800000000000000
+      internalID: -8013581061854853002
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: world_unlock_00016_11
+      rect:
+        serializedVersion: 2
+        x: 643
+        y: 1102
+        width: 30
+        height: 38
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f70deac109b4f33f0800000000000000
+      internalID: -918932716631699329
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: world_unlock_00016_12
+      rect:
+        serializedVersion: 2
+        x: 362
+        y: 1059
+        width: 26
+        height: 27
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e6956874530f42830800000000000000
+      internalID: 4045622476909468014
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      world_unlock_00016_0: 5297653021587568518
+      world_unlock_00016_1: -3603752959210749727
+      world_unlock_00016_10: -8013581061854853002
+      world_unlock_00016_11: -918932716631699329
+      world_unlock_00016_12: 4045622476909468014
+      world_unlock_00016_2: 5987067057709035283
+      world_unlock_00016_3: -4962286841168017659
+      world_unlock_00016_4: 7295671139383931792
+      world_unlock_00016_5: 1030701746856731877
+      world_unlock_00016_6: 7755268833807321857
+      world_unlock_00016_7: 3140313576409215888
+      world_unlock_00016_8: -7068260218906362476
+      world_unlock_00016_9: 8599659881477360647
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

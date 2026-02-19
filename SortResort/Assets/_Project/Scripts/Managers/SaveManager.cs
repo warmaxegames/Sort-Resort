@@ -220,6 +220,16 @@ namespace SortResort
             }
         }
 
+        public void LockWorld(string worldId)
+        {
+            if (currentSaveData.unlockedWorlds.Contains(worldId))
+            {
+                currentSaveData.unlockedWorlds.Remove(worldId);
+                SaveGame();
+                Debug.Log($"[SaveManager] World locked: {worldId}");
+            }
+        }
+
         public bool IsWorldUnlocked(string worldId)
         {
             return currentSaveData.unlockedWorlds.Contains(worldId);

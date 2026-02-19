@@ -33,7 +33,7 @@ from level_generator import (
     SCREEN_MIN_X, SCREEN_MAX_X, SCREEN_MIN_Y, SCREEN_MAX_Y,
     MIN_CONTAINER_GAP, HUD_BAR_BOTTOM_Y,
 )
-from level_solver import solve_level
+from level_solver import solve_level, solve_level_best
 
 
 # ── Reverse-Play Item Placement ─────────────────────────────────────────────
@@ -533,6 +533,7 @@ def generate_level(level, config, item_usage, seed_offset=0):
         "star_move_thresholds": [t3, t2, t1, fail],
         "time_limit_seconds": timer,
         "containers": containers, "moving_tracks": [],
+        "construction_moves": construction_moves,
     }
 
 
@@ -556,6 +557,7 @@ def generate_levels(config, output_dir, count=100):
     stats = []
     errors = []
     mechanic_histogram = {}
+    move_comparisons = []  # (level, construction_moves, solver_moves)
 
     MAX_ATTEMPTS = 20
 
@@ -567,7 +569,8 @@ def generate_levels(config, output_dir, count=100):
             saved_usage = dict(item_usage)
             level_data = generate_level(level, config, item_usage,
                                         seed_offset=attempt * 1000)
-            result = solve_level(level_data)
+            # Use ensemble solver for best possible move count
+            result = solve_level_best(level_data)
             if result.success:
                 best_data = level_data
                 best_moves = result.total_moves
@@ -580,7 +583,7 @@ def generate_levels(config, output_dir, count=100):
             best_data = level_data
             errors.append(f"L{level}: Solver failed after {MAX_ATTEMPTS} attempts")
         else:
-            # Update thresholds using solver's actual move count
+            # Update thresholds using ensemble solver's best move count
             optimal = max(2, best_moves)
             t3 = optimal
             t2 = max(t3 + 1, round(optimal * 1.15))
@@ -688,13 +691,19 @@ def generate_levels(config, output_dir, count=100):
 
         attempt_str = f" (attempt {attempt + 1})" if attempt > 0 else ""
         solver_str = f", solver={best_moves}m" if best_moves else ", UNSOLVED"
+        construction_moves = level_data.get("construction_moves", 0)
+        cmoves_str = f", construct={construction_moves}m" if construction_moves else ""
         stat = (f"L{level:3d}: {n_containers:2d}c, {n_types:2d}t, "
                 f"{n_items:3d}i, {max_r}r, {fill_pct:3d}% fill, "
-                f"thresh={thresh}, timer={timer}s{solver_str}{attempt_str}")
+                f"thresh={thresh}, timer={timer}s{solver_str}{cmoves_str}{attempt_str}")
         if mechanics:
             stat += f", [{', '.join(sorted(mechanics))}]"
         stats.append(stat)
         print(stat)
+
+        # Track construction vs solver comparison
+        if construction_moves and best_moves:
+            move_comparisons.append((level, construction_moves, best_moves))
 
     # Summary
     print(f"\n{'=' * 60}")
@@ -712,6 +721,33 @@ def generate_levels(config, output_dir, count=100):
     print(f"\nMechanic histogram (levels using each):")
     for mech in sorted(mechanic_histogram.keys()):
         print(f"  {mech}: {mechanic_histogram[mech]}/{count}")
+
+    # Construction vs Solver comparison
+    if move_comparisons:
+        print(f"\nConstruction vs Solver moves:")
+        print(f"  {'Level':>5}  {'Construct':>9}  {'Solver':>6}  {'Diff':>5}  {'%':>6}")
+        print(f"  {'-'*5}  {'-'*9}  {'-'*6}  {'-'*5}  {'-'*6}")
+        total_construct = 0
+        total_solver = 0
+        solver_better = 0
+        solver_worse = 0
+        solver_equal = 0
+        for lvl, cm, sm in move_comparisons:
+            diff = sm - cm
+            pct = (diff / cm * 100) if cm > 0 else 0
+            print(f"  L{lvl:>3}  {cm:>9}  {sm:>6}  {diff:>+5}  {pct:>+5.1f}%")
+            total_construct += cm
+            total_solver += sm
+            if sm < cm:
+                solver_better += 1
+            elif sm > cm:
+                solver_worse += 1
+            else:
+                solver_equal += 1
+        print(f"\n  Summary: solver better={solver_better}, equal={solver_equal}, worse={solver_worse}")
+        avg_diff = (total_solver - total_construct) / len(move_comparisons)
+        print(f"  Totals: construct={total_construct}, solver={total_solver}, "
+              f"avg diff={avg_diff:+.1f} moves/level")
 
     if errors:
         print(f"\nERRORS ({len(errors)}):")

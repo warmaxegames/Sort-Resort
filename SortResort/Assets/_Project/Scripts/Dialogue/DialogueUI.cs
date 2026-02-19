@@ -11,6 +11,8 @@ namespace SortResort
     /// </summary>
     public class DialogueUI : MonoBehaviour
     {
+        public static DialogueUI Instance { get; private set; }
+
         [Header("UI References")]
         [SerializeField] private GameObject dialoguePanel;
         [SerializeField] private Image dialogueBoxImage;
@@ -46,6 +48,8 @@ namespace SortResort
         /// </summary>
         public void Initialize()
         {
+            Instance = this;
+
             if (dialoguePanel != null)
             {
                 canvasGroup = dialoguePanel.GetComponent<CanvasGroup>();
@@ -63,7 +67,6 @@ namespace SortResort
             submitAction.Enable();
 
             FontManager.ApplyBold(nameText);
-            FontManager.ApplyBold(dialogueText);
 
             // Make sure we're subscribed to DialogueManager events
             TrySubscribe();
@@ -115,6 +118,8 @@ namespace SortResort
 
         private void OnDestroy()
         {
+            if (Instance == this) Instance = null;
+
             // Clean up input actions
             clickAction?.Dispose();
             submitAction?.Dispose();
@@ -366,6 +371,35 @@ namespace SortResort
                 canvasGroup.interactable = false;
             }
             isVisible = false;
+        }
+
+        /// <summary>
+        /// Measures how many characters of the given text fit in the dialogue box
+        /// without overflowing. Uses TMP's built-in overflow detection.
+        /// Returns text.Length if everything fits.
+        /// </summary>
+        public int MeasureVisibleCharacters(string text)
+        {
+            if (dialogueText == null || string.IsNullOrEmpty(text)) return text?.Length ?? 0;
+
+            // Save current state
+            string originalText = dialogueText.text;
+            var originalOverflow = dialogueText.overflowMode;
+
+            // Temporarily set to Truncate so TMP calculates overflow point
+            dialogueText.overflowMode = TMPro.TextOverflowModes.Truncate;
+            dialogueText.text = text;
+            dialogueText.ForceMeshUpdate();
+
+            int visible = text.Length;
+            if (dialogueText.isTextOverflowing && dialogueText.firstOverflowCharacterIndex > 0)
+                visible = dialogueText.firstOverflowCharacterIndex;
+
+            // Restore original state
+            dialogueText.text = originalText;
+            dialogueText.overflowMode = originalOverflow;
+
+            return visible;
         }
     }
 }

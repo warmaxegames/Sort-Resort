@@ -12,6 +12,7 @@ namespace SortResort
         public string name;
         public int[] star_move_thresholds; // [3-star, 2-star, 1-star, fail] - based on solver optimal
         public int time_limit_seconds; // 0 = no time limit (optional timer feature)
+        public int construction_moves; // Move count from reverse-play construction (upper bound for solver)
         public List<ContainerDefinition> containers;
         public List<MovingTrackDefinition> moving_tracks;
 

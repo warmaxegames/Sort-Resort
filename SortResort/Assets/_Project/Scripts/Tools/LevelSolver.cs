@@ -229,6 +229,35 @@ namespace SortResort
             }
         }
 
+        /// <summary>
+        /// Defines a solver strategy with weight multipliers for different scoring categories.
+        /// Default values (all 1.0) reproduce the baseline solver behavior exactly.
+        /// Weight adjustments are applied as: score += category_subtotal * (weight - 1.0)
+        /// so weight=1.0 has zero effect, weight=1.4 adds 40% more, weight=0.6 subtracts 40%.
+        /// </summary>
+        public class SolverStrategy
+        {
+            public string Name;
+            public float PairWeight = 1.0f;      // Scales pair creation/destruction bonuses
+            public float RevealWeight = 1.0f;    // Scales reveal/row-advance bonuses
+            public float CautionWeight = 1.0f;   // Scales penalties (higher = more cautious)
+            public int NoiseMagnitude = 0;        // Random noise ±N added to each move score
+
+            public static readonly SolverStrategy Balanced = new SolverStrategy
+                { Name = "Balanced" };
+            public static readonly SolverStrategy PairFocused = new SolverStrategy
+                { Name = "PairFocused", PairWeight = 1.4f, RevealWeight = 0.85f };
+            public static readonly SolverStrategy RevealFocused = new SolverStrategy
+                { Name = "RevealFocused", PairWeight = 0.85f, RevealWeight = 1.4f };
+            public static readonly SolverStrategy Cautious = new SolverStrategy
+                { Name = "Cautious", RevealWeight = 0.9f, CautionWeight = 1.6f };
+            public static readonly SolverStrategy Aggressive = new SolverStrategy
+                { Name = "Aggressive", PairWeight = 1.1f, RevealWeight = 1.3f, CautionWeight = 0.5f };
+
+            public static readonly SolverStrategy[] AllStrategies =
+                { Balanced, PairFocused, RevealFocused, Cautious, Aggressive };
+        }
+
         #endregion
 
         #region Solving
@@ -240,6 +269,11 @@ namespace SortResort
         // Parameters: (currentMoves, itemsRemaining, elapsedSeconds)
         public Func<int, int, float, bool> OnProgressUpdate { get; set; } = null;
 
+        // Active strategy and noise for current solve run (set by SolveLevel)
+        private SolverStrategy _activeStrategy = null;
+        private System.Random _noiseRng = null;
+        private int _moveLimit = MAX_MOVES;
+
         // Item accessibility classification
         private enum ItemAccessibility
         {
@@ -249,15 +283,88 @@ namespace SortResort
         }
 
         /// <summary>
-        /// Solve a level from JSON data
+        /// Solve a level using multiple strategies and noise restarts, returning the best result.
+        /// Runs each strategy once cleanly, then with noise restarts. Takes the best (lowest moves).
+        /// Uses construction_moves from level data as initial move limit for early termination.
         /// </summary>
-        public SolveResult SolveLevel(LevelData levelData)
+        public SolveResult SolveLevelBest(LevelData levelData, int noiseRunsPerStrategy = 3, int noiseMagnitude = 8)
+        {
+            var startTime = DateTime.Now;
+            SolveResult bestResult = null;
+            int moveLimit = levelData.construction_moves > 0 ? levelData.construction_moves : MAX_MOVES;
+            string bestStrategyName = "";
+
+            bool savedVerbose = VerboseLogging;
+            VerboseLogging = false;
+
+            foreach (var strategy in SolverStrategy.AllStrategies)
+            {
+                // Clean run (no noise)
+                var result = SolveLevel(levelData, strategy, 0, moveLimit);
+                if (result.Success && (bestResult == null || result.TotalMoves < bestResult.TotalMoves))
+                {
+                    bestResult = result;
+                    moveLimit = bestResult.TotalMoves;
+                    bestStrategyName = strategy.Name;
+                }
+
+                // Noise restarts
+                for (int run = 1; run <= noiseRunsPerStrategy; run++)
+                {
+                    var noiseStrategy = new SolverStrategy
+                    {
+                        Name = $"{strategy.Name}_n{run}",
+                        PairWeight = strategy.PairWeight,
+                        RevealWeight = strategy.RevealWeight,
+                        CautionWeight = strategy.CautionWeight,
+                        NoiseMagnitude = noiseMagnitude
+                    };
+
+                    result = SolveLevel(levelData, noiseStrategy, run, moveLimit);
+                    if (result.Success && (bestResult == null || result.TotalMoves < bestResult.TotalMoves))
+                    {
+                        bestResult = result;
+                        moveLimit = bestResult.TotalMoves;
+                        bestStrategyName = noiseStrategy.Name;
+                    }
+                }
+            }
+
+            VerboseLogging = savedVerbose;
+
+            if (bestResult == null)
+            {
+                // All strategies failed — return single fallback attempt
+                bestResult = SolveLevel(levelData);
+            }
+
+            bestResult.SolveTimeMs = (float)(DateTime.Now - startTime).TotalMilliseconds;
+
+            if (savedVerbose && bestResult.Success)
+            {
+                Log($"Best result: {bestResult.TotalMoves} moves via {bestStrategyName} ({bestResult.SolveTimeMs:F1}ms total)");
+            }
+
+            return bestResult;
+        }
+
+        /// <summary>
+        /// Solve a level from JSON data.
+        /// Optionally accepts a strategy (weight profile), noise seed, and move limit for ensemble solving.
+        /// </summary>
+        public SolveResult SolveLevel(LevelData levelData, SolverStrategy strategy = null, int noiseSeed = 0, int moveLimit = 0)
         {
             var startTime = DateTime.Now;
             var result = new SolveResult
             {
                 MoveSequence = new List<Move>()
             };
+
+            // Set up strategy, noise, and move limit for this run
+            _activeStrategy = strategy;
+            _noiseRng = (strategy != null && strategy.NoiseMagnitude > 0)
+                ? new System.Random(noiseSeed) : null;
+            _moveLimit = moveLimit > 0 ? moveLimit : MAX_MOVES;
 
             Log($"=== Starting solve for {levelData.name} ===");
 
@@ -286,7 +393,7 @@ namespace SortResort
             Move? lastMove = null; // Track last move to prevent oscillation
             var recentMoves = new List<Move>(); // Track recent moves for pattern detection
             const int PATTERN_WINDOW = 10; // Look for patterns in last N moves
-            while (!state.IsComplete() && state.MoveCount < MAX_MOVES)
+            while (!state.IsComplete() && state.MoveCount < _moveLimit)
             {
                 // Check for cancellation via progress callback
                 if (OnProgressUpdate != null)
@@ -561,6 +668,13 @@ namespace SortResort
                     reason += ", PATTERN PENALTY";
                 }
 
+                // Apply noise for ensemble diversity
+                if (_noiseRng != null && _activeStrategy != null && _activeStrategy.NoiseMagnitude > 0)
+                {
+                    int noise = _noiseRng.Next(-_activeStrategy.NoiseMagnitude, _activeStrategy.NoiseMagnitude + 1);
+                    score += noise;
+                }
+
                 scoredMoves.Add((move, score, reason));
             }
 
@@ -606,7 +720,7 @@ namespace SortResort
             for (int ci = 0; ci < state.Containers.Count; ci++)
             {
                 var c = state.Containers[ci];
-                if (c.IsLocked && c.UnlockMatchesRequired - c.CurrentUnlockProgress <= 1)
+                if (c.IsLocked && c.UnlockMatchesRequired - c.CurrentUnlockProgress <= 2)
                 {
                     nearUnlockContainers.Add(ci);
                 }
@@ -697,6 +811,11 @@ namespace SortResort
             int score = 0;
             var reasons = new List<string>();
 
+            // Category subtotals for strategy weight adjustments
+            int pairContrib = 0;
+            int revealContrib = 0;
+            int penaltyContrib = 0;
+
             var fromContainer = state.Containers[move.FromContainerIndex];
             var toContainer = state.Containers[move.ToContainerIndex];
 
@@ -753,6 +872,39 @@ namespace SortResort
                         score += 40;
                         reasons.Add("enables match (temp location)");
                     }
+
+                    // Follow-up quality: evaluate how good the enabled match is
+                    var followUpFromContainer = testState.Containers[followUp.Value.FromContainerIndex];
+                    int followUpFromOccupied = 0;
+                    for (int s = 0; s < followUpFromContainer.SlotCount; s++)
+                    {
+                        if (!followUpFromContainer.IsFrontSlotEmpty(s)) followUpFromOccupied++;
+                    }
+
+                    // Bonus if the follow-up move triggers row advance at its source
+                    if (followUpFromOccupied == 1 && followUpFromContainer.HasBackRowItems())
+                    {
+                        var revealedByFollowUp = GetItemsThatWouldAdvance(followUpFromContainer);
+                        int fuRevealBonus = 20 + (revealedByFollowUp.Count * 10);
+                        score += fuRevealBonus; revealContrib += fuRevealBonus;
+                        reasons.Add($"follow-up reveals {revealedByFollowUp.Count} items");
+                    }
+
+                    // Check if follow-up creates chain matches
+                    var followUpState = testState.Clone();
+                    ExecuteMove(followUpState, followUp.Value);
+                    ProcessAllMatches(followUpState);
+
+                    bool oldVerbose2 = VerboseLogging;
+                    VerboseLogging = false;
+                    var chainMatch = FindOneMoveMatch(followUpState);
+                    VerboseLogging = oldVerbose2;
+
+                    if (chainMatch != null)
+                    {
+                        score += 15; revealContrib += 15;
+                        reasons.Add("follow-up chains into match");
+                    }
                 }
             }
 
@@ -773,13 +925,13 @@ namespace SortResort
                 if (thirdIsAccessible && hasRoomForThird)
                 {
                     // EXCELLENT PAIR: 3rd item accessible AND room to complete triple
-                    score += 180;
+                    score += 180; pairContrib += 180;
                     reasons.Add("creates completable pair");
                 }
                 else if (thirdIsAccessible && !hasRoomForThird)
                 {
                     // BLOCKED PAIR: 3rd is accessible but no room - need extra move to clear space
-                    score -= 50;
+                    score -= 50; pairContrib -= 50;
                     reasons.Add("creates BLOCKED pair (no room for 3rd)");
                 }
                 else if (thirdIsNearlyAccessible && hasRoomForThird)
@@ -793,27 +945,27 @@ namespace SortResort
                         // BAD: Creating a pair that blocks its own completion!
                         // The 3rd item is hidden here and can't advance while we have items in front
                         // This costs an extra move because you have to move items OUT before the advance
-                        score -= 200;
+                        score -= 200; pairContrib -= 200;
                         reasons.Add("SELF-BLOCKING pair (3rd hidden HERE)");
                     }
                     else
                     {
                         // GOOD PAIR: 3rd item will become accessible soon (at different container) AND room exists
                         // This is valuable because it sets up a 1-move match once the 3rd reveals
-                        score += 100;
+                        score += 100; pairContrib += 100;
                         reasons.Add("creates near-completable pair (3rd nearly accessible)");
                     }
                 }
                 else if (!thirdIsAccessible && hasRoomForThird)
                 {
                     // WAITING PAIR: 3rd deeply hidden but room exists - low priority
-                    score += 20;
+                    score += 20; pairContrib += 20;
                     reasons.Add("creates waiting pair (3rd hidden)");
 
                     // PENALTY if this pair blocks back row items at destination
                     if (toContainer.HasBackRowItems())
                     {
-                        score -= 80;
+                        score -= 80; pairContrib -= 80;
                         reasons.Add("pair blocks reveals");
                     }
                 }
@@ -844,13 +996,13 @@ namespace SortResort
                     {
                         // Better than staging: creates a pair that will become completable
                         // once the blocking type clears (all 3 copies accessible in post-move state)
-                        score += 30;
+                        score += 30; pairContrib += 30;
                         pairRoomWillOpen = true;
                         reasons.Add("creates pair (room will open - blocking type clearable)");
                     }
                     else
                     {
-                        score -= 100;
+                        score -= 100; pairContrib -= 100;
                         reasons.Add("creates useless pair (hidden + blocked)");
                     }
                 }
@@ -858,7 +1010,7 @@ namespace SortResort
             else if (matchingAtDest == 0 && destItems.Count > 0 && !reasons.Contains("enables match (temp location)"))
             {
                 // Only penalize mixing if we didn't already note it as "temp location"
-                score -= 10;
+                score -= 10; penaltyContrib -= 10;
                 reasons.Add("mixes items");
             }
 
@@ -869,7 +1021,7 @@ namespace SortResort
                 bool selfBlocking = hiddenAtDest.Contains(move.ItemId);
                 if (selfBlocking)
                 {
-                    score -= 200;
+                    score -= 200; pairContrib -= 200;
                     reasons.Add("SELF-BLOCKING pair (3rd hidden HERE)");
                 }
             }
@@ -888,7 +1040,7 @@ namespace SortResort
                                        reasons.Contains("creates pair");
                 if (!hasUsefulEffect)
                 {
-                    score -= 40;
+                    score -= 40; penaltyContrib -= 40;
                     reasons.Add("stuck item shuffle");
                 }
             }
@@ -914,13 +1066,13 @@ namespace SortResort
                     if (thirdAccessible && sourceHasRoom)
                     {
                         // BAD: We're destroying a completable pair!
-                        score -= 150;
+                        score -= 150; pairContrib -= 150;
                         reasons.Add("DESTROYS completable pair");
                     }
                     else if (thirdAccessible && !sourceHasRoom)
                     {
                         // Pair was blocked anyway (no room for 3rd), small penalty
-                        score -= 30;
+                        score -= 30; pairContrib -= 30;
                         reasons.Add("breaks blocked pair");
                     }
                     // If 3rd not accessible, no penalty - pair couldn't be completed yet anyway
@@ -940,7 +1092,8 @@ namespace SortResort
                 // IMMEDIATE REVEAL: This move clears the front row
                 var revealedItems = GetItemsThatWouldAdvance(fromContainer);
                 int revealCount = revealedItems.Count;
-                score += 100 + (revealCount * 25);
+                int rowAdvBonus = 100 + (revealCount * 25);
+                score += rowAdvBonus; revealContrib += rowAdvBonus;
                 reasons.Add($"triggers row advance ({revealCount} items)");
 
                 // Extra bonus if revealed item completes a waiting pair (2 matching + empty slot)
@@ -948,7 +1101,7 @@ namespace SortResort
                 {
                     if (HasWaitingPairForItem(state, revealedItem))
                     {
-                        score += 80;
+                        score += 80; revealContrib += 80;
                         reasons.Add($"reveals {revealedItem} for waiting pair");
                         break; // Only count bonus once
                     }
@@ -957,8 +1110,13 @@ namespace SortResort
                 // Extra bonus if this move ALSO creates a good pair (combo move)
                 if (matchingAtDest == 1 && accessible >= 3)
                 {
-                    score += 50;
-                    reasons.Add("combo: pair + reveal");
+                    score += 60; revealContrib += 60;
+                    reasons.Add("combo: completable pair + reveal");
+                }
+                else if (matchingAtDest == 1 && (accessible + nearlyAccessible) >= 3)
+                {
+                    score += 50; revealContrib += 50;
+                    reasons.Add("combo: near-pair + reveal");
                 }
             }
             else if (fromContainer.HasBackRowItems())
@@ -967,8 +1125,53 @@ namespace SortResort
                 // Moving items out brings us closer to revealing them
                 int backRowCount = fromContainer.GetBackRowItemCount();
                 int progressBonus = 30 + (backRowCount * 10);
-                score += progressBonus;
+                score += progressBonus; revealContrib += progressBonus;
                 reasons.Add($"progress toward reveal ({backRowCount} hidden)");
+            }
+
+            // === SOURCE PAIR BONUS (Double-Pair Recognition) ===
+            // When row advance reveals a pair at source
+            if (fromOccupiedCount == 1 && fromContainer.HasBackRowItems())
+            {
+                var revealedForPairCheck = GetItemsThatWouldAdvance(fromContainer);
+                var revealedCounts = new Dictionary<string, int>();
+                foreach (var ri in revealedForPairCheck)
+                {
+                    if (!revealedCounts.ContainsKey(ri)) revealedCounts[ri] = 0;
+                    revealedCounts[ri]++;
+                }
+                foreach (var kvp in revealedCounts)
+                {
+                    if (kvp.Value >= 2)
+                    {
+                        score += 40; pairContrib += 40;
+                        reasons.Add($"reveals source pair ({kvp.Key})");
+                        break;
+                    }
+                }
+            }
+            else if (fromOccupiedCount > 1)
+            {
+                // Check if remaining front items at source form a pair
+                var remainingCounts = new Dictionary<string, int>();
+                for (int s = 0; s < fromContainer.SlotCount; s++)
+                {
+                    var fi = fromContainer.GetFrontItem(s);
+                    if (fi != null && s != move.FromSlot)
+                    {
+                        if (!remainingCounts.ContainsKey(fi)) remainingCounts[fi] = 0;
+                        remainingCounts[fi]++;
+                    }
+                }
+                foreach (var kvp in remainingCounts)
+                {
+                    if (kvp.Value >= 2)
+                    {
+                        score += 25; pairContrib += 25;
+                        reasons.Add($"exposes source pair ({kvp.Key})");
+                        break;
+                    }
+                }
             }
 
             // === DESTINATION QUALITY ===
@@ -976,8 +1179,54 @@ namespace SortResort
             if (destEmptySlots <= 1 && !pairRoomWillOpen)
             {
                 // Skip this penalty when room-will-open: the fullness is temporary
-                score -= 15;
+                score -= 15; penaltyContrib -= 15;
                 reasons.Add("fills container");
+            }
+
+            // === DEADLOCK PREVENTION ===
+            // Check if this move would leave dangerously few empty front slots globally
+            // Account for locked containers near-unlocking (they'll open soon, providing slots)
+            {
+                var deadlockTestState = testState.Clone();
+                int matchesFromMove = ProcessAllMatches(deadlockTestState);
+                int totalEmptySlots = 0;
+                foreach (var c in deadlockTestState.Containers)
+                {
+                    if (!c.IsLocked)
+                        totalEmptySlots += c.GetEmptyFrontSlotCount();
+                }
+
+                // Count containers about to unlock (within 2 matches)
+                int nearUnlockCount = 0;
+                foreach (var c in deadlockTestState.Containers)
+                {
+                    if (c.IsLocked && c.UnlockMatchesRequired - c.CurrentUnlockProgress <= 2)
+                        nearUnlockCount++;
+                }
+
+                if (matchesFromMove == 0)
+                {
+                    if (totalEmptySlots == 0 && nearUnlockCount == 0)
+                    {
+                        score -= 500; penaltyContrib -= 500;
+                        reasons.Add("DEADLOCK: leaves 0 empty slots");
+                    }
+                    else if (totalEmptySlots == 0 && nearUnlockCount > 0)
+                    {
+                        score -= 150; penaltyContrib -= 150;
+                        reasons.Add("tight board (unlocks coming)");
+                    }
+                    else if (totalEmptySlots == 1 && nearUnlockCount == 0)
+                    {
+                        score -= 100; penaltyContrib -= 100;
+                        reasons.Add("near-deadlock: only 1 empty slot left");
+                    }
+                    else if (totalEmptySlots <= 2 && nearUnlockCount == 0)
+                    {
+                        score -= 30; penaltyContrib -= 30;
+                        reasons.Add("low slots remaining");
+                    }
+                }
             }
 
             // === STAGING MOVE BONUS ===
@@ -994,7 +1243,7 @@ namespace SortResort
                 else
                 {
                     // Pure staging with no reveal - not great but sometimes necessary
-                    score -= 5;
+                    score -= 5; penaltyContrib -= 5;
                     reasons.Add("staging move");
                 }
             }
@@ -1009,7 +1258,7 @@ namespace SortResort
             {
                 // We're evacuating an actionable item to a non-pairing destination
                 // This might disrupt a potential match-in-place
-                score -= 35;
+                score -= 35; penaltyContrib -= 35;
                 reasons.Add("disrupts match-in-place potential");
             }
 
@@ -1025,8 +1274,8 @@ namespace SortResort
                 int hiddenCount = toContainer.GetBackRowItemCount();
 
                 // Bonus scales with how many items we'll reveal
-                int revealBonus = 50 + (hiddenCount * 20);
-                score += revealBonus;
+                int tripleRevealBonus = 50 + (hiddenCount * 20);
+                score += tripleRevealBonus; revealContrib += tripleRevealBonus;
                 reasons.Add($"triple reveals {hiddenCount} hidden item(s)");
 
                 // Check if hidden items are different types that could use this container
@@ -1036,9 +1285,19 @@ namespace SortResort
                 {
                     // After matching, container is empty and reveals items of other types
                     // This container becomes a collection point for those types
-                    score += 30;
+                    score += 30; revealContrib += 30;
                     reasons.Add("clears container for revealed items");
                 }
+            }
+
+            // === STRATEGY WEIGHT ADJUSTMENTS ===
+            // Apply category-specific scaling from active strategy.
+            // Weight of 1.0 has zero effect; >1.0 amplifies; <1.0 dampens.
+            if (_activeStrategy != null)
+            {
+                score += (int)(pairContrib * (_activeStrategy.PairWeight - 1.0f));
+                score += (int)(revealContrib * (_activeStrategy.RevealWeight - 1.0f));
+                score += (int)(penaltyContrib * (_activeStrategy.CautionWeight - 1.0f));
             }
 
             string reason = reasons.Count > 0 ? string.Join(", ", reasons) : "neutral";

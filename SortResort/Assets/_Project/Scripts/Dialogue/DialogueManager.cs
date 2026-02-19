@@ -181,13 +181,111 @@ namespace SortResort
                 return false;
             }
 
-            currentSequence = sequence;
+            // Work on a copy so we don't modify cached JSON data
+            var workingSequence = new DialogueSequence
+            {
+                id = sequence.id,
+                triggerId = sequence.triggerId,
+                playOnce = sequence.playOnce,
+                lines = new List<DialogueLine>(sequence.lines)
+            };
+
+            // Auto-split any lines that overflow the dialogue box
+            PreSplitOverflowingLines(workingSequence);
+
+            currentSequence = workingSequence;
             currentLineIndex = 0;
 
-            Debug.Log($"[DialogueManager] Starting dialogue: {sequence.id} ({sequence.lines.Count} lines)");
+            Debug.Log($"[DialogueManager] Starting dialogue: {workingSequence.id} ({workingSequence.lines.Count} lines)");
 
             PlayCurrentLine();
             return true;
+        }
+
+        /// <summary>
+        /// Merges consecutive same-mascot/expression lines into single text blocks,
+        /// then auto-splits any that overflow the dialogue box into evenly-filled pages.
+        /// </summary>
+        private void PreSplitOverflowingLines(DialogueSequence sequence)
+        {
+            if (DialogueUI.Instance == null) return;
+
+            // Step 1: Merge consecutive lines with same mascot+expression
+            var merged = new List<DialogueLine>();
+            foreach (var line in sequence.lines)
+            {
+                if (merged.Count > 0)
+                {
+                    var prev = merged[merged.Count - 1];
+                    if (prev.mascotId == line.mascotId && prev.expression == line.expression)
+                    {
+                        // Append to previous line with a space
+                        prev.text = prev.text.TrimEnd() + " " + line.text.TrimStart();
+                        continue;
+                    }
+                }
+                merged.Add(new DialogueLine(line.mascotId, line.text, line.expression));
+            }
+
+            // Step 2: Split any overflowing merged lines at word boundaries
+            // Accounts for "..." continuation markers by measuring with them included
+            var splitLines = new List<DialogueLine>();
+            foreach (var line in merged)
+            {
+                string remaining = line.text;
+                var parts = new List<string>();
+
+                while (remaining.Length > 0)
+                {
+                    // If this will be a continuation box, measure with "..." prefix
+                    string testText = parts.Count > 0 ? ("..." + remaining) : remaining;
+                    int prefixLen = parts.Count > 0 ? 3 : 0;
+
+                    int visible = DialogueUI.Instance.MeasureVisibleCharacters(testText);
+                    if (visible >= testText.Length)
+                    {
+                        parts.Add(testText);
+                        break;
+                    }
+
+                    // Reserve room for "..." suffix by measuring chunk + "..."
+                    // Reduce effective split zone by a few chars
+                    int effectiveVisible = Mathf.Max(prefixLen + 1, visible - 3);
+
+                    int splitAt = testText.LastIndexOf(' ', Mathf.Min(effectiveVisible, testText.Length - 1));
+                    if (splitAt <= prefixLen) splitAt = effectiveVisible;
+
+                    string chunk = testText.Substring(0, splitAt).TrimEnd();
+                    // remaining is raw text without prefix for next iteration
+                    remaining = testText.Substring(splitAt).TrimStart();
+                    // Strip "..." prefix from remaining since next iteration re-adds it
+                    if (prefixLen > 0 && remaining.StartsWith("..."))
+                        remaining = remaining.Substring(3).TrimStart();
+
+                    // Prevent orphaned short text: pull words back until remainder is substantial
+                    const int MIN_CHARS_NEXT_BOX = 40;
+                    while (remaining.Length > 0 && remaining.Length < MIN_CHARS_NEXT_BOX)
+                    {
+                        int lastSpace = chunk.LastIndexOf(' ');
+                        if (lastSpace <= prefixLen) break;
+                        string pulled = chunk.Substring(lastSpace);
+                        chunk = chunk.Substring(0, lastSpace).TrimEnd();
+                        remaining = pulled.TrimStart() + " " + remaining;
+                    }
+
+                    // Add "..." suffix to indicate continuation
+                    parts.Add(chunk + "...");
+                }
+
+                foreach (var part in parts)
+                    splitLines.Add(new DialogueLine(line.mascotId, part, line.expression));
+            }
+
+            if (splitLines.Count != sequence.lines.Count)
+            {
+                Debug.Log($"[DialogueManager] Pre-split: {sequence.lines.Count} original -> {merged.Count} merged -> {splitLines.Count} final lines");
+            }
+            sequence.lines = splitLines;
         }
 
         /// <summary>
@@ -319,7 +417,12 @@ namespace SortResort
             // Add slight random variation to pitch for natural feel
             float pitch = basePitch + UnityEngine.Random.Range(-pitchVariation, pitchVariation);
             voiceAudioSource.pitch = pitch;
-            voiceAudioSource.PlayOneShot(clip);
+
+            // Scale by master and SFX volume
+            float vol = 1f;
+            if (AudioManager.Instance != null)
+                vol = AudioManager.Instance.MasterVolume * AudioManager.Instance.SFXVolume;
+            voiceAudioSource.PlayOneShot(clip, vol);
         }
 
         /// <summary>

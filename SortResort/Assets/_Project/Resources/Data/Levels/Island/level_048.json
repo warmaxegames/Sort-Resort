@@ -3,12 +3,12 @@
     "world_id": "island",
     "name": "level_048",
     "star_move_thresholds": [
-        65,
-        75,
-        84,
-        91
+        76,
+        87,
+        99,
+        106
     ],
-    "time_limit_seconds": 128,
+    "time_limit_seconds": 139,
     "containers": [
         {
             "id": "carousel_1",
@@ -36,27 +36,32 @@
             "despawn_on_match": false,
             "initial_items": [
                 {
-                    "id": "camera",
+                    "id": "messageinabottle",
                     "row": 0,
                     "slot": 0
                 },
                 {
-                    "id": "camera",
+                    "id": "beachball_yellowblue",
+                    "row": 1,
+                    "slot": 0
+                },
+                {
+                    "id": "icecreamconechocolate",
                     "row": 0,
                     "slot": 1
                 },
                 {
-                    "id": "flipflops",
+                    "id": "oysterblue",
                     "row": 1,
                     "slot": 1
                 },
                 {
-                    "id": "flipflopsgreen",
+                    "id": "maitai",
                     "row": 0,
                     "slot": 2
                 },
                 {
-                    "id": "surfboardblueyellow",
+                    "id": "surfboardbluepink",
                     "row": 1,
                     "slot": 2
                 }
@@ -88,27 +93,22 @@
             "despawn_on_match": false,
             "initial_items": [
                 {
-                    "id": "sandpale_green",
+                    "id": "sunscreen",
                     "row": 0,
                     "slot": 0
                 },
                 {
-                    "id": "sunglassespurple",
+                    "id": "scubatanks",
                     "row": 1,
                     "slot": 0
                 },
                 {
-                    "id": "messageinabottle",
+                    "id": "lifepreserver",
                     "row": 0,
                     "slot": 1
                 },
                 {
-                    "id": "icecreamconechocolate",
-                    "row": 1,
-                    "slot": 1
-                },
-                {
-                    "id": "lemonade",
+                    "id": "swimmask",
                     "row": 0,
                     "slot": 2
                 }
@@ -140,23 +140,28 @@
             "despawn_on_match": false,
             "initial_items": [
                 {
-                    "id": "suitcaseyellow",
+                    "id": "vanillaicecreamcone",
                     "row": 0,
                     "slot": 0
                 },
                 {
-                    "id": "sunscreen",
-                    "row": 0,
-                    "slot": 1
-                },
-                {
-                    "id": "watermelonslice",
+                    "id": "sunhat",
                     "row": 1,
+                    "slot": 0
+                },
+                {
+                    "id": "popsiclemintchocolate",
+                    "row": 0,
                     "slot": 1
                 },
                 {
-                    "id": "sunglassesorange",
+                    "id": "sandpale_red",
                     "row": 0,
+                    "slot": 2
+                },
+                {
+                    "id": "strawberrydaiquiri",
+                    "row": 1,
                     "slot": 2
                 }
             ]
@@ -187,32 +192,22 @@
             "despawn_on_match": false,
             "initial_items": [
                 {
-                    "id": "messageinabottle",
+                    "id": "sparkleicecreamcone",
                     "row": 0,
                     "slot": 0
-                },
-                {
-                    "id": "lemonadepitcher",
-                    "row": 1,
-                    "slot": 0
-                },
-                {
-                    "id": "sandpale_green",
-                    "row": 0,
-                    "slot": 1
-                },
-                {
-                    "id": "camera",
-                    "row": 1,
-                    "slot": 1
                 },
                 {
                     "id": "sandals",
                     "row": 0,
+                    "slot": 1
+                },
+                {
+                    "id": "bluesunglasses",
+                    "row": 0,
                     "slot": 2
                 },
                 {
-                    "id": "sunglassespurple",
+                    "id": "oysterblue",
                     "row": 1,
                     "slot": 2
                 }
@@ -244,23 +239,23 @@
             "despawn_on_match": false,
             "initial_items": [
                 {
-                    "id": "icecreamparfait",
+                    "id": "flipflopsgreen",
                     "row": 0,
                     "slot": 0
                 },
                 {
-                    "id": "surfboardpalmtrees",
+                    "id": "camera",
                     "row": 0,
                     "slot": 1
                 },
                 {
-                    "id": "beachball_redblue",
-                    "row": 0,
-                    "slot": 2
+                    "id": "scubatanks",
+                    "row": 1,
+                    "slot": 1
                 },
                 {
-                    "id": "surfboardbluepink",
-                    "row": 1,
+                    "id": "flipflopsgreen",
+                    "row": 0,
                     "slot": 2
                 }
             ]
@@ -291,38 +286,33 @@
             "despawn_on_match": false,
             "initial_items": [
                 {
-                    "id": "surfboardpalmtrees",
+                    "id": "vanilladrink",
                     "row": 0,
                     "slot": 0
                 },
                 {
-                    "id": "bluesunglasses",
+                    "id": "sandpale_green",
                     "row": 1,
                     "slot": 0
                 },
                 {
-                    "id": "sunglassesorange",
-                    "row": 2,
-                    "slot": 0
-                },
-                {
-                    "id": "beachball_redblue",
+                    "id": "vanilladrink",
                     "row": 0,
                     "slot": 1
                 },
                 {
-                    "id": "sandpale_blue",
+                    "id": "sandpale_red",
                     "row": 2,
                     "slot": 1
                 },
                 {
-                    "id": "bluesunglasses",
-                    "row": 1,
+                    "id": "beachball_yellowblue",
+                    "row": 0,
                     "slot": 2
                 },
                 {
-                    "id": "flipflopsgreen",
-                    "row": 2,
+                    "id": "suitcaseyellow",
+                    "row": 1,
                     "slot": 2
                 }
             ]
@@ -337,9 +327,9 @@
             "container_image": "island_container",
             "slot_count": 3,
             "max_rows_per_slot": 3,
-            "is_locked": false,
-            "unlock_matches_required": 0,
-            "lock_overlay_image": "",
+            "is_locked": true,
+            "unlock_matches_required": 3,
+            "lock_overlay_image": "island_lockoverlay",
             "unlock_animation": "",
             "is_moving": false,
             "move_type": "",
@@ -353,37 +343,47 @@
             "despawn_on_match": false,
             "initial_items": [
                 {
-                    "id": "greencoconut",
+                    "id": "sunglassespurple",
                     "row": 0,
                     "slot": 0
                 },
                 {
-                    "id": "scubatanks",
+                    "id": "lemonadepitcher",
                     "row": 1,
                     "slot": 0
                 },
                 {
-                    "id": "lemonade",
+                    "id": "surfboardbluewhitestripes",
+                    "row": 2,
+                    "slot": 0
+                },
+                {
+                    "id": "icecreamparfait",
                     "row": 0,
                     "slot": 1
                 },
                 {
-                    "id": "sparkleicecreamcone",
+                    "id": "lemonadepitcher",
                     "row": 1,
                     "slot": 1
                 },
                 {
-                    "id": "sandals",
+                    "id": "sunglassesorange",
+                    "row": 2,
+                    "slot": 1
+                },
+                {
+                    "id": "icecreamparfait",
                     "row": 0,
                     "slot": 2
                 },
                 {
-                    "id": "beachball_redblue",
+                    "id": "popsiclemintchocolate",
                     "row": 1,
                     "slot": 2
                 },
                 {
-                    "id": "surfboardbluewhitepeace",
+                    "id": "swimmask",
                     "row": 2,
                     "slot": 2
                 }
@@ -415,37 +415,32 @@
             "despawn_on_match": false,
             "initial_items": [
                 {
-                    "id": "oysterblue",
+                    "id": "sunscreenspf50",
                     "row": 0,
                     "slot": 0
                 },
                 {
-                    "id": "bluesunglasses",
-                    "row": 1,
-                    "slot": 0
-                },
-                {
-                    "id": "oysterblue",
-                    "row": 0,
-                    "slot": 1
-                },
-                {
-                    "id": "surfboardpalmtrees",
-                    "row": 1,
-                    "slot": 1
-                },
-                {
-                    "id": "surfboardbluewhitepeace",
+                    "id": "vanillaicecreamcone",
                     "row": 2,
-                    "slot": 1
+                    "slot": 0
                 },
                 {
                     "id": "greencoconut",
                     "row": 0,
+                    "slot": 1
+                },
+                {
+                    "id": "watermelonslice",
+                    "row": 2,
+                    "slot": 1
+                },
+                {
+                    "id": "bluesunglasses",
+                    "row": 0,
                     "slot": 2
                 },
                 {
-                    "id": "sandpale_green",
+                    "id": "lifepreserver",
                     "row": 1,
                     "slot": 2
                 },
@@ -482,33 +477,38 @@
             "despawn_on_match": false,
             "initial_items": [
                 {
-                    "id": "oysterblue",
+                    "id": "sunscreenspf50",
                     "row": 0,
                     "slot": 0
                 },
                 {
-                    "id": "sunhat",
+                    "id": "suitcaseyellow",
+                    "row": 1,
+                    "slot": 0
+                },
+                {
+                    "id": "beachbag",
                     "row": 0,
                     "slot": 1
                 },
                 {
-                    "id": "flipflops",
+                    "id": "piratepopsicle",
                     "row": 1,
                     "slot": 1
                 },
                 {
-                    "id": "sandals",
-                    "row": 0,
-                    "slot": 2
-                },
-                {
-                    "id": "icecreamconechocolate",
-                    "row": 1,
-                    "slot": 2
-                },
-                {
-                    "id": "surfboardredorange",
+                    "id": "strawberrydaiquiri",
                     "row": 2,
+                    "slot": 1
+                },
+                {
+                    "id": "beachball_yellowblue",
+                    "row": 0,
+                    "slot": 2
+                },
+                {
+                    "id": "piratepopsicle",
+                    "row": 1,
                     "slot": 2
                 }
             ]
@@ -517,6 +517,68 @@
             "id": "container_10",
             "position": {
                 "x": 540.0,
+                "y": 729.0
+            },
+            "container_type": "standard",
+            "container_image": "island_container",
+            "slot_count": 3,
+            "max_rows_per_slot": 3,
+            "is_locked": true,
+            "unlock_matches_required": 7,
+            "lock_overlay_image": "island_lockoverlay",
+            "unlock_animation": "",
+            "is_moving": false,
+            "move_type": "",
+            "move_direction": "",
+            "move_speed": 50.0,
+            "move_distance": 200.0,
+            "track_id": "",
+            "is_falling": false,
+            "fall_speed": 100.0,
+            "fall_target_y": 0.0,
+            "despawn_on_match": false,
+            "initial_items": [
+                {
+                    "id": "beachball_mixed",
+                    "row": 0,
+                    "slot": 0
+                },
+                {
+                    "id": "surfboardbluewhitestripes",
+                    "row": 2,
+                    "slot": 0
+                },
+                {
+                    "id": "beachbag",
+                    "row": 0,
+                    "slot": 1
+                },
+                {
+                    "id": "pinkpolkadotbikini",
+                    "row": 2,
+                    "slot": 1
+                },
+                {
+                    "id": "icecreamparfait",
+                    "row": 0,
+                    "slot": 2
+                },
+                {
+                    "id": "bluesunglasses",
+                    "row": 1,
+                    "slot": 2
+                },
+                {
+                    "id": "sunglassesorange",
+                    "row": 2,
+                    "slot": 2
+                }
+            ]
+        },
+        {
+            "id": "container_11",
+            "position": {
+                "x": 880.0,
                 "y": 729.0
             },
             "container_type": "standard",
@@ -539,84 +601,37 @@
             "despawn_on_match": false,
             "initial_items": [
                 {
-                    "id": "sunglassesorange",
+                    "id": "sunglassespurple",
                     "row": 0,
                     "slot": 0
+                },
+                {
+                    "id": "piratepopsicle",
+                    "row": 1,
+                    "slot": 0
+                },
+                {
+                    "id": "sandals",
+                    "row": 0,
+                    "slot": 1
+                },
+                {
+                    "id": "camera",
+                    "row": 1,
+                    "slot": 1
+                },
+                {
+                    "id": "scubatanks",
+                    "row": 2,
+                    "slot": 1
                 },
                 {
                     "id": "beachbag",
-                    "row": 2,
-                    "slot": 0
-                },
-                {
-                    "id": "coconut",
-                    "row": 0,
-                    "slot": 1
-                },
-                {
-                    "id": "hibiscusflower",
-                    "row": 1,
-                    "slot": 1
-                }
-            ]
-        },
-        {
-            "id": "container_11",
-            "position": {
-                "x": 880.0,
-                "y": 729.0
-            },
-            "container_type": "standard",
-            "container_image": "island_container",
-            "slot_count": 3,
-            "max_rows_per_slot": 3,
-            "is_locked": true,
-            "unlock_matches_required": 3,
-            "lock_overlay_image": "island_lockoverlay",
-            "unlock_animation": "",
-            "is_moving": false,
-            "move_type": "",
-            "move_direction": "",
-            "move_speed": 50.0,
-            "move_distance": 200.0,
-            "track_id": "",
-            "is_falling": false,
-            "fall_speed": 100.0,
-            "fall_target_y": 0.0,
-            "despawn_on_match": false,
-            "initial_items": [
-                {
-                    "id": "icecreamparfait",
-                    "row": 0,
-                    "slot": 0
-                },
-                {
-                    "id": "hibiscusflower",
-                    "row": 1,
-                    "slot": 0
-                },
-                {
-                    "id": "surfboardbluepink",
-                    "row": 2,
-                    "slot": 0
-                },
-                {
-                    "id": "icecreamparfait",
-                    "row": 0,
-                    "slot": 1
-                },
-                {
-                    "id": "sparkleicecreamcone",
-                    "row": 1,
-                    "slot": 1
-                },
-                {
-                    "id": "lemonade",
                     "row": 0,
                     "slot": 2
                 },
                 {
-                    "id": "scubatanks",
+                    "id": "messageinabottle",
                     "row": 1,
                     "slot": 2
                 }
@@ -648,33 +663,38 @@
             "despawn_on_match": false,
             "initial_items": [
                 {
-                    "id": "pineapple",
+                    "id": "icecreamconechocolate",
                     "row": 0,
                     "slot": 0
                 },
                 {
-                    "id": "sunscreen",
+                    "id": "pinkpolkadotbikini",
                     "row": 1,
                     "slot": 0
                 },
                 {
-                    "id": "flipflops",
-                    "row": 2,
-                    "slot": 0
-                },
-                {
-                    "id": "sunscreen",
-                    "row": 1,
+                    "id": "surfboardpalmtrees",
+                    "row": 0,
                     "slot": 1
                 },
                 {
-                    "id": "greencoconut",
+                    "id": "watermelonslice",
+                    "row": 2,
+                    "slot": 1
+                },
+                {
+                    "id": "surfboardpalmtrees",
                     "row": 0,
                     "slot": 2
                 },
                 {
-                    "id": "sparkleicecreamcone",
+                    "id": "pinkpolkadotbikini",
                     "row": 1,
+                    "slot": 2
+                },
+                {
+                    "id": "surfboardbluepink",
+                    "row": 2,
                     "slot": 2
                 }
             ]
@@ -705,28 +725,33 @@
             "despawn_on_match": false,
             "initial_items": [
                 {
-                    "id": "flipflopsgreen",
+                    "id": "camera",
                     "row": 0,
                     "slot": 0
                 },
                 {
-                    "id": "sunhat",
-                    "row": 0,
-                    "slot": 1
-                },
-                {
-                    "id": "suitcaseyellow",
+                    "id": "surfboardpalmtrees",
                     "row": 1,
-                    "slot": 1
+                    "slot": 0
                 },
                 {
-                    "id": "sandpale_blue",
+                    "id": "strawberrydaiquiri",
                     "row": 2,
+                    "slot": 0
+                },
+                {
+                    "id": "maitai",
+                    "row": 0,
                     "slot": 1
                 },
                 {
-                    "id": "scubatanks",
+                    "id": "surfboardbluewhitestripes",
                     "row": 0,
+                    "slot": 2
+                },
+                {
+                    "id": "sunhat",
+                    "row": 1,
                     "slot": 2
                 }
             ]
@@ -757,37 +782,37 @@
             "despawn_on_match": false,
             "initial_items": [
                 {
-                    "id": "coconut",
+                    "id": "icecreamconechocolate",
                     "row": 0,
                     "slot": 0
                 },
                 {
-                    "id": "surfboardblueyellow",
+                    "id": "sandpale_green",
                     "row": 1,
                     "slot": 0
                 },
                 {
-                    "id": "hibiscusflower",
-                    "row": 2,
-                    "slot": 0
+                    "id": "sunscreenspf50",
+                    "row": 0,
+                    "slot": 1
                 },
                 {
-                    "id": "suitcaseyellow",
+                    "id": "sunglassesorange",
                     "row": 1,
                     "slot": 1
                 },
                 {
-                    "id": "surfboardredorange",
+                    "id": "sparkleicecreamcone",
                     "row": 2,
                     "slot": 1
                 },
                 {
-                    "id": "watermelonslice",
-                    "row": 1,
+                    "id": "beachball_mixed",
+                    "row": 0,
                     "slot": 2
                 },
                 {
-                    "id": "surfboardblueyellow",
+                    "id": "sandpale_red",
                     "row": 2,
                     "slot": 2
                 }
@@ -797,115 +822,6 @@
             "id": "container_15",
             "position": {
                 "x": 200.0,
-                "y": 1261.0
-            },
-            "container_type": "standard",
-            "container_image": "island_container",
-            "slot_count": 3,
-            "max_rows_per_slot": 3,
-            "is_locked": false,
-            "unlock_matches_required": 0,
-            "lock_overlay_image": "",
-            "unlock_animation": "",
-            "is_moving": false,
-            "move_type": "",
-            "move_direction": "",
-            "move_speed": 50.0,
-            "move_distance": 200.0,
-            "track_id": "",
-            "is_falling": false,
-            "fall_speed": 100.0,
-            "fall_target_y": 0.0,
-            "despawn_on_match": false,
-            "initial_items": [
-                {
-                    "id": "icecreamconechocolate",
-                    "row": 0,
-                    "slot": 0
-                },
-                {
-                    "id": "swimmask",
-                    "row": 2,
-                    "slot": 0
-                },
-                {
-                    "id": "surfboardbluepink",
-                    "row": 0,
-                    "slot": 1
-                },
-                {
-                    "id": "sandpale_blue",
-                    "row": 1,
-                    "slot": 1
-                },
-                {
-                    "id": "messageinabottle",
-                    "row": 0,
-                    "slot": 2
-                }
-            ]
-        },
-        {
-            "id": "container_16",
-            "position": {
-                "x": 540.0,
-                "y": 1261.0
-            },
-            "container_type": "standard",
-            "container_image": "island_container",
-            "slot_count": 3,
-            "max_rows_per_slot": 3,
-            "is_locked": true,
-            "unlock_matches_required": 3,
-            "lock_overlay_image": "island_lockoverlay",
-            "unlock_animation": "",
-            "is_moving": false,
-            "move_type": "",
-            "move_direction": "",
-            "move_speed": 50.0,
-            "move_distance": 200.0,
-            "track_id": "",
-            "is_falling": false,
-            "fall_speed": 100.0,
-            "fall_target_y": 0.0,
-            "despawn_on_match": false,
-            "initial_items": [
-                {
-                    "id": "beachbag",
-                    "row": 0,
-                    "slot": 0
-                },
-                {
-                    "id": "swimmask",
-                    "row": 1,
-                    "slot": 0
-                },
-                {
-                    "id": "beachbag",
-                    "row": 0,
-                    "slot": 1
-                },
-                {
-                    "id": "lemonadepitcher",
-                    "row": 2,
-                    "slot": 1
-                },
-                {
-                    "id": "surfboardredorange",
-                    "row": 0,
-                    "slot": 2
-                },
-                {
-                    "id": "lemonadepitcher",
-                    "row": 2,
-                    "slot": 2
-                }
-            ]
-        },
-        {
-            "id": "container_17",
-            "position": {
-                "x": 880.0,
                 "y": 1261.0
             },
             "container_type": "standard",
@@ -928,42 +844,172 @@
             "despawn_on_match": false,
             "initial_items": [
                 {
-                    "id": "pineapple",
+                    "id": "sunscreen",
                     "row": 0,
                     "slot": 0
                 },
                 {
-                    "id": "sunhat",
+                    "id": "lifepreserver",
                     "row": 1,
                     "slot": 0
                 },
                 {
-                    "id": "surfboardbluewhitepeace",
+                    "id": "vanillaicecreamcone",
                     "row": 2,
                     "slot": 0
                 },
                 {
-                    "id": "pineapple",
+                    "id": "maitai",
                     "row": 0,
                     "slot": 1
-                },
-                {
-                    "id": "sunglassespurple",
-                    "row": 2,
-                    "slot": 1
-                },
-                {
-                    "id": "coconut",
-                    "row": 1,
-                    "slot": 2
                 },
                 {
                     "id": "watermelonslice",
                     "row": 2,
+                    "slot": 1
+                },
+                {
+                    "id": "sunscreen",
+                    "row": 0,
+                    "slot": 2
+                },
+                {
+                    "id": "sparkleicecreamcone",
+                    "row": 1,
+                    "slot": 2
+                },
+                {
+                    "id": "oysterblue",
+                    "row": 2,
+                    "slot": 2
+                }
+            ]
+        },
+        {
+            "id": "container_16",
+            "position": {
+                "x": 540.0,
+                "y": 1261.0
+            },
+            "container_type": "standard",
+            "container_image": "island_container",
+            "slot_count": 3,
+            "max_rows_per_slot": 3,
+            "is_locked": false,
+            "unlock_matches_required": 0,
+            "lock_overlay_image": "",
+            "unlock_animation": "",
+            "is_moving": false,
+            "move_type": "",
+            "move_direction": "",
+            "move_speed": 50.0,
+            "move_distance": 200.0,
+            "track_id": "",
+            "is_falling": false,
+            "fall_speed": 100.0,
+            "fall_target_y": 0.0,
+            "despawn_on_match": false,
+            "initial_items": [
+                {
+                    "id": "sunglassespurple",
+                    "row": 0,
+                    "slot": 0
+                },
+                {
+                    "id": "popsiclemintchocolate",
+                    "row": 1,
+                    "slot": 0
+                },
+                {
+                    "id": "suitcaseyellow",
+                    "row": 2,
+                    "slot": 0
+                },
+                {
+                    "id": "sandals",
+                    "row": 0,
+                    "slot": 1
+                },
+                {
+                    "id": "greencoconut",
+                    "row": 1,
+                    "slot": 1
+                },
+                {
+                    "id": "surfboardbluepink",
+                    "row": 2,
+                    "slot": 1
+                },
+                {
+                    "id": "vanilladrink",
+                    "row": 1,
+                    "slot": 2
+                },
+                {
+                    "id": "flipflopsgreen",
+                    "row": 2,
+                    "slot": 2
+                }
+            ]
+        },
+        {
+            "id": "container_17",
+            "position": {
+                "x": 880.0,
+                "y": 1261.0
+            },
+            "container_type": "standard",
+            "container_image": "island_container",
+            "slot_count": 3,
+            "max_rows_per_slot": 3,
+            "is_locked": false,
+            "unlock_matches_required": 0,
+            "lock_overlay_image": "",
+            "unlock_animation": "",
+            "is_moving": false,
+            "move_type": "",
+            "move_direction": "",
+            "move_speed": 50.0,
+            "move_distance": 200.0,
+            "track_id": "",
+            "is_falling": false,
+            "fall_speed": 100.0,
+            "fall_target_y": 0.0,
+            "despawn_on_match": false,
+            "initial_items": [
+                {
+                    "id": "messageinabottle",
+                    "row": 1,
+                    "slot": 0
+                },
+                {
+                    "id": "sunhat",
+                    "row": 2,
+                    "slot": 0
+                },
+                {
+                    "id": "greencoconut",
+                    "row": 1,
+                    "slot": 1
+                },
+                {
+                    "id": "sandpale_green",
+                    "row": 2,
+                    "slot": 1
+                },
+                {
+                    "id": "beachball_mixed",
+                    "row": 0,
+                    "slot": 2
+                },
+                {
+                    "id": "lemonadepitcher",
+                    "row": 1,
                     "slot": 2
                 }
             ]
         }
     ],
-    "moving_tracks": []
+    "moving_tracks": [],
+    "construction_moves": 92
 }

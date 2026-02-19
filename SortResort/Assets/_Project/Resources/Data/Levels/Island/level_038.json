@@ -3,10 +3,10 @@
     "world_id": "island",
     "name": "level_038",
     "star_move_thresholds": [
-        77,
-        89,
-        100,
-        108
+        76,
+        87,
+        99,
+        106
     ],
     "time_limit_seconds": 173,
     "containers": [
@@ -1205,5 +1205,6 @@
             ]
         }
     ],
-    "moving_tracks": []
+    "moving_tracks": [],
+    "construction_moves": 103
 }

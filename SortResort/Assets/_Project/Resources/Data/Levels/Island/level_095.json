@@ -3,10 +3,10 @@
     "world_id": "island",
     "name": "level_095",
     "star_move_thresholds": [
-        66,
-        76,
-        86,
-        92
+        58,
+        67,
+        75,
+        81
     ],
     "time_limit_seconds": 47,
     "containers": [
@@ -88,7 +88,7 @@
                     "slot": 0
                 },
                 {
-                    "id": "popsiclemintchocolate",
+                    "id": "beachball_mixed",
                     "row": 1,
                     "slot": 0
                 },
@@ -98,7 +98,7 @@
                     "slot": 1
                 },
                 {
-                    "id": "icecreamconechocolate",
+                    "id": "sandpale_green",
                     "row": 1,
                     "slot": 2
                 }
@@ -130,17 +130,17 @@
             "despawn_on_match": false,
             "initial_items": [
                 {
-                    "id": "icecreamconechocolate",
+                    "id": "sandpale_green",
                     "row": 0,
                     "slot": 0
                 },
                 {
-                    "id": "beachball_mixed",
+                    "id": "greencoconut",
                     "row": 0,
                     "slot": 1
                 },
                 {
-                    "id": "lemonade",
+                    "id": "sandpale_red",
                     "row": 1,
                     "slot": 1
                 },
@@ -177,7 +177,7 @@
             "despawn_on_match": false,
             "initial_items": [
                 {
-                    "id": "icecreamconechocolate",
+                    "id": "sandpale_green",
                     "row": 0,
                     "slot": 0
                 },
@@ -187,12 +187,12 @@
                     "slot": 0
                 },
                 {
-                    "id": "piratepopsicle",
+                    "id": "flipflopsgreen",
                     "row": 0,
                     "slot": 1
                 },
                 {
-                    "id": "flipflopsgreen",
+                    "id": "lemonadepitcher",
                     "row": 1,
                     "slot": 1
                 },
@@ -239,7 +239,7 @@
                     "slot": 0
                 },
                 {
-                    "id": "lemonade",
+                    "id": "sandpale_red",
                     "row": 1,
                     "slot": 0
                 },
@@ -254,7 +254,7 @@
                     "slot": 1
                 },
                 {
-                    "id": "greencoconut",
+                    "id": "watermelondrink",
                     "row": 0,
                     "slot": 2
                 },
@@ -311,7 +311,7 @@
                     "slot": 2
                 },
                 {
-                    "id": "piratepopsicle",
+                    "id": "flipflopsgreen",
                     "row": 1,
                     "slot": 2
                 },
@@ -410,7 +410,7 @@
                     "slot": 2
                 },
                 {
-                    "id": "watermelondrink",
+                    "id": "icecreamconechocolate",
                     "row": 2,
                     "slot": 2
                 }
@@ -452,12 +452,12 @@
                     "slot": 1
                 },
                 {
-                    "id": "popsiclemintchocolate",
+                    "id": "beachball_mixed",
                     "row": 2,
                     "slot": 1
                 },
                 {
-                    "id": "flipflopsgreen",
+                    "id": "lemonadepitcher",
                     "row": 0,
                     "slot": 2
                 }
@@ -494,7 +494,7 @@
                     "slot": 0
                 },
                 {
-                    "id": "greencoconut",
+                    "id": "watermelondrink",
                     "row": 1,
                     "slot": 0
                 }
@@ -526,12 +526,12 @@
             "despawn_on_match": false,
             "initial_items": [
                 {
-                    "id": "flipflopsgreen",
+                    "id": "lemonadepitcher",
                     "row": 2,
                     "slot": 0
                 },
                 {
-                    "id": "greencoconut",
+                    "id": "watermelondrink",
                     "row": 0,
                     "slot": 1
                 },
@@ -583,7 +583,7 @@
             "despawn_on_match": false,
             "initial_items": [
                 {
-                    "id": "lemonade",
+                    "id": "sandpale_red",
                     "row": 0,
                     "slot": 0
                 },
@@ -630,7 +630,7 @@
                     "slot": 0
                 },
                 {
-                    "id": "beachball_mixed",
+                    "id": "greencoconut",
                     "row": 0,
                     "slot": 1
                 },
@@ -650,7 +650,7 @@
                     "slot": 2
                 },
                 {
-                    "id": "popsiclemintchocolate",
+                    "id": "beachball_mixed",
                     "row": 2,
                     "slot": 2
                 }
@@ -682,7 +682,7 @@
             "despawn_on_match": false,
             "initial_items": [
                 {
-                    "id": "coconut",
+                    "id": "beachball_yellowblue",
                     "row": 0,
                     "slot": 0
                 },
@@ -697,7 +697,7 @@
                     "slot": 1
                 },
                 {
-                    "id": "beachball_mixed",
+                    "id": "greencoconut",
                     "row": 1,
                     "slot": 1
                 },
@@ -707,7 +707,7 @@
                     "slot": 2
                 },
                 {
-                    "id": "coconut",
+                    "id": "beachball_yellowblue",
                     "row": 1,
                     "slot": 2
                 },
@@ -744,7 +744,7 @@
             "despawn_on_match": false,
             "initial_items": [
                 {
-                    "id": "piratepopsicle",
+                    "id": "flipflopsgreen",
                     "row": 0,
                     "slot": 0
                 },
@@ -774,7 +774,7 @@
                     "slot": 2
                 },
                 {
-                    "id": "watermelondrink",
+                    "id": "icecreamconechocolate",
                     "row": 2,
                     "slot": 2
                 }
@@ -863,17 +863,18 @@
             "despawn_on_match": false,
             "initial_items": [
                 {
-                    "id": "watermelondrink",
+                    "id": "icecreamconechocolate",
                     "row": 0,
                     "slot": 0
                 },
                 {
-                    "id": "coconut",
+                    "id": "beachball_yellowblue",
                     "row": 1,
                     "slot": 0
                 }
             ]
         }
     ],
-    "moving_tracks": []
+    "moving_tracks": [],
+    "construction_moves": 73
 }
