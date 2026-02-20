@@ -33,6 +33,12 @@ namespace SortResort
         private InputAction clickAction;
         private InputAction submitAction;
 
+        // Skip button sprites
+        private Image skipButtonImage;
+        private Sprite skipNormalSprite;
+        private Sprite skipPressedSprite;
+        private Coroutine skipPressCoroutine;
+
         // Cached mascot sprites
         private string currentMascotFolder;
         private Sprite defaultMascotSprite;
@@ -147,6 +153,7 @@ namespace SortResort
             // Handle player input to advance dialogue (using new Input System)
             if (isVisible && (clickAction?.WasPressedThisFrame() == true || submitAction?.WasPressedThisFrame() == true))
             {
+                ShowSkipPressed();
                 DialogueManager.Instance?.OnPlayerInput();
             }
         }
@@ -164,10 +171,10 @@ namespace SortResort
                 dialogueText.text = "";
             }
 
-            // Hide continue indicator while typing
+            // Skip button is always visible during dialogue
             if (continueIndicator != null)
             {
-                continueIndicator.SetActive(false);
+                continueIndicator.SetActive(true);
             }
         }
 
@@ -400,6 +407,30 @@ namespace SortResort
             dialogueText.overflowMode = originalOverflow;
 
             return visible;
+        }
+
+        public void SetSkipButtonSprites(Image image, Sprite normal, Sprite pressed)
+        {
+            skipButtonImage = image;
+            skipNormalSprite = normal;
+            skipPressedSprite = pressed;
+        }
+
+        private void ShowSkipPressed()
+        {
+            if (skipButtonImage == null || skipPressedSprite == null) return;
+            if (skipPressCoroutine != null)
+                StopCoroutine(skipPressCoroutine);
+            skipPressCoroutine = StartCoroutine(SkipPressAnimation());
+        }
+
+        private IEnumerator SkipPressAnimation()
+        {
+            skipButtonImage.sprite = skipPressedSprite;
+            yield return new WaitForSecondsRealtime(0.15f);
+            if (skipButtonImage != null && skipNormalSprite != null)
+                skipButtonImage.sprite = skipNormalSprite;
+            skipPressCoroutine = null;
         }
     }
 }

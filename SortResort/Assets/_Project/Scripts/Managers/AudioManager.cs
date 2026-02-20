@@ -590,7 +590,7 @@ namespace SortResort
         // Convenience Methods for Common Sounds
         public void PlayDragSound() => PlaySFX(itemDragClip);
         public void PlayDropSound() => PlaySFX(itemDropClip);
-        public void PlayMatchSound() => PlaySFX(matchClip);
+        public void PlayMatchSound() => PlaySFX(matchClip, 2.5f);
         public void PlayUnlockSound()
         {
             // Play at higher volume (2.5x) since unlock_sound.mp3 has low internal audio levels

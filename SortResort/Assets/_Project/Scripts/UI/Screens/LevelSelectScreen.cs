@@ -59,7 +59,9 @@ namespace SortResort.UI
         private GameObject worldLockOverlay;
         private Image lockPadlockImage;
         private Button buyButton;
+        private Image lockBackgroundImage;
         private Dictionary<string, Sprite> lockedWorldSprites = new Dictionary<string, Sprite>();
+        private Dictionary<string, Sprite> lockedBackgroundSprites = new Dictionary<string, Sprite>();
 
         // World unlock animation
         private Sprite[] unlockAnimFrames;
@@ -463,19 +465,21 @@ namespace SortResort.UI
             var textGO = new GameObject("LevelNumber");
             textGO.transform.SetParent(btnGO.transform, false);
             var textRect = textGO.AddComponent<RectTransform>();
-            textRect.anchorMin = new Vector2(0.1f, 0.22f);
-            textRect.anchorMax = new Vector2(0.9f, 0.78f);
+            textRect.anchorMin = new Vector2(0.2f, 0.28f);
+            textRect.anchorMax = new Vector2(0.8f, 0.72f);
             textRect.offsetMin = Vector2.zero;
             textRect.offsetMax = Vector2.zero;
 
             var levelText = textGO.AddComponent<TextMeshProUGUI>();
             levelText.text = levelNumber.ToString();
-            levelText.fontSize = 72;
             levelText.fontStyle = FontStyles.Bold;
             levelText.alignment = TextAlignmentOptions.Center;
             levelText.color = Color.white;
             levelText.outlineWidth = 0.3f;
             levelText.outlineColor = new Color32(80, 0, 80, 200);
+            levelText.enableAutoSizing = true;
+            levelText.fontSizeMin = 36;
+            levelText.fontSizeMax = 72;
 
             // Result overlays container (stars, timer, checkmark icons on completed portals)
             var resultOvGO = new GameObject("ResultOverlays");
@@ -604,6 +608,21 @@ namespace SortResort.UI
             // Show/hide lock overlay and buy button
             if (worldLockOverlay != null)
                 worldLockOverlay.SetActive(!worldUnlocked);
+
+            // Update per-world locked background image
+            if (lockBackgroundImage != null)
+            {
+                var bgSprite = GetLockedBackgroundSprite(worldId);
+                if (bgSprite != null && !worldUnlocked)
+                {
+                    lockBackgroundImage.sprite = bgSprite;
+                    lockBackgroundImage.enabled = true;
+                }
+                else
+                {
+                    lockBackgroundImage.enabled = false;
+                }
+            }
 
             // Show/hide level grid and mode tabs when world is locked
             if (levelScrollRect != null)
@@ -806,11 +825,12 @@ namespace SortResort.UI
         /// <summary>
         /// Set the world lock overlay references (called from UIManager).
         /// </summary>
-        public void SetWorldLockOverlay(GameObject overlay, Image padlock, Button buyBtn)
+        public void SetWorldLockOverlay(GameObject overlay, Image padlock, Button buyBtn, Image lockBg = null)
         {
             worldLockOverlay = overlay;
             lockPadlockImage = padlock;
             buyButton = buyBtn;
+            lockBackgroundImage = lockBg;
             if (buyButton != null)
                 buyButton.onClick.AddListener(OnBuyWorldClicked);
         }
@@ -830,6 +850,17 @@ namespace SortResort.UI
             var sprite = LoadSpriteFromTexture($"Sprites/UI/Worlds/{worldId}_world_locked");
             if (sprite != null)
                 lockedWorldSprites[worldId] = sprite;
+            return sprite;
+        }
+
+        private Sprite GetLockedBackgroundSprite(string worldId)
+        {
+            if (lockedBackgroundSprites.TryGetValue(worldId, out Sprite cached))
+                return cached;
+
+            var sprite = LoadSpriteFromTexture($"Sprites/UI/Worlds/{worldId}_locked_background");
+            if (sprite != null)
+                lockedBackgroundSprites[worldId] = sprite;
             return sprite;
         }
 
@@ -908,9 +939,11 @@ namespace SortResort.UI
                 fadeCanvasGroup.blocksRaycasts = false;
             }
 
-            // Hide lock overlay (padlock + buy button) immediately
+            // Hide lock overlay (padlock + buy button) and locked background immediately
             if (worldLockOverlay != null)
                 worldLockOverlay.SetActive(false);
+            if (lockBackgroundImage != null)
+                lockBackgroundImage.enabled = false;
 
             // Create fullscreen animation overlay canvas
             GameObject animCanvasGO = null;

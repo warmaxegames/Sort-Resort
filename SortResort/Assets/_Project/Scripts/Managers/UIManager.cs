@@ -147,6 +147,8 @@ namespace SortResort
         private TextMeshProUGUI overlayLevelText;
         private TextMeshProUGUI overlayMovesText;
         private TextMeshProUGUI overlayTimerText;
+        private GameObject threeStarTargetGO;
+        private TextMeshProUGUI threeStarTargetText;
         private Image hudPanelBgImage;
         private GameObject statsContainerGO;
         private GameObject hudSettingsOverlay;
@@ -830,8 +832,8 @@ namespace SortResort
             prevBtnRect.anchorMin = new Vector2(0, 0.5f);
             prevBtnRect.anchorMax = new Vector2(0, 0.5f);
             prevBtnRect.pivot = new Vector2(0, 0.5f);
-            prevBtnRect.anchoredPosition = new Vector2(10, 0);
-            prevBtnRect.sizeDelta = new Vector2(170, 195);
+            prevBtnRect.anchoredPosition = new Vector2(25, 0);
+            prevBtnRect.sizeDelta = new Vector2(153, 176);
 
             var prevBtnImg = prevBtnGO.AddComponent<Image>();
             var prevSprite = Resources.Load<Sprite>("Sprites/UI/Buttons/button_left");
@@ -931,6 +933,23 @@ namespace SortResort
 
             lockOverlayGO.SetActive(false); // Starts hidden, LevelSelectScreen controls visibility
 
+            // Per-world fullscreen locked background image
+            // Parented to levelSelectPanel for fullscreen coverage
+            // Placed at sibling index 0 (first child, behind all UI elements)
+            // so all interactive elements (nav buttons, padlock, buy) render on top
+            var lockBgGO = new GameObject("LockedBackground");
+            lockBgGO.transform.SetParent(levelSelectPanel.transform, false);
+            lockBgGO.transform.SetSiblingIndex(0);
+            var lockBgRect = lockBgGO.AddComponent<RectTransform>();
+            lockBgRect.anchorMin = Vector2.zero;
+            lockBgRect.anchorMax = Vector2.one;
+            lockBgRect.offsetMin = Vector2.zero;
+            lockBgRect.offsetMax = Vector2.zero;
+            var lockBgImg = lockBgGO.AddComponent<Image>();
+            lockBgImg.preserveAspect = false;
+            lockBgImg.raycastTarget = false;
+            lockBgImg.enabled = false; // Hidden until a world with a background is shown
+
             // Next world button (larger)
             var nextBtnGO = new GameObject("NextWorld Button");
             nextBtnGO.transform.SetParent(worldArea.transform, false);
@@ -938,8 +957,8 @@ namespace SortResort
             nextBtnRect.anchorMin = new Vector2(1, 0.5f);
             nextBtnRect.anchorMax = new Vector2(1, 0.5f);
             nextBtnRect.pivot = new Vector2(1, 0.5f);
-            nextBtnRect.anchoredPosition = new Vector2(-10, 0);
-            nextBtnRect.sizeDelta = new Vector2(170, 195);
+            nextBtnRect.anchoredPosition = new Vector2(-25, 0);
+            nextBtnRect.sizeDelta = new Vector2(153, 176);
 
             var nextBtnImg = nextBtnGO.AddComponent<Image>();
             var nextSprite = Resources.Load<Sprite>("Sprites/UI/Buttons/button_right");
@@ -964,54 +983,61 @@ namespace SortResort
             }
 
             // ============================================
-            // MODE TABS ROW - Between world area and level grid
+            // LEVEL SELECT BOARD - Wood board background image (before tabs so tabs render on top)
+            // ============================================
+            var boardGO = new GameObject("LevelSelectBoard");
+            boardGO.transform.SetParent(levelSelectPanel.transform, false);
+            var boardRect = boardGO.AddComponent<RectTransform>();
+            boardRect.anchorMin = Vector2.zero;
+            boardRect.anchorMax = Vector2.one;
+            boardRect.offsetMin = Vector2.zero;
+            boardRect.offsetMax = Vector2.zero;
+            var boardImg = boardGO.AddComponent<Image>();
+            var boardSprite = LoadFullRectSprite("Sprites/UI/Worlds/level_select_board");
+            if (boardSprite != null)
+            {
+                boardImg.sprite = boardSprite;
+                boardImg.preserveAspect = false; // Fullscreen 1080x1920
+            }
+            boardImg.raycastTarget = false;
+
+            // ============================================
+            // MODE TABS ROW - Flush against top of level select board (after board so tabs render on top)
             // ============================================
             var modeTabContainerGO = new GameObject("ModeTabContainer");
             modeTabContainerGO.transform.SetParent(levelSelectPanel.transform, false);
             var modeTabRect = modeTabContainerGO.AddComponent<RectTransform>();
-            modeTabRect.anchorMin = new Vector2(0, 0.465f);
+            modeTabRect.anchorMin = new Vector2(0, 0.468f);
             modeTabRect.anchorMax = new Vector2(1, 0.51f);
-            modeTabRect.offsetMin = new Vector2(20, 0);
-            modeTabRect.offsetMax = new Vector2(-20, 0);
+            modeTabRect.offsetMin = new Vector2(70, 0);
+            modeTabRect.offsetMax = new Vector2(-70, 0);
 
             var modeTabLayout = modeTabContainerGO.AddComponent<HorizontalLayoutGroup>();
-            modeTabLayout.spacing = 8;
+            modeTabLayout.spacing = 0;
             modeTabLayout.childAlignment = TextAnchor.MiddleCenter;
             modeTabLayout.childForceExpandWidth = true;
             modeTabLayout.childForceExpandHeight = true;
-            modeTabLayout.padding = new RectOffset(5, 5, 4, 4);
+            modeTabLayout.padding = new RectOffset(0, 0, 0, 0);
 
             // ============================================
-            // LEVEL GRID SCROLL AREA - Rounded corners, larger scrollbar
+            // LEVEL GRID SCROLL AREA - Inside the board frame
             // ============================================
             var scrollArea = new GameObject("ScrollArea");
             scrollArea.transform.SetParent(levelSelectPanel.transform, false);
             var scrollAreaRect = scrollArea.AddComponent<RectTransform>();
-            scrollAreaRect.anchorMin = new Vector2(0, 0);
-            scrollAreaRect.anchorMax = new Vector2(1, 0.46f);
-            scrollAreaRect.offsetMin = new Vector2(30, 25);
-            scrollAreaRect.offsetMax = new Vector2(-30, 0);
+            // Position within the board's inner dark wood area
+            scrollAreaRect.anchorMin = new Vector2(0.082f, 0.052f);
+            scrollAreaRect.anchorMax = new Vector2(0.921f, 0.455f);
+            scrollAreaRect.offsetMin = Vector2.zero;
+            scrollAreaRect.offsetMax = Vector2.zero;
 
-            // Dark gray/olive background with rounded corners
+            // Transparent background - board image provides the visual
             var scrollBg = scrollArea.AddComponent<Image>();
-            var roundedBgSprite = CreateRoundedRectSprite(256, 256, 30, new Color(0.34f, 0.37f, 0.32f, 1f));
-            scrollBg.sprite = roundedBgSprite;
-            scrollBg.type = Image.Type.Sliced;
-            // Set 9-slice border for proper scaling
-            scrollBg.sprite = Sprite.Create(
-                roundedBgSprite.texture,
-                new Rect(0, 0, 256, 256),
-                new Vector2(0.5f, 0.5f),
-                100f,
-                0,
-                SpriteMeshType.FullRect,
-                new Vector4(35, 35, 35, 35) // Border for 9-slice (L, B, R, T)
-            );
-            scrollBg.type = Image.Type.Sliced;
+            scrollBg.color = new Color(0, 0, 0, 0);
 
-            // Use RectMask2D for content clipping
+            // Use RectMask2D for content clipping within the board frame
             var rectMask = scrollArea.AddComponent<RectMask2D>();
-            rectMask.softness = new Vector2Int(25, 25); // Slight softness for edge blending
+            rectMask.softness = new Vector2Int(10, 10);
 
             // Content container - extra padding to prevent portal glow clipping
             var content = new GameObject("Content");
@@ -1023,11 +1049,11 @@ namespace SortResort
             contentRect.anchoredPosition = Vector2.zero;
             contentRect.sizeDelta = new Vector2(-40, 0); // Room for scrollbar
 
-            // Grid layout - 3 columns, cells sized to fit with glow padding
+            // Grid layout - 3 columns, cells sized so 3 full rows fit on screen
             var gridLayout = content.AddComponent<GridLayoutGroup>();
-            gridLayout.cellSize = new Vector2(300, 300); // Larger cells for portal + glow
-            gridLayout.spacing = new Vector2(8, 8); // Minimal spacing since glow provides visual separation
-            gridLayout.padding = new RectOffset(25, 25, 25, 25); // Padding to prevent edge clipping
+            gridLayout.cellSize = new Vector2(240, 240);
+            gridLayout.spacing = new Vector2(4, 4);
+            gridLayout.padding = new RectOffset(15, 15, 10, 10);
             gridLayout.startCorner = GridLayoutGroup.Corner.UpperLeft;
             gridLayout.startAxis = GridLayoutGroup.Axis.Horizontal;
             gridLayout.childAlignment = TextAnchor.UpperCenter;
@@ -1046,41 +1072,41 @@ namespace SortResort
             scrollView.viewport = scrollAreaRect;
             scrollView.scrollSensitivity = 50f; // Increase scroll wheel sensitivity
 
-            // Vertical scrollbar - LARGER for touch, with rounded appearance
+            // Vertical scrollbar - white pill handle with semi-transparent track
             var scrollbarGO = new GameObject("Scrollbar");
             scrollbarGO.transform.SetParent(scrollArea.transform, false);
             var scrollbarRect = scrollbarGO.AddComponent<RectTransform>();
             scrollbarRect.anchorMin = new Vector2(1, 0);
             scrollbarRect.anchorMax = new Vector2(1, 1);
             scrollbarRect.pivot = new Vector2(1, 0.5f);
-            scrollbarRect.anchoredPosition = new Vector2(-8, 0);
-            scrollbarRect.sizeDelta = new Vector2(30, -20); // Wider for touch
+            scrollbarRect.anchoredPosition = new Vector2(-14, 0);
+            scrollbarRect.sizeDelta = new Vector2(30, -30);
 
-            // Rounded scrollbar track
+            // Semi-transparent rounded track
             var scrollbarImg = scrollbarGO.AddComponent<Image>();
-            var scrollbarTrackSprite = CreateRoundedRectSprite(64, 256, 15, new Color(0.25f, 0.27f, 0.23f, 0.8f));
+            var scrollbarTrackSprite = CreateRoundedRectSprite(48, 256, 24, new Color(0f, 0f, 0f, 0.25f));
             scrollbarImg.sprite = Sprite.Create(
                 scrollbarTrackSprite.texture,
-                new Rect(0, 0, 64, 256),
+                new Rect(0, 0, 48, 256),
                 new Vector2(0.5f, 0.5f),
                 100f,
                 0,
                 SpriteMeshType.FullRect,
-                new Vector4(18, 18, 18, 18)
+                new Vector4(24, 24, 24, 24)
             );
             scrollbarImg.type = Image.Type.Sliced;
 
             var scrollbar = scrollbarGO.AddComponent<Scrollbar>();
             scrollbar.direction = Scrollbar.Direction.BottomToTop;
 
-            // Scrollbar handle - rounded
+            // Handle area
             var handleArea = new GameObject("Handle Area");
             handleArea.transform.SetParent(scrollbarGO.transform, false);
             var handleAreaRect = handleArea.AddComponent<RectTransform>();
             handleAreaRect.anchorMin = Vector2.zero;
             handleAreaRect.anchorMax = Vector2.one;
-            handleAreaRect.offsetMin = new Vector2(3, 5);
-            handleAreaRect.offsetMax = new Vector2(-3, -5);
+            handleAreaRect.offsetMin = new Vector2(2, 5);
+            handleAreaRect.offsetMax = new Vector2(-2, -5);
 
             var handle = new GameObject("Handle");
             handle.transform.SetParent(handleArea.transform, false);
@@ -1090,9 +1116,9 @@ namespace SortResort
             handleRect.offsetMin = Vector2.zero;
             handleRect.offsetMax = Vector2.zero;
 
-            // Rounded handle
+            // White handle with subtle rounding
             var handleImg = handle.AddComponent<Image>();
-            var handleSprite = CreateRoundedRectSprite(48, 128, 12, new Color(0.85f, 0.85f, 0.85f, 1f));
+            var handleSprite = CreateRoundedRectSprite(48, 128, 10, new Color(1f, 1f, 1f, 0.9f));
             handleImg.sprite = Sprite.Create(
                 handleSprite.texture,
                 new Rect(0, 0, 48, 128),
@@ -1100,14 +1126,14 @@ namespace SortResort
                 100f,
                 0,
                 SpriteMeshType.FullRect,
-                new Vector4(15, 15, 15, 15)
+                new Vector4(12, 12, 12, 12)
             );
             handleImg.type = Image.Type.Sliced;
 
             scrollbar.handleRect = handleRect;
             scrollbar.targetGraphic = handleImg;
             scrollView.verticalScrollbar = scrollbar;
-            scrollView.verticalScrollbarVisibility = ScrollRect.ScrollbarVisibility.Permanent; // Always visible
+            scrollView.verticalScrollbarVisibility = ScrollRect.ScrollbarVisibility.Permanent;
 
             // Add LevelSelectScreen component
             levelSelectScreen = levelSelectPanel.AddComponent<LevelSelectScreen>();
@@ -1125,7 +1151,7 @@ namespace SortResort
             // Wire mode tab container, topBar, and world lock overlay references
             levelSelectScreen.SetModeTabContainer(modeTabContainerGO.transform);
             levelSelectScreen.SetTopBar(topBar.transform);
-            levelSelectScreen.SetWorldLockOverlay(lockOverlayGO, padlockImg, buyBtn);
+            levelSelectScreen.SetWorldLockOverlay(lockOverlayGO, padlockImg, buyBtn, lockBgImg);
 
             // Initialize level select screen (creates grid, loads portals, etc.)
             levelSelectScreen.Initialize();
@@ -1544,6 +1570,51 @@ namespace SortResort
             overlayTimerText = CreateOverlayCounterText(hudModeOverlay.transform, "Overlay Timer",
                 new Vector2(0.5f, 0.9162f), 174f, 120f, 45);
 
+            // 3-star target indicator - shown below moves bubble in Star/Hard modes
+            threeStarTargetGO = new GameObject("ThreeStarTarget");
+            threeStarTargetGO.transform.SetParent(hudModeOverlay.transform, false);
+            var targetRect = threeStarTargetGO.AddComponent<RectTransform>();
+            // Position below the moves bubble (anchor will be updated per-mode in PositionOverlayCounters)
+            targetRect.anchorMin = new Vector2(0.5f, 0.87f);
+            targetRect.anchorMax = new Vector2(0.5f, 0.87f);
+            targetRect.pivot = new Vector2(0.5f, 0.5f);
+            targetRect.anchoredPosition = new Vector2(0f, 6f);
+            targetRect.sizeDelta = new Vector2(136, 125);
+
+            var targetImg = threeStarTargetGO.AddComponent<Image>();
+            var targetSprite = LoadFullRectSprite("Sprites/UI/HUD/3stars_target_UI");
+            if (targetSprite != null)
+            {
+                targetImg.sprite = targetSprite;
+                targetImg.preserveAspect = true;
+            }
+            targetImg.raycastTarget = false;
+
+            // Target text label inside the banner
+            var targetTextGO = new GameObject("TargetText");
+            targetTextGO.transform.SetParent(threeStarTargetGO.transform, false);
+            var targetTextRect = targetTextGO.AddComponent<RectTransform>();
+            targetTextRect.anchorMin = new Vector2(0.1f, 0.05f);
+            targetTextRect.anchorMax = new Vector2(0.9f, 0.65f);
+            targetTextRect.offsetMin = new Vector2(0f, 20f);
+            targetTextRect.offsetMax = new Vector2(0f, 20f);
+
+            threeStarTargetText = targetTextGO.AddComponent<TextMeshProUGUI>();
+            threeStarTargetText.text = "";
+            threeStarTargetText.fontSize = 32;
+            threeStarTargetText.font = FontManager.ExtraBold;
+            threeStarTargetText.alignment = TextAlignmentOptions.Center;
+            threeStarTargetText.color = Color.white;
+            threeStarTargetText.enableWordWrapping = false;
+            threeStarTargetText.overflowMode = TextOverflowModes.Overflow;
+            threeStarTargetText.raycastTarget = false;
+            threeStarTargetText.enableAutoSizing = true;
+            threeStarTargetText.fontSizeMin = 18;
+            threeStarTargetText.fontSizeMax = 32;
+
+            threeStarTargetGO.transform.SetSiblingIndex(0); // Behind the top bar
+            threeStarTargetGO.SetActive(false);
+
             hudModeOverlay.SetActive(false);
         }
 
@@ -1556,6 +1627,7 @@ namespace SortResort
             if (overlayLevelText != null) overlayLevelText.gameObject.SetActive(false);
             if (overlayMovesText != null) overlayMovesText.gameObject.SetActive(false);
             if (overlayTimerText != null) overlayTimerText.gameObject.SetActive(false);
+            if (threeStarTargetGO != null) threeStarTargetGO.SetActive(false);
 
             switch (mode)
             {
@@ -1566,11 +1638,14 @@ namespace SortResort
                     break;
 
                 case GameMode.StarMode:
-                    // Level + Moves
+                    // Level + Moves + 3-star target
                     SetOverlayTextAnchor(overlayLevelText, new Vector2(0.389f, 0.9162f));
                     SetOverlayTextAnchor(overlayMovesText, new Vector2(0.614f, 0.9162f));
                     if (overlayLevelText != null) overlayLevelText.gameObject.SetActive(true);
                     if (overlayMovesText != null) overlayMovesText.gameObject.SetActive(true);
+                    // Position 3-star target below moves bubble
+                    SetAnchor(threeStarTargetGO, new Vector2(0.614f, 0.87f));
+                    if (threeStarTargetGO != null) threeStarTargetGO.SetActive(true);
                     break;
 
                 case GameMode.TimerMode:
@@ -1582,15 +1657,27 @@ namespace SortResort
                     break;
 
                 case GameMode.HardMode:
-                    // Level + Moves + Timer
+                    // Level + Moves + Timer + 3-star target
                     SetOverlayTextAnchor(overlayLevelText, new Vector2(0.276f, 0.9162f));
                     SetOverlayTextAnchor(overlayMovesText, new Vector2(0.500f, 0.9162f));
                     SetOverlayTextAnchor(overlayTimerText, new Vector2(0.732f, 0.9162f));
                     if (overlayLevelText != null) overlayLevelText.gameObject.SetActive(true);
                     if (overlayMovesText != null) overlayMovesText.gameObject.SetActive(true);
                     if (overlayTimerText != null) overlayTimerText.gameObject.SetActive(true);
+                    // Position 3-star target below moves bubble
+                    SetAnchor(threeStarTargetGO, new Vector2(0.500f, 0.87f));
+                    if (threeStarTargetGO != null) threeStarTargetGO.SetActive(true);
                     break;
             }
+        }
+
+        private void SetAnchor(GameObject go, Vector2 anchor)
+        {
+            if (go == null) return;
+            var rt = go.GetComponent<RectTransform>();
+            if (rt == null) return;
+            rt.anchorMin = anchor;
+            rt.anchorMax = anchor;
         }
 
         private void SetOverlayTextAnchor(TextMeshProUGUI text, Vector2 anchor)
@@ -3725,6 +3812,16 @@ Antonia and Joakim Engfors
                     overlayMovesText.text = "0";
                 if (overlayTimerText != null)
                     overlayTimerText.text = "0:00.00";
+
+                // Set 3-star target text from level thresholds
+                if (threeStarTargetText != null && LevelManager.Instance?.CurrentLevel != null)
+                {
+                    var thresholds = LevelManager.Instance.CurrentLevel.star_move_thresholds;
+                    if (thresholds != null && thresholds.Length > 0)
+                        threeStarTargetText.text = thresholds[0].ToString();
+                    else
+                        threeStarTargetText.text = "";
+                }
 
                 // Hide default HUD elements (background, title, stats) but keep buttons + stars
                 if (hudPanelBgImage != null)
@@ -5951,10 +6048,10 @@ Antonia and Joakim Engfors
             var mascotContainer = new GameObject("Mascot Container");
             mascotContainer.transform.SetParent(dialoguePanel.transform, false);
             var mascotRect = mascotContainer.AddComponent<RectTransform>();
-            mascotRect.anchorMin = new Vector2(0, 0);
-            mascotRect.anchorMax = new Vector2(0, 0);
-            mascotRect.pivot = new Vector2(0, 0);
-            mascotRect.anchoredPosition = new Vector2(10, 160); // Left side, positioned so feet overlap box
+            mascotRect.anchorMin = new Vector2(0.5f, 0);
+            mascotRect.anchorMax = new Vector2(0.5f, 0);
+            mascotRect.pivot = new Vector2(0.5f, 0);
+            mascotRect.anchoredPosition = new Vector2(0, 160); // Centered horizontally, positioned so feet overlap box
             mascotRect.sizeDelta = new Vector2(480, 750); // Large mascot visible above box
 
             dialogueMascotImage = mascotContainer.AddComponent<Image>();
@@ -6013,22 +6110,25 @@ Antonia and Joakim Engfors
             dialogueText.lineSpacing = -15f;
             dialogueText.paragraphSpacing = -20f;
 
-            // Continue indicator (blinking arrow or "tap to continue")
+            // Continue indicator - skip button sprite in bottom right
             var continueGO = new GameObject("Continue Indicator");
             continueGO.transform.SetParent(dialogueBox.transform, false);
             var continueRect = continueGO.AddComponent<RectTransform>();
             continueRect.anchorMin = new Vector2(1, 0);
             continueRect.anchorMax = new Vector2(1, 0);
             continueRect.pivot = new Vector2(1, 0);
-            continueRect.anchoredPosition = new Vector2(-30, 20);
-            continueRect.sizeDelta = new Vector2(150, 40);
+            continueRect.anchoredPosition = new Vector2(-20, 15);
+            continueRect.sizeDelta = new Vector2(137, 78);
 
-            var continueText = continueGO.AddComponent<TextMeshProUGUI>();
-            continueText.text = "Tap to continue ▶";
-            continueText.fontSize = 20;
-            continueText.color = new Color(0.3f, 0.3f, 0.3f, 0.8f); // Dark gray
-            continueText.alignment = TextAlignmentOptions.Right;
-            continueText.fontStyle = FontStyles.Italic;
+            var skipImg = continueGO.AddComponent<Image>();
+            var skipNormalSprite = LoadFullRectSprite("Sprites/UI/Dialogue/skip_button");
+            var skipPressedSprite = LoadFullRectSprite("Sprites/UI/Dialogue/skip_button_pressed");
+            if (skipNormalSprite != null)
+            {
+                skipImg.sprite = skipNormalSprite;
+                skipImg.preserveAspect = true;
+            }
+            skipImg.raycastTarget = false;
 
             dialogueContinueIndicator = continueGO;
             dialogueContinueIndicator.SetActive(false);
@@ -6045,6 +6145,9 @@ Antonia and Joakim Engfors
             uiType.GetField("mascotImage", flags)?.SetValue(dialogueUI, dialogueMascotImage);
             uiType.GetField("dialogueText", flags)?.SetValue(dialogueUI, dialogueText);
             uiType.GetField("continueIndicator", flags)?.SetValue(dialogueUI, dialogueContinueIndicator);
+
+            // Wire up skip button sprites
+            dialogueUI.SetSkipButtonSprites(skipImg, skipNormalSprite, skipPressedSprite);
 
             // Initialize after fields are set (hides the panel)
             dialogueUI.Initialize();
