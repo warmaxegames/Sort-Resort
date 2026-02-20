@@ -14,7 +14,7 @@ namespace SortResort
         public int time_limit_seconds; // 0 = no time limit (optional timer feature)
         public int construction_moves; // Move count from reverse-play construction (upper bound for solver)
         public List<ContainerDefinition> containers;
-        public List<MovingTrackDefinition> moving_tracks;
+        public List<MovingTrackDefinition> moving_tracks = new List<MovingTrackDefinition>();
 
         // Star thresholds based on solver optimal:
         // 3-star: solver moves (optimal)
@@ -39,16 +39,16 @@ namespace SortResort
         public int max_rows_per_slot = 4;
         public bool is_locked;
         public int unlock_matches_required;
-        public string lock_overlay_image;
-        public string unlock_animation;
+        public string lock_overlay_image = "";
+        public string unlock_animation = "";
 
         // Movement settings
         public bool is_moving;
-        public string move_type; // "carousel", "back_and_forth"
-        public string move_direction; // "left", "right", "up", "down"
+        public string move_type = ""; // "carousel", "back_and_forth"
+        public string move_direction = ""; // "left", "right", "up", "down"
         public float move_speed = 50f;
         public float move_distance = 200f;
-        public string track_id;
+        public string track_id = "";
 
         // Falling settings
         public bool is_falling;

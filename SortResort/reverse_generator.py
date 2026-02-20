@@ -537,6 +537,61 @@ def generate_level(level, config, item_usage, seed_offset=0):
     }
 
 
+# ── Compact JSON Serialization ────────────────────────────────────────────────
+
+# Default values for container fields — omit from JSON if field matches default.
+_CONTAINER_DEFAULTS = {
+    "is_locked": False,
+    "unlock_matches_required": 0,
+    "lock_overlay_image": "",
+    "unlock_animation": "",
+    "is_moving": False,
+    "move_type": "",
+    "move_direction": "",
+    "move_speed": 50.0,
+    "move_distance": 200.0,
+    "track_id": "",
+    "is_falling": False,
+    "fall_speed": 100.0,
+    "fall_target_y": 0.0,
+    "despawn_on_match": False,
+}
+
+# Fields that should always be removed (never read by game code)
+_ALWAYS_REMOVE = {"unlock_animation"}
+
+
+def _compact_container(container):
+    """Strip default-value fields and round positions for compact JSON."""
+    result = {}
+    for key, value in container.items():
+        if key in _ALWAYS_REMOVE:
+            continue
+        if key in _CONTAINER_DEFAULTS and value == _CONTAINER_DEFAULTS[key]:
+            continue
+        if key == "position" and isinstance(value, dict):
+            result[key] = {
+                "x": round(value["x"], 1),
+                "y": round(value["y"], 1),
+            }
+            continue
+        result[key] = value
+    return result
+
+
+def _compact_level(level_data):
+    """Produce a compact version of level data for JSON serialization."""
+    result = {}
+    for key, value in level_data.items():
+        if key == "moving_tracks" and (not value or value == []):
+            continue
+        if key == "containers" and isinstance(value, list):
+            result[key] = [_compact_container(c) for c in value]
+            continue
+        result[key] = value
+    return result
+
+
 # ── Batch Generation ─────────────────────────────────────────────────────────
 
 def generate_levels(config, output_dir, count=100):
@@ -593,8 +648,9 @@ def generate_levels(config, output_dir, count=100):
 
         level_data = best_data
         filepath = os.path.join(output_dir, f"level_{level:03d}.json")
-        with open(filepath, "w") as f_out:
-            json.dump(level_data, f_out, indent=4)
+        with open(filepath, "w", newline="\n") as f_out:
+            compact = _compact_level(level_data)
+            json.dump(compact, f_out, separators=(",", ":"))
 
         n_items = sum(len(c["initial_items"]) for c in level_data["containers"])
         n_containers = len(level_data["containers"])
