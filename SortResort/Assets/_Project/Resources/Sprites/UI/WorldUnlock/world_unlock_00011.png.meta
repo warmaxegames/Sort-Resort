@@ -107,14 +107,14 @@ TextureImporter:
     forceMaximumCompressionQuality_BC6H_BC7: 0
   - serializedVersion: 4
     buildTarget: WebGL
-    maxTextureSize: 1024
+    maxTextureSize: 2048
     resizeAlgorithm: 0
-    textureFormat: 50
+    textureFormat: -1
     textureCompression: 1
     compressionQuality: 50
-    crunchedCompression: 1
+    crunchedCompression: 0
     allowsAlphaSplitting: 0
-    overridden: 1
+    overridden: 0
     ignorePlatformSupport: 0
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
@@ -125,8 +125,8 @@ TextureImporter:
       name: world_unlock_00011_0
       rect:
         serializedVersion: 2
-        x: 125
-        y: 1210
+        x: 24
+        y: 311
         width: 352
         height: 407
       alignment: 0
@@ -147,8 +147,8 @@ TextureImporter:
       name: world_unlock_00011_1
       rect:
         serializedVersion: 2
-        x: 297
-        y: 1102
+        x: 196
+        y: 203
         width: 679
         height: 643
       alignment: 0
@@ -169,8 +169,8 @@ TextureImporter:
       name: world_unlock_00011_2
       rect:
         serializedVersion: 2
-        x: 202
-        y: 1137
+        x: 101
+        y: 238
         width: 86
         height: 60
       alignment: 0
@@ -191,8 +191,8 @@ TextureImporter:
       name: world_unlock_00011_3
       rect:
         serializedVersion: 2
-        x: 370
-        y: 963
+        x: 269
+        y: 64
         width: 106
         height: 134
       alignment: 0

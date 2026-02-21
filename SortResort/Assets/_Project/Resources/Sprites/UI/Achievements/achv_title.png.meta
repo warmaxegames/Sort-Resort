@@ -152,14 +152,14 @@ TextureImporter:
     forceMaximumCompressionQuality_BC6H_BC7: 0
   - serializedVersion: 4
     buildTarget: WebGL
-    maxTextureSize: 512
+    maxTextureSize: 2048
     resizeAlgorithm: 0
-    textureFormat: 50
+    textureFormat: -1
     textureCompression: 1
     compressionQuality: 50
-    crunchedCompression: 1
+    crunchedCompression: 0
     allowsAlphaSplitting: 0
-    overridden: 1
+    overridden: 0
     ignorePlatformSupport: 0
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
@@ -170,8 +170,8 @@ TextureImporter:
       name: achv_title_0
       rect:
         serializedVersion: 2
-        x: 379
-        y: 1865
+        x: 157
+        y: 280
         width: 8
         height: 8
       alignment: 0
@@ -192,8 +192,8 @@ TextureImporter:
       name: achv_title_1
       rect:
         serializedVersion: 2
-        x: 470
-        y: 1808
+        x: 248
+        y: 223
         width: 51
         height: 74
       alignment: 0
@@ -214,8 +214,8 @@ TextureImporter:
       name: achv_title_2
       rect:
         serializedVersion: 2
-        x: 559
-        y: 1850
+        x: 337
+        y: 265
         width: 11
         height: 11
       alignment: 0
@@ -236,8 +236,8 @@ TextureImporter:
       name: achv_title_3
       rect:
         serializedVersion: 2
-        x: 587
-        y: 1803
+        x: 365
+        y: 218
         width: 35
         height: 58
       alignment: 0
@@ -258,8 +258,8 @@ TextureImporter:
       name: achv_title_4
       rect:
         serializedVersion: 2
-        x: 640
-        y: 1822
+        x: 418
+        y: 237
         width: 25
         height: 37
       alignment: 0
@@ -280,8 +280,8 @@ TextureImporter:
       name: achv_title_5
       rect:
         serializedVersion: 2
-        x: 223
-        y: 1614
+        x: 1
+        y: 29
         width: 602
         height: 227
       alignment: 0
@@ -302,8 +302,8 @@ TextureImporter:
       name: achv_title_6
       rect:
         serializedVersion: 2
-        x: 344
-        y: 1829
+        x: 122
+        y: 244
         width: 15
         height: 15
       alignment: 0
@@ -324,8 +324,8 @@ TextureImporter:
       name: achv_title_7
       rect:
         serializedVersion: 2
-        x: 382
-        y: 1820
+        x: 160
+        y: 235
         width: 27
         height: 27
       alignment: 0
@@ -346,8 +346,8 @@ TextureImporter:
       name: achv_title_8
       rect:
         serializedVersion: 2
-        x: 760
-        y: 1814
+        x: 538
+        y: 229
         width: 22
         height: 23
       alignment: 0
@@ -368,8 +368,8 @@ TextureImporter:
       name: achv_title_9
       rect:
         serializedVersion: 2
-        x: 727
-        y: 1812
+        x: 505
+        y: 227
         width: 9
         height: 10
       alignment: 0
@@ -390,8 +390,8 @@ TextureImporter:
       name: achv_title_10
       rect:
         serializedVersion: 2
-        x: 812
-        y: 1721
+        x: 590
+        y: 136
         width: 14
         height: 15
       alignment: 0
@@ -412,8 +412,8 @@ TextureImporter:
       name: achv_title_11
       rect:
         serializedVersion: 2
-        x: 833
-        y: 1692
+        x: 611
+        y: 107
         width: 24
         height: 32
       alignment: 0
@@ -434,8 +434,8 @@ TextureImporter:
       name: achv_title_12
       rect:
         serializedVersion: 2
-        x: 486
-        y: 1614
+        x: 264
+        y: 29
         width: 16
         height: 16
       alignment: 0
@@ -456,8 +456,8 @@ TextureImporter:
       name: achv_title_13
       rect:
         serializedVersion: 2
-        x: 538
-        y: 1589
+        x: 316
+        y: 4
         width: 31
         height: 32
       alignment: 0
@@ -478,8 +478,8 @@ TextureImporter:
       name: achv_title_14
       rect:
         serializedVersion: 2
-        x: 672
-        y: 1617
+        x: 450
+        y: 32
         width: 6
         height: 6
       alignment: 0
@@ -500,8 +500,8 @@ TextureImporter:
       name: achv_title_15
       rect:
         serializedVersion: 2
-        x: 378
-        y: 1586
+        x: 156
+        y: 1
         width: 25
         height: 24
       alignment: 0
@@ -522,8 +522,8 @@ TextureImporter:
       name: achv_title_16
       rect:
         serializedVersion: 2
-        x: 470
-        y: 1598
+        x: 248
+        y: 13
         width: 9
         height: 9
       alignment: 0
@@ -544,8 +544,8 @@ TextureImporter:
       name: achv_title_17
       rect:
         serializedVersion: 2
-        x: 624
-        y: 1596
+        x: 402
+        y: 11
         width: 6
         height: 6
       alignment: 0
@@ -566,8 +566,8 @@ TextureImporter:
       name: achv_title_18
       rect:
         serializedVersion: 2
-        x: 730
-        y: 1588
+        x: 508
+        y: 3
         width: 18
         height: 17
       alignment: 0

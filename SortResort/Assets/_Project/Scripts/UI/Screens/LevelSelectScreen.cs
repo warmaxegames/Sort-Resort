@@ -3,6 +3,7 @@ using UnityEngine.UI;
 using TMPro;
 using System.Collections;
 using System.Collections.Generic;
+using SortResort;
 
 namespace SortResort.UI
 {
@@ -54,6 +55,9 @@ namespace SortResort.UI
         private GameMode selectedMode = GameMode.FreePlay;
         private List<LevelButton> levelButtons = new List<LevelButton>();
         private bool isPortalAnimating = false;
+
+        // Level select board (hidden when world is locked)
+        private GameObject levelSelectBoard;
 
         // World lock/buy overlay
         private GameObject worldLockOverlay;
@@ -155,7 +159,7 @@ namespace SortResort.UI
             starSprites[1] = LoadSpriteFromTexture("Sprites/UI/Icons/1star_portal");
             starSprites[2] = LoadSpriteFromTexture("Sprites/UI/Icons/2star_portal");
             starSprites[3] = LoadSpriteFromTexture("Sprites/UI/Icons/3star_portal");
-            timerPortalSprite = LoadSpriteFromTexture("Sprites/UI/Icons/timer_portal");
+            timerPortalSprite = LoadSpriteFromTexture("Sprites/UI/Icons/timer_portal_overlay");
             freePortalSprite = LoadSpriteFromTexture("Sprites/UI/Icons/free_portal");
 
             // Mode tab sprites (sprite-based tabs replace colored rectangles + text)
@@ -490,12 +494,12 @@ namespace SortResort.UI
             resultOvRect.offsetMin = Vector2.zero;
             resultOvRect.offsetMax = Vector2.zero;
 
-            // Timer overlay (full portal size, used in Timer/Hard modes)
+            // Timer overlay (bottom bar, used in Timer/Hard modes)
             var timerOvGO = new GameObject("TimerOverlay");
             timerOvGO.transform.SetParent(resultOvGO.transform, false);
             var timerOvRect = timerOvGO.AddComponent<RectTransform>();
-            timerOvRect.anchorMin = Vector2.zero;
-            timerOvRect.anchorMax = Vector2.one;
+            timerOvRect.anchorMin = new Vector2(0f, 0f);
+            timerOvRect.anchorMax = new Vector2(1f, 0.35f);
             timerOvRect.offsetMin = Vector2.zero;
             timerOvRect.offsetMax = Vector2.zero;
             var timerOvImage = timerOvGO.AddComponent<Image>();
@@ -516,12 +520,12 @@ namespace SortResort.UI
             compOvImage.raycastTarget = false;
             compOvImage.enabled = false;
 
-            // Best time text (vertically centered in timer_portal dark rounded rectangle)
+            // Best time text (centered within timer overlay bar)
             var timeTextGO = new GameObject("BestTimeText");
             timeTextGO.transform.SetParent(resultOvGO.transform, false);
             var timeTextRect = timeTextGO.AddComponent<RectTransform>();
-            timeTextRect.anchorMin = new Vector2(0.275f, 0.12f);
-            timeTextRect.anchorMax = new Vector2(0.975f, 0.30f);
+            timeTextRect.anchorMin = new Vector2(0.1833f, 0.03f);
+            timeTextRect.anchorMax = new Vector2(1.0333f, 0.30f);
             timeTextRect.offsetMin = Vector2.zero;
             timeTextRect.offsetMax = Vector2.zero;
             var bestTimeText = timeTextGO.AddComponent<TextMeshProUGUI>();
@@ -616,6 +620,8 @@ namespace SortResort.UI
                 if (bgSprite != null && !worldUnlocked)
                 {
                     lockBackgroundImage.sprite = bgSprite;
+                    lockBackgroundImage.preserveAspect = true;
+                    CropMetadata.ApplyCropAnchors(lockBackgroundImage.rectTransform, $"Sprites/UI/Worlds/{worldId}_locked_background");
                     lockBackgroundImage.enabled = true;
                 }
                 else
@@ -624,7 +630,9 @@ namespace SortResort.UI
                 }
             }
 
-            // Show/hide level grid and mode tabs when world is locked
+            // Show/hide level board, grid and mode tabs when world is locked
+            if (levelSelectBoard != null)
+                levelSelectBoard.SetActive(worldUnlocked);
             if (levelScrollRect != null)
                 levelScrollRect.gameObject.SetActive(worldUnlocked);
             if (modeTabContainer != null)
@@ -823,6 +831,14 @@ namespace SortResort.UI
         }
 
         /// <summary>
+        /// Set the level select board reference so it can be hidden when a world is locked.
+        /// </summary>
+        public void SetLevelSelectBoard(GameObject board)
+        {
+            levelSelectBoard = board;
+        }
+
+        /// <summary>
         /// Set the world lock overlay references (called from UIManager).
         /// </summary>
         public void SetWorldLockOverlay(GameObject overlay, Image padlock, Button buyBtn, Image lockBg = null)
@@ -939,11 +955,44 @@ namespace SortResort.UI
                 fadeCanvasGroup.blocksRaycasts = false;
             }
 
-            // Hide lock overlay (padlock + buy button) and locked background immediately
+            // Hide lock overlay (padlock + buy button) immediately
             if (worldLockOverlay != null)
                 worldLockOverlay.SetActive(false);
-            if (lockBackgroundImage != null)
-                lockBackgroundImage.enabled = false;
+
+            // Prepare lock background for fade-out (instead of hiding immediately)
+            CanvasGroup lockBgCanvasGroup = null;
+            if (lockBackgroundImage != null && lockBackgroundImage.enabled)
+            {
+                lockBgCanvasGroup = lockBackgroundImage.gameObject.AddComponent<CanvasGroup>();
+                lockBgCanvasGroup.alpha = 1f;
+            }
+
+            // Show board/grid/tabs early so they can fade in during the animation.
+            // World is already unlocked in SaveManager, so RefreshDisplay will populate them.
+            RefreshDisplay();
+            UpdateModeTabVisuals();
+
+            // Keep lock background visible for fade-out (RefreshDisplay disabled it)
+            if (lockBgCanvasGroup != null)
+                lockBackgroundImage.enabled = true;
+
+            // Add temporary CanvasGroups to fade in the level content
+            CanvasGroup boardCG = null, scrollCG = null, tabsCG = null;
+            if (levelSelectBoard != null)
+            {
+                boardCG = levelSelectBoard.AddComponent<CanvasGroup>();
+                boardCG.alpha = 0f;
+            }
+            if (levelScrollRect != null)
+            {
+                scrollCG = levelScrollRect.gameObject.AddComponent<CanvasGroup>();
+                scrollCG.alpha = 0f;
+            }
+            if (modeTabContainer != null)
+            {
+                tabsCG = modeTabContainer.gameObject.AddComponent<CanvasGroup>();
+                tabsCG.alpha = 0f;
+            }
 
             // Create fullscreen animation overlay canvas
             GameObject animCanvasGO = null;
@@ -972,6 +1021,7 @@ namespace SortResort.UI
                 animImage.sprite = unlockAnimFrames[0];
                 animImage.preserveAspect = true;
                 animImage.raycastTarget = false;
+                CropMetadata.ApplyCropAnchorsForFolder(animRect, "Sprites/UI/WorldUnlock");
             }
 
             // Play animation + cross-fade
@@ -990,9 +1040,23 @@ namespace SortResort.UI
             {
                 elapsed += Time.unscaledDeltaTime;
 
-                // Cross-fade locked → unlocked: starts after delay, lasts 1.5s
-                if (fadeCanvasGroup != null && elapsed > fadeDelay)
-                    fadeCanvasGroup.alpha = Mathf.Clamp01(1f - (elapsed - fadeDelay) / fadeDuration);
+                if (elapsed > fadeDelay)
+                {
+                    float t = Mathf.Clamp01((elapsed - fadeDelay) / fadeDuration);
+
+                    // Cross-fade locked → unlocked world image
+                    if (fadeCanvasGroup != null)
+                        fadeCanvasGroup.alpha = 1f - t;
+
+                    // Fade out locked background
+                    if (lockBgCanvasGroup != null)
+                        lockBgCanvasGroup.alpha = 1f - t;
+
+                    // Fade in board, scroll grid, and mode tabs
+                    if (boardCG != null) boardCG.alpha = t;
+                    if (scrollCG != null) scrollCG.alpha = t;
+                    if (tabsCG != null) tabsCG.alpha = t;
+                }
 
                 // Advance animation frames
                 if (animImage != null && totalFrames > 0)
@@ -1009,16 +1073,20 @@ namespace SortResort.UI
                 yield return null;
             }
 
-            // Cleanup temporary objects
+            // Cleanup temporary CanvasGroups and objects
+            if (boardCG != null) Destroy(boardCG);
+            if (scrollCG != null) Destroy(scrollCG);
+            if (tabsCG != null) Destroy(tabsCG);
+            if (lockBgCanvasGroup != null)
+            {
+                lockBackgroundImage.enabled = false;
+                Destroy(lockBgCanvasGroup);
+            }
             if (fadeOverlayGO != null) Destroy(fadeOverlayGO);
             if (animCanvasGO != null) Destroy(animCanvasGO);
 
             // Re-enable buy button for future use (e.g. after debug lock/unlock cycle)
             if (buyButton != null) buyButton.interactable = true;
-
-            // Full refresh to show unlocked state with level grid, mode tabs, etc.
-            RefreshDisplay();
-            UpdateModeTabVisuals();
 
             unlockAnimCoroutine = null;
         }
@@ -1035,11 +1103,11 @@ namespace SortResort.UI
 
             if (topBarTransform != null)
             {
-                // Position to the left of the hard mode button (which is at -325)
+                // Position to the left of the hard mode button
                 rect.anchorMin = new Vector2(1, 0.5f);
                 rect.anchorMax = new Vector2(1, 0.5f);
                 rect.pivot = new Vector2(1, 0.5f);
-                rect.anchoredPosition = new Vector2(-425, 0);
+                rect.anchoredPosition = new Vector2(-445, 0);
                 rect.sizeDelta = new Vector2(90, 90);
             }
             else
@@ -1105,11 +1173,11 @@ namespace SortResort.UI
 
             if (topBarTransform != null)
             {
-                // Position to the left of the achievement button (which is at -225)
+                // Position to the left of the achievement button
                 debugRect.anchorMin = new Vector2(1, 0.5f);
                 debugRect.anchorMax = new Vector2(1, 0.5f);
                 debugRect.pivot = new Vector2(1, 0.5f);
-                debugRect.anchoredPosition = new Vector2(-325, 0);
+                debugRect.anchoredPosition = new Vector2(-345, 0);
                 debugRect.sizeDelta = new Vector2(90, 90);
             }
             else
@@ -1196,7 +1264,7 @@ namespace SortResort.UI
                 rect.anchorMin = new Vector2(1, 0.5f);
                 rect.anchorMax = new Vector2(1, 0.5f);
                 rect.pivot = new Vector2(1, 0.5f);
-                rect.anchoredPosition = new Vector2(-525, 0);
+                rect.anchoredPosition = new Vector2(-545, 0);
                 rect.sizeDelta = new Vector2(90, 90);
             }
             else

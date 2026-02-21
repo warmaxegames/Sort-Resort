@@ -131,14 +131,14 @@ TextureImporter:
     forceMaximumCompressionQuality_BC6H_BC7: 0
   - serializedVersion: 4
     buildTarget: WebGL
-    maxTextureSize: 1024
+    maxTextureSize: 2048
     resizeAlgorithm: 0
-    textureFormat: 50
+    textureFormat: -1
     textureCompression: 1
     compressionQuality: 50
-    crunchedCompression: 1
+    crunchedCompression: 0
     allowsAlphaSplitting: 0
-    overridden: 1
+    overridden: 0
     ignorePlatformSupport: 0
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
@@ -149,8 +149,8 @@ TextureImporter:
       name: world_unlock_00017_0
       rect:
         serializedVersion: 2
-        x: 462
-        y: 1520
+        x: 361
+        y: 621
         width: 49
         height: 81
       alignment: 0
@@ -171,8 +171,8 @@ TextureImporter:
       name: world_unlock_00017_1
       rect:
         serializedVersion: 2
-        x: 626
-        y: 1590
+        x: 525
+        y: 691
         width: 21
         height: 34
       alignment: 0
@@ -193,8 +193,8 @@ TextureImporter:
       name: world_unlock_00017_2
       rect:
         serializedVersion: 2
-        x: 200
-        y: 1515
+        x: 99
+        y: 616
         width: 33
         height: 21
       alignment: 0
@@ -215,8 +215,8 @@ TextureImporter:
       name: world_unlock_00017_3
       rect:
         serializedVersion: 2
-        x: 309
-        y: 1513
+        x: 208
+        y: 614
         width: 33
         height: 24
       alignment: 0
@@ -237,8 +237,8 @@ TextureImporter:
       name: world_unlock_00017_4
       rect:
         serializedVersion: 2
-        x: 838
-        y: 1519
+        x: 737
+        y: 620
         width: 57
         height: 38
       alignment: 0
@@ -259,8 +259,8 @@ TextureImporter:
       name: world_unlock_00017_5
       rect:
         serializedVersion: 2
-        x: 179
-        y: 1294
+        x: 78
+        y: 395
         width: 9
         height: 10
       alignment: 0
@@ -281,8 +281,8 @@ TextureImporter:
       name: world_unlock_00017_6
       rect:
         serializedVersion: 2
-        x: 267
-        y: 1248
+        x: 166
+        y: 349
         width: 588
         height: 198
       alignment: 0
@@ -303,8 +303,8 @@ TextureImporter:
       name: world_unlock_00017_7
       rect:
         serializedVersion: 2
-        x: 430
-        y: 1221
+        x: 329
+        y: 322
         width: 28
         height: 42
       alignment: 0
@@ -325,8 +325,8 @@ TextureImporter:
       name: world_unlock_00017_8
       rect:
         serializedVersion: 2
-        x: 235
-        y: 1202
+        x: 134
+        y: 303
         width: 11
         height: 7
       alignment: 0
@@ -347,8 +347,8 @@ TextureImporter:
       name: world_unlock_00017_9
       rect:
         serializedVersion: 2
-        x: 514
-        y: 1154
+        x: 413
+        y: 255
         width: 21
         height: 30
       alignment: 0
@@ -369,8 +369,8 @@ TextureImporter:
       name: world_unlock_00017_10
       rect:
         serializedVersion: 2
-        x: 642
-        y: 1108
+        x: 541
+        y: 209
         width: 20
         height: 28
       alignment: 0
@@ -391,8 +391,8 @@ TextureImporter:
       name: world_unlock_00017_11
       rect:
         serializedVersion: 2
-        x: 364
-        y: 1065
+        x: 263
+        y: 166
         width: 17
         height: 19
       alignment: 0

@@ -897,7 +897,7 @@ namespace SortResort
             if (movesUsed >= maxMoves && itemsRemaining > 0)
             {
                 Debug.Log("[LevelManager] Level failed - out of moves!");
-                GameManager.Instance?.FailLevel();
+                GameManager.Instance?.FailLevel("Out of Moves");
             }
         }
 

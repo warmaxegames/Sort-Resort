@@ -1,1 +1,211 @@
-{"id":3,"world_id":"tavern","name":"level_003","star_move_thresholds":[8,9,10,11],"time_limit_seconds":0,"containers":[{"id":"container_1","position":{"x":300.0,"y":350.0},"container_type":"standard","container_image":"tavern_container","slot_count":3,"max_rows_per_slot":4,"initial_items":[{"id":"blue_potion","row":0,"slot":0},{"id":"green_potion","row":1,"slot":0},{"id":"ham","row":0,"slot":2}]},{"id":"container_2","position":{"x":722.0,"y":350.0},"container_type":"standard","container_image":"tavern_container","slot_count":3,"max_rows_per_slot":4,"initial_items":[{"id":"blue_potion","row":0,"slot":0},{"id":"torch","row":0,"slot":1},{"id":"ham","row":1,"slot":1}]},{"id":"container_3","position":{"x":300.0,"y":660.0},"container_type":"standard","container_image":"tavern_container","slot_count":3,"max_rows_per_slot":4,"initial_items":[{"id":"green_potion","row":0,"slot":0},{"id":"torch","row":0,"slot":1},{"id":"blue_potion","row":0,"slot":2}]},{"id":"container_4","position":{"x":722.0,"y":660.0},"container_type":"standard","container_image":"tavern_container","slot_count":3,"max_rows_per_slot":4,"initial_items":[{"id":"green_potion","row":0,"slot":1},{"id":"torch","row":0,"slot":2}]},{"id":"container_5","position":{"x":511.0,"y":900.0},"container_type":"standard","container_image":"tavern_container","slot_count":3,"max_rows_per_slot":4,"initial_items":[{"id":"ham","row":0,"slot":1}]}]}
+{
+    "id": 3,
+    "world_id": "tavern",
+    "name": "level_003",
+    "star_move_thresholds": [
+        8,
+        9,
+        10,
+        11
+    ],
+    "time_limit_seconds": 0,
+    "construction_moves": 0,
+    "containers": [
+        {
+            "id": "container_1",
+            "position": {
+                "x": 300.0,
+                "y": 350.0
+            },
+            "container_type": "standard",
+            "container_image": "tavern_container",
+            "slot_count": 3,
+            "max_rows_per_slot": 4,
+            "is_locked": false,
+            "unlock_matches_required": 0,
+            "lock_overlay_image": "",
+            "unlock_animation": "",
+            "is_moving": false,
+            "move_type": "",
+            "move_direction": "",
+            "move_speed": 50.0,
+            "move_distance": 200.0,
+            "track_id": "",
+            "is_falling": false,
+            "fall_speed": 100.0,
+            "fall_target_y": 0.0,
+            "despawn_on_match": false,
+            "initial_items": [
+                {
+                    "id": "blue_potion",
+                    "row": 0,
+                    "slot": 0
+                },
+                {
+                    "id": "green_potion",
+                    "row": 1,
+                    "slot": 0
+                },
+                {
+                    "id": "ham",
+                    "row": 0,
+                    "slot": 2
+                }
+            ]
+        },
+        {
+            "id": "container_2",
+            "position": {
+                "x": 722.0,
+                "y": 350.0
+            },
+            "container_type": "standard",
+            "container_image": "tavern_container",
+            "slot_count": 3,
+            "max_rows_per_slot": 4,
+            "is_locked": false,
+            "unlock_matches_required": 0,
+            "lock_overlay_image": "",
+            "unlock_animation": "",
+            "is_moving": false,
+            "move_type": "",
+            "move_direction": "",
+            "move_speed": 50.0,
+            "move_distance": 200.0,
+            "track_id": "",
+            "is_falling": false,
+            "fall_speed": 100.0,
+            "fall_target_y": 0.0,
+            "despawn_on_match": false,
+            "initial_items": [
+                {
+                    "id": "blue_potion",
+                    "row": 0,
+                    "slot": 0
+                },
+                {
+                    "id": "torch",
+                    "row": 0,
+                    "slot": 1
+                },
+                {
+                    "id": "ham",
+                    "row": 1,
+                    "slot": 1
+                }
+            ]
+        },
+        {
+            "id": "container_3",
+            "position": {
+                "x": 300.0,
+                "y": 660.0
+            },
+            "container_type": "standard",
+            "container_image": "tavern_container",
+            "slot_count": 3,
+            "max_rows_per_slot": 4,
+            "is_locked": false,
+            "unlock_matches_required": 0,
+            "lock_overlay_image": "",
+            "unlock_animation": "",
+            "is_moving": false,
+            "move_type": "",
+            "move_direction": "",
+            "move_speed": 50.0,
+            "move_distance": 200.0,
+            "track_id": "",
+            "is_falling": false,
+            "fall_speed": 100.0,
+            "fall_target_y": 0.0,
+            "despawn_on_match": false,
+            "initial_items": [
+                {
+                    "id": "green_potion",
+                    "row": 0,
+                    "slot": 0
+                },
+                {
+                    "id": "torch",
+                    "row": 0,
+                    "slot": 1
+                },
+                {
+                    "id": "blue_potion",
+                    "row": 0,
+                    "slot": 2
+                }
+            ]
+        },
+        {
+            "id": "container_4",
+            "position": {
+                "x": 722.0,
+                "y": 660.0
+            },
+            "container_type": "standard",
+            "container_image": "tavern_container",
+            "slot_count": 3,
+            "max_rows_per_slot": 4,
+            "is_locked": false,
+            "unlock_matches_required": 0,
+            "lock_overlay_image": "",
+            "unlock_animation": "",
+            "is_moving": false,
+            "move_type": "",
+            "move_direction": "",
+            "move_speed": 50.0,
+            "move_distance": 200.0,
+            "track_id": "",
+            "is_falling": false,
+            "fall_speed": 100.0,
+            "fall_target_y": 0.0,
+            "despawn_on_match": false,
+            "initial_items": [
+                {
+                    "id": "green_potion",
+                    "row": 0,
+                    "slot": 1
+                },
+                {
+                    "id": "torch",
+                    "row": 0,
+                    "slot": 2
+                }
+            ]
+        },
+        {
+            "id": "container_5",
+            "position": {
+                "x": 511.0,
+                "y": 900.0
+            },
+            "container_type": "standard",
+            "container_image": "tavern_container",
+            "slot_count": 3,
+            "max_rows_per_slot": 4,
+            "is_locked": false,
+            "unlock_matches_required": 0,
+            "lock_overlay_image": "",
+            "unlock_animation": "",
+            "is_moving": false,
+            "move_type": "",
+            "move_direction": "",
+            "move_speed": 50.0,
+            "move_distance": 200.0,
+            "track_id": "",
+            "is_falling": false,
+            "fall_speed": 100.0,
+            "fall_target_y": 0.0,
+            "despawn_on_match": false,
+            "initial_items": [
+                {
+                    "id": "ham",
+                    "row": 0,
+                    "slot": 1
+                }
+            ]
+        }
+    ],
+    "moving_tracks": []
+}

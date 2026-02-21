@@ -1,0 +1,393 @@
+{
+  "version": 1,
+  "crops": {
+    "Sprites/Mascots/Animations/Farm": {
+      "x": 121,
+      "y": 669,
+      "w": 844,
+      "h": 801,
+      "orig_w": 1080,
+      "orig_h": 1920,
+      "is_group": true
+    },
+    "Sprites/Mascots/Animations/Island": {
+      "x": 117,
+      "y": 847,
+      "w": 844,
+      "h": 621,
+      "orig_w": 1080,
+      "orig_h": 1920,
+      "is_group": true
+    },
+    "Sprites/UI/LevelComplete/BottomBoard": {
+      "x": 0,
+      "y": 1618,
+      "w": 1080,
+      "h": 302,
+      "orig_w": 1080,
+      "orig_h": 1920,
+      "is_group": true
+    },
+    "Sprites/UI/LevelComplete/Curtains": {
+      "x": 0,
+      "y": 0,
+      "w": 1080,
+      "h": 597,
+      "orig_w": 1080,
+      "orig_h": 1920,
+      "is_group": true
+    },
+    "Sprites/UI/LevelComplete/DancingStars": {
+      "x": 209,
+      "y": 281,
+      "w": 656,
+      "h": 368,
+      "orig_w": 1080,
+      "orig_h": 1920,
+      "is_group": true
+    },
+    "Sprites/UI/LevelComplete/LevelBoard": {
+      "x": 346,
+      "y": 657,
+      "w": 387,
+      "h": 133,
+      "orig_w": 1080,
+      "orig_h": 1920,
+      "is_group": true
+    },
+    "Sprites/UI/LevelComplete/LevelCompleteText": {
+      "x": 236,
+      "y": 529,
+      "w": 608,
+      "h": 291,
+      "orig_w": 1080,
+      "orig_h": 1920,
+      "is_group": true
+    },
+    "Sprites/UI/LevelComplete/StarRibbon": {
+      "x": 108,
+      "y": 427,
+      "w": 864,
+      "h": 370,
+      "orig_w": 1080,
+      "orig_h": 1920,
+      "is_group": true
+    },
+    "Sprites/UI/WorldUnlock": {
+      "x": 101,
+      "y": 139,
+      "w": 917,
+      "h": 882,
+      "orig_w": 1080,
+      "orig_h": 1920,
+      "is_group": true
+    },
+    "Sprites/UI/Achievements/achv_bg_yellow": {
+      "x": 130,
+      "y": 518,
+      "w": 811,
+      "h": 1287,
+      "orig_w": 1080,
+      "orig_h": 1920
+    },
+    "Sprites/UI/Achievements/achv_board": {
+      "x": 51,
+      "y": 184,
+      "w": 972,
+      "h": 1678,
+      "orig_w": 1080,
+      "orig_h": 1920
+    },
+    "Sprites/UI/Achievements/achv_close_button": {
+      "x": 913,
+      "y": 154,
+      "w": 122,
+      "h": 122,
+      "orig_w": 1080,
+      "orig_h": 1920
+    },
+    "Sprites/UI/Achievements/achv_title": {
+      "x": 222,
+      "y": 37,
+      "w": 636,
+      "h": 298,
+      "orig_w": 1080,
+      "orig_h": 1920
+    },
+    "Sprites/UI/Achievements/achv_title_bar": {
+      "x": 245,
+      "y": 300,
+      "w": 656,
+      "h": 197,
+      "orig_w": 1080,
+      "orig_h": 1920
+    },
+    "Sprites/UI/HUD/free_ui_top": {
+      "x": 0,
+      "y": 0,
+      "w": 1080,
+      "h": 225,
+      "orig_w": 1080,
+      "orig_h": 1920
+    },
+    "Sprites/UI/HUD/hard_mode_UI_top": {
+      "x": 0,
+      "y": 0,
+      "w": 1080,
+      "h": 225,
+      "orig_w": 1080,
+      "orig_h": 1920
+    },
+    "Sprites/UI/HUD/island_icon_UI_top": {
+      "x": 21,
+      "y": 21,
+      "w": 164,
+      "h": 140,
+      "orig_w": 1080,
+      "orig_h": 1920
+    },
+    "Sprites/UI/HUD/stars_ui_top": {
+      "x": 0,
+      "y": 0,
+      "w": 1080,
+      "h": 225,
+      "orig_w": 1080,
+      "orig_h": 1920
+    },
+    "Sprites/UI/HUD/timer_ui_top": {
+      "x": 0,
+      "y": 0,
+      "w": 1080,
+      "h": 225,
+      "orig_w": 1080,
+      "orig_h": 1920
+    },
+    "Sprites/UI/LevelComplete/Buttons/level_label": {
+      "x": 154,
+      "y": 701,
+      "w": 387,
+      "h": 133,
+      "orig_w": 1080,
+      "orig_h": 1920
+    },
+    "Sprites/UI/LevelComplete/Buttons/moves_label": {
+      "x": 555,
+      "y": 701,
+      "w": 387,
+      "h": 133,
+      "orig_w": 1080,
+      "orig_h": 1920
+    },
+    "Sprites/UI/LevelComplete/free_levelcomplete_overlay": {
+      "x": 108,
+      "y": 0,
+      "w": 864,
+      "h": 746,
+      "orig_w": 1080,
+      "orig_h": 1920
+    },
+    "Sprites/UI/LevelComplete/grey_stars": {
+      "x": 205,
+      "y": 299,
+      "w": 661,
+      "h": 344,
+      "orig_w": 1080,
+      "orig_h": 1920
+    },
+    "Sprites/UI/LevelComplete/hard_levelcomplete_overlay": {
+      "x": 299,
+      "y": 0,
+      "w": 512,
+      "h": 716,
+      "orig_w": 1080,
+      "orig_h": 1920
+    },
+    "Sprites/UI/LevelComplete/level_UI": {
+      "x": 155,
+      "y": 988,
+      "w": 387,
+      "h": 133,
+      "orig_w": 1080,
+      "orig_h": 1920
+    },
+    "Sprites/UI/LevelComplete/moves_UI": {
+      "x": 150,
+      "y": 1191,
+      "w": 387,
+      "h": 133,
+      "orig_w": 1080,
+      "orig_h": 1920
+    },
+    "Sprites/UI/LevelComplete/new_record_UI": {
+      "x": 293,
+      "y": 665,
+      "w": 480,
+      "h": 91,
+      "orig_w": 1080,
+      "orig_h": 1920
+    },
+    "Sprites/UI/LevelComplete/timer_bar_UI": {
+      "x": 346,
+      "y": 752,
+      "w": 387,
+      "h": 109,
+      "orig_w": 1080,
+      "orig_h": 1920
+    },
+    "Sprites/UI/LevelComplete/timer_icon": {
+      "x": 336,
+      "y": 212,
+      "w": 378,
+      "h": 455,
+      "orig_w": 1080,
+      "orig_h": 1920
+    },
+    "Sprites/UI/LevelComplete/VictoryBoard/island_board_victory_screen": {
+      "x": 18,
+      "y": 757,
+      "w": 1044,
+      "h": 795,
+      "orig_w": 1080,
+      "orig_h": 1920
+    },
+    "Sprites/UI/Overlays/dialogbox": {
+      "x": 0,
+      "y": 1462,
+      "w": 1080,
+      "h": 458,
+      "orig_w": 1080,
+      "orig_h": 1920
+    },
+    "Sprites/UI/Overlays/topbar": {
+      "x": 0,
+      "y": 0,
+      "w": 1080,
+      "h": 238,
+      "orig_w": 1080,
+      "orig_h": 1920
+    },
+    "Sprites/UI/PauseMenu/pause_board": {
+      "x": 58,
+      "y": 287,
+      "w": 967,
+      "h": 1340,
+      "orig_w": 1080,
+      "orig_h": 1920
+    },
+    "Sprites/UI/PauseMenu/pause_quit": {
+      "x": 303,
+      "y": 1331,
+      "w": 462,
+      "h": 146,
+      "orig_w": 1080,
+      "orig_h": 1920,
+      "is_group": true
+    },
+    "Sprites/UI/PauseMenu/pause_quit_pressed": {
+      "x": 303,
+      "y": 1331,
+      "w": 462,
+      "h": 146,
+      "orig_w": 1080,
+      "orig_h": 1920,
+      "is_group": true
+    },
+    "Sprites/UI/PauseMenu/pause_restart": {
+      "x": 303,
+      "y": 983,
+      "w": 462,
+      "h": 145,
+      "orig_w": 1080,
+      "orig_h": 1920,
+      "is_group": true
+    },
+    "Sprites/UI/PauseMenu/pause_restart_pressed": {
+      "x": 303,
+      "y": 983,
+      "w": 462,
+      "h": 145,
+      "orig_w": 1080,
+      "orig_h": 1920,
+      "is_group": true
+    },
+    "Sprites/UI/PauseMenu/pause_resume": {
+      "x": 303,
+      "y": 805,
+      "w": 462,
+      "h": 145,
+      "orig_w": 1080,
+      "orig_h": 1920,
+      "is_group": true
+    },
+    "Sprites/UI/PauseMenu/pause_resume_pressed": {
+      "x": 303,
+      "y": 805,
+      "w": 462,
+      "h": 145,
+      "orig_w": 1080,
+      "orig_h": 1920,
+      "is_group": true
+    },
+    "Sprites/UI/PauseMenu/pause_settings": {
+      "x": 303,
+      "y": 1156,
+      "w": 462,
+      "h": 146,
+      "orig_w": 1080,
+      "orig_h": 1920,
+      "is_group": true
+    },
+    "Sprites/UI/PauseMenu/pause_settings_pressed": {
+      "x": 303,
+      "y": 1156,
+      "w": 462,
+      "h": 146,
+      "orig_w": 1080,
+      "orig_h": 1920,
+      "is_group": true
+    },
+    "Sprites/UI/Worlds/farm_locked_background": {
+      "x": 0,
+      "y": 1000,
+      "w": 1080,
+      "h": 920,
+      "orig_w": 1080,
+      "orig_h": 1920
+    },
+    "Sprites/UI/Worlds/level_select_board": {
+      "x": 52,
+      "y": 1005,
+      "w": 977,
+      "h": 834,
+      "orig_w": 1080,
+      "orig_h": 1920
+    },
+    "Sprites/UI/LevelComplete/Star1": {
+      "x": 207,
+      "y": 419,
+      "w": 234,
+      "h": 225,
+      "orig_w": 1080,
+      "orig_h": 1920,
+      "is_group": true
+    },
+    "Sprites/UI/LevelComplete/Star2": {
+      "x": 631,
+      "y": 419,
+      "w": 235,
+      "h": 225,
+      "orig_w": 1080,
+      "orig_h": 1920,
+      "is_group": true
+    },
+    "Sprites/UI/LevelComplete/Star3": {
+      "x": 376,
+      "y": 299,
+      "w": 325,
+      "h": 310,
+      "orig_w": 1080,
+      "orig_h": 1920,
+      "is_group": true
+    }
+  }
+}

@@ -157,6 +157,7 @@ namespace SortResort
 
         private GameObject levelFailedPanel;
         private TextMeshProUGUI levelFailedReasonText;
+        private Coroutine failedReasonPulseCoroutine;
         private Image failedBottomBoardImage;
         private Sprite[] failedBottomBoardFrames;
         private GameObject failedButtonsContainerGO;
@@ -668,11 +669,11 @@ namespace SortResort
             topBarRect.anchorMax = new Vector2(1, 1);
             topBarRect.pivot = new Vector2(0.5f, 1);
             topBarRect.anchoredPosition = Vector2.zero;
-            topBarRect.sizeDelta = new Vector2(0, 120);
+            topBarRect.sizeDelta = new Vector2(0, 150);
 
-            // Wood plank background (blank_topbar)
+            // Wood plank background
             var topBarBg = topBar.AddComponent<Image>();
-            var topBarSprite = Resources.Load<Sprite>("Sprites/UI/Overlays/blank_topbar");
+            var topBarSprite = Resources.Load<Sprite>("Sprites/UI/Overlays/wooden_bar_top");
             if (topBarSprite != null)
             {
                 topBarBg.sprite = topBarSprite;
@@ -691,7 +692,7 @@ namespace SortResort
             settingsBtnRect.anchorMin = new Vector2(1, 0.5f);
             settingsBtnRect.anchorMax = new Vector2(1, 0.5f);
             settingsBtnRect.pivot = new Vector2(1, 0.5f);
-            settingsBtnRect.anchoredPosition = new Vector2(-15, 0); // Centered vertically (no Y offset)
+            settingsBtnRect.anchoredPosition = new Vector2(-35, 0);
             settingsBtnRect.sizeDelta = new Vector2(100, 100);
 
             var settingsBtnImg = settingsBtnGO.AddComponent<Image>();
@@ -709,69 +710,36 @@ namespace SortResort
             settingsBtn.targetGraphic = settingsBtnImg;
             settingsBtn.onClick.AddListener(OnSettingsClicked);
 
-            // Reset Achievements button (for testing) - small button to left of settings
-            var resetAchBtnGO = new GameObject("ResetAchievementsButton");
-            resetAchBtnGO.transform.SetParent(topBar.transform, false);
-            var resetAchBtnRect = resetAchBtnGO.AddComponent<RectTransform>();
-            resetAchBtnRect.anchorMin = new Vector2(1, 0.5f);
-            resetAchBtnRect.anchorMax = new Vector2(1, 0.5f);
-            resetAchBtnRect.pivot = new Vector2(1, 0.5f);
-            resetAchBtnRect.anchoredPosition = new Vector2(-125, 0); // To the left of settings
-            resetAchBtnRect.sizeDelta = new Vector2(90, 50);
-
-            var resetAchBtnImg = resetAchBtnGO.AddComponent<Image>();
-            resetAchBtnImg.color = new Color(0.8f, 0.3f, 0.3f, 1f); // Red for danger/reset
-
-            var resetAchBtn = resetAchBtnGO.AddComponent<Button>();
-            resetAchBtn.targetGraphic = resetAchBtnImg;
-            resetAchBtn.onClick.AddListener(OnResetAchievementsClicked);
-
-            // Button text
-            var resetAchTextGO = new GameObject("Text");
-            resetAchTextGO.transform.SetParent(resetAchBtnGO.transform, false);
-            var resetAchTextRect = resetAchTextGO.AddComponent<RectTransform>();
-            resetAchTextRect.anchorMin = Vector2.zero;
-            resetAchTextRect.anchorMax = Vector2.one;
-            resetAchTextRect.offsetMin = new Vector2(3, 3);
-            resetAchTextRect.offsetMax = new Vector2(-3, -3);
-            var resetAchText = resetAchTextGO.AddComponent<TextMeshProUGUI>();
-            resetAchText.text = "RST\nACH";
-            resetAchText.fontSize = 16;
-            resetAchText.fontStyle = FontStyles.Bold;
-            resetAchText.alignment = TextAlignmentOptions.Center;
-            resetAchText.color = Color.white;
-
-            // Achievements/Trophy button - to the left of reset button
+            // Achievements/Trophy button - next to settings button
             var trophyBtnGO = new GameObject("AchievementsButton");
             trophyBtnGO.transform.SetParent(topBar.transform, false);
             var trophyBtnRect = trophyBtnGO.AddComponent<RectTransform>();
             trophyBtnRect.anchorMin = new Vector2(1, 0.5f);
             trophyBtnRect.anchorMax = new Vector2(1, 0.5f);
             trophyBtnRect.pivot = new Vector2(1, 0.5f);
-            trophyBtnRect.anchoredPosition = new Vector2(-225, 0); // To the left of reset button
-            trophyBtnRect.sizeDelta = new Vector2(90, 90);
+            trophyBtnRect.anchoredPosition = new Vector2(-150, 0);
+            trophyBtnRect.sizeDelta = new Vector2(100, 100);
 
             var trophyBtnImg = trophyBtnGO.AddComponent<Image>();
-            trophyBtnImg.color = new Color(0.9f, 0.75f, 0.2f, 1f); // Gold color for trophy
+            var achNormalSprite = LoadFullRectSprite("Sprites/UI/Achievements/achievements_button_2");
+            var achPressedSprite = LoadFullRectSprite("Sprites/UI/Achievements/achievements_button_pressed_2");
+            if (achNormalSprite != null)
+            {
+                trophyBtnImg.sprite = achNormalSprite;
+                trophyBtnImg.preserveAspect = true;
+                trophyBtnImg.color = Color.white;
+            }
 
             var trophyBtn = trophyBtnGO.AddComponent<Button>();
+            trophyBtn.transition = Selectable.Transition.SpriteSwap;
             trophyBtn.targetGraphic = trophyBtnImg;
+            if (achPressedSprite != null)
+            {
+                var achSpriteState = new SpriteState();
+                achSpriteState.pressedSprite = achPressedSprite;
+                trophyBtn.spriteState = achSpriteState;
+            }
             trophyBtn.onClick.AddListener(OnAchievementsClicked);
-
-            // Trophy icon text (placeholder)
-            var trophyTextGO = new GameObject("Text");
-            trophyTextGO.transform.SetParent(trophyBtnGO.transform, false);
-            var trophyTextRect = trophyTextGO.AddComponent<RectTransform>();
-            trophyTextRect.anchorMin = Vector2.zero;
-            trophyTextRect.anchorMax = Vector2.one;
-            trophyTextRect.offsetMin = Vector2.zero;
-            trophyTextRect.offsetMax = Vector2.zero;
-            var trophyText = trophyTextGO.AddComponent<TextMeshProUGUI>();
-            trophyText.text = "ACH";
-            trophyText.fontSize = 28;
-            trophyText.fontStyle = FontStyles.Bold;
-            trophyText.alignment = TextAlignmentOptions.Center;
-            trophyText.color = new Color(0.4f, 0.25f, 0f, 1f); // Dark brown
 
             // Profile overlay - LARGER, positioned to hang OVER the topbar onto the background
             // Parent to levelSelectPanel so it can extend beyond topbar
@@ -946,7 +914,7 @@ namespace SortResort
             lockBgRect.offsetMin = Vector2.zero;
             lockBgRect.offsetMax = Vector2.zero;
             var lockBgImg = lockBgGO.AddComponent<Image>();
-            lockBgImg.preserveAspect = false;
+            lockBgImg.preserveAspect = true;
             lockBgImg.raycastTarget = false;
             lockBgImg.enabled = false; // Hidden until a world with a background is shown
 
@@ -997,9 +965,10 @@ namespace SortResort
             if (boardSprite != null)
             {
                 boardImg.sprite = boardSprite;
-                boardImg.preserveAspect = false; // Fullscreen 1080x1920
+                boardImg.preserveAspect = true;
             }
             boardImg.raycastTarget = false;
+            CropMetadata.ApplyCropAnchors(boardRect, "Sprites/UI/Worlds/level_select_board");
 
             // ============================================
             // MODE TABS ROW - Flush against top of level select board (after board so tabs render on top)
@@ -1026,7 +995,7 @@ namespace SortResort
             scrollArea.transform.SetParent(levelSelectPanel.transform, false);
             var scrollAreaRect = scrollArea.AddComponent<RectTransform>();
             // Position within the board's inner dark wood area
-            scrollAreaRect.anchorMin = new Vector2(0.082f, 0.052f);
+            scrollAreaRect.anchorMin = new Vector2(0.082f, 0.0616f);
             scrollAreaRect.anchorMax = new Vector2(0.921f, 0.455f);
             scrollAreaRect.offsetMin = Vector2.zero;
             scrollAreaRect.offsetMax = Vector2.zero;
@@ -1148,9 +1117,10 @@ namespace SortResort
             screenType.GetField("levelGridParent", flags)?.SetValue(levelSelectScreen, content.transform);
             screenType.GetField("levelScrollRect", flags)?.SetValue(levelSelectScreen, scrollView);
 
-            // Wire mode tab container, topBar, and world lock overlay references
+            // Wire mode tab container, topBar, board, and world lock overlay references
             levelSelectScreen.SetModeTabContainer(modeTabContainerGO.transform);
             levelSelectScreen.SetTopBar(topBar.transform);
+            levelSelectScreen.SetLevelSelectBoard(boardGO);
             levelSelectScreen.SetWorldLockOverlay(lockOverlayGO, padlockImg, buyBtn, lockBgImg);
 
             // Initialize level select screen (creates grid, loads portals, etc.)
@@ -1174,20 +1144,6 @@ namespace SortResort
             Debug.Log("[UIManager] Settings button clicked");
             AudioManager.Instance?.PlayButtonClick();
             ShowSettings();
-        }
-
-        private void OnResetAchievementsClicked()
-        {
-            Debug.Log("[UIManager] Reset Achievements button clicked");
-            AudioManager.Instance?.PlayButtonClick();
-
-            if (AchievementManager.Instance != null)
-            {
-                AchievementManager.Instance.ResetAllAchievements();
-                Debug.Log("[UIManager] All achievements have been reset!");
-                // Refresh achievements panel if open
-                RefreshAchievementsPanel();
-            }
         }
 
         private void OnAchievementsClicked()
@@ -1992,6 +1948,7 @@ namespace SortResort
             levelCompleteTextImage.preserveAspect = true;
             levelCompleteTextImage.raycastTarget = false;
             levelCompleteTextImage.enabled = false;
+            CropMetadata.ApplyCropAnchorsForFolder(lcTextRect, "Sprites/UI/LevelComplete/LevelCompleteText");
             LoadLevelCompleteTextFrames();
 
             // === PHASE B ELEMENTS ===
@@ -2016,7 +1973,8 @@ namespace SortResort
             curtainsRect.offsetMin = Vector2.zero;
             curtainsRect.offsetMax = Vector2.zero;
             var curtainsImage = curtainsGO.AddComponent<Image>();
-            curtainsImage.preserveAspect = false;
+            curtainsImage.preserveAspect = true;
+            CropMetadata.ApplyCropAnchorsForFolder(curtainsRect, "Sprites/UI/LevelComplete/Curtains");
 
             // 4b. Timer Icon - fullscreen overlay with stopwatch for Timer/Hard mode
             var timerIconGO = new GameObject("Timer Icon");
@@ -2032,6 +1990,7 @@ namespace SortResort
             timerIconImage.raycastTarget = false;
             timerIconCanvasGroup = timerIconGO.AddComponent<CanvasGroup>();
             timerIconCanvasGroup.alpha = 0f;
+            CropMetadata.ApplyCropAnchors(timerIconRect, "Sprites/UI/LevelComplete/timer_icon");
 
             // 4c. Free Mode Overlay - medal overlay for FreePlay mode
             var freeOverlayGO = new GameObject("Free Overlay");
@@ -2047,6 +2006,7 @@ namespace SortResort
             freeOverlayImage.raycastTarget = false;
             freeOverlayCanvasGroup = freeOverlayGO.AddComponent<CanvasGroup>();
             freeOverlayCanvasGroup.alpha = 0f;
+            CropMetadata.ApplyCropAnchors(freeOverlayRect, "Sprites/UI/LevelComplete/free_levelcomplete_overlay");
 
             // 4d. Hard Mode Overlay - medal+stopwatch overlay for HardMode
             var hardOverlayGO = new GameObject("Hard Overlay");
@@ -2062,6 +2022,7 @@ namespace SortResort
             hardOverlayImage.raycastTarget = false;
             hardOverlayCanvasGroup = hardOverlayGO.AddComponent<CanvasGroup>();
             hardOverlayCanvasGroup.alpha = 0f;
+            CropMetadata.ApplyCropAnchors(hardOverlayRect, "Sprites/UI/LevelComplete/hard_levelcomplete_overlay");
 
             // 5. Victory Board - per-world fullscreen overlay
             var victoryBoardGO = new GameObject("Victory Board");
@@ -2091,13 +2052,15 @@ namespace SortResort
             levelUIImage.raycastTarget = false;
             levelUICanvasGroup = levelUIGO.AddComponent<CanvasGroup>();
             levelUICanvasGroup.alpha = 0f;
+            CropMetadata.ApplyCropAnchors(levelUIRect, "Sprites/UI/LevelComplete/level_UI");
 
             // Level Number text - child of level_UI, positioned on its brown circle
             var levelNumGO = new GameObject("Level Number Text");
             levelNumGO.transform.SetParent(levelUIGO.transform, false);
             var levelNumRect = levelNumGO.AddComponent<RectTransform>();
-            levelNumRect.anchorMin = new Vector2(0.4176f, 0.4510f);
-            levelNumRect.anchorMax = new Vector2(0.4176f, 0.4510f);
+            var levelNumAnchor = CropMetadata.ConvertAnchorToCropSpace(new Vector2(0.4176f, 0.4510f), "Sprites/UI/LevelComplete/level_UI");
+            levelNumRect.anchorMin = levelNumAnchor;
+            levelNumRect.anchorMax = levelNumAnchor;
             levelNumRect.pivot = new Vector2(0.5f, 0.5f);
             levelNumRect.anchoredPosition = Vector2.zero;
             levelNumRect.sizeDelta = new Vector2(120, 80);
@@ -2124,13 +2087,15 @@ namespace SortResort
             movesUIImage.raycastTarget = false;
             movesUICanvasGroup = movesUIGO.AddComponent<CanvasGroup>();
             movesUICanvasGroup.alpha = 0f;
+            CropMetadata.ApplyCropAnchors(movesUIRect, "Sprites/UI/LevelComplete/moves_UI");
 
             // Moves Count text - child of moves_UI, positioned on its brown circle
             var movesCountGO = new GameObject("Moves Count Text");
             movesCountGO.transform.SetParent(movesUIGO.transform, false);
             var movesCountRect = movesCountGO.AddComponent<RectTransform>();
-            movesCountRect.anchorMin = new Vector2(0.4130f, 0.3453f);
-            movesCountRect.anchorMax = new Vector2(0.4130f, 0.3453f);
+            var movesCountAnchor = CropMetadata.ConvertAnchorToCropSpace(new Vector2(0.4130f, 0.3453f), "Sprites/UI/LevelComplete/moves_UI");
+            movesCountRect.anchorMin = movesCountAnchor;
+            movesCountRect.anchorMax = movesCountAnchor;
             movesCountRect.pivot = new Vector2(0.5f, 0.5f);
             movesCountRect.anchoredPosition = Vector2.zero;
             movesCountRect.sizeDelta = new Vector2(120, 80);
@@ -2154,6 +2119,7 @@ namespace SortResort
             var starRibbonImage = starRibbonGO.AddComponent<Image>();
             starRibbonImage.preserveAspect = true;
             starRibbonImage.raycastTarget = false;
+            CropMetadata.ApplyCropAnchorsForFolder(starRibbonRect, "Sprites/UI/LevelComplete/StarRibbon");
 
             // Add and initialize the animation controller
             animatedLevelComplete = levelCompletePanel.AddComponent<AnimatedLevelComplete>();
@@ -2181,6 +2147,7 @@ namespace SortResort
             levelCompleteGreyStarsImage.raycastTarget = false;
             greyStarsCanvasGroup = greyStarsGO.AddComponent<CanvasGroup>();
             greyStarsCanvasGroup.alpha = 0f;
+            CropMetadata.ApplyCropAnchors(greyStarsRect, "Sprites/UI/LevelComplete/grey_stars");
 
             // Load star animation frames
             star1Frames = LoadStarFrames("Sprites/UI/LevelComplete/Star1", "star1");
@@ -2198,6 +2165,7 @@ namespace SortResort
             levelCompleteStar1Image = star1GO.AddComponent<Image>();
             levelCompleteStar1Image.preserveAspect = true;
             levelCompleteStar1Image.raycastTarget = false;
+            CropMetadata.ApplyCropAnchorsForFolder(star1Rect, "Sprites/UI/LevelComplete/Star1");
             star1GO.SetActive(false);
 
             // Star 2 Image (right star) - fullscreen, starts hidden
@@ -2211,6 +2179,7 @@ namespace SortResort
             levelCompleteStar2Image = star2GO.AddComponent<Image>();
             levelCompleteStar2Image.preserveAspect = true;
             levelCompleteStar2Image.raycastTarget = false;
+            CropMetadata.ApplyCropAnchorsForFolder(star2Rect, "Sprites/UI/LevelComplete/Star2");
             star2GO.SetActive(false);
 
             // Star 3 Image (center/large star) - fullscreen, starts hidden
@@ -2224,6 +2193,7 @@ namespace SortResort
             levelCompleteStar3Image = star3GO.AddComponent<Image>();
             levelCompleteStar3Image.preserveAspect = true;
             levelCompleteStar3Image.raycastTarget = false;
+            CropMetadata.ApplyCropAnchorsForFolder(star3Rect, "Sprites/UI/LevelComplete/Star3");
             star3GO.SetActive(false);
 
             // 11. Dancing Stars - fullscreen, loops when 3 stars earned, starts hidden
@@ -2237,6 +2207,7 @@ namespace SortResort
             dancingStarsImage = dancingStarsGO.AddComponent<Image>();
             dancingStarsImage.preserveAspect = true;
             dancingStarsImage.raycastTarget = false;
+            CropMetadata.ApplyCropAnchorsForFolder(dancingStarsRect, "Sprites/UI/LevelComplete/DancingStars");
             dancingStarsGO.SetActive(false);
 
             // Load dancing stars animation frames
@@ -2256,13 +2227,15 @@ namespace SortResort
             timerBarUIImage.raycastTarget = false;
             timerBarUICanvasGroup = timerBarGO.AddComponent<CanvasGroup>();
             timerBarUICanvasGroup.alpha = 0f;
+            CropMetadata.ApplyCropAnchors(timerBarRect, "Sprites/UI/LevelComplete/timer_bar_UI");
 
             // Timer text - child of timer_bar_UI, positioned on the teal bar center
             var timerTextGO = new GameObject("Timer Bar Text");
             timerTextGO.transform.SetParent(timerBarGO.transform, false);
             var timerTextRect = timerTextGO.AddComponent<RectTransform>();
-            timerTextRect.anchorMin = new Vector2(0.4991f, 0.5802f);
-            timerTextRect.anchorMax = new Vector2(0.4991f, 0.5802f);
+            var timerTextAnchor = CropMetadata.ConvertAnchorToCropSpace(new Vector2(0.4991f, 0.5802f), "Sprites/UI/LevelComplete/timer_bar_UI");
+            timerTextRect.anchorMin = timerTextAnchor;
+            timerTextRect.anchorMax = timerTextAnchor;
             timerTextRect.pivot = new Vector2(0.5f, 0.5f);
             timerTextRect.anchoredPosition = Vector2.zero;
             timerTextRect.sizeDelta = new Vector2(400, 80);
@@ -2289,6 +2262,7 @@ namespace SortResort
             newRecordUIImage.raycastTarget = false;
             newRecordUICanvasGroup = newRecordGO.AddComponent<CanvasGroup>();
             newRecordUICanvasGroup.alpha = 0f;
+            CropMetadata.ApplyCropAnchors(newRecordRect, "Sprites/UI/LevelComplete/new_record_UI");
 
             // 14. Bottom Board - animated wooden board that slides up behind buttons
             var bottomBoardGO = new GameObject("Bottom Board");
@@ -2301,6 +2275,7 @@ namespace SortResort
             bottomBoardImage = bottomBoardGO.AddComponent<Image>();
             bottomBoardImage.preserveAspect = true;
             bottomBoardImage.raycastTarget = false;
+            CropMetadata.ApplyCropAnchorsForFolder(bottomBoardRect, "Sprites/UI/LevelComplete/BottomBoard");
             bottomBoardGO.SetActive(false);
 
             // Load bottom board animation frames
@@ -2391,6 +2366,7 @@ namespace SortResort
             failedBottomBoardImage = failBottomBoardGO.AddComponent<Image>();
             failedBottomBoardImage.preserveAspect = true;
             failedBottomBoardImage.raycastTarget = false;
+            CropMetadata.ApplyCropAnchorsForFolder(failBoardRect, "Sprites/UI/LevelComplete/BottomBoard");
             failBottomBoardGO.SetActive(false);
 
             // Load bottom board frames (reuse same frames as level complete)
@@ -3323,6 +3299,7 @@ Antonia and Joakim Engfors
             boardImg.sprite = LoadFullRectSprite("Sprites/UI/PauseMenu/pause_board");
             boardImg.preserveAspect = true;
             boardImg.raycastTarget = false;
+            CropMetadata.ApplyCropAnchors(boardRect, "Sprites/UI/PauseMenu/pause_board");
 
             // Create sprite-based buttons with hit areas at exact pixel positions
             // Button positions from sprite analysis (in 1080x1920 canvas):
@@ -3385,10 +3362,11 @@ Antonia and Joakim Engfors
             spriteImg.sprite = normalSprite;
             spriteImg.preserveAspect = true;
             spriteImg.raycastTarget = false;
+            CropMetadata.ApplyCropAnchors(spriteRect, normalPath);
 
-            // Clickable hit area positioned at the button's exact location
+            // Clickable hit area parented to panel (not cropped sprite) for correct positioning
             var hitGO = new GameObject(name + " HitArea");
-            hitGO.transform.SetParent(spriteGO.transform, false);
+            hitGO.transform.SetParent(parent, false);
             var hitRect = hitGO.AddComponent<RectTransform>();
             hitRect.anchorMin = new Vector2(anchorX, anchorY);
             hitRect.anchorMax = new Vector2(anchorX, anchorY);
@@ -3784,6 +3762,7 @@ Antonia and Joakim Engfors
                     hudOverlayBgImage.sprite = Sprite.Create(barTex,
                         new Rect(0, 0, barTex.width, barTex.height),
                         new Vector2(0.5f, 0.5f), 100f);
+                    CropMetadata.ApplyCropAnchors(hudOverlayBgImage.rectTransform, overlayBarPath);
                 }
 
                 // Set world icon sprite (or hide if missing)
@@ -3794,6 +3773,7 @@ Antonia and Joakim Engfors
                         hudWorldIconImage.sprite = Sprite.Create(iconTex,
                             new Rect(0, 0, iconTex.width, iconTex.height),
                             new Vector2(0.5f, 0.5f), 100f);
+                        CropMetadata.ApplyCropAnchors(hudWorldIconImage.rectTransform, overlayIconPath);
                         hudWorldIconImage.gameObject.SetActive(true);
                     }
                     else
@@ -3911,9 +3891,13 @@ Antonia and Joakim Engfors
 
                 // Load correct victory board for current world
                 string worldId = GameManager.Instance?.CurrentWorldId ?? "island";
-                var boardSprite = LoadFullRectSprite($"Sprites/UI/LevelComplete/VictoryBoard/{worldId}_board_victory_screen");
+                var victoryBoardPath = $"Sprites/UI/LevelComplete/VictoryBoard/{worldId}_board_victory_screen";
+                var boardSprite = LoadFullRectSprite(victoryBoardPath);
                 if (boardSprite != null && victoryBoardImage != null)
+                {
                     victoryBoardImage.sprite = boardSprite;
+                    CropMetadata.ApplyCropAnchors(victoryBoardImage.rectTransform, victoryBoardPath);
+                }
 
                 // Start the sequenced animation
                 if (levelCompleteSequence != null)
@@ -4228,6 +4212,14 @@ Antonia and Joakim Engfors
                 if (levelFailedReasonText != null)
                 {
                     levelFailedReasonText.text = reason;
+                    levelFailedReasonText.transform.localScale = Vector3.one;
+                }
+
+                // Stop any existing pulse
+                if (failedReasonPulseCoroutine != null)
+                {
+                    StopCoroutine(failedReasonPulseCoroutine);
+                    failedReasonPulseCoroutine = null;
                 }
 
                 // Reset animated elements
@@ -4249,6 +4241,9 @@ Antonia and Joakim Engfors
             // Brief pause to let the screen appear
             yield return new WaitForSecondsRealtime(0.5f);
 
+            // Start pulsing the reason text
+            failedReasonPulseCoroutine = StartCoroutine(PulseFailedReasonText());
+
             // Play bottom board animation
             if (failedBottomBoardImage != null && failedBottomBoardFrames != null && failedBottomBoardFrames.Length > 0)
             {
@@ -4268,12 +4263,38 @@ Antonia and Joakim Engfors
             failedScreenSequence = null;
         }
 
+        private IEnumerator PulseFailedReasonText()
+        {
+            if (levelFailedReasonText == null) yield break;
+
+            var rt = levelFailedReasonText.GetComponent<RectTransform>();
+            if (rt == null) yield break;
+
+            Vector3 baseScale = Vector3.one;
+            float time = 0f;
+
+            while (true)
+            {
+                time += Time.unscaledDeltaTime;
+                float scaleFactor = 1f + 0.085f * Mathf.Sin(time * 5f);
+                rt.localScale = baseScale * scaleFactor;
+                yield return null;
+            }
+        }
+
         private void StopFailedScreenSequence()
         {
             if (failedScreenSequence != null)
             {
                 StopCoroutine(failedScreenSequence);
                 failedScreenSequence = null;
+            }
+            if (failedReasonPulseCoroutine != null)
+            {
+                StopCoroutine(failedReasonPulseCoroutine);
+                failedReasonPulseCoroutine = null;
+                if (levelFailedReasonText != null)
+                    levelFailedReasonText.transform.localScale = Vector3.one;
             }
         }
 
@@ -4384,6 +4405,7 @@ Antonia and Joakim Engfors
                 if (levelCompleteMascotAnimator.LoadFrames(worldFolder, animationName))
                 {
                     Debug.Log($"[UIManager] Playing mascot animation with {levelCompleteMascotAnimator.Duration}s duration");
+                    CropMetadata.ApplyCropAnchorsForFolder(levelCompleteMascotImage.rectTransform, $"Sprites/Mascots/Animations/{worldFolder}");
                     levelCompleteMascotImage.enabled = true;
                     levelCompleteMascotAnimator.Play();
                     return;
@@ -5266,6 +5288,7 @@ Antonia and Joakim Engfors
             boardImg.sprite = LoadFullRectSprite("Sprites/UI/Achievements/achv_board");
             boardImg.preserveAspect = true;
             boardImg.raycastTarget = false;
+            CropMetadata.ApplyCropAnchors(boardRect, "Sprites/UI/Achievements/achv_board");
 
             // ============================================
             // Layer 2: Yellow background panel
@@ -5281,6 +5304,7 @@ Antonia and Joakim Engfors
             bgYellowImg.sprite = LoadFullRectSprite("Sprites/UI/Achievements/achv_bg_yellow");
             bgYellowImg.preserveAspect = true;
             bgYellowImg.raycastTarget = false;
+            CropMetadata.ApplyCropAnchors(bgYellowRect, "Sprites/UI/Achievements/achv_bg_yellow");
 
             // ============================================
             // Layer 3: Scroll Area (achievement cards)
@@ -5383,15 +5407,18 @@ Antonia and Joakim Engfors
             titleBarImg.sprite = LoadFullRectSprite("Sprites/UI/Achievements/achv_title_bar");
             titleBarImg.preserveAspect = true;
             titleBarImg.raycastTarget = false;
+            CropMetadata.ApplyCropAnchors(titleBarRect, "Sprites/UI/Achievements/achv_title_bar");
 
-            // Title bar text - centered within the bar content area x(247-897), y(302-494)
+            // Title bar text - child of title bar, positioned in bar content area
             var titleBarTextGO = new GameObject("TitleBarText");
             titleBarTextGO.transform.SetParent(titleBarGO.transform, false);
             var titleBarTextRect = titleBarTextGO.AddComponent<RectTransform>();
             // x: 320/1080≈0.296, 897/1080≈0.831 (shifted right to leave room for icon)
             // y: 1-494/1920≈0.743, 1-302/1920≈0.843
-            titleBarTextRect.anchorMin = new Vector2(0.296f, 0.743f);
-            titleBarTextRect.anchorMax = new Vector2(0.831f, 0.843f);
+            var tbTextMinAnchor = CropMetadata.ConvertAnchorToCropSpace(new Vector2(0.296f, 0.743f), "Sprites/UI/Achievements/achv_title_bar");
+            var tbTextMaxAnchor = CropMetadata.ConvertAnchorToCropSpace(new Vector2(0.831f, 0.843f), "Sprites/UI/Achievements/achv_title_bar");
+            titleBarTextRect.anchorMin = tbTextMinAnchor;
+            titleBarTextRect.anchorMax = tbTextMaxAnchor;
             titleBarTextRect.offsetMin = Vector2.zero;
             titleBarTextRect.offsetMax = Vector2.zero;
 
@@ -5408,12 +5435,14 @@ Antonia and Joakim Engfors
             if (FontManager.ExtraBold != null)
                 achievementTitleBarText.font = FontManager.ExtraBold;
 
-            // Title bar text shadow (stronger black, larger offset)
+            // Title bar text shadow - child of title bar
             var titleBarShadowGO = new GameObject("TitleBarShadow");
             titleBarShadowGO.transform.SetParent(titleBarGO.transform, false);
             var titleBarShadowRect = titleBarShadowGO.AddComponent<RectTransform>();
-            titleBarShadowRect.anchorMin = new Vector2(0.296f, 0.743f);
-            titleBarShadowRect.anchorMax = new Vector2(0.831f, 0.843f);
+            var tbShadowMinAnchor = CropMetadata.ConvertAnchorToCropSpace(new Vector2(0.296f, 0.743f), "Sprites/UI/Achievements/achv_title_bar");
+            var tbShadowMaxAnchor = CropMetadata.ConvertAnchorToCropSpace(new Vector2(0.831f, 0.843f), "Sprites/UI/Achievements/achv_title_bar");
+            titleBarShadowRect.anchorMin = tbShadowMinAnchor;
+            titleBarShadowRect.anchorMax = tbShadowMaxAnchor;
             titleBarShadowRect.offsetMin = new Vector2(3, -3);
             titleBarShadowRect.offsetMax = new Vector2(3, -3);
             var shadowText = titleBarShadowGO.AddComponent<TextMeshProUGUI>();
@@ -5447,6 +5476,7 @@ Antonia and Joakim Engfors
             titleBannerImg.sprite = LoadFullRectSprite("Sprites/UI/Achievements/achv_title");
             titleBannerImg.preserveAspect = true;
             titleBannerImg.raycastTarget = false;
+            CropMetadata.ApplyCropAnchors(titleBannerRect, "Sprites/UI/Achievements/achv_title");
 
             // ============================================
             // Layer 7: World Icon (200x202px, positioned in title bar area)
