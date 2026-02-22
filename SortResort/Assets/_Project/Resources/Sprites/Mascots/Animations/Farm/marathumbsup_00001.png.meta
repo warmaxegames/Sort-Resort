@@ -3,8 +3,98 @@ guid: 258bbc38009f318a2ea40daacad95dc4
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -752140998073649974
+      213: 357654289361856933
     second: marathumbsup_00001_0
+  - first:
+      213: 7556222017659747142
+    second: marathumbsup_00001_1
+  - first:
+      213: 44181655194715283
+    second: marathumbsup_00001_2
+  - first:
+      213: -6046522204363145526
+    second: marathumbsup_00001_3
+  - first:
+      213: 5090893980910983940
+    second: marathumbsup_00001_4
+  - first:
+      213: 2085117408335647538
+    second: marathumbsup_00001_5
+  - first:
+      213: -1570411471869068465
+    second: marathumbsup_00001_6
+  - first:
+      213: 9197490983432287921
+    second: marathumbsup_00001_7
+  - first:
+      213: -8804404382894810900
+    second: marathumbsup_00001_8
+  - first:
+      213: -3840854171110521982
+    second: marathumbsup_00001_9
+  - first:
+      213: -7395941287615888155
+    second: marathumbsup_00001_10
+  - first:
+      213: 4316515572402224080
+    second: marathumbsup_00001_11
+  - first:
+      213: 6241132093009251146
+    second: marathumbsup_00001_12
+  - first:
+      213: 7061219756135176239
+    second: marathumbsup_00001_13
+  - first:
+      213: 7598791950159762346
+    second: marathumbsup_00001_14
+  - first:
+      213: 2787563096373663380
+    second: marathumbsup_00001_15
+  - first:
+      213: 802993472544748199
+    second: marathumbsup_00001_16
+  - first:
+      213: 6486564403997528065
+    second: marathumbsup_00001_17
+  - first:
+      213: 2641989761108410436
+    second: marathumbsup_00001_18
+  - first:
+      213: -91820692086355778
+    second: marathumbsup_00001_19
+  - first:
+      213: -1687353935528921704
+    second: marathumbsup_00001_20
+  - first:
+      213: -771078939025266096
+    second: marathumbsup_00001_21
+  - first:
+      213: 4253147077719564586
+    second: marathumbsup_00001_22
+  - first:
+      213: 7627302847727789155
+    second: marathumbsup_00001_23
+  - first:
+      213: 5456329938950399463
+    second: marathumbsup_00001_24
+  - first:
+      213: 3582772442563082981
+    second: marathumbsup_00001_25
+  - first:
+      213: -731579943898657465
+    second: marathumbsup_00001_26
+  - first:
+      213: -885622999255405304
+    second: marathumbsup_00001_27
+  - first:
+      213: 344008262017464702
+    second: marathumbsup_00001_28
+  - first:
+      213: 356237706899240010
+    second: marathumbsup_00001_29
+  - first:
+      213: -3624211543281764755
+    second: marathumbsup_00001_30
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -46,7 +136,7 @@ TextureImporter:
   nPOTScale: 0
   lightmap: 0
   compressionQuality: 50
-  spriteMode: 1
+  spriteMode: 2
   spriteExtrude: 1
   spriteMeshType: 1
   alignment: 0
@@ -97,33 +187,7 @@ TextureImporter:
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
   - serializedVersion: 4
-    buildTarget: Android
-    maxTextureSize: 2048
-    resizeAlgorithm: 0
-    textureFormat: -1
-    textureCompression: 1
-    compressionQuality: 50
-    crunchedCompression: 0
-    allowsAlphaSplitting: 0
-    overridden: 0
-    ignorePlatformSupport: 0
-    androidETC2FallbackOverride: 0
-    forceMaximumCompressionQuality_BC6H_BC7: 0
-  - serializedVersion: 4
     buildTarget: WebGL
-    maxTextureSize: 1024
-    resizeAlgorithm: 0
-    textureFormat: 50
-    textureCompression: 1
-    compressionQuality: 50
-    crunchedCompression: 1
-    allowsAlphaSplitting: 0
-    overridden: 1
-    ignorePlatformSupport: 0
-    androidETC2FallbackOverride: 0
-    forceMaximumCompressionQuality_BC6H_BC7: 0
-  - serializedVersion: 4
-    buildTarget: iOS
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
@@ -142,10 +206,10 @@ TextureImporter:
       name: marathumbsup_00001_0
       rect:
         serializedVersion: 2
-        x: 0
-        y: 0
-        width: 1080
-        height: 1920
+        x: 70
+        y: 362
+        width: 25
+        height: 68
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -154,8 +218,668 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 586e2294e48a02b7e933c4079adc6230
-      internalID: -752140998073649974
+      spriteID: 5a9eec56ea4a6f400800000000000000
+      internalID: 357654289361856933
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: marathumbsup_00001_1
+      rect:
+        serializedVersion: 2
+        x: 98
+        y: 358
+        width: 50
+        height: 36
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 64b3896f3e71dd860800000000000000
+      internalID: 7556222017659747142
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: marathumbsup_00001_2
+      rect:
+        serializedVersion: 2
+        x: 101
+        y: 390
+        width: 36
+        height: 55
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 39448773bf6fc9000800000000000000
+      internalID: 44181655194715283
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: marathumbsup_00001_3
+      rect:
+        serializedVersion: 2
+        x: 150
+        y: 47
+        width: 540
+        height: 540
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ace3c6a4710761ca0800000000000000
+      internalID: -6046522204363145526
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: marathumbsup_00001_4
+      rect:
+        serializedVersion: 2
+        x: 696
+        y: 358
+        width: 51
+        height: 36
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 40b9f595a1d76a640800000000000000
+      internalID: 5090893980910983940
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: marathumbsup_00001_5
+      rect:
+        serializedVersion: 2
+        x: 707
+        y: 390
+        width: 37
+        height: 55
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 23354d64c33dfec10800000000000000
+      internalID: 2085117408335647538
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: marathumbsup_00001_6
+      rect:
+        serializedVersion: 2
+        x: 750
+        y: 362
+        width: 25
+        height: 68
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f4bbb043617c43ae0800000000000000
+      internalID: -1570411471869068465
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: marathumbsup_00001_7
+      rect:
+        serializedVersion: 2
+        x: 42
+        y: 265
+        width: 36
+        height: 62
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1b6f65ca15d04af70800000000000000
+      internalID: 9197490983432287921
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: marathumbsup_00001_8
+      rect:
+        serializedVersion: 2
+        x: 53
+        y: 314
+        width: 28
+        height: 67
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ce899aa8cd870d580800000000000000
+      internalID: -8804404382894810900
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: marathumbsup_00001_9
+      rect:
+        serializedVersion: 2
+        x: 87
+        y: 265
+        width: 38
+        height: 51
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 28341e82b7b82bac0800000000000000
+      internalID: -3840854171110521982
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: marathumbsup_00001_10
+      rect:
+        serializedVersion: 2
+        x: 88
+        y: 312
+        width: 45
+        height: 45
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5e4820495965c5990800000000000000
+      internalID: -7395941287615888155
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: marathumbsup_00001_11
+      rect:
+        serializedVersion: 2
+        x: 712
+        y: 312
+        width: 49
+        height: 45
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0dbf9701b0857eb30800000000000000
+      internalID: 4316515572402224080
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: marathumbsup_00001_12
+      rect:
+        serializedVersion: 2
+        x: 719
+        y: 265
+        width: 38
+        height: 51
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a4b4b185294fc9650800000000000000
+      internalID: 6241132093009251146
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: marathumbsup_00001_13
+      rect:
+        serializedVersion: 2
+        x: 764
+        y: 314
+        width: 28
+        height: 67
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f28586dc4fd7ef160800000000000000
+      internalID: 7061219756135176239
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: marathumbsup_00001_14
+      rect:
+        serializedVersion: 2
+        x: 766
+        y: 265
+        width: 37
+        height: 62
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: aa3de5fb405547960800000000000000
+      internalID: 7598791950159762346
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: marathumbsup_00001_15
+      rect:
+        serializedVersion: 2
+        x: 39
+        y: 213
+        width: 52
+        height: 58
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4961754fdd96fa620800000000000000
+      internalID: 2787563096373663380
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: marathumbsup_00001_16
+      rect:
+        serializedVersion: 2
+        x: 81
+        y: 245
+        width: 7
+        height: 50
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7a2bcff0f4ec42b00800000000000000
+      internalID: 802993472544748199
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: marathumbsup_00001_17
+      rect:
+        serializedVersion: 2
+        x: 94
+        y: 218
+        width: 33
+        height: 57
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 10057f845f7e40a50800000000000000
+      internalID: 6486564403997528065
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: marathumbsup_00001_18
+      rect:
+        serializedVersion: 2
+        x: 717
+        y: 218
+        width: 34
+        height: 57
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 440061b90bb3aa420800000000000000
+      internalID: 2641989761108410436
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: marathumbsup_00001_19
+      rect:
+        serializedVersion: 2
+        x: 752
+        y: 213
+        width: 53
+        height: 58
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: eb889292199c9bef0800000000000000
+      internalID: -91820692086355778
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: marathumbsup_00001_20
+      rect:
+        serializedVersion: 2
+        x: 757
+        y: 244
+        width: 6
+        height: 56
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 895f07e19805598e0800000000000000
+      internalID: -1687353935528921704
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: marathumbsup_00001_21
+      rect:
+        serializedVersion: 2
+        x: 48
+        y: 163
+        width: 59
+        height: 49
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 05a2d915ac39c45f0800000000000000
+      internalID: -771078939025266096
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: marathumbsup_00001_22
+      rect:
+        serializedVersion: 2
+        x: 89
+        y: 77
+        width: 108
+        height: 150
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a2127f8abb6360b30800000000000000
+      internalID: 4253147077719564586
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: marathumbsup_00001_23
+      rect:
+        serializedVersion: 2
+        x: 110
+        y: 172
+        width: 27
+        height: 63
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 364e321678f99d960800000000000000
+      internalID: 7627302847727789155
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: marathumbsup_00001_24
+      rect:
+        serializedVersion: 2
+        x: 647
+        y: 77
+        width: 107
+        height: 145
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7e5a77cab27c8bb40800000000000000
+      internalID: 5456329938950399463
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: marathumbsup_00001_25
+      rect:
+        serializedVersion: 2
+        x: 707
+        y: 172
+        width: 27
+        height: 63
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5eaf70edd8098b130800000000000000
+      internalID: 3582772442563082981
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: marathumbsup_00001_26
+      rect:
+        serializedVersion: 2
+        x: 737
+        y: 163
+        width: 60
+        height: 50
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 74dce17cae7e8d5f0800000000000000
+      internalID: -731579943898657465
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: marathumbsup_00001_27
+      rect:
+        serializedVersion: 2
+        x: 69
+        y: 114
+        width: 69
+        height: 41
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 80d277c0392a5b3f0800000000000000
+      internalID: -885622999255405304
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: marathumbsup_00001_28
+      rect:
+        serializedVersion: 2
+        x: 706
+        y: 114
+        width: 69
+        height: 41
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e79b95111b926c400800000000000000
+      internalID: 344008262017464702
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: marathumbsup_00001_29
+      rect:
+        serializedVersion: 2
+        x: 103
+        y: 71
+        width: 75
+        height: 31
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a4434579e4c91f400800000000000000
+      internalID: 356237706899240010
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: marathumbsup_00001_30
+      rect:
+        serializedVersion: 2
+        x: 666
+        y: 71
+        width: 75
+        height: 31
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d66f1d3adc634bdc0800000000000000
+      internalID: -3624211543281764755
       vertices: []
       indices: 
       edges: []
@@ -164,7 +888,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 5e97eb03825dee720800000000000000
+    spriteID: 
     internalID: 0
     vertices: []
     indices: 
@@ -174,7 +898,37 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      marathumbsup_00001_0: -752140998073649974
+      marathumbsup_00001_0: 357654289361856933
+      marathumbsup_00001_1: 7556222017659747142
+      marathumbsup_00001_10: -7395941287615888155
+      marathumbsup_00001_11: 4316515572402224080
+      marathumbsup_00001_12: 6241132093009251146
+      marathumbsup_00001_13: 7061219756135176239
+      marathumbsup_00001_14: 7598791950159762346
+      marathumbsup_00001_15: 2787563096373663380
+      marathumbsup_00001_16: 802993472544748199
+      marathumbsup_00001_17: 6486564403997528065
+      marathumbsup_00001_18: 2641989761108410436
+      marathumbsup_00001_19: -91820692086355778
+      marathumbsup_00001_2: 44181655194715283
+      marathumbsup_00001_20: -1687353935528921704
+      marathumbsup_00001_21: -771078939025266096
+      marathumbsup_00001_22: 4253147077719564586
+      marathumbsup_00001_23: 7627302847727789155
+      marathumbsup_00001_24: 5456329938950399463
+      marathumbsup_00001_25: 3582772442563082981
+      marathumbsup_00001_26: -731579943898657465
+      marathumbsup_00001_27: -885622999255405304
+      marathumbsup_00001_28: 344008262017464702
+      marathumbsup_00001_29: 356237706899240010
+      marathumbsup_00001_3: -6046522204363145526
+      marathumbsup_00001_30: -3624211543281764755
+      marathumbsup_00001_4: 5090893980910983940
+      marathumbsup_00001_5: 2085117408335647538
+      marathumbsup_00001_6: -1570411471869068465
+      marathumbsup_00001_7: 9197490983432287921
+      marathumbsup_00001_8: -8804404382894810900
+      marathumbsup_00001_9: -3840854171110521982
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

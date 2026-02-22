@@ -591,6 +591,9 @@ namespace SortResort
             if (transforms.Count > 0)
             {
                 MatchEffect.SpawnAtCenter(transforms.ToArray());
+
+                // Notify combo tracker with the container center position
+                ComboTracker.NotifyMatch(transform.position);
             }
 
             // Play match sound
@@ -612,9 +615,6 @@ namespace SortResort
                     matchedCount++;
                 }
             }
-
-            // Play match sound
-            AudioManager.Instance?.PlayMatchSound();
 
             // Fire event and increment match count
             // Note: LevelManager listens to OnItemsMatched and notifies ALL locked containers
@@ -922,9 +922,11 @@ namespace SortResort
             Sprite lockSprite = null;
             foreach (var path in spritePaths)
             {
-                lockSprite = Resources.Load<Sprite>(path);
-                if (lockSprite != null)
+                // Load as Texture2D and create full-rect sprite to prevent Unity alpha-trimming
+                var tex = Resources.Load<Texture2D>(path);
+                if (tex != null)
                 {
+                    lockSprite = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), new Vector2(0.5f, 0.5f), 100f);
                     Debug.Log($"[ItemContainer] Loaded lock overlay from: {path}");
                     break;
                 }
@@ -1041,8 +1043,11 @@ namespace SortResort
 
             Debug.Log($"[ItemContainer] Container {containerId} unlocked!");
 
-            // Play unlock sound
-            AudioManager.Instance?.PlayUnlockSound();
+            // Play unlock sound after a short delay so it doesn't overlap with the match sound
+            LeanTween.delayedCall(0.3f, () =>
+            {
+                AudioManager.Instance?.PlayUnlockSound();
+            });
 
             // Hide the static lock overlay immediately
             if (lockOverlay != null)

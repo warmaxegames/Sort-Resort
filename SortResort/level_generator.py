@@ -38,6 +38,9 @@ class WorldConfig:
         world_id:        World identifier (e.g. "island", "supermarket")
         item_groups:     List of (unlock_level, [item_ids]) tuples.
                          Items become available at the specified level.
+        complexity_offset: Offset added to level number for complexity calculations.
+                         Non-default worlds use this so L1 starts at higher complexity
+                         (e.g. offset=44 means L1 plays like Island L45).
         container_image: Sprite name for standard containers.
                          Defaults to "{world_id}_container".
         single_slot_image: Sprite name for single-slot containers.
@@ -47,6 +50,7 @@ class WorldConfig:
     """
     world_id: str
     item_groups: List[Tuple[int, List[str]]]
+    complexity_offset: int = 0
     container_image: str = ""
     single_slot_image: str = ""
     lock_overlay_image: str = ""
@@ -108,12 +112,26 @@ def get_max_rows(level):
 
 # ── Item Management ──────────────────────────────────────────────────────────
 
-def get_available_items(config, level):
-    """Return items unlocked at or before this level."""
+def get_available_items(config, level, min_needed=0):
+    """Return items unlocked at or before this level.
+
+    If min_needed > 0 and the wave-based pool is too small, items from later
+    waves are pulled in (earliest waves first) until we have enough unique
+    items or exhaust the entire world pool.  This prevents excessive duplicates
+    on early levels of high-complexity-offset worlds.
+    """
     available = []
+    remaining = []
     for unlock_lvl, items in config.item_groups:
         if level >= unlock_lvl:
             available.extend(items)
+        else:
+            remaining.extend(items)
+
+    if min_needed > 0 and len(available) < min_needed and remaining:
+        shortfall = min_needed - len(available)
+        available.extend(remaining[:shortfall])
+
     return available
 
 
@@ -274,9 +292,9 @@ def _compute_bf_params(positions, single_indices, locked_indices, spec, placed_r
     Returns:
         dict mapping position index -> (direction, distance, speed)
     """
-    level = spec["level"]
+    effective = spec["effective"]
     max_rows = spec["max_rows"]
-    bf_speed = 40 + level * 0.4
+    bf_speed = 40 + effective * 0.4
     Y_ROW_TOLERANCE = 150  # for grouping b&f candidates into visual rows
 
     # Identify which position indices are back-and-forth movers
@@ -514,32 +532,37 @@ def make_container(cid, x, y, config, slot_count=3, max_rows=1, is_locked=False,
 
 # ── Level Spec ───────────────────────────────────────────────────────────────
 
-def get_level_spec(level):
+def get_level_spec(level, complexity_offset=0):
     """Determine level parameters based on level number.
 
     Uses a cumulative mechanic availability system: each mechanic has an
     unlock level and persists thereafter (probability-based). A complexity
     cap prevents overwhelming early levels.
+
+    complexity_offset: added to level for all complexity calculations.
+    Non-default worlds use this so L1 starts at higher complexity
+    (e.g. offset=44 means L1 plays like Island L45).
     """
+    effective = level + complexity_offset
     rng = random.Random(level * 42 + 7)
 
     # ── Faster container count ramp ────────────────────────────────────
-    if level <= 1:
+    if effective <= 1:
         n_containers = 3
-    elif level <= 3:
-        n_containers = level + 2                          # 4, 5
-    elif level <= 7:
-        n_containers = min(5 + (level - 4), 9)            # 5-9
-    elif level <= 15:
-        n_containers = min(8 + (level - 8) // 2, 12)     # 8-12
-    elif level <= 30:
-        n_containers = min(10 + (level - 16) // 3, 16)   # 10-16
-    elif level <= 60:
-        n_containers = min(14 + (level - 31) // 5, 20)   # 14-20
+    elif effective <= 3:
+        n_containers = effective + 2                          # 4, 5
+    elif effective <= 7:
+        n_containers = min(5 + (effective - 4), 9)            # 5-9
+    elif effective <= 15:
+        n_containers = min(8 + (effective - 8) // 2, 12)     # 8-12
+    elif effective <= 30:
+        n_containers = min(10 + (effective - 16) // 3, 16)   # 10-16
+    elif effective <= 60:
+        n_containers = min(14 + (effective - 31) // 5, 20)   # 14-20
     else:
-        n_containers = min(18 + (level - 61) // 8, 24)   # 18-24
+        n_containers = min(18 + (effective - 61) // 8, 24)   # 18-24
 
-    max_rows = get_max_rows(level)
+    max_rows = get_max_rows(effective)
 
     # ── Mechanic unlock levels ─────────────────────────────────────────
     UNLOCK_LOCKED    = 11
@@ -559,13 +582,13 @@ def get_level_spec(level):
         (UNLOCK_CAROUSEL,  "carousel"),
         (UNLOCK_DESPAWN,   "despawn"),
     ]:
-        if level >= unlock:
+        if effective >= unlock:
             mechanics_available.append((unlock, name))
 
     # Determine which mechanics are active this level
     active_mechanics = set()
     for unlock, name in mechanics_available:
-        levels_since = level - unlock
+        levels_since = effective - unlock
         if levels_since < INTRO_RANGE:
             # Introduction range: guaranteed
             active_mechanics.add(name)
@@ -577,11 +600,11 @@ def get_level_spec(level):
 
     # ── Complexity cap (early levels only) ─────────────────────────────
     # max 1 mechanic at L11-15, max 2 at L16-25, max 3 at L26-40, no cap L41+
-    if level < 16:
+    if effective < 16:
         max_mechanics = 1
-    elif level < 26:
+    elif effective < 26:
         max_mechanics = 2
-    elif level < 41:
+    elif effective < 41:
         max_mechanics = 3
     else:
         max_mechanics = 99
@@ -591,7 +614,7 @@ def get_level_spec(level):
         # Find the mechanic with the highest unlock level that isn't in intro
         removable = []
         for unlock, name in reversed(mechanics_available):
-            if name in active_mechanics and (level - unlock) >= INTRO_RANGE:
+            if name in active_mechanics and (effective - unlock) >= INTRO_RANGE:
                 removable.append(name)
         if removable:
             active_mechanics.discard(removable[0])
@@ -601,7 +624,7 @@ def get_level_spec(level):
     # ── Configure each mechanic's parameters ───────────────────────────
     use_locked = "locked" in active_mechanics
     use_singleslot = "singleslot" in active_mechanics
-    use_backforth = "backforth" in active_mechanics and level <= 50
+    use_backforth = "backforth" in active_mechanics and effective <= 50
     use_carousel = "carousel" in active_mechanics
     use_despawn = "despawn" in active_mechanics
 
@@ -609,8 +632,8 @@ def get_level_spec(level):
     # overlaps the despawn stack extending upward through that zone, and vertical
     # carousel occupies the same center column. Prefer whichever is in intro range.
     if use_carousel and use_despawn:
-        car_in_intro = (level - UNLOCK_CAROUSEL) < INTRO_RANGE
-        desp_in_intro = (level - UNLOCK_DESPAWN) < INTRO_RANGE
+        car_in_intro = (effective - UNLOCK_CAROUSEL) < INTRO_RANGE
+        desp_in_intro = (effective - UNLOCK_DESPAWN) < INTRO_RANGE
         if car_in_intro and not desp_in_intro:
             use_despawn = False
         elif desp_in_intro and not car_in_intro:
@@ -626,46 +649,47 @@ def get_level_spec(level):
     locked_count = 0
     locked_matches_range = (0, 0)
     if use_locked:
-        locked_count = 1 + (level - UNLOCK_LOCKED) // 15
+        locked_count = 1 + (effective - UNLOCK_LOCKED) // 15
         locked_count = min(locked_count, max(1, n_containers // 4))
         # Lock matches range 1-9, widening with level for per-container variance
-        lo = max(1, 1 + (level - UNLOCK_LOCKED) // 20)
-        hi = min(9, lo + 2 + (level - UNLOCK_LOCKED) // 12)
+        lo = max(1, 1 + (effective - UNLOCK_LOCKED) // 20)
+        hi = min(9, lo + 2 + (effective - UNLOCK_LOCKED) // 12)
         locked_matches_range = (lo, hi)
 
     # Single-slot: count scales
     singleslot_count = 0
     if use_singleslot:
-        singleslot_count = 1 + (level - UNLOCK_SINGLE) // 25
+        singleslot_count = 1 + (effective - UNLOCK_SINGLE) // 25
         singleslot_count = min(singleslot_count, max(1, n_containers // 3))
 
     # Back-and-forth: count scales
     backforth_count = 0
     if use_backforth:
-        backforth_count = 1 + (level - UNLOCK_BACKFORTH) // 20
+        backforth_count = 1 + (effective - UNLOCK_BACKFORTH) // 20
         backforth_count = min(backforth_count, 3)
 
     # Carousel: count scales
     carousel_count = 0
     if use_carousel:
-        carousel_count = 3 + (level - UNLOCK_CAROUSEL) // 20
+        carousel_count = 3 + (effective - UNLOCK_CAROUSEL) // 20
         carousel_count = min(carousel_count, 5)
 
     # Despawn: full-screen stacked columns, multi-column at higher levels
     despawn_count = 0
     despawn_columns = 1
     if use_despawn:
-        # Column count scales with level
-        if level >= 71:
+        # Column count scales with effective level
+        if effective >= 71:
             despawn_columns = rng.choice([1, 2, 2, 3])  # 25% 1-col, 50% 2-col, 25% 3-col
-        elif level >= 51:
+        elif effective >= 51:
             despawn_columns = rng.choice([1, 1, 2])      # 67% 1-col, 33% 2-col
         # Per-column count fills visible screen + off-screen buffer
         # Computed dynamically in build_containers based on v_spacing
         despawn_count = -1  # sentinel: computed in build_containers
 
     return {
-        "level": level, "n_containers": n_containers, "max_rows": max_rows,
+        "level": level, "effective": effective,
+        "n_containers": n_containers, "max_rows": max_rows,
         "use_locked": use_locked, "locked_count": locked_count,
         "locked_matches_range": locked_matches_range,
         "use_singleslot": use_singleslot, "singleslot_count": singleslot_count,
@@ -683,6 +707,7 @@ def build_containers(spec, config):
     """Create all containers with positions and mechanics."""
     rng = spec["rng"]
     level = spec["level"]
+    effective = spec["effective"]
     containers = []
     idx = 1
     static_count = spec["n_containers"]
@@ -692,12 +717,12 @@ def build_containers(spec, config):
 
     # Carousel containers (allowed off-screen, they scroll in)
     if spec["use_carousel"]:
-        car_speed = 60 + level * 0.3
+        car_speed = 60 + effective * 0.3
         car_mr = min(spec["max_rows"], 2)
         hw = CONTAINER_WIDTH_3SLOT / 2  # ~170
 
-        # For levels 50+, randomly choose vertical or horizontal carousel
-        use_vertical_carousel = level >= 50 and rng.random() < 0.4
+        # For effective levels 50+, randomly choose vertical or horizontal carousel
+        use_vertical_carousel = effective >= 50 and rng.random() < 0.4
 
         if use_vertical_carousel:
             # Vertical carousel at X=540: disable despawn (shares center column)
@@ -777,7 +802,7 @@ def build_containers(spec, config):
             carousel_bottom = car_y + car_half_h
             min_first_static_y = carousel_bottom + MIN_CONTAINER_GAP + static_half_h
             y_offset = int(max(
-                get_y_gap(spec["max_rows"], static_count, level),
+                get_y_gap(spec["max_rows"], static_count, effective),
                 min_first_static_y - SCREEN_MIN_Y
             ))
 
@@ -839,7 +864,7 @@ def build_containers(spec, config):
         static_count = max(2, static_count)
         # Cap statics to fit on screen: use actual y_gap (includes MIN_CONTAINER_GAP)
         # to compute how many rows fit, then multiply by available columns
-        actual_y_gap = get_y_gap(spec["max_rows"], static_count, level)
+        actual_y_gap = get_y_gap(spec["max_rows"], static_count, effective)
         avail_height = SCREEN_MAX_Y - SCREEN_MIN_Y - y_offset
         max_rows_fit = max(1, avail_height // actual_y_gap + 1)
         n_cols = len(available_cols) if available_cols else 3
@@ -878,7 +903,7 @@ def build_containers(spec, config):
     if static_count == 0:
         positions = []
     else:
-        y_gap = get_y_gap(spec["max_rows"], static_count, level)
+        y_gap = get_y_gap(spec["max_rows"], static_count, effective)
 
         # Determine which columns statics can use (exclude despawn-occupied columns)
         static_cols = available_cols if available_cols else [200, 540, 880]
@@ -929,7 +954,7 @@ def build_containers(spec, config):
                 if n_static_only > 0:
                     static_y_offset = y_offset + bf_rows_used * y_gap
                     static_positions = get_static_positions(
-                        n_static_only, spec["max_rows"], static_y_offset, level)
+                        n_static_only, spec["max_rows"], static_y_offset, effective)
                 else:
                     static_positions = []
 
@@ -951,7 +976,7 @@ def build_containers(spec, config):
                 row += 1
         else:
             # Standard 3-column layout
-            positions = get_static_positions(static_count, spec["max_rows"], y_offset, level)
+            positions = get_static_positions(static_count, spec["max_rows"], y_offset, effective)
 
     # ── Bounds validation: clamp container centers to safe screen area ──
     # Centers stay within SCREEN_MIN/MAX bounds; edges naturally extend beyond
@@ -1269,8 +1294,9 @@ def place_items(containers, item_ids, max_rows, rng, level=1):
 # ── Timer & Thresholds ───────────────────────────────────────────────────────
 
 def calc_timer(level, n_items):
-    """Timer scales from 2.0s/item (L1) to 0.5s/item (L100)."""
-    secs_per_item = 2.0 - (level - 1) * (1.5 / 99.0)
+    """Timer scales from 2.0s/item (L1) to 0.5s/item (L100+)."""
+    capped = min(level, 100)
+    secs_per_item = 2.0 - (capped - 1) * (1.5 / 99.0)
     return max(10, round(n_items * secs_per_item))
 
 
@@ -1296,12 +1322,13 @@ def estimate_thresholds(level, n_items, spec):
 
 def generate_level(level, config, item_usage):
     """Generate a single level for the given world."""
-    spec = get_level_spec(level)
+    spec = get_level_spec(level, config.complexity_offset)
+    effective = spec["effective"]
     rng = spec["rng"]
     containers = build_containers(spec, config)
 
-    # Level 1: hardcoded 2-move tutorial
-    if level == 1:
+    # Level 1: hardcoded 2-move tutorial (only for default world with no offset)
+    if level == 1 and config.complexity_offset == 0:
         available = get_available_items(config, level)
         selected = select_items(rng, available, 2, item_usage)
         a, b = selected[0], selected[1]
@@ -1328,15 +1355,15 @@ def generate_level(level, config, item_usage):
 
     # Calculate items from fill ratio (primary driver) and variety (secondary)
     total_capacity = sum(c["slot_count"] * c["max_rows_per_slot"] for c in containers)
-    target_fill = get_target_fill_ratio(level)
+    target_fill = get_target_fill_ratio(effective)
     target_items = math.ceil(total_capacity * target_fill)
     target_items = ((target_items + 2) // 3) * 3     # Round up to nearest multiple of 3
     target_triples = target_items // 3
 
-    available = get_available_items(config, level)
+    available = get_available_items(config, level)  # item unlock uses actual level
     max_types = max(2, (total_capacity - 3) // 3)     # Leave at least 1 slot buffer
     fill_types = max(2, target_triples)
-    variety_types = get_target_types(level)
+    variety_types = get_target_types(effective)
 
     # Number of unique item types for variety
     n_unique = max(fill_types, variety_types)
@@ -1357,7 +1384,7 @@ def generate_level(level, config, item_usage):
 
     n_items = len(selected) * 3
 
-    construction_moves = place_items(containers, selected, spec["max_rows"], rng, level)
+    construction_moves = place_items(containers, selected, spec["max_rows"], rng, effective)
 
     actual = sum(len(c["initial_items"]) for c in containers)
     if construction_moves == 0 or actual != n_items:
@@ -1367,8 +1394,8 @@ def generate_level(level, config, item_usage):
             used = len(c["initial_items"])
             print(f"     {c['id']}: {used}/{cap}")
 
-    timer = calc_timer(level, n_items)
-    thresholds = estimate_thresholds(level, n_items, spec)
+    timer = calc_timer(effective, n_items)
+    thresholds = estimate_thresholds(effective, n_items, spec)
 
     return {
         "id": level, "world_id": config.world_id, "name": f"level_{level:03d}",
@@ -1379,27 +1406,40 @@ def generate_level(level, config, item_usage):
 
 # ── Main Entry Point ─────────────────────────────────────────────────────────
 
-def generate_levels(config, output_dir, count=100):
+def generate_levels(config, output_dir, count=100, start_level=None, end_level=None):
     """Generate levels for the given world configuration.
-    Returns list of error strings (empty = success)."""
+
+    If start_level/end_level are given, generates only that range (inclusive)
+    without deleting other files. Otherwise generates all 1..count.
+    Returns list of error strings (empty = success).
+    """
     os.makedirs(output_dir, exist_ok=True)
 
-    # Delete existing levels
-    for f in os.listdir(output_dir):
-        if f.startswith("level_") and f.endswith(".json"):
-            os.remove(os.path.join(output_dir, f))
-            print(f"  Deleted old {f}")
+    if start_level is not None and end_level is not None:
+        # Range mode: only generate specified levels, don't delete others
+        level_start = start_level
+        level_end = end_level
+    else:
+        # Full mode: delete all and regenerate
+        level_start = 1
+        level_end = count
+        for f in os.listdir(output_dir):
+            if f.startswith("level_") and f.endswith(".json"):
+                os.remove(os.path.join(output_dir, f))
+                print(f"  Deleted old {f}")
 
     all_items = config.all_items
     item_count = len(all_items)
     item_usage = {item: 0 for item in all_items}
 
-    print(f"\nGenerating {count} {config.world_id.title()} levels to: {output_dir}\n")
+    n_levels = level_end - level_start + 1
+    range_str = f"L{level_start}-L{level_end}" if n_levels < count else f"{count}"
+    print(f"\nGenerating {range_str} {config.world_id.title()} levels to: {output_dir}\n")
 
     stats = []
     errors = []
 
-    for level in range(1, count + 1):
+    for level in range(level_start, level_end + 1):
         level_data = generate_level(level, config, item_usage)
         filepath = os.path.join(output_dir, f"level_{level:03d}.json")
         with open(filepath, "w") as f:
@@ -1455,14 +1495,17 @@ def generate_levels(config, output_dir, count=100):
 
     # Item usage report
     print(f"\n{'='*60}")
-    print(f"Item usage across all {count} levels:")
+    print(f"Item usage across {n_levels} levels ({range_str}):")
     unused = [item for item in all_items if item_usage[item] == 0]
     min_used = min(item_usage.values())
     max_used = max(item_usage.values())
     print(f"  Min usage: {min_used}, Max usage: {max_used}")
-    if unused:
+    if unused and n_levels >= count:
+        # Only flag unused items as errors for full generation
         print(f"  UNUSED ITEMS: {unused}")
         errors.append(f"Unused items: {unused}")
+    elif unused:
+        print(f"  Items not used in this range: {len(unused)} (expected for partial generation)")
     else:
         print(f"  All {item_count} items used!")
 
@@ -1473,7 +1516,7 @@ def generate_levels(config, output_dir, count=100):
     else:
         print(f"\nNo errors!")
 
-    print(f"\nDone! Generated {count} levels.")
+    print(f"\nDone! Generated {n_levels} levels ({range_str}).")
     print("IMPORTANT: Run 'Tools > Sort Resort > Solver > Update All Level Thresholds' in Unity")
 
     # Summary file

@@ -1,0 +1,31 @@
+Space Levels Summary
+================================================================================
+
+L 31: 17c, 37t, 111i, 3r,  80% fill, thresh=[79, 91, 103, 111], timer=98s, solver=79m, construct=94m, [carousel, locked]
+L 32: 18c, 32t,  96i, 3r,  67% fill, thresh=[75, 86, 98, 105], timer=83s, solver=75m, construct=79m, [locked, single]
+L 33: 22c, 37t, 111i, 3r,  74% fill, thresh=[72, 83, 94, 101], timer=94s, solver=72m, construct=94m, [carousel, locked, single]
+L 34: 18c, 41t, 123i, 3r,  76% fill, thresh=[91, 105, 118, 127], timer=102s, solver=91m, construct=104m
+L 35: 30c, 49t, 147i, 2r,  82% fill, thresh=[86, 99, 112, 120], timer=120s, solver=86m, construct=103m, [despawn]
+L 36: 22c, 43t, 129i, 3r,  77% fill, thresh=[88, 101, 114, 123], timer=104s, solver=88m, construct=106m, [despawn, locked]
+L 37: 17c, 32t,  96i, 3r,  70% fill, thresh=[65, 75, 84, 91], timer=76s, solver=65m, construct=86m, [carousel]
+L 38: 22c, 36t, 108i, 3r,  72% fill, thresh=[72, 83, 94, 101], timer=83s, solver=72m, construct=78m (attempt 3), [carousel, locked, single]
+L 39: 22c, 33t,  99i, 3r,  66% fill, thresh=[64, 74, 83, 90], timer=75s, solver=64m, construct=84m, [carousel, single]
+L 40: 22c, 35t, 105i, 3r,  70% fill, thresh=[70, 80, 91, 98], timer=78s, solver=70m, construct=84m, [despawn, single]
+L 41: 22c, 43t, 129i, 3r,  77% fill, thresh=[84, 97, 109, 118], timer=94s, solver=84m, construct=110m, [carousel]
+L 42: 22c, 41t, 123i, 3r,  73% fill, thresh=[87, 100, 113, 122], timer=88s, solver=87m, construct=108m, [carousel, locked]
+L 43: 17c, 27t,  81i, 3r,  68% fill, thresh=[60, 69, 78, 84], timer=56s, solver=60m, construct=74m, [carousel, locked, single]
+L 44: 18c, 31t,  93i, 3r,  65% fill, thresh=[67, 77, 87, 94], timer=63s, solver=67m, construct=80m, [locked, single]
+L 45: 30c, 47t, 141i, 2r,  78% fill, thresh=[83, 95, 108, 116], timer=94s, solver=83m, construct=99m, [despawn]
+L 46: 17c, 33t,  99i, 3r,  72% fill, thresh=[64, 74, 83, 90], timer=64s, solver=64m, construct=89m, [carousel, locked]
+L 47: 26c, 38t, 114i, 3r,  76% fill, thresh=[74, 85, 96, 104], timer=73s, solver=74m, construct=76m, [despawn, locked, single]
+L 48: 22c, 39t, 117i, 3r,  70% fill, thresh=[71, 82, 92, 99], timer=73s, solver=71m, construct=97m, [carousel, locked]
+L 49: 26c, 38t, 114i, 3r,  76% fill, thresh=[75, 86, 98, 105], timer=69s, solver=75m, construct=73m, [despawn, locked, single]
+L 50: 18c, 42t, 126i, 3r,  78% fill, thresh=[82, 94, 107, 115], timer=74s, solver=82m, construct=110m
+
+Item usage: min=19, max=19
+
+Mechanic histogram:
+  carousel: 10/20
+  despawn: 6/20
+  locked: 12/20
+  single: 9/20

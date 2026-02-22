@@ -1,0 +1,65 @@
+Farm Levels Summary
+================================================================================
+
+L 51: 22c, 42t, 126i, 3r,  75% fill, thresh=[88, 101, 114, 123], timer=73s, solver=88m, construct=90m, [despawn]
+L 52: 22c, 31t,  93i, 3r,  65% fill, thresh=[66, 76, 86, 92], timer=52s, solver=66m, construct=80m (attempt 3), [carousel, locked, single]
+L 53: 22c, 31t,  93i, 3r,  65% fill, thresh=[63, 72, 82, 88], timer=51s, solver=63m, construct=74m, [carousel, locked, single]
+L 54: 26c, 44t, 132i, 3r,  76% fill, thresh=[83, 95, 108, 116], timer=70s, solver=83m, construct=98m (attempt 3), [despawn]
+L 55: 26c, 34t, 102i, 3r,  68% fill, thresh=[65, 75, 84, 91], timer=53s, solver=65m, construct=80m, [despawn, locked, single]
+L 56: 22c, 33t,  99i, 3r,  69% fill, thresh=[81, 93, 105, 113], timer=50s, solver=81m, construct=86m, [despawn, locked, single]
+L 57: 30c, 47t, 141i, 2r,  78% fill, thresh=[88, 101, 114, 123], timer=70s, solver=88m, construct=92m (attempt 2), [despawn]
+L 58: 18c, 41t, 123i, 3r,  76% fill, thresh=[84, 97, 109, 118], timer=62s, solver=84m, construct=111m (attempt 3), [locked]
+L 59: 26c, 45t, 135i, 3r,  78% fill, thresh=[87, 100, 113, 122], timer=68s, solver=87m, construct=100m, [despawn, locked]
+L 60: 22c, 33t,  99i, 3r,  69% fill, thresh=[63, 72, 82, 88], timer=50s, solver=63m, construct=80m, [despawn, locked, single]
+L 61: 22c, 44t, 132i, 3r,  79% fill, thresh=[87, 100, 113, 122], timer=66s, solver=87m, construct=99m, [despawn, locked]
+L 62: 22c, 35t, 105i, 3r,  73% fill, thresh=[73, 84, 95, 102], timer=52s, solver=73m, construct=85m (attempt 3), [despawn, locked, single]
+L 63: 30c, 45t, 135i, 2r,  75% fill, thresh=[84, 97, 109, 118], timer=68s, solver=84m, construct=88m (attempt 2), [despawn]
+L 64: 18c, 38t, 114i, 3r,  70% fill, thresh=[87, 100, 113, 122], timer=57s, solver=87m, construct=100m (attempt 3), [locked]
+L 65: 26c, 36t, 108i, 3r,  72% fill, thresh=[66, 76, 86, 92], timer=54s, solver=66m, construct=78m, [despawn, locked, single]
+L 66: 22c, 32t,  96i, 3r,  67% fill, thresh=[66, 76, 86, 92], timer=48s, solver=66m, construct=84m, [carousel, single]
+L 67: 26c, 37t, 111i, 3r,  74% fill, thresh=[70, 80, 91, 98], timer=56s, solver=70m, construct=78m, [despawn, single]
+L 68: 30c, 48t, 144i, 2r,  80% fill, thresh=[80, 92, 104, 112], timer=72s, solver=80m, construct=99m (attempt 3), [despawn]
+L 69: 26c, 48t, 144i, 3r,  83% fill, thresh=[94, 108, 122, 132], timer=72s, solver=94m, construct=106m, [despawn, locked]
+L 70: 22c, 33t,  99i, 3r,  69% fill, thresh=[81, 93, 105, 113], timer=50s, solver=81m, construct=85m (attempt 2), [carousel, locked, single]
+L 71: 17c, 26t,  78i, 3r,  68% fill, thresh=[53, 61, 69, 74], timer=39s, solver=53m, construct=64m, [carousel, single]
+L 72: 26c, 33t,  99i, 3r,  69% fill, thresh=[63, 72, 82, 88], timer=50s, solver=63m, construct=73m, [despawn, locked, single]
+L 73: 17c, 24t,  72i, 3r,  67% fill, thresh=[61, 70, 79, 85], timer=36s, UNSOLVED, construct=61m (attempt 20), [carousel, locked, single]
+L 74: 17c, 33t,  99i, 3r,  72% fill, thresh=[65, 75, 84, 91], timer=50s, solver=65m, construct=94m, [carousel]
+L 75: 22c, 31t,  93i, 3r,  67% fill, thresh=[66, 76, 86, 92], timer=46s, solver=66m, construct=80m (attempt 3), [carousel, locked, single]
+L 76: 26c, 34t, 102i, 3r,  71% fill, thresh=[66, 76, 86, 92], timer=51s, solver=66m, construct=69m, [despawn, locked, single]
+L 77: 30c, 46t, 138i, 2r,  77% fill, thresh=[78, 90, 101, 109], timer=69s, solver=78m, construct=85m, [despawn]
+L 78: 26c, 34t, 102i, 3r,  71% fill, thresh=[63, 72, 82, 88], timer=51s, solver=63m, construct=79m (attempt 2), [despawn, locked, single]
+L 79: 26c, 35t, 105i, 3r,  73% fill, thresh=[64, 74, 83, 90], timer=52s, solver=64m, construct=72m, [despawn, single]
+L 80: 30c, 43t, 129i, 2r,  72% fill, thresh=[78, 90, 101, 109], timer=64s, solver=78m, construct=97m (attempt 2), [despawn]
+L 81: 26c, 44t, 132i, 3r,  76% fill, thresh=[75, 86, 98, 105], timer=66s, solver=75m, construct=94m, [despawn]
+L 82: 18c, 28t,  84i, 3r,  64% fill, thresh=[76, 87, 99, 106], timer=42s, UNSOLVED, construct=76m (attempt 20), [locked, single]
+L 83: 26c, 36t, 108i, 3r,  75% fill, thresh=[64, 74, 83, 90], timer=54s, solver=64m, construct=71m (attempt 2), [despawn, locked, single]
+L 84: 26c, 32t,  96i, 3r,  67% fill, thresh=[56, 64, 73, 78], timer=48s, solver=56m, construct=69m, [despawn, locked, single]
+L 85: 22c, 31t,  93i, 3r,  67% fill, thresh=[64, 74, 83, 90], timer=46s, solver=64m, construct=70m (attempt 4), [carousel, locked, single]
+L 86: 22c, 32t,  96i, 3r,  70% fill, thresh=[67, 77, 87, 94], timer=48s, solver=67m, construct=83m (attempt 5), [carousel, locked, single]
+L 87: 22c, 41t, 123i, 3r,  73% fill, thresh=[84, 97, 109, 118], timer=62s, solver=84m, construct=103m (attempt 9), [carousel, locked]
+L 88: 22c, 32t,  96i, 3r,  70% fill, thresh=[83, 95, 108, 116], timer=48s, solver=83m, construct=85m (attempt 3), [carousel, locked, single]
+L 89: 22c, 42t, 126i, 3r,  75% fill, thresh=[87, 100, 113, 122], timer=63s, solver=87m, construct=98m (attempt 17), [carousel, locked]
+L 90: 26c, 34t, 102i, 3r,  71% fill, thresh=[62, 71, 81, 87], timer=51s, solver=62m, construct=66m, [despawn, locked, single]
+L 91: 22c, 40t, 120i, 3r,  71% fill, thresh=[84, 97, 109, 118], timer=60s, solver=84m, construct=96m, [carousel]
+L 92: 22c, 29t,  87i, 3r,  63% fill, thresh=[69, 79, 90, 97], timer=44s, solver=69m, construct=73m (attempt 2), [carousel, locked, single]
+L 93: 22c, 41t, 123i, 3r,  73% fill, thresh=[82, 94, 107, 115], timer=62s, solver=82m, construct=106m (attempt 16), [carousel, locked]
+L 94: 26c, 33t,  99i, 3r,  69% fill, thresh=[61, 70, 79, 85], timer=50s, solver=61m, construct=71m, [despawn, locked, single]
+L 95: 22c, 33t,  99i, 3r,  72% fill, thresh=[65, 75, 84, 91], timer=50s, solver=65m, construct=77m, [despawn, locked, single]
+L 96: 22c, 34t, 102i, 3r,  74% fill, thresh=[72, 83, 94, 101], timer=51s, solver=72m, construct=86m, [despawn, locked, single]
+L 97: 22c, 43t, 129i, 3r,  77% fill, thresh=[78, 90, 101, 109], timer=64s, solver=78m, construct=97m, [despawn, locked]
+L 98: 26c, 31t,  93i, 3r,  67% fill, thresh=[58, 67, 75, 81], timer=46s, solver=58m, construct=63m, [despawn, single]
+L 99: 17c, 33t,  99i, 3r,  72% fill, thresh=[58, 67, 75, 81], timer=50s, solver=58m, construct=80m, [carousel]
+L100: 22c, 31t,  93i, 3r,  70% fill, thresh=[86, 99, 112, 120], timer=46s, solver=86m, construct=84m (attempt 3), [despawn, locked, single]
+
+Item usage: min=43, max=44
+
+Mechanic histogram:
+  carousel: 17/50
+  despawn: 30/50
+  locked: 34/50
+  single: 30/50
+
+Errors:
+  L73: Solver failed after 20 attempts
+  L82: Solver failed after 20 attempts

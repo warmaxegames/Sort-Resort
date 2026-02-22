@@ -13,25 +13,16 @@ namespace SortResort
 
         private SpriteRenderer spriteRenderer;
         private Sprite[] frames;
-        private Vector2[] frameOffsets; // Offset to keep each frame centered like frame 0
         private int currentFrame = 0;
         private float frameTimer = 0f;
         private float frameDuration;
         private bool isPlaying = false;
 
         private System.Action onComplete;
-        private Transform spriteTransform; // Child transform for the sprite to apply offsets
 
         private void Awake()
         {
-            // Create a child object for the sprite so we can offset it
-            var spriteGO = new GameObject("Sprite");
-            spriteGO.transform.SetParent(transform);
-            spriteGO.transform.localPosition = Vector3.zero;
-            spriteGO.transform.localScale = Vector3.one;
-            spriteTransform = spriteGO.transform;
-
-            spriteRenderer = spriteGO.AddComponent<SpriteRenderer>();
+            spriteRenderer = gameObject.AddComponent<SpriteRenderer>();
             spriteRenderer.sortingOrder = 50; // Same as lock overlay
         }
 
@@ -59,20 +50,23 @@ namespace SortResort
             string basePath = $"Sprites/UI/Overlays/LockAnimations/{worldName}/{lockOverlayImage}";
 
             // Count how many frames exist (try loading until we fail)
+            // Load as Texture2D and create full-rect sprites to prevent Unity alpha-trimming
             var frameList = new System.Collections.Generic.List<Sprite>();
             int maxFrames = 50; // Safety limit
 
             for (int i = 0; i < maxFrames; i++)
             {
                 string framePath = $"{basePath}_{i:D5}";
-                Sprite frame = Resources.Load<Sprite>(framePath);
+                Texture2D tex = Resources.Load<Texture2D>(framePath);
 
-                if (frame == null)
+                if (tex == null)
                 {
                     // No more frames
                     break;
                 }
 
+                // Create full-rect sprite to preserve transparent padding (prevents alpha-trimming)
+                Sprite frame = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), new Vector2(0.5f, 0.5f), 100f);
                 frameList.Add(frame);
             }
 
@@ -83,30 +77,6 @@ namespace SortResort
             }
 
             frames = frameList.ToArray();
-
-            // Calculate offsets to keep all frames aligned with frame 0
-            // Each sprite's pivot might be different, causing visual shifting
-            frameOffsets = new Vector2[frames.Length];
-
-            if (frames.Length > 0)
-            {
-                // Use frame 0 as the reference - all other frames should align to it
-                Sprite refSprite = frames[0];
-                Vector2 refPivotNormalized = refSprite.pivot / refSprite.rect.size;
-                Vector2 refCenter = new Vector2(0.5f, 0.5f);
-                Vector2 refOffset = (refCenter - refPivotNormalized) * refSprite.bounds.size;
-
-                for (int i = 0; i < frames.Length; i++)
-                {
-                    Sprite sprite = frames[i];
-                    Vector2 pivotNormalized = sprite.pivot / sprite.rect.size;
-                    Vector2 center = new Vector2(0.5f, 0.5f);
-                    Vector2 offset = (center - pivotNormalized) * sprite.bounds.size;
-
-                    // The offset needed to align this frame with frame 0
-                    frameOffsets[i] = refOffset - offset;
-                }
-            }
 
             return true;
         }
@@ -161,7 +131,6 @@ namespace SortResort
 
             // Set first frame
             spriteRenderer.sprite = frames[0];
-            spriteTransform.localPosition = new Vector3(frameOffsets[0].x, frameOffsets[0].y, 0);
         }
 
         private void Update()
@@ -185,7 +154,6 @@ namespace SortResort
                 }
 
                 spriteRenderer.sprite = frames[currentFrame];
-                spriteTransform.localPosition = new Vector3(frameOffsets[currentFrame].x, frameOffsets[currentFrame].y, 0);
             }
         }
 

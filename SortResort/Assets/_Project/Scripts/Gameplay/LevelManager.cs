@@ -340,6 +340,9 @@ namespace SortResort
             // Clear previous level
             ClearLevel();
 
+            // Reset combo streak tracking
+            ComboTracker.Reset();
+
             // Load level data
             currentLevel = LevelDataLoader.LoadLevel(worldId, levelNumber);
             if (currentLevel == null)

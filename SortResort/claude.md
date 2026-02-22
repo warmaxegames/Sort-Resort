@@ -22,11 +22,11 @@
 
 ## Current Status
 
-**Last Updated:** 2026-02-18
+**Last Updated:** 2026-02-21
 
 ### Working Features (Unity)
 - Splash screen → Level select with fade transition
-- 5 worlds: Island (100 levels), Supermarket, Farm, Tavern, Space (5-11 levels each for non-Island)
+- 5 worlds: Island (100), Supermarket (100), Farm (100), Space (100) levels generated; Tavern (49 items, needs 1 more)
 - Full game flow: Level Select → Play → Complete/Fail → Back/Next
 - Drag-drop with visual feedback, sounds, triple-match detection
 - Row advancement, locked containers with unlock animation
@@ -39,8 +39,9 @@
 - **Level complete/failed screens** - Mode-specific animations (stars, timer count-up), mascot thumbsup, sprite-based buttons
 - **HUD overlay** - Per-mode ui_top bars, counter text, sprite gear/undo buttons, pause menu
 - **Portal overlays** - Mode-specific completion indicators on level select portals
-- **Level generator** - Python reverse-play generator, solver-verified, 100 Island levels
+- **Level generator** - Python reverse-play generator, solver-verified, 400 levels across 4 worlds
 - **Benzin font system** - FontManager utility, TMP default, ApplyBold() on 8 scripts
+- **Combo text effects** - "GOOD!"/"AMAZING!"/"PERFECT!" on consecutive match streaks (2/3/4+), 18-frame animation + tween fade-out, per-word sound effects
 - Level solver tool (Editor window + in-game auto-solve button)
 
 ---
@@ -61,10 +62,10 @@
 5. **World-Specific Dialogue Boxes** - Need custom designs for:
    - Supermarket
 6. **Generate Levels for Remaining Worlds** - Create world config files like `generate_island_levels.py`:
-   - Farm
-   - Supermarket
-   - Tavern
-   - Space
+   - ~~Supermarket~~ - DONE (`generate_supermarket_levels.py`, 51 items, offset=44, 100/100 solver-verified)
+   - ~~Farm~~ - DONE (`generate_farm_levels.py`, 53 items, offset=44, 100/100 solver-verified)
+   - Tavern (49 items - needs 1 more for minimum 50)
+   - ~~Space~~ - DONE (`generate_space_levels.py`, 50 items, offset=44, 100/100 solver-verified)
 7. **World Icon Assets** - HUD world icons for non-Island worlds:
    - Supermarket, Farm, Tavern, Space
 8. **Mobile/Device Testing** - Test performance on mobile devices, tablets, different screen sizes
@@ -283,6 +284,15 @@ Container border scale: 1.2 (17% border around slots)
 - **TMP default**: Benzin-Bold set as TMP default so dynamically-created text auto-inherits
 - **Editor tools**: `Tools > Sort Resort > Fonts` for SDF generation and setting TMP default
 
+### Combo Text System
+- **Files**: `ComboTracker.cs` (static streak tracking), `ComboTextEffect.cs` (hybrid animation + tween)
+- **Streak**: 2 consecutive = "GOOD!", 3 = "AMAZING!", 4+ = "PERFECT!"
+- **Animation**: 18 frames at 30fps (0.6s) for scale-up + shine, then 0.15s hold, 0.25s fade-out (1s total)
+- **Assets**: `Resources/Sprites/Effects/Combo{Good,Amazing,Perfect}/` (18 frames each), `Resources/Audio/SFX/combo_{good,amazing,perfect}.mp3`
+- **Hooks**: `ComboTracker.NotifyDropStarted()` in `Item.DropOnSlot()`, `ComboTracker.NotifyMatch()` in `ItemContainer.ProcessMatch()`
+- **Reset**: `ComboTracker.Reset()` in `LevelManager.LoadLevel()`, `ComboTextEffect.DestroyAll()` in `GameManager.CompleteLevel()`/`FailLevel()`
+- **Chain match handling**: Multiple matches on same drop (row advance reveals) count as single combo increment
+
 ### Level Generator (Python)
 - **Infrastructure**: `level_generator.py` - WorldConfig, progression curves, container builder, specs
 - **Reverse generator**: `reverse_generator.py` - reverse-play item placement + solver-verified generation
@@ -292,7 +302,9 @@ Container border scale: 1.2 (17% border around slots)
 - **Algorithm**: Reverse-play construction V2 (no work container). For each triple: pick random container, push existing items deeper, place triple at front, scatter 1-3 items to other containers. Each scatter = 1 forward move.
 - **Locked containers**: Participate in reverse-play loop with cutoff timing. Last `unlock_matches_required` triples exclude locked container (those forward triples unlock it).
 - **Validation**: No starting triples at ANY row depth. Solver verifies each level; retries with different seed on failure (up to 20 attempts). Star thresholds use solver's actual move count. Full AABB bounding box checks for overlap and off-screen detection.
-- **To add a new world**: Create `generate_{world}_levels.py` with a `WorldConfig` defining item groups, then run it.
+- **Complexity offset**: Non-default worlds use `complexity_offset` in WorldConfig so L1 starts at higher complexity. E.g. `complexity_offset=44` means L1 plays like Island L45 (container count, mechanics, fill ratio all scaled). Item availability still uses actual level number, with compressed unlock schedules.
+- **Range-based generation**: `generate_levels(config, dir, start_level=X, end_level=Y)` generates only a subset without deleting others, enabling parallel generation (10 agents × 10 levels each).
+- **To add a new world**: Create `generate_{world}_levels.py` with a `WorldConfig` defining item groups and `complexity_offset`, then run it.
 
 #### Cumulative Mechanic System
 Mechanics unlock at fixed levels and persist via probability (30-70%). A complexity cap prevents overwhelming early levels (max 1 at L11-15, max 2 at L16-25, max 3 at L26-40, no cap at L41+). Introduction range (5 levels after unlock) guarantees the mechanic appears. Carousel and despawn are mutually exclusive (spatial conflict).
@@ -322,7 +334,8 @@ Mechanics unlock at fixed levels and persist via probability (30-70%). A complex
 - L11: 1-3 matches, L26: 2-5, L36: 2-6, L51: 3-8, L75: 4-9. Per-container randomization via `rng.randint(lo, hi)` ensures different values on the same level.
 
 ### Level Structure (All Worlds)
-- level_001: 3 containers, 2 item types, intro (hardcoded 2-move tutorial)
+- **Note**: Level numbers below refer to *effective* level (actual + complexity_offset). Island uses offset=0 so they match. Non-default worlds (offset=44) start L1 at effective L45.
+- level_001: 3 containers, 2 item types, intro (hardcoded 2-move tutorial, only for offset=0 worlds)
 - Levels 2-7: 4-9 containers, increasing item types, multi-row
 - Levels 8-15: 8-12 containers
 - Levels 11+: locked containers introduced (1-9 matches to unlock, widening with level)
@@ -333,7 +346,7 @@ Mechanics unlock at fixed levels and persist via probability (30-70%). A complex
 - Levels 41+: all mechanics combined (probability-based, no complexity cap)
 - Levels 50+: vertical carousel possible (10 containers, 40% chance). Container count 17-26
 - Levels 61+: container count 17-26 (screen-fit capped)
-- Fill ratios: 50-83% across levels, 50 item types per world
+- Fill ratios: 50-83% across levels, minimum 50 item types per world (some worlds may have more)
 
 ### Level Solver
 - Editor: Tools > Sort Resort > Solver > Solve Level...

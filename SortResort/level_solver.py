@@ -12,8 +12,10 @@ The two implementations must stay in sync to produce identical results.
 """
 
 import copy
+import gc
 import random
 import time
+import threading
 from dataclasses import dataclass, field
 from typing import List, Optional, Dict, Tuple
 
@@ -182,6 +184,9 @@ def solve_level_best(level_dict, noise_runs_per_strategy=3, noise_magnitude=8, v
             best = result
             move_limit = best.total_moves
             best_strategy_name = strat.name
+        else:
+            del result
+        gc.collect()
 
         # Noise restarts
         for run in range(1, noise_runs_per_strategy + 1):
@@ -198,6 +203,9 @@ def solve_level_best(level_dict, noise_runs_per_strategy=3, noise_magnitude=8, v
                 best = result
                 move_limit = best.total_moves
                 best_strategy_name = noise_strat.name
+            else:
+                del result
+            gc.collect()
 
     if best is None:
         best = solve_level(level_dict)
@@ -753,7 +761,24 @@ def _find_one_move_match(state):
 # ── Move Enumeration ─────────────────────────────────────────────────────────
 
 def _get_all_valid_moves(state):
-    """Get all valid moves: front-row items to empty front slots."""
+    """Get all valid moves: front-row items to empty front slots.
+    Optimizations to prevent combinatorial explosion when many containers are empty:
+    1. Completely empty containers: only one representative per slot_count is used
+       as a destination, since moves to different empty containers of the same shape
+       are functionally identical.
+    2. Multiple empty slots in a destination: only the first empty slot is used,
+       since slot position doesn't affect the solver's scoring or matching logic
+       (match checks all 3 front items, not specific positions).
+    """
+    # Identify completely empty unlocked containers and pick one representative per slot_count
+    empty_representatives = {}  # slot_count -> container index
+    empty_container_set = set()
+    for ci, c in enumerate(state.containers):
+        if not c.is_locked and c.is_empty():
+            empty_container_set.add(ci)
+            if c.slot_count not in empty_representatives:
+                empty_representatives[c.slot_count] = ci
+
     moves = []
     for from_ci, from_c in enumerate(state.containers):
         if from_c.is_locked:
@@ -765,9 +790,17 @@ def _get_all_valid_moves(state):
             for to_ci, to_c in enumerate(state.containers):
                 if to_ci == from_ci or to_c.is_locked:
                     continue
+                # Skip non-representative empty containers
+                if to_ci in empty_container_set and to_ci != empty_representatives.get(to_c.slot_count):
+                    continue
+                # Only consider first empty slot in each destination container
+                first_empty = -1
                 for to_s in range(to_c.slot_count):
                     if to_c.is_front_slot_empty(to_s):
-                        moves.append(Move(from_ci, from_s, to_ci, to_s, item))
+                        first_empty = to_s
+                        break
+                if first_empty >= 0:
+                    moves.append(Move(from_ci, from_s, to_ci, first_empty, item))
     return moves
 
 

@@ -369,6 +369,9 @@ namespace SortResort
 
             Debug.Log($"[Item] DropOnSlot - {itemId} dropping on container {container.ContainerId}, slot {slot.SlotIndex}");
 
+            // Notify combo tracker that a drop is starting
+            ComboTracker.NotifyDropStarted();
+
             // Check if item is being placed back in the same position
             bool isSamePosition = (originalContainer == container) &&
                                   (originalSlot != null && originalSlot.SlotIndex == slot.SlotIndex);

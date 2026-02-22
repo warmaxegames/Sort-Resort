@@ -18,10 +18,14 @@ Algorithm (V2 - push-based, no work container):
   Star thresholds are derived from construction move count.
 """
 
+import gc
 import json
 import math
 import os
 import random
+import subprocess
+import tempfile
+import sys
 from typing import List, Tuple
 
 from level_generator import (
@@ -452,14 +456,15 @@ def get_max_triples(containers, max_rows):
 
 def generate_level(level, config, item_usage, seed_offset=0):
     """Generate a single level using reverse-play construction."""
-    spec = get_level_spec(level)
+    spec = get_level_spec(level, config.complexity_offset)
+    effective = spec["effective"]
     if seed_offset > 0:
         spec["rng"] = random.Random(level * 42 + 7 + seed_offset)
     rng = spec["rng"]
     containers = build_containers(spec, config)
 
-    # Level 1: hardcoded 2-move tutorial
-    if level == 1:
+    # Level 1: hardcoded 2-move tutorial (only for default world with no offset)
+    if level == 1 and config.complexity_offset == 0:
         available = get_available_items(config, level)
         selected = select_items(rng, available, 2, item_usage)
         a, b = selected[0], selected[1]
@@ -486,11 +491,12 @@ def generate_level(level, config, item_usage, seed_offset=0):
     total_capacity = sum(c["slot_count"] * c["max_rows_per_slot"] for c in containers)
     max_placeable = get_max_triples(containers, spec["max_rows"])
 
-    target_fill = get_target_fill_ratio(level)
+    target_fill = get_target_fill_ratio(effective)
     target_triples = max(2, math.ceil(total_capacity * target_fill / 3))
-    variety_types = get_target_types(level)
+    variety_types = get_target_types(effective)
 
-    available = get_available_items(config, level)
+    available = get_available_items(config, level,
+                                    min_needed=min(target_triples, max_placeable))
     # Number of unique item types (capped by available pool, usually 50)
     n_unique = max(target_triples, variety_types)
     n_unique = min(n_unique, max_placeable, len(available))
@@ -519,7 +525,7 @@ def generate_level(level, config, item_usage, seed_offset=0):
         containers, placement_order, spec["max_rows"], rng, level)
 
     n_items = sum(len(c["initial_items"]) for c in containers)
-    timer = calc_timer(level, n_items)
+    timer = calc_timer(effective, n_items)
 
     # Star thresholds from exact construction move count
     optimal = max(2, construction_moves)
@@ -594,20 +600,33 @@ def _compact_level(level_data):
 
 # ── Batch Generation ─────────────────────────────────────────────────────────
 
-def generate_levels(config, output_dir, count=100):
-    """Generate all levels for a world using reverse-play construction."""
+def generate_levels(config, output_dir, count=100, start_level=None, end_level=None):
+    """Generate levels for a world using reverse-play construction.
+
+    If start_level/end_level are given, generates only that range (inclusive)
+    without deleting other files. Otherwise generates all 1..count.
+    """
     os.makedirs(output_dir, exist_ok=True)
 
-    # Delete existing levels
-    for f in os.listdir(output_dir):
-        if f.startswith("level_") and f.endswith(".json"):
-            os.remove(os.path.join(output_dir, f))
+    if start_level is not None and end_level is not None:
+        level_start = start_level
+        level_end = end_level
+    else:
+        level_start = 1
+        level_end = count
+        # Full mode: delete all existing levels
+        for f in os.listdir(output_dir):
+            if f.startswith("level_") and f.endswith(".json"):
+                os.remove(os.path.join(output_dir, f))
 
     all_items = config.all_items
     item_usage = {item: 0 for item in all_items}
 
-    print(f"\nGenerating {count} {config.world_id.title()} levels "
-          f"(reverse-play V2) to: {output_dir}\n")
+    n_levels = level_end - level_start + 1
+    range_str = f"L{level_start}-L{level_end}" if n_levels < count else f"{count}"
+    offset_str = f", complexity_offset={config.complexity_offset}" if config.complexity_offset else ""
+    print(f"\nGenerating {range_str} {config.world_id.title()} levels "
+          f"(reverse-play V2{offset_str}) to: {output_dir}\n")
 
     stats = []
     errors = []
@@ -616,7 +635,10 @@ def generate_levels(config, output_dir, count=100):
 
     MAX_ATTEMPTS = 20
 
-    for level in range(1, count + 1):
+    for level in range(level_start, level_end + 1):
+        # Free memory between levels to prevent CPython segfaults on complex levels
+        gc.collect()
+
         # Try generating with solver verification; retry with different seeds
         best_data = None
         best_moves = None
@@ -624,8 +646,55 @@ def generate_levels(config, output_dir, count=100):
             saved_usage = dict(item_usage)
             level_data = generate_level(level, config, item_usage,
                                         seed_offset=attempt * 1000)
-            # Use ensemble solver for best possible move count
-            result = solve_level_best(level_data)
+            # Use subprocess-isolated solver to avoid CPython 3.11 memory corruption
+            # Write level data to temp file (stdin piping causes corruption on large JSON)
+            try:
+                script_dir = os.path.dirname(os.path.abspath(__file__))
+                tmp_path = os.path.join(script_dir, f'_solver_tmp_{os.getpid()}.json')
+                with open(tmp_path, 'w') as tmp_f:
+                    json.dump(level_data, tmp_f, separators=(',', ':'))
+                proc = subprocess.run(
+                    [sys.executable, 'solver_subprocess.py', tmp_path, 'single'],
+                    capture_output=True, text=True,
+                    timeout=120, cwd=script_dir
+                )
+                if proc.returncode == 0 and proc.stdout.strip():
+                    solver_output = json.loads(proc.stdout.strip())
+                    class SubResult:
+                        pass
+                    result = SubResult()
+                    result.success = solver_output['success']
+                    result.total_moves = solver_output['total_moves']
+                    result.total_matches = solver_output['total_matches']
+                    result.failure_reason = solver_output.get('failure_reason', '')
+                    result.solve_time_ms = solver_output.get('solve_time_ms', 0)
+                    result.move_sequence = []
+                else:
+                    class SubResult:
+                        pass
+                    result = SubResult()
+                    result.success = False
+                    stderr_msg = proc.stderr[:500] if proc.stderr else 'no stderr'
+                    result.failure_reason = f'Solver subprocess failed (rc={proc.returncode}): {stderr_msg}'
+                    result.total_moves = 0
+                    if proc.returncode != 0:
+                        print(f'    Solver subprocess failed: rc={proc.returncode}, stderr={stderr_msg}', flush=True)
+                    result.total_matches = 0
+                    result.move_sequence = []
+            except subprocess.TimeoutExpired:
+                class SubResult:
+                    pass
+                result = SubResult()
+                result.success = False
+                result.failure_reason = 'Solver subprocess timed out'
+                result.total_moves = 0
+                result.total_matches = 0
+                result.move_sequence = []
+            finally:
+                try:
+                    os.remove(tmp_path)
+                except OSError:
+                    pass
             if result.success:
                 best_data = level_data
                 best_moves = result.total_moves
@@ -645,6 +714,10 @@ def generate_levels(config, output_dir, count=100):
             t1 = max(t2 + 1, round(optimal * 1.30))
             fail = max(t1 + 1, round(optimal * 1.40))
             best_data["star_move_thresholds"] = [t3, t2, t1, fail]
+            # Recalculate timer based on actual item count and effective level
+            n_items_actual = sum(len(c["initial_items"]) for c in best_data["containers"])
+            effective = level + config.complexity_offset
+            best_data["time_limit_seconds"] = calc_timer(effective, n_items_actual)
 
         level_data = best_data
         filepath = os.path.join(output_dir, f"level_{level:03d}.json")
@@ -776,7 +849,8 @@ def generate_levels(config, output_dir, count=100):
     # Mechanic histogram
     print(f"\nMechanic histogram (levels using each):")
     for mech in sorted(mechanic_histogram.keys()):
-        print(f"  {mech}: {mechanic_histogram[mech]}/{count}")
+        n_levels = level_end - level_start + 1
+        print(f"  {mech}: {mechanic_histogram[mech]}/{n_levels}")
 
     # Construction vs Solver comparison
     if move_comparisons:
@@ -812,7 +886,8 @@ def generate_levels(config, output_dir, count=100):
     else:
         print("\nNo errors!")
 
-    print(f"\nDone! Generated {count} levels.")
+    range_str = f"L{level_start}-L{level_end}" if start_level is not None else f"all {n_levels}"
+    print(f"\nDone! Generated {n_levels} levels ({range_str}).")
 
     # Summary file
     summary_path = os.path.join(output_dir, "..",
@@ -827,7 +902,7 @@ def generate_levels(config, output_dir, count=100):
             f_out.write(f"UNUSED: {unused}\n")
         f_out.write(f"\nMechanic histogram:\n")
         for mech in sorted(mechanic_histogram.keys()):
-            f_out.write(f"  {mech}: {mechanic_histogram[mech]}/{count}\n")
+            f_out.write(f"  {mech}: {mechanic_histogram[mech]}/{n_levels}\n")
         if errors:
             f_out.write(f"\nErrors:\n")
             for e in errors:
