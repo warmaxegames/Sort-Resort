@@ -101,6 +101,9 @@ namespace SortResort
         private Sprite[] star1Frames;
         private Sprite[] star2Frames;
         private Sprite[] star3Frames;
+        private string[] star1FrameKeys;
+        private string[] star2FrameKeys;
+        private string[] star3FrameKeys;
         private TextMeshProUGUI levelCompleteLevelNumberText;
         private TextMeshProUGUI levelCompleteMoveCountText;
         private CanvasGroup greyStarsCanvasGroup;
@@ -2149,10 +2152,10 @@ namespace SortResort
             greyStarsCanvasGroup.alpha = 0f;
             CropMetadata.ApplyCropAnchors(greyStarsRect, "Sprites/UI/LevelComplete/grey_stars");
 
-            // Load star animation frames
-            star1Frames = LoadStarFrames("Sprites/UI/LevelComplete/Star1", "star1");
-            star2Frames = LoadStarFrames("Sprites/UI/LevelComplete/Star2", "star2");
-            star3Frames = LoadStarFrames("Sprites/UI/LevelComplete/Star3", "star3");
+            // Load star animation frames (with crop metadata keys for per-frame positioning)
+            star1Frames = LoadStarFrames("Sprites/UI/LevelComplete/Star1", "star1", out star1FrameKeys);
+            star2Frames = LoadStarFrames("Sprites/UI/LevelComplete/Star2", "star2", out star2FrameKeys);
+            star3Frames = LoadStarFrames("Sprites/UI/LevelComplete/Star3", "star3", out star3FrameKeys);
 
             // 10. Star 1 Image (left star) - fullscreen, starts hidden
             var star1GO = new GameObject("Star 1");
@@ -2165,7 +2168,7 @@ namespace SortResort
             levelCompleteStar1Image = star1GO.AddComponent<Image>();
             levelCompleteStar1Image.preserveAspect = true;
             levelCompleteStar1Image.raycastTarget = false;
-            CropMetadata.ApplyCropAnchorsForFolder(star1Rect, "Sprites/UI/LevelComplete/Star1");
+            // Per-frame crop anchors applied during animation playback
             star1GO.SetActive(false);
 
             // Star 2 Image (right star) - fullscreen, starts hidden
@@ -2179,7 +2182,7 @@ namespace SortResort
             levelCompleteStar2Image = star2GO.AddComponent<Image>();
             levelCompleteStar2Image.preserveAspect = true;
             levelCompleteStar2Image.raycastTarget = false;
-            CropMetadata.ApplyCropAnchorsForFolder(star2Rect, "Sprites/UI/LevelComplete/Star2");
+            // Per-frame crop anchors applied during animation playback
             star2GO.SetActive(false);
 
             // Star 3 Image (center/large star) - fullscreen, starts hidden
@@ -2193,7 +2196,7 @@ namespace SortResort
             levelCompleteStar3Image = star3GO.AddComponent<Image>();
             levelCompleteStar3Image.preserveAspect = true;
             levelCompleteStar3Image.raycastTarget = false;
-            CropMetadata.ApplyCropAnchorsForFolder(star3Rect, "Sprites/UI/LevelComplete/Star3");
+            // Per-frame crop anchors applied during animation playback
             star3GO.SetActive(false);
 
             // 11. Dancing Stars - fullscreen, loops when 3 stars earned, starts hidden
@@ -3559,18 +3562,26 @@ Antonia and Joakim Engfors
 
         private static Sprite[] LoadStarFrames(string resourcePath, string label)
         {
+            return LoadStarFrames(resourcePath, label, out _);
+        }
+
+        private static Sprite[] LoadStarFrames(string resourcePath, string label, out string[] frameKeys)
+        {
             var textures = Resources.LoadAll<Texture2D>(resourcePath);
             if (textures.Length == 0)
             {
                 Debug.LogWarning($"[UIManager] No star frames found at: {resourcePath}");
+                frameKeys = new string[0];
                 return new Sprite[0];
             }
             System.Array.Sort(textures, (a, b) => a.name.CompareTo(b.name));
             var sprites = new Sprite[textures.Length];
+            frameKeys = new string[textures.Length];
             for (int i = 0; i < textures.Length; i++)
             {
                 var tex = textures[i];
                 sprites[i] = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), new Vector2(0.5f, 0.5f), 100f);
+                frameKeys[i] = resourcePath + "/" + tex.name;
             }
             Debug.Log($"[UIManager] Loaded {sprites.Length} {label} frames");
             return sprites;
@@ -3617,18 +3628,22 @@ Antonia and Joakim Engfors
         }
 
 
-        private IEnumerator PlayStarAnimation(Image starImage, Sprite[] frames, float delay)
+        private IEnumerator PlayStarAnimation(Image starImage, Sprite[] frames, string[] frameKeys, float delay)
         {
             if (starImage == null || frames == null || frames.Length == 0) yield break;
 
             yield return new WaitForSecondsRealtime(delay);
 
             starImage.gameObject.SetActive(true);
+            var rt = starImage.rectTransform;
             float frameTime = 1f / 15f; // 15 fps
 
             for (int i = 0; i < frames.Length; i++)
             {
                 starImage.sprite = frames[i];
+                // Apply per-frame crop anchors to position the trimmed star correctly
+                if (frameKeys != null && i < frameKeys.Length)
+                    CropMetadata.ApplyCropAnchors(rt, frameKeys[i]);
                 if (i < frames.Length - 1)
                     yield return new WaitForSecondsRealtime(frameTime);
             }
@@ -4033,19 +4048,19 @@ Antonia and Joakim Engfors
             if (stars >= 1)
             {
                 AudioManager.Instance?.PlayStarEarned(1);
-                yield return StartCoroutine(PlayStarAnimation(levelCompleteStar1Image, star1Frames, 0f));
+                yield return StartCoroutine(PlayStarAnimation(levelCompleteStar1Image, star1Frames, star1FrameKeys, 0f));
             }
             if (stars >= 2)
             {
                 yield return new WaitForSecondsRealtime(0.35f);
                 AudioManager.Instance?.PlayStarEarned(2);
-                yield return StartCoroutine(PlayStarAnimation(levelCompleteStar2Image, star2Frames, 0f));
+                yield return StartCoroutine(PlayStarAnimation(levelCompleteStar2Image, star2Frames, star2FrameKeys, 0f));
             }
             if (stars >= 3)
             {
                 yield return new WaitForSecondsRealtime(0.35f);
                 AudioManager.Instance?.PlayStarEarned(3);
-                yield return StartCoroutine(PlayStarAnimation(levelCompleteStar3Image, star3Frames, 0f));
+                yield return StartCoroutine(PlayStarAnimation(levelCompleteStar3Image, star3Frames, star3FrameKeys, 0f));
                 dancingStarsCoroutine = StartCoroutine(PlayDancingStarsAnimation());
             }
         }

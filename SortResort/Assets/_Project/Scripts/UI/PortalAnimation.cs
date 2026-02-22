@@ -158,6 +158,10 @@ namespace SortResort.UI
             callbackFired = false;
             isPlaying = true;
 
+            // Force canvas layout update so CanvasScaler has applied scaling
+            // (fixes wrong size/position on first click when canvas was just created)
+            Canvas.ForceUpdateCanvases();
+
             // Position the portal image over the source button
             PositionOverButton(sourceButton);
 

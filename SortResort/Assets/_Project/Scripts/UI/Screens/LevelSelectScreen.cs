@@ -486,6 +486,7 @@ namespace SortResort.UI
             levelText.fontSizeMax = 72;
 
             // Result overlays container (stars, timer, checkmark icons on completed portals)
+            // Override sorting so overlays render above the portal vortex animation (sortingOrder 5000)
             var resultOvGO = new GameObject("ResultOverlays");
             resultOvGO.transform.SetParent(btnGO.transform, false);
             var resultOvRect = resultOvGO.AddComponent<RectTransform>();
@@ -493,6 +494,9 @@ namespace SortResort.UI
             resultOvRect.anchorMax = Vector2.one;
             resultOvRect.offsetMin = Vector2.zero;
             resultOvRect.offsetMax = Vector2.zero;
+            var resultOvCanvas = resultOvGO.AddComponent<Canvas>();
+            resultOvCanvas.overrideSorting = false; // Enabled only during portal animation so scroll mask still clips
+            resultOvCanvas.sortingOrder = 5001;
 
             // Timer overlay (bottom bar, used in Timer/Hard modes)
             var timerOvGO = new GameObject("TimerOverlay");
@@ -550,7 +554,7 @@ namespace SortResort.UI
 
             // Create LevelButton component
             var levelBtn = btnGO.AddComponent<LevelButton>();
-            levelBtn.Initialize(levelNumber, button, bgImage, levelText, compOvImage, timerOvImage, bestTimeText, lockGO, starSprites, timerPortalSprite, freePortalSprite);
+            levelBtn.Initialize(levelNumber, button, bgImage, levelText, compOvImage, timerOvImage, bestTimeText, lockGO, starSprites, timerPortalSprite, freePortalSprite, resultOvCanvas);
 
             // Connect click handler
             int lvl = levelNumber;
@@ -574,12 +578,23 @@ namespace SortResort.UI
             RectTransform buttonRect = levelButtons[levelNumber - 1].GetComponent<RectTransform>();
 
             isPortalAnimating = true;
+            SetAllOverrideSorting(true);
             PortalAnimation.EnsureInstance();
             PortalAnimation.Instance.Play(buttonRect, selectedMode, () =>
             {
                 isPortalAnimating = false;
+                SetAllOverrideSorting(false);
                 OnLevelSelected?.Invoke(worldId, levelNumber);
             });
+        }
+
+        private void SetAllOverrideSorting(bool enabled)
+        {
+            foreach (var btn in levelButtons)
+            {
+                if (btn != null)
+                    btn.SetOverrideSorting(enabled);
+            }
         }
 
         // ============================================
@@ -1372,10 +1387,11 @@ namespace SortResort.UI
         private Sprite[] starSprites;       // [1]=1star_portal, [2]=2star_portal, [3]=3star_portal
         private Sprite timerPortalSprite;   // timer_portal overlay
         private Sprite freePortalSprite;    // free_portal checkmark overlay
+        private Canvas resultOverlayCanvas;
 
         public void Initialize(int level, Button btn, Image bg, TextMeshProUGUI text,
             Image compOv, Image timerOv, TextMeshProUGUI timeText, GameObject lockObj,
-            Sprite[] stars, Sprite timerSprite, Sprite freeSprite)
+            Sprite[] stars, Sprite timerSprite, Sprite freeSprite, Canvas resultCanvas)
         {
             levelNumber = level;
             button = btn;
@@ -1388,6 +1404,13 @@ namespace SortResort.UI
             starSprites = stars;
             timerPortalSprite = timerSprite;
             freePortalSprite = freeSprite;
+            resultOverlayCanvas = resultCanvas;
+        }
+
+        public void SetOverrideSorting(bool enabled)
+        {
+            if (resultOverlayCanvas != null)
+                resultOverlayCanvas.overrideSorting = enabled;
         }
 
         public void UpdateState(bool isUnlocked, int starsEarned, float bestTime, bool isCompleted, GameMode mode, Sprite portalSprite)
