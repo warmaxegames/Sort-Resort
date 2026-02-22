@@ -158,8 +158,9 @@ namespace SortResort.UI
             callbackFired = false;
             isPlaying = true;
 
-            // Force canvas layout update so CanvasScaler has applied scaling
-            // (fixes wrong size/position on first click when canvas was just created)
+            // Enable canvas before ForceUpdateCanvases so the CanvasScaler processes
+            // (disabled canvases are skipped, causing wrong size/position on first click)
+            canvas.enabled = true;
             Canvas.ForceUpdateCanvases();
 
             // Position the portal image over the source button
@@ -169,7 +170,6 @@ namespace SortResort.UI
             AudioManager.Instance?.PlayWarpSound();
 
             portalImage.sprite = activeFrames[0];
-            canvas.enabled = true;
         }
 
         private void Hide()

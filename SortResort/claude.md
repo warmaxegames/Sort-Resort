@@ -386,3 +386,26 @@ Example (solver finds 10-move solution):
 - Fail:   >14 moves (10 × 1.40 = 14)
 
 To update all level thresholds: `Tools > Sort Resort > Solver > Update All Level Thresholds`
+
+### WebGL Build & Deploy
+
+**Live URL**: https://warmaxegames.github.io/Sort-Resort/
+
+#### Build Steps
+1. Unity: **File → Build Settings → WebGL → Build** (output: `WebGL_Build/`)
+2. From `Unity Redo/SortResort/`: `python patch_webgl_build.py` (fixes WASM import module mismatch from wasm-opt shim)
+3. **CRITICAL**: Do NOT skip step 2 — the build will fail to load without the framework JS patch
+
+#### Deploy to GitHub Pages
+```bash
+cd "Unity Redo/SortResort/WebGL_Build"
+git add -A
+git commit -m "Deploy WebGL build"
+git push origin gh-pages
+```
+
+#### Notes
+- `WebGL_Build/` is a separate git repo on the `gh-pages` branch
+- Build compression is disabled (`webGLCompressionFormat: 2`) to avoid hosting issues
+- `wasm-opt.exe` is replaced with a shim on this machine (crashes otherwise); teammate builds are fully optimized
+- Do NOT use PowerShell `Compress-Archive` for zips — backslash paths cause 403 errors. Use `python make_zip.py` instead
