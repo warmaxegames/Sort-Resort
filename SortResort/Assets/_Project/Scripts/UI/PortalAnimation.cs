@@ -1,6 +1,7 @@
 using System;
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
 namespace SortResort.UI
 {
@@ -35,6 +36,7 @@ namespace SortResort.UI
         private bool callbackFired;
         private float hideTimer;
         private Sprite[] activeFrames; // frames for the currently playing mode
+        private GameObject overlayCloneContainer; // cloned overlay visuals rendered on top of vortex
 
         // Fire the callback at frame 15 so the fade starts while the vortex is still playing
         private const int callbackFrame = 15;
@@ -166,6 +168,9 @@ namespace SortResort.UI
             // Position the portal image over the source button
             PositionOverButton(sourceButton);
 
+            // Clone active overlay visuals (stars, timer, checkmark) on top of the vortex
+            CloneButtonOverlays(sourceButton);
+
             // Play the warp sound
             AudioManager.Instance?.PlayWarpSound();
 
@@ -175,6 +180,7 @@ namespace SortResort.UI
         private void Hide()
         {
             isPlaying = false;
+            DestroyOverlayClones();
             canvas.enabled = false;
         }
 
@@ -222,6 +228,99 @@ namespace SortResort.UI
         }
 
         public bool IsPlaying => isPlaying;
+
+        private void CloneButtonOverlays(RectTransform sourceButton)
+        {
+            DestroyOverlayClones();
+
+            // Find ResultOverlays child of the portal button
+            Transform resultOverlays = sourceButton.Find("ResultOverlays");
+            if (resultOverlays == null) return;
+
+            // Check if there are any active overlays worth cloning
+            bool hasActiveOverlay = false;
+            for (int i = 0; i < resultOverlays.childCount; i++)
+            {
+                var child = resultOverlays.GetChild(i);
+                var img = child.GetComponent<Image>();
+                var tmp = child.GetComponent<TextMeshProUGUI>();
+                if ((img != null && img.enabled) || (tmp != null && tmp.enabled))
+                {
+                    hasActiveOverlay = true;
+                    break;
+                }
+            }
+            if (!hasActiveOverlay) return;
+
+            // Create container matching portalRect's position and size on our overlay canvas
+            var containerGO = new GameObject("OverlayClones");
+            containerGO.transform.SetParent(transform, false);
+            var containerRect = containerGO.AddComponent<RectTransform>();
+            containerRect.anchorMin = portalRect.anchorMin;
+            containerRect.anchorMax = portalRect.anchorMax;
+            containerRect.pivot = portalRect.pivot;
+            containerRect.anchoredPosition = portalRect.anchoredPosition;
+            containerRect.sizeDelta = portalRect.sizeDelta;
+            overlayCloneContainer = containerGO;
+
+            // Clone each active overlay child
+            for (int i = 0; i < resultOverlays.childCount; i++)
+            {
+                var child = resultOverlays.GetChild(i);
+                var childRect = child.GetComponent<RectTransform>();
+                if (childRect == null) continue;
+
+                var srcImg = child.GetComponent<Image>();
+                var srcTmp = child.GetComponent<TextMeshProUGUI>();
+
+                if (srcImg != null && srcImg.enabled)
+                {
+                    var cloneGO = new GameObject(child.name + "_Clone");
+                    cloneGO.transform.SetParent(containerGO.transform, false);
+                    var cloneRect = cloneGO.AddComponent<RectTransform>();
+                    CopyRectTransform(childRect, cloneRect);
+                    var cloneImg = cloneGO.AddComponent<Image>();
+                    cloneImg.sprite = srcImg.sprite;
+                    cloneImg.color = srcImg.color;
+                    cloneImg.preserveAspect = srcImg.preserveAspect;
+                    cloneImg.type = srcImg.type;
+                    cloneImg.raycastTarget = false;
+                }
+                else if (srcTmp != null && srcTmp.enabled)
+                {
+                    var cloneGO = new GameObject(child.name + "_Clone");
+                    cloneGO.transform.SetParent(containerGO.transform, false);
+                    var cloneRect = cloneGO.AddComponent<RectTransform>();
+                    CopyRectTransform(childRect, cloneRect);
+                    var cloneTmp = cloneGO.AddComponent<TextMeshProUGUI>();
+                    cloneTmp.text = srcTmp.text;
+                    cloneTmp.fontSize = srcTmp.fontSize;
+                    cloneTmp.fontStyle = srcTmp.fontStyle;
+                    cloneTmp.alignment = srcTmp.alignment;
+                    cloneTmp.color = srcTmp.color;
+                    cloneTmp.font = srcTmp.font;
+                    cloneTmp.raycastTarget = false;
+                }
+            }
+        }
+
+        private void DestroyOverlayClones()
+        {
+            if (overlayCloneContainer != null)
+            {
+                Destroy(overlayCloneContainer);
+                overlayCloneContainer = null;
+            }
+        }
+
+        private static void CopyRectTransform(RectTransform src, RectTransform dst)
+        {
+            dst.anchorMin = src.anchorMin;
+            dst.anchorMax = src.anchorMax;
+            dst.pivot = src.pivot;
+            dst.offsetMin = src.offsetMin;
+            dst.offsetMax = src.offsetMax;
+        }
 
         private void Update()
         {
