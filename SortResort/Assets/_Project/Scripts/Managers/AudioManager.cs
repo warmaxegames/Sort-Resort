@@ -267,6 +267,7 @@ namespace SortResort
                 StopAllMusic();
                 var source = GetCurrentMusicSource();
                 source.clip = clip;
+                source.loop = true;
                 source.volume = masterVolume * musicVolume;
                 source.Play();
             }
@@ -295,6 +296,7 @@ namespace SortResort
             var fadeInSource = isUsingSourceA ? musicSourceB : musicSourceA;
 
             fadeInSource.clip = newClip;
+            fadeInSource.loop = true;
             fadeInSource.volume = 0f;
             fadeInSource.Play();
 
@@ -381,6 +383,7 @@ namespace SortResort
             else
             {
                 ambientSource.clip = clip;
+                ambientSource.loop = true;
                 ambientSource.volume = masterVolume * ambientVolume;
                 ambientSource.Play();
             }
@@ -404,6 +407,7 @@ namespace SortResort
             // Switch clip
             ambientSource.Stop();
             ambientSource.clip = newClip;
+            ambientSource.loop = true;
             ambientSource.Play();
 
             // Fade in

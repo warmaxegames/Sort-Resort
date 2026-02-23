@@ -160,7 +160,7 @@ namespace SortResort.Editor
                     var platformSettings = importer.GetOverrideSampleSettings("WebGL");
                     if (isMusic)
                     {
-                        platformSettings.loadType = AudioClipLoadType.Streaming;
+                        platformSettings.loadType = AudioClipLoadType.CompressedInMemory;
                         platformSettings.quality = 0.4f;
                     }
                     else
@@ -184,7 +184,7 @@ namespace SortResort.Editor
             EditorUtility.DisplayDialog("Audio Optimization",
                 $"Updated {modified} of {total} audio clips with WebGL overrides.\n\n" +
                 "Settings applied:\n" +
-                "- Music: Streaming, Vorbis q0.4, stereo\n" +
+                "- Music: CompressedInMemory, Vorbis q0.4, stereo\n" +
                 "- SFX/UI: DecompressOnLoad, Vorbis q0.6\n" +
                 "- Dialogue: DecompressOnLoad, Vorbis q0.5",
                 "OK");
