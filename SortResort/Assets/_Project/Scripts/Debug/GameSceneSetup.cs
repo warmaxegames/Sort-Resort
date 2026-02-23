@@ -15,10 +15,6 @@ namespace SortResort
     /// </summary>
     public class GameSceneSetup : MonoBehaviour
     {
-        [Header("Level to Load")]
-        [SerializeField] private string worldId = "island";
-        [SerializeField] private int levelNumber = 1;
-
         [Header("Layer Configuration")]
         [SerializeField] private int itemLayer = 6;  // "Items" layer
         [SerializeField] private int slotLayer = 7;  // "Slots" layer
@@ -143,6 +139,9 @@ namespace SortResort
             var uim = uiGO.AddComponent<UIManager>();
             uim.CreateRuntimeUI();
             Debug.Log("[GameSceneSetup] UIManager created with runtime UI");
+
+            // Mark root as DontDestroyOnLoad so all child managers persist
+            DontDestroyOnLoad(managersRoot);
         }
 
         private void ConfigureDragDropManager(DragDropManager ddm)

@@ -1564,7 +1564,7 @@ namespace SortResort
             threeStarTargetText.font = FontManager.ExtraBold;
             threeStarTargetText.alignment = TextAlignmentOptions.Center;
             threeStarTargetText.color = Color.white;
-            threeStarTargetText.enableWordWrapping = false;
+            threeStarTargetText.textWrappingMode = TextWrappingModes.NoWrap;
             threeStarTargetText.overflowMode = TextOverflowModes.Overflow;
             threeStarTargetText.raycastTarget = false;
             threeStarTargetText.enableAutoSizing = true;
@@ -1678,7 +1678,7 @@ namespace SortResort
             text.fontStyle = FontStyles.Bold;
             text.alignment = TextAlignmentOptions.Center;
             text.color = Color.white;
-            text.enableWordWrapping = false;
+            text.textWrappingMode = TextWrappingModes.NoWrap;
             text.overflowMode = TextOverflowModes.Overflow;
             text.raycastTarget = false;
             text.enableAutoSizing = true;
@@ -2073,7 +2073,7 @@ namespace SortResort
             levelCompleteLevelNumberText.fontStyle = FontStyles.Bold;
             levelCompleteLevelNumberText.alignment = TextAlignmentOptions.Center;
             levelCompleteLevelNumberText.color = Color.black;
-            levelCompleteLevelNumberText.enableWordWrapping = false;
+            levelCompleteLevelNumberText.textWrappingMode = TextWrappingModes.NoWrap;
             levelCompleteLevelNumberText.overflowMode = TextOverflowModes.Overflow;
 
             // 7. moves_UI - fullscreen overlay with brown circle for move count
@@ -2108,7 +2108,7 @@ namespace SortResort
             levelCompleteMoveCountText.fontStyle = FontStyles.Bold;
             levelCompleteMoveCountText.alignment = TextAlignmentOptions.Center;
             levelCompleteMoveCountText.color = Color.black;
-            levelCompleteMoveCountText.enableWordWrapping = false;
+            levelCompleteMoveCountText.textWrappingMode = TextWrappingModes.NoWrap;
             levelCompleteMoveCountText.overflowMode = TextOverflowModes.Overflow;
 
             // 8. Star Ribbon layer (full screen, on top of curtains)
@@ -2248,7 +2248,7 @@ namespace SortResort
             timerBarText.fontStyle = FontStyles.Bold;
             timerBarText.alignment = TextAlignmentOptions.Center;
             timerBarText.color = Color.white;
-            timerBarText.enableWordWrapping = false;
+            timerBarText.textWrappingMode = TextWrappingModes.NoWrap;
             timerBarText.overflowMode = TextOverflowModes.Overflow;
 
             // 13. new_record_UI - fullscreen overlay sprite for "New Record!" display
@@ -2356,7 +2356,7 @@ namespace SortResort
             levelFailedReasonText.fontStyle = FontStyles.Bold;
             levelFailedReasonText.color = new Color(1f, 0.85f, 0.85f, 1f);
             levelFailedReasonText.alignment = TextAlignmentOptions.Center;
-            levelFailedReasonText.enableWordWrapping = true;
+            levelFailedReasonText.textWrappingMode = TextWrappingModes.Normal;
 
             // Bottom Board - reuse the same animated board from level complete
             var failBottomBoardGO = new GameObject("Bottom Board");
@@ -3521,7 +3521,7 @@ Antonia and Joakim Engfors
             tmp.fontStyle = FontStyles.Bold;
             tmp.alignment = TextAlignmentOptions.Center;
             tmp.color = Color.white;
-            tmp.enableWordWrapping = false; // Prevent word wrap
+            tmp.textWrappingMode = TextWrappingModes.NoWrap; // Prevent word wrap
             tmp.overflowMode = TextOverflowModes.Overflow;
 
             return btn;
@@ -3928,7 +3928,7 @@ Antonia and Joakim Engfors
             // ===== PHASE A: Mascot Celebration on dimmed background =====
 
             // Destroy any lingering match effects so they don't bleed through the dim overlay
-            foreach (var fx in FindObjectsOfType<MatchEffect>())
+            foreach (var fx in FindObjectsByType<MatchEffect>(FindObjectsSortMode.None))
                 Destroy(fx.gameObject);
 
             // Load and start mascot FIRST (Resources.LoadAll is expensive/blocking)
@@ -5616,7 +5616,7 @@ Antonia and Joakim Engfors
             tabText.enableAutoSizing = true;
             tabText.fontSizeMin = 9;
             tabText.fontSizeMax = 18;
-            tabText.enableWordWrapping = true;
+            tabText.textWrappingMode = TextWrappingModes.Normal;
             tabText.overflowMode = TextOverflowModes.Truncate;
             if (FontManager.ExtraBold != null)
                 tabText.font = FontManager.ExtraBold;
@@ -5919,7 +5919,7 @@ Antonia and Joakim Engfors
             titleText.fontStyle = FontStyles.Bold;
             titleText.alignment = TextAlignmentOptions.Center;
             titleText.color = Color.black;
-            titleText.enableWordWrapping = true;
+            titleText.textWrappingMode = TextWrappingModes.Normal;
             titleText.enableAutoSizing = true;
             titleText.fontSizeMin = 14;
             titleText.fontSizeMax = 24;
@@ -5943,7 +5943,7 @@ Antonia and Joakim Engfors
             descText.fontSize = 18;
             descText.alignment = TextAlignmentOptions.Center;
             descText.color = new Color(0.2f, 0.2f, 0.2f, 1f);
-            descText.enableWordWrapping = true;
+            descText.textWrappingMode = TextWrappingModes.Normal;
             descText.enableAutoSizing = true;
             descText.fontSizeMin = 12;
             descText.fontSizeMax = 18;
@@ -6151,7 +6151,7 @@ Antonia and Joakim Engfors
             dialogueText.fontStyle = FontStyles.Normal;
             dialogueText.color = new Color(0.1f, 0.1f, 0.1f, 1f); // Dark/black text
             dialogueText.alignment = TextAlignmentOptions.TopLeft;
-            dialogueText.enableWordWrapping = true;
+            dialogueText.textWrappingMode = TextWrappingModes.Normal;
             dialogueText.lineSpacing = -15f;
             dialogueText.paragraphSpacing = -20f;
 

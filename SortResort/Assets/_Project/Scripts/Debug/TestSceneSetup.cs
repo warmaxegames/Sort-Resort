@@ -9,14 +9,9 @@ namespace SortResort
     /// </summary>
     public class TestSceneSetup : MonoBehaviour
     {
-        [Header("Test Configuration")]
-        [SerializeField] private string testWorldId = "island";
-
         [Header("Visual Settings")]
-        [SerializeField] private float containerSpacing = 5f;
         [SerializeField] private float slotWidth = 1.28f;
         [SerializeField] private float slotHeight = 2.56f;
-        [SerializeField] private float itemScale = 0.01f; // Scale for imported sprites
 
         [Header("Layer Configuration")]
         [SerializeField] private int itemLayer = 6;  // "Items" layer

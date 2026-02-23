@@ -75,7 +75,7 @@ namespace SortResort
                 return;
             }
             Instance = this;
-            DontDestroyOnLoad(gameObject);
+            if (transform.parent == null) DontDestroyOnLoad(gameObject);
 
             BuildAvailableTabs();
             InitializeAchievements();

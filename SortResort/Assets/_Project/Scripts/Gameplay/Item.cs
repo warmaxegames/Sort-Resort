@@ -71,7 +71,6 @@ namespace SortResort
 
         // Events
         public event Action<Item> OnSelected;
-        public event Action<Item> OnDeselected;
         public event Action<Item> OnDragStarted;
         public event Action<Item> OnDragEnded;
         public event Action<Item> OnMatched;

@@ -16,8 +16,6 @@ namespace SortResort
         [SerializeField] private Camera gameCamera;
         [SerializeField] private LayerMask itemLayerMask;
         [SerializeField] private LayerMask slotLayerMask;
-        [SerializeField] private float dragThreshold = 0.1f;
-
         [Header("Debug")]
         [SerializeField] private bool debugMode;
 
@@ -27,7 +25,6 @@ namespace SortResort
         private Slot currentHoveredSlot;
         private Vector3 pointerStartPosition;
         private bool isDragging;
-        private bool pointerDown;
         private Vector3 previousDragPosition;
 
         // Input
@@ -118,7 +115,6 @@ namespace SortResort
                 return;
             }
 
-            pointerDown = true;
             Vector2 screenPos = pointerPositionAction.ReadValue<Vector2>();
             Vector3 worldPos = gameCamera.ScreenToWorldPoint(screenPos);
             worldPos.z = 0;
@@ -136,8 +132,6 @@ namespace SortResort
 
         private void OnPointerUp(InputAction.CallbackContext context)
         {
-            pointerDown = false;
-
             if (isDragging && draggedItem != null)
             {
                 EndDrag();

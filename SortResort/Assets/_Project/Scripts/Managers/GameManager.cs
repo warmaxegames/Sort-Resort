@@ -17,7 +17,6 @@ namespace SortResort
         [SerializeField] private int currentMatchCount;
 
         [Header("Scene Names")]
-        [SerializeField] private string bootstrapSceneName = "Bootstrap";
         [SerializeField] private string mainMenuSceneName = "MainMenu";
         [SerializeField] private string worldSelectionSceneName = "WorldSelection";
         [SerializeField] private string levelSelectionSceneName = "LevelSelection";
@@ -39,7 +38,7 @@ namespace SortResort
             }
 
             Instance = this;
-            DontDestroyOnLoad(gameObject);
+            if (transform.parent == null) DontDestroyOnLoad(gameObject);
 
             Initialize();
         }

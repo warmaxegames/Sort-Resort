@@ -147,7 +147,7 @@ namespace SortResort
         /// </summary>
         public static void DestroyAll()
         {
-            foreach (var effect in FindObjectsOfType<ComboTextEffect>())
+            foreach (var effect in FindObjectsByType<ComboTextEffect>(FindObjectsSortMode.None))
             {
                 Destroy(effect.gameObject);
             }

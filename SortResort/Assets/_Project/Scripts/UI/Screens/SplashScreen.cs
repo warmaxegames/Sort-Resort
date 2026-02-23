@@ -25,7 +25,6 @@ namespace SortResort.UI
         protected override void Awake()
         {
             base.Awake();
-            SetupPlayButton();
         }
 
         private void SetupPlayButton()

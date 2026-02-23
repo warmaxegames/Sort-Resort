@@ -38,9 +38,6 @@ namespace SortResort
         public bool IsInteractive => isInteractive;
         public ItemContainer ParentContainer => parentContainer;
 
-        // Events
-        public event Action<Slot, Item> OnItemDropped;
-        public event Action<Slot> OnSlotClicked;
 
         private void Awake()
         {
