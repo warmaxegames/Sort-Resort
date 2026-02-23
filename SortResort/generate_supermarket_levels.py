@@ -3,8 +3,8 @@
 Supermarket Level Generator for Sort Resort
 Uses the core level_generator module with Supermarket-specific item configuration.
 
-51 item types, complexity_offset=44 (L1 plays like Island L45).
-Items unlock faster (all by L20) since complexity is already high.
+51 item types, complexity_offset=10 (L1 plays like Island L11).
+Mechanics unlock gradually across L1-L26, all unlocked by L31+.
 Run: python generate_supermarket_levels.py [start_level end_level]
 """
 
@@ -15,12 +15,12 @@ from reverse_generator import generate_levels
 
 # ── Supermarket World Configuration ──────────────────────────────────────────
 # 51 items grouped by product category, unlocking progressively through L1-L20.
-# Compressed unlock schedule since complexity_offset=44 means L1 is already complex.
+# Items unlock progressively L1-L20. complexity_offset=10 gives a gradual difficulty ramp.
 # Each tuple: (unlock_level, [item_ids])
 
 SUPERMARKET_CONFIG = WorldConfig(
     world_id="supermarket",
-    complexity_offset=44,  # L1 plays like Island L45
+    complexity_offset=10,  # L1 plays like Island L11
     item_groups=[
         # Wave 1: L1 - starter items (15 items)
         (1,  ["milk", "milkbottle", "orangejuice"]),

@@ -160,7 +160,7 @@ namespace SortResort.Editor
                     var platformSettings = importer.GetOverrideSampleSettings("WebGL");
                     if (isMusic)
                     {
-                        platformSettings.loadType = AudioClipLoadType.CompressedInMemory;
+                        platformSettings.loadType = AudioClipLoadType.Streaming;
                         platformSettings.quality = 0.4f;
                     }
                     else

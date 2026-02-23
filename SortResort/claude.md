@@ -22,7 +22,7 @@
 
 ## Current Status
 
-**Last Updated:** 2026-02-21
+**Last Updated:** 2026-02-23
 
 ### Working Features (Unity)
 - Splash screen → Level select with fade transition
@@ -62,10 +62,10 @@
 5. **World-Specific Dialogue Boxes** - Need custom designs for:
    - Supermarket
 6. **Generate Levels for Remaining Worlds** - Create world config files like `generate_island_levels.py`:
-   - ~~Supermarket~~ - DONE (`generate_supermarket_levels.py`, 51 items, offset=44, 100/100 solver-verified)
-   - ~~Farm~~ - DONE (`generate_farm_levels.py`, 53 items, offset=44, 100/100 solver-verified)
+   - ~~Supermarket~~ - DONE (`generate_supermarket_levels.py`, 51 items, offset=10, 100/100 solver-verified)
+   - ~~Farm~~ - DONE (`generate_farm_levels.py`, 53 items, offset=10, 100/100 solver-verified)
    - Tavern (49 items - needs 1 more for minimum 50)
-   - ~~Space~~ - DONE (`generate_space_levels.py`, 50 items, offset=44, 100/100 solver-verified)
+   - ~~Space~~ - DONE (`generate_space_levels.py`, 50 items, offset=10, 100/100 solver-verified)
 7. **World Icon Assets** - HUD world icons for non-Island worlds:
    - Supermarket, Farm, Tavern, Space
 8. **Mobile/Device Testing** - Test performance on mobile devices, tablets, different screen sizes
@@ -302,7 +302,7 @@ Container border scale: 1.2 (17% border around slots)
 - **Algorithm**: Reverse-play construction V2 (no work container). For each triple: pick random container, push existing items deeper, place triple at front, scatter 1-3 items to other containers. Each scatter = 1 forward move.
 - **Locked containers**: Participate in reverse-play loop with cutoff timing. Last `unlock_matches_required` triples exclude locked container (those forward triples unlock it).
 - **Validation**: No starting triples at ANY row depth. Solver verifies each level; retries with different seed on failure (up to 20 attempts). Star thresholds use solver's actual move count. Full AABB bounding box checks for overlap and off-screen detection.
-- **Complexity offset**: Non-default worlds use `complexity_offset` in WorldConfig so L1 starts at higher complexity. E.g. `complexity_offset=44` means L1 plays like Island L45 (container count, mechanics, fill ratio all scaled). Item availability still uses actual level number, with compressed unlock schedules.
+- **Complexity offset**: Non-default worlds use `complexity_offset` in WorldConfig so L1 starts at higher complexity. E.g. `complexity_offset=10` means L1 plays like Island L11 (locked containers just unlocked, ~9 containers). Mechanics unlock gradually across L1-L26, all unlocked by L31+. Item availability still uses actual level number.
 - **Range-based generation**: `generate_levels(config, dir, start_level=X, end_level=Y)` generates only a subset without deleting others, enabling parallel generation (10 agents × 10 levels each).
 - **To add a new world**: Create `generate_{world}_levels.py` with a `WorldConfig` defining item groups and `complexity_offset`, then run it.
 
@@ -334,7 +334,7 @@ Mechanics unlock at fixed levels and persist via probability (30-70%). A complex
 - L11: 1-3 matches, L26: 2-5, L36: 2-6, L51: 3-8, L75: 4-9. Per-container randomization via `rng.randint(lo, hi)` ensures different values on the same level.
 
 ### Level Structure (All Worlds)
-- **Note**: Level numbers below refer to *effective* level (actual + complexity_offset). Island uses offset=0 so they match. Non-default worlds (offset=44) start L1 at effective L45.
+- **Note**: Level numbers below refer to *effective* level (actual + complexity_offset). Island uses offset=0 so they match. Non-default worlds (offset=10) start L1 at effective L11.
 - level_001: 3 containers, 2 item types, intro (hardcoded 2-move tutorial, only for offset=0 worlds)
 - Levels 2-7: 4-9 containers, increasing item types, multi-row
 - Levels 8-15: 8-12 containers
