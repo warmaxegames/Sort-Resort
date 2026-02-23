@@ -882,7 +882,7 @@ namespace SortResort
             buyBtnRect.anchorMax = new Vector2(0.5f, 0.5f);
             buyBtnRect.pivot = new Vector2(0.5f, 0.5f);
             buyBtnRect.sizeDelta = new Vector2(280, 90);
-            buyBtnRect.anchoredPosition = new Vector2(0, -100);
+            buyBtnRect.anchoredPosition = new Vector2(0, -190);
 
             var buyBtnImg = buyBtnGO.AddComponent<Image>();
             var buyNormalSprite = LoadSpriteFromTexture("Sprites/UI/Buttons/buy_button");

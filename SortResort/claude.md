@@ -391,21 +391,38 @@ To update all level thresholds: `Tools > Sort Resort > Solver > Update All Level
 
 **Live URL**: https://warmaxegames.github.io/Sort-Resort/
 
-#### Build Steps
-1. Unity: **File → Build Settings → WebGL → Build** (output: `WebGL_Build/`)
-2. From `Unity Redo/SortResort/`: `python patch_webgl_build.py` (fixes WASM import module mismatch from wasm-opt shim)
-3. **CRITICAL**: Do NOT skip step 2 — the build will fail to load without the framework JS patch
+#### "Commit and push and deploy to GitHub Pages" Procedure
+**When the user says to commit/push/deploy, follow ALL steps in order. Do NOT skip any step.**
 
-#### Deploy to GitHub Pages
-```bash
-cd "Unity Redo/SortResort/WebGL_Build"
-git add -A
-git commit -m "Deploy WebGL build"
-git push origin gh-pages
-```
+1. **Commit source changes** to `master` (Unity Redo/SortResort repo):
+   - `git add` the changed files
+   - `git commit` with descriptive message
+   - `git push origin master`
+
+2. **Run the framework JS patch** (CRITICAL — build WILL fail without this):
+   ```bash
+   cd "Unity Redo/SortResort"
+   python patch_webgl_build.py
+   ```
+   - Verify output says "Patched:" — if it says "already patched" or "no match", investigate
+
+3. **Deploy WebGL build** to GitHub Pages (WebGL_Build is a separate repo on `gh-pages`):
+   ```bash
+   cd "Unity Redo/SortResort/WebGL_Build"
+   git add -A
+   git commit -m "Deploy WebGL build - <brief description>"
+   git push origin gh-pages
+   ```
+
+4. **Verify**: Remind user to hard refresh (Ctrl+Shift+R) after ~1 minute for GitHub Pages to update
+
+#### Build Steps (user does manually in Unity before asking to deploy)
+1. Unity: **File → Build Settings → WebGL → Build** (output: `WebGL_Build/`)
+2. Steps 2-4 above are what Claude does when asked to "commit and push and deploy"
 
 #### Notes
 - `WebGL_Build/` is a separate git repo on the `gh-pages` branch
 - Build compression is disabled (`webGLCompressionFormat: 2`) to avoid hosting issues
 - `wasm-opt.exe` is replaced with a shim on this machine (crashes otherwise); teammate builds are fully optimized
+- `patch_webgl_build.py` fixes WASM import module mismatch — the shim skips `--minify-imports-and-exports`, so WASM uses `"env"` but framework JS expects `"a"`. Patch maps both.
 - Do NOT use PowerShell `Compress-Archive` for zips — backslash paths cause 403 errors. Use `python make_zip.py` instead

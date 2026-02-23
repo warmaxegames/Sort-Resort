@@ -5,42 +5,6 @@ TextureImporter:
   - first:
       213: 4815476061570213978
     second: star_0
-  - first:
-      213: 3999761062471549324
-    second: star_1
-  - first:
-      213: -3497892727927865473
-    second: star_2
-  - first:
-      213: 6504763747683324272
-    second: star_3
-  - first:
-      213: -4570688628630608616
-    second: star_4
-  - first:
-      213: -2421095534358572595
-    second: star_5
-  - first:
-      213: 7502820030017634684
-    second: star_6
-  - first:
-      213: -7635506848463661964
-    second: star_7
-  - first:
-      213: 2727262029204247388
-    second: star_8
-  - first:
-      213: 833913586904043743
-    second: star_9
-  - first:
-      213: 6061701880611319068
-    second: star_10
-  - first:
-      213: -2853548015814847213
-    second: star_11
-  - first:
-      213: 6148300447891027083
-    second: star_12
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -82,7 +46,7 @@ TextureImporter:
   nPOTScale: 0
   lightmap: 0
   compressionQuality: 50
-  spriteMode: 1
+  spriteMode: 2
   spriteExtrude: 1
   spriteMeshType: 1
   alignment: 0
@@ -133,19 +97,6 @@ TextureImporter:
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
   - serializedVersion: 4
-    buildTarget: Android
-    maxTextureSize: 2048
-    resizeAlgorithm: 0
-    textureFormat: -1
-    textureCompression: 1
-    compressionQuality: 50
-    crunchedCompression: 0
-    allowsAlphaSplitting: 0
-    overridden: 0
-    ignorePlatformSupport: 0
-    androidETC2FallbackOverride: 0
-    forceMaximumCompressionQuality_BC6H_BC7: 0
-  - serializedVersion: 4
     buildTarget: WebGL
     maxTextureSize: 256
     resizeAlgorithm: 0
@@ -158,19 +109,6 @@ TextureImporter:
     ignorePlatformSupport: 0
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
-  - serializedVersion: 4
-    buildTarget: iOS
-    maxTextureSize: 2048
-    resizeAlgorithm: 0
-    textureFormat: -1
-    textureCompression: 1
-    compressionQuality: 50
-    crunchedCompression: 0
-    allowsAlphaSplitting: 0
-    overridden: 0
-    ignorePlatformSupport: 0
-    androidETC2FallbackOverride: 0
-    forceMaximumCompressionQuality_BC6H_BC7: 0
   spriteSheet:
     serializedVersion: 2
     sprites:
@@ -178,10 +116,10 @@ TextureImporter:
       name: star_0
       rect:
         serializedVersion: 2
-        x: 16
-        y: 149
-        width: 225
-        height: 207
+        x: 5
+        y: 61
+        width: 118
+        height: 120
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -196,275 +134,11 @@ TextureImporter:
       indices: 
       edges: []
       weights: []
-    - serializedVersion: 2
-      name: star_1
-      rect:
-        serializedVersion: 2
-        x: 48
-        y: 125
-        width: 11
-        height: 8
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: c814e03ae71028730800000000000000
-      internalID: 3999761062471549324
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: star_2
-      rect:
-        serializedVersion: 2
-        x: 70
-        y: 132
-        width: 7
-        height: 7
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: f7fff69b81df47fc0800000000000000
-      internalID: -3497892727927865473
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: star_3
-      rect:
-        serializedVersion: 2
-        x: 85
-        y: 133
-        width: 8
-        height: 7
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 071d0803a20954a50800000000000000
-      internalID: 6504763747683324272
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: star_4
-      rect:
-        serializedVersion: 2
-        x: 165
-        y: 133
-        width: 8
-        height: 7
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 8152e87a8e6a190c0800000000000000
-      internalID: -4570688628630608616
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: star_5
-      rect:
-        serializedVersion: 2
-        x: 182
-        y: 132
-        width: 7
-        height: 7
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: dc1d543607a866ed0800000000000000
-      internalID: -2421095534358572595
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: star_6
-      rect:
-        serializedVersion: 2
-        x: 192
-        y: 131
-        width: 7
-        height: 7
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: c7103eec01f5f1860800000000000000
-      internalID: 7502820030017634684
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: star_7
-      rect:
-        serializedVersion: 2
-        x: 206
-        y: 127
-        width: 7
-        height: 7
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 474d249d9fa390690800000000000000
-      internalID: -7635506848463661964
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: star_8
-      rect:
-        serializedVersion: 2
-        x: 69
-        y: 123
-        width: 7
-        height: 7
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: c53512cad5e29d520800000000000000
-      internalID: 2727262029204247388
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: star_9
-      rect:
-        serializedVersion: 2
-        x: 86
-        y: 122
-        width: 7
-        height: 7
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: fd099c03df7a29b00800000000000000
-      internalID: 833913586904043743
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: star_10
-      rect:
-        serializedVersion: 2
-        x: 168
-        y: 122
-        width: 7
-        height: 7
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: c1da7208ebd7f1450800000000000000
-      internalID: 6061701880611319068
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: star_11
-      rect:
-        serializedVersion: 2
-        x: 183
-        y: 123
-        width: 7
-        height: 7
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 315d5d7c2392668d0800000000000000
-      internalID: -2853548015814847213
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: star_12
-      rect:
-        serializedVersion: 2
-        x: 193
-        y: 124
-        width: 7
-        height: 7
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: b847be8aea6235550800000000000000
-      internalID: 6148300447891027083
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
     outline: []
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 5e97eb03825dee720800000000000000
+    spriteID: 
     internalID: 0
     vertices: []
     indices: 
@@ -475,18 +149,6 @@ TextureImporter:
       entries: []
     nameFileIdTable:
       star_0: 4815476061570213978
-      star_1: 3999761062471549324
-      star_10: 6061701880611319068
-      star_11: -2853548015814847213
-      star_12: 6148300447891027083
-      star_2: -3497892727927865473
-      star_3: 6504763747683324272
-      star_4: -4570688628630608616
-      star_5: -2421095534358572595
-      star_6: 7502820030017634684
-      star_7: -7635506848463661964
-      star_8: 2727262029204247388
-      star_9: 833913586904043743
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
