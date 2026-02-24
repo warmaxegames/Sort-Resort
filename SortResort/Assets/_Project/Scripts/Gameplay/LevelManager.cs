@@ -437,6 +437,12 @@ namespace SortResort
             // Countdown
             timeRemaining -= Time.deltaTime;
 
+            // Start/stop tick tock sound at 10 seconds
+            if (timeRemaining <= 10f && timeRemaining > 0f)
+                AudioManager.Instance?.StartTickTock();
+            else
+                AudioManager.Instance?.StopTickTock();
+
             // Fire timer update event
             GameEvents.InvokeTimerUpdated(timeRemaining);
             OnTimerTick?.Invoke(timeRemaining);
@@ -446,6 +452,7 @@ namespace SortResort
             {
                 timeRemaining = 0;
                 timerActive = false;
+                AudioManager.Instance?.StopTickTock();
                 OnTimerExpired();
             }
         }
@@ -473,6 +480,7 @@ namespace SortResort
         private System.Collections.IEnumerator FreezeTimerCoroutine(float duration)
         {
             timerFrozen = true;
+            AudioManager.Instance?.StopTickTock();
             GameEvents.InvokeTimerFrozen(true);
             Debug.Log($"[LevelManager] Timer frozen for {duration}s");
 
@@ -495,6 +503,10 @@ namespace SortResort
             {
                 timeRemaining = totalTimeLimit; // Cap at original time
             }
+
+            // Stop tick tock if time is back above 10s
+            if (timeRemaining > 10f)
+                AudioManager.Instance?.StopTickTock();
 
             GameEvents.InvokeTimerUpdated(timeRemaining);
             Debug.Log($"[LevelManager] Added {seconds}s to timer, now {timeRemaining}s");
@@ -624,6 +636,7 @@ namespace SortResort
             timerFrozen = false;
             timeRemaining = 0;
             totalTimeLimit = 0;
+            AudioManager.Instance?.StopTickTock();
 
             currentLevel = null;
             itemsRemaining = 0;

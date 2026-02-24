@@ -41,7 +41,9 @@ namespace SortResort
         [SerializeField] private AudioClip warpClip;
         [SerializeField] private AudioClip achievementClip;
         [SerializeField] private AudioClip portalClip;
+        [SerializeField] private AudioClip tickTockClip;
 
+        private AudioSource tickTockSource;
         private bool isUsingSourceA = true;
         private Coroutine crossfadeCoroutine;
         private Coroutine ambientFadeCoroutine;
@@ -114,6 +116,8 @@ namespace SortResort
                 achievementClip = Resources.Load<AudioClip>("Audio/SFX/achievement_sound");
             if (portalClip == null)
                 portalClip = Resources.Load<AudioClip>("Audio/SFX/portal");
+            if (tickTockClip == null)
+                tickTockClip = Resources.Load<AudioClip>("Audio/SFX/tick_tock");
 
             Debug.Log($"[AudioManager] Audio clips loaded - match:{matchClip != null}, unlock:{unlockClip != null}, victory:{victoryClip != null}, button:{buttonClickClip != null}, warp:{warpClip != null}, achievement:{achievementClip != null}, portal:{portalClip != null}");
         }
@@ -161,6 +165,15 @@ namespace SortResort
                 uiObj.transform.SetParent(transform);
                 uiSource = uiObj.AddComponent<AudioSource>();
                 uiSource.playOnAwake = false;
+            }
+
+            if (tickTockSource == null)
+            {
+                var tickTockObj = new GameObject("TickTockSource");
+                tickTockObj.transform.SetParent(transform);
+                tickTockSource = tickTockObj.AddComponent<AudioSource>();
+                tickTockSource.loop = true;
+                tickTockSource.playOnAwake = false;
             }
         }
 
@@ -247,6 +260,8 @@ namespace SortResort
         private void UpdateSFXVolume()
         {
             sfxSource.volume = masterVolume * sfxVolume;
+            if (tickTockSource != null)
+                tickTockSource.volume = masterVolume * sfxVolume;
         }
 
         private void UpdateUIVolume()
@@ -618,6 +633,21 @@ namespace SortResort
         public void PlayWarpSound() => PlayUI(portalClip ?? warpClip);
         public void PlayAchievementSound() => PlaySFX(achievementClip, 1.3f);
         public void PlayPortalSound() => PlaySFX(portalClip);
+
+        public void StartTickTock()
+        {
+            if (tickTockClip == null || tickTockSource == null) return;
+            if (tickTockSource.isPlaying) return;
+            tickTockSource.clip = tickTockClip;
+            tickTockSource.volume = masterVolume * sfxVolume;
+            tickTockSource.Play();
+        }
+
+        public void StopTickTock()
+        {
+            if (tickTockSource != null && tickTockSource.isPlaying)
+                tickTockSource.Stop();
+        }
 
         /// <summary>
         /// Play victory sound (stops gameplay audio first)
