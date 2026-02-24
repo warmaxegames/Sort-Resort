@@ -228,6 +228,7 @@ namespace SortResort
         public void CompleteLevel(int starsEarned, float timeTaken = 0f)
         {
             ComboTextEffect.DestroyAll();
+            ComboTimerBonus.DestroyAll();
             SetState(GameState.LevelComplete);
             SaveManager.Instance?.SaveLevelProgress(currentWorldId, currentLevelNumber, starsEarned, timeTaken);
             GameEvents.InvokeLevelCompleted(currentLevelNumber, starsEarned);
@@ -242,6 +243,7 @@ namespace SortResort
         public void FailLevel(string reason = null)
         {
             ComboTextEffect.DestroyAll();
+            ComboTimerBonus.DestroyAll();
             SetState(GameState.LevelFailed);
             GameEvents.InvokeLevelFailed(currentLevelNumber, reason);
         }

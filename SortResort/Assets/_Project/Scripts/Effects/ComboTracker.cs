@@ -44,6 +44,7 @@ namespace SortResort
             if (comboStreak >= 2)
             {
                 ComboTextEffect.Spawn(matchCenter, comboStreak);
+                ComboTimerBonus.Spawn(comboStreak);
             }
         }
 
