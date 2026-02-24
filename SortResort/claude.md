@@ -26,7 +26,7 @@
 
 ### Working Features (Unity)
 - Splash screen → Level select with fade transition
-- 5 worlds: Island (100), Supermarket (100), Farm (100), Space (100) levels generated; Tavern (49 items, needs 1 more)
+- 5 worlds: Island (100), Supermarket (100), Farm (100), Space (100), Tavern (100) levels generated
 - Full game flow: Level Select → Play → Complete/Fail → Back/Next
 - Drag-drop with visual feedback, sounds, triple-match detection
 - Row advancement, locked containers with unlock animation
@@ -39,7 +39,7 @@
 - **Level complete/failed screens** - Mode-specific animations (stars, timer count-up), mascot thumbsup, sprite-based buttons
 - **HUD overlay** - Per-mode ui_top bars, counter text, sprite gear/undo buttons, pause menu
 - **Portal overlays** - Mode-specific completion indicators on level select portals
-- **Level generator** - Python reverse-play generator, solver-verified, 400 levels across 4 worlds
+- **Level generator** - Python reverse-play generator, solver-verified, 500 levels across 5 worlds
 - **Benzin font system** - FontManager utility, TMP default, ApplyBold() on 8 scripts
 - **Combo text effects** - "GOOD!"/"AMAZING!"/"PERFECT!" on consecutive match streaks (2/3/4+), 18-frame animation + tween fade-out, per-word sound effects
 - Level solver tool (Editor window + in-game auto-solve button)
@@ -61,10 +61,10 @@
    - Space
 5. **World-Specific Dialogue Boxes** - Need custom designs for:
    - Supermarket
-6. **Generate Levels for Remaining Worlds** - Create world config files like `generate_island_levels.py`:
+6. ~~**Generate Levels for Remaining Worlds**~~ - DONE. All 5 worlds have 100 solver-verified levels (500 total):
    - ~~Supermarket~~ - DONE (`generate_supermarket_levels.py`, 51 items, offset=10, 100/100 solver-verified)
    - ~~Farm~~ - DONE (`generate_farm_levels.py`, 53 items, offset=10, 100/100 solver-verified)
-   - Tavern (49 items - needs 1 more for minimum 50)
+   - ~~Tavern~~ - DONE (`generate_tavern_levels.py`, 50 items, offset=10, 100/100 solver-verified)
    - ~~Space~~ - DONE (`generate_space_levels.py`, 50 items, offset=10, 100/100 solver-verified)
 7. **World Icon Assets** - HUD world icons for non-Island worlds:
    - Supermarket, Farm, Tavern, Space
@@ -197,9 +197,11 @@ Container border scale: 1.2 (17% border around slots)
 - Timer active only in TimerMode and HardMode (mode-driven, not settings-driven)
 - Runtime fallback for missing timer values: `FailThreshold * 6` seconds
 - Timer pauses automatically while dialogue is active
+- Timer and tick-tock sound stop immediately on level complete (before victory sound plays)
 - Power-ups: `LevelManager.FreezeTimer(duration)`, `AddTime(seconds)`
 - UI: M:SS.CC format (centiseconds), flashes red under 10s, cyan when frozen
 - Overlay timer: dark red flash and dark teal frozen (visible on light wood background)
+- Level complete count-up: 1.5s animation from 0:00.00 to final time, sound stops when count finishes
 
 ### Dialogue System
 - **Data**: `Resources/Data/Dialogue/dialogues.json` (mascots, dialogues, triggers)
@@ -296,9 +298,9 @@ Container border scale: 1.2 (17% border around slots)
 ### Level Generator (Python)
 - **Infrastructure**: `level_generator.py` - WorldConfig, progression curves, container builder, specs
 - **Reverse generator**: `reverse_generator.py` - reverse-play item placement + solver-verified generation
-- **Island config**: `generate_island_levels.py` - imports from reverse_generator, defines 50 Island items
+- **World configs**: `generate_island_levels.py` (50 items), `generate_supermarket_levels.py` (51 items), `generate_farm_levels.py` (53 items), `generate_space_levels.py` (50 items), `generate_tavern_levels.py` (50 items)
 - **Python solver**: `level_solver.py` - greedy solver port for verification during generation
-- **Usage**: `python generate_island_levels.py` (creates 100 levels in `Resources/Data/Levels/Island/`)
+- **Usage**: `python generate_{world}_levels.py` (creates 100 levels in `Resources/Data/Levels/{World}/`)
 - **Algorithm**: Reverse-play construction V2 (no work container). For each triple: pick random container, push existing items deeper, place triple at front, scatter 1-3 items to other containers. Each scatter = 1 forward move.
 - **Locked containers**: Participate in reverse-play loop with cutoff timing. Last `unlock_matches_required` triples exclude locked container (those forward triples unlock it).
 - **Validation**: No starting triples at ANY row depth. Solver verifies each level; retries with different seed on failure (up to 20 attempts). Star thresholds use solver's actual move count. Full AABB bounding box checks for overlap and off-screen detection.
