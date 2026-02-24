@@ -8,6 +8,7 @@ namespace SortResort
     /// Plays a frame-by-frame animation on a UI Image component.
     /// Used for mascot animations on level complete screen.
     /// Loads frames from Resources/Sprites/Mascots/Animations/{World}/
+    /// Frames are cached statically so they load once and play instantly on subsequent uses.
     /// </summary>
     public class MascotAnimator : MonoBehaviour
     {
@@ -25,6 +26,9 @@ namespace SortResort
 
         private System.Action onComplete;
 
+        // Static frame cache: key = "WorldName/animationName", value = cached sprites
+        private static Dictionary<string, Sprite[]> frameCache = new Dictionary<string, Sprite[]>();
+
         private void Awake()
         {
             targetImage = GetComponent<Image>();
@@ -39,8 +43,31 @@ namespace SortResort
         }
 
         /// <summary>
+        /// Preload animation frames for a world into the static cache.
+        /// Call this during level loading so frames are ready instantly at level complete.
+        /// </summary>
+        public static void PreloadFrames(string worldId)
+        {
+            string animationName = GetVictoryAnimationName(worldId);
+            string worldFolder = GetWorldFolderName(worldId);
+            if (string.IsNullOrEmpty(animationName) || string.IsNullOrEmpty(worldFolder))
+                return;
+
+            string cacheKey = $"{worldFolder}/{animationName}";
+            if (frameCache.ContainsKey(cacheKey))
+                return; // Already cached
+
+            var loaded = LoadFramesFromResources(worldFolder, animationName);
+            if (loaded != null && loaded.Length > 0)
+            {
+                frameCache[cacheKey] = loaded;
+                Debug.Log($"[MascotAnimator] Preloaded {loaded.Length} frames for {cacheKey}");
+            }
+        }
+
+        /// <summary>
         /// Load animation frames for a mascot animation.
-        /// E.g., "whiskerthumbsup" in world "Island" loads from Mascots/Animations/Island/whiskerthumbsup_00000.png etc.
+        /// Uses static cache if available, otherwise loads from Resources.
         /// </summary>
         public bool LoadFrames(string worldName, string animationName)
         {
@@ -50,6 +77,34 @@ namespace SortResort
                 return false;
             }
 
+            string cacheKey = $"{worldName}/{animationName}";
+
+            // Check static cache first
+            if (frameCache.TryGetValue(cacheKey, out var cached))
+            {
+                frames = cached;
+                Debug.Log($"[MascotAnimator] Using cached {frames.Length} frames for {cacheKey}");
+                return true;
+            }
+
+            // Cache miss - load from Resources
+            var loaded = LoadFramesFromResources(worldName, animationName);
+            if (loaded != null && loaded.Length > 0)
+            {
+                frameCache[cacheKey] = loaded;
+                frames = loaded;
+                Debug.Log($"[MascotAnimator] Loaded and cached {frames.Length} frames for {cacheKey}");
+                return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Internal: load frames from Resources as full-rect sprites.
+        /// </summary>
+        private static Sprite[] LoadFramesFromResources(string worldName, string animationName)
+        {
             string basePath = $"Sprites/Mascots/Animations/{worldName}/{animationName}";
 
             var frameList = new List<Sprite>();
@@ -74,8 +129,6 @@ namespace SortResort
 
             if (frameList.Count == 0)
             {
-                Debug.LogWarning($"[MascotAnimator] No frames found at path: {basePath}_00000. Trying with _0 suffix...");
-
                 // Try loading with _0 suffix (for sprites imported as Multiple/sliced)
                 for (int i = 0; i < maxFrames; i++)
                 {
@@ -88,14 +141,12 @@ namespace SortResort
 
                 if (frameList.Count == 0)
                 {
-                    Debug.LogError($"[MascotAnimator] No frames found at either path format");
-                    return false;
+                    Debug.LogWarning($"[MascotAnimator] No frames found for {worldName}/{animationName}");
+                    return null;
                 }
             }
 
-            frames = frameList.ToArray();
-            Debug.Log($"[MascotAnimator] Loaded {frames.Length} frames for {worldName}/{animationName}");
-            return true;
+            return frameList.ToArray();
         }
 
         /// <summary>
@@ -192,8 +243,7 @@ namespace SortResort
             return worldId?.ToLower() switch
             {
                 "island" => "whiskerthumbsup",
-                // Add more worlds as animations are created
-                // "supermarket" => "tommythumbsup",
+                "supermarket" => "tommythumbsup",
                 "farm" => "marathumbsup",
                 // "tavern" => "hogthumbsup",
                 // "space" => "leikathumbsup",
@@ -209,8 +259,9 @@ namespace SortResort
         {
             return worldId?.ToLower() switch
             {
-                "island" => 30f,  // 56 frames / 30fps = 1.87s
-                "farm" => 16f,    // 31 frames / 16fps = 1.94s (deduplicated from 83 frames)
+                "island" => 30f,       // 56 frames / 30fps = 1.87s
+                "supermarket" => 42f,  // 80 frames / 42fps = 1.90s (deduplicated from 99 frames)
+                "farm" => 16f,         // 31 frames / 16fps = 1.94s (deduplicated from 83 frames)
                 _ => 30f
             };
         }

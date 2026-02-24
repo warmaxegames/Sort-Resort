@@ -221,12 +221,46 @@ Container border scale: 1.2 (17% border around slots)
 
 ### Level Complete Animation
 - **AnimatedLevelComplete.cs**: 3 layers - rays, curtains, star ribbon (level board removed)
-- **MascotAnimator.cs**: Frame-by-frame animation for mascot thumbsup (Island world, 56 frames)
-- Frames loaded via `Resources.LoadAll<Texture2D>()` from folders in `Resources/Sprites/UI/LevelComplete/`
+- **MascotAnimator.cs**: Frame-by-frame animation for mascot thumbsup, static frame caching, preloaded at level start
+- Mascot animations: Island (56 frames/30fps), Supermarket (80 frames/42fps), Farm (31 frames/16fps) — all ~1.9s duration
 - Mascot animation frames: `Resources/Sprites/Mascots/Animations/{World}/`
+- Victory board: `Resources/Sprites/UI/LevelComplete/VictoryBoard/{worldId}_board_victory_screen.png`
 - **Animation sequence**: rays+curtains+mascot → labels fade in → star ribbon → grey stars → gold stars (1-by-1) → dancing stars (3-star only) → bottom board → buttons
 - **Star animations**: Star1 (9 frames), Star2 (9 frames), Star3 (9 frames) at 15fps; DancingStars (74 frames) at 24fps
 - **Level Failed screen**: fail_screen.png background, reason text overlay, bottom board animation (shared frames), retry + level select sprite buttons
+
+### Adding New Image/Animation Assets (IMPORTANT)
+All fullscreen UI images and animation frames **MUST** be cropped and registered in crop metadata before use. Failing to do this causes oversized textures, inconsistent sizing across worlds, and animation stutter.
+
+#### For single images (victory boards, overlays, etc.):
+1. **Crop** the PNG to its visible content bounding box (remove transparent padding):
+   ```python
+   from PIL import Image
+   img = Image.open("source.png")
+   bbox = img.getbbox()  # (x, y, x2, y2) of non-transparent content
+   cropped = img.crop(bbox)
+   cropped.save("Resources/.../final.png")
+   ```
+2. **Add crop metadata** to `Resources/Data/crop_metadata.json` with the original position:
+   ```json
+   "Sprites/UI/.../final": {
+     "x": <bbox[0]>, "y": <bbox[1]>,
+     "w": <bbox[2]-bbox[0]>, "h": <bbox[3]-bbox[1]>,
+     "orig_w": 1080, "orig_h": 1920
+   }
+   ```
+3. Code uses `LoadFullRectSprite()` + `CropMetadata.ApplyCropAnchors()` to position correctly.
+4. **Always reset RectTransform anchors to fullscreen** before calling `ApplyCropAnchors` to prevent stale anchors from a previous world persisting.
+
+#### For animation frames (mascot thumbsup, etc.):
+1. **Find the union bounding box** across ALL frames (the largest area any frame uses).
+2. **Crop all frames** to that union box so every frame has identical dimensions.
+3. **Deduplicate** consecutive identical frames (hash-compare) to reduce frame count.
+4. **Save** with naming convention `{animname}_{NNNNN}.png` (5-digit zero-padded).
+5. **Add crop metadata** with `"is_group": true` for the folder path.
+6. **Register** in `MascotAnimator.GetVictoryAnimationName()` and `GetVictoryAnimationFPS()`.
+7. Frames are loaded as `Texture2D` + `Sprite.Create(fullRect)` to prevent Unity auto-trim stutter.
+8. Frames are **statically cached** in MascotAnimator and **preloaded at level start** via `MascotAnimator.PreloadFrames()` to avoid freeze at level complete time.
 
 ### Asset Locations (Unity)
 - Item Sprites: `Resources/Sprites/Items/{World}/`

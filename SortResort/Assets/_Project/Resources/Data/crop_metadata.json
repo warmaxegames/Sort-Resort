@@ -10,6 +10,15 @@
       "orig_h": 1920,
       "is_group": true
     },
+    "Sprites/Mascots/Animations/Supermarket": {
+      "x": 117,
+      "y": 847,
+      "w": 846,
+      "h": 621,
+      "orig_w": 1080,
+      "orig_h": 1920,
+      "is_group": true
+    },
     "Sprites/Mascots/Animations/Island": {
       "x": 117,
       "y": 847,
@@ -458,11 +467,27 @@
       "orig_w": 1080,
       "orig_h": 1920
     },
+    "Sprites/UI/LevelComplete/VictoryBoard/farm_board_victory_screen": {
+      "x": 4,
+      "y": 675,
+      "w": 1069,
+      "h": 905,
+      "orig_w": 1080,
+      "orig_h": 1920
+    },
     "Sprites/UI/LevelComplete/VictoryBoard/island_board_victory_screen": {
       "x": 18,
       "y": 757,
       "w": 1044,
       "h": 795,
+      "orig_w": 1080,
+      "orig_h": 1920
+    },
+    "Sprites/UI/LevelComplete/VictoryBoard/supermarket_board_victory_screen": {
+      "x": 61,
+      "y": 851,
+      "w": 958,
+      "h": 729,
       "orig_w": 1080,
       "orig_h": 1920
     },

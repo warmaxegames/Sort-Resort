@@ -3910,8 +3910,16 @@ Antonia and Joakim Engfors
                 var boardSprite = LoadFullRectSprite(victoryBoardPath);
                 if (boardSprite != null && victoryBoardImage != null)
                 {
+                    // Reset anchors to fullscreen before applying per-world crop data.
+                    // Without this, stale anchors from a previous world persist when
+                    // the new world has no crop metadata (ApplyCropAnchors returns false).
+                    var vbRect = victoryBoardImage.rectTransform;
+                    vbRect.anchorMin = Vector2.zero;
+                    vbRect.anchorMax = Vector2.one;
+                    vbRect.offsetMin = Vector2.zero;
+                    vbRect.offsetMax = Vector2.zero;
                     victoryBoardImage.sprite = boardSprite;
-                    CropMetadata.ApplyCropAnchors(victoryBoardImage.rectTransform, victoryBoardPath);
+                    CropMetadata.ApplyCropAnchors(vbRect, victoryBoardPath);
                 }
 
                 // Start the sequenced animation

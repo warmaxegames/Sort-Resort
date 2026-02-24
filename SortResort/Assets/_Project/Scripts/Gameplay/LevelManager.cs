@@ -343,6 +343,10 @@ namespace SortResort
             // Reset combo streak tracking
             ComboTracker.Reset();
 
+            // Preload mascot animation frames for level complete screen
+            // (loads into static cache so level complete plays instantly)
+            MascotAnimator.PreloadFrames(worldId);
+
             // Load level data
             currentLevel = LevelDataLoader.LoadLevel(worldId, levelNumber);
             if (currentLevel == null)
