@@ -4402,6 +4402,15 @@ Antonia and Joakim Engfors
         {
             if (levelCompleteMascotImage == null) return;
 
+            // Reset anchors to fullscreen before loading new mascot content.
+            // ApplyCropAnchorsForFolder modifies anchors per-world, so stale values
+            // from a previous world's animation would break the next world's display.
+            var rt = levelCompleteMascotImage.rectTransform;
+            rt.anchorMin = Vector2.zero;
+            rt.anchorMax = Vector2.one;
+            rt.offsetMin = Vector2.zero;
+            rt.offsetMax = Vector2.zero;
+
             string worldId = GameManager.Instance?.CurrentWorldId;
             var world = WorldProgressionManager.Instance?.GetWorldData(worldId);
 

@@ -58,13 +58,17 @@ namespace SortResort
             for (int i = 0; i < maxFrames; i++)
             {
                 string framePath = $"{basePath}_{i:D5}";
-                Sprite frame = Resources.Load<Sprite>(framePath);
+                // Load as Texture2D and create full-rect sprite to prevent Unity's
+                // auto-trimming from giving each frame different dimensions.
+                // Inconsistent sprite rects cause size stuttering with preserveAspect.
+                var tex = Resources.Load<Texture2D>(framePath);
 
-                if (frame == null)
+                if (tex == null)
                 {
                     break;
                 }
 
+                var frame = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), new Vector2(0.5f, 0.5f), 100f);
                 frameList.Add(frame);
             }
 
@@ -76,8 +80,9 @@ namespace SortResort
                 for (int i = 0; i < maxFrames; i++)
                 {
                     string framePath = $"{basePath}_{i:D5}_0";
-                    Sprite frame = Resources.Load<Sprite>(framePath);
-                    if (frame == null) break;
+                    var tex = Resources.Load<Texture2D>(framePath);
+                    if (tex == null) break;
+                    var frame = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), new Vector2(0.5f, 0.5f), 100f);
                     frameList.Add(frame);
                 }
 
