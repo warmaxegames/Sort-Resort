@@ -861,6 +861,10 @@ namespace SortResort
                 StopRecording();
             }
 
+            // Stop tick-tock and timer before victory sound
+            timerActive = false;
+            AudioManager.Instance?.StopTickTock();
+
             // Play victory sound
             AudioManager.Instance?.PlayVictorySound();
 

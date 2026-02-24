@@ -620,6 +620,7 @@ namespace SortResort
         public void PlayStarEarned() => PlaySFX(starEarnedClip);
         public void PlayLevelCompleteSound() => PlaySFX(levelCompleteClip);
         public void PlayTimerCountUp() => PlaySFX(timerCountUpClip);
+        public void StopTimerCountUp() => sfxSource?.Stop();
         public void PlayStarEarned(int starNumber)
         {
             switch (starNumber)

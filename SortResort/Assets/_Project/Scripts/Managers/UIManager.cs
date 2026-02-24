@@ -4080,11 +4080,11 @@ Antonia and Joakim Engfors
                 timerBarText.text = "0:00.00";
             yield return StartCoroutine(FadeCanvasGroup(timerBarUICanvasGroup, 0f, 1f, 0.2f));
 
-            // Play timer count-up sound effect (3 seconds to match)
+            // Play timer count-up sound effect
             AudioManager.Instance?.PlayTimerCountUp();
 
-            // Animate counting up from 0 to final time over 3 seconds
-            float countDuration = 3.0f;
+            // Animate counting up from 0 to final time over 1.5 seconds
+            float countDuration = 1.5f;
             float elapsed = 0f;
 
             while (elapsed < countDuration)
@@ -4104,6 +4104,9 @@ Antonia and Joakim Engfors
 
                 yield return null;
             }
+
+            // Stop the count-up sound effect
+            AudioManager.Instance?.StopTimerCountUp();
 
             // Set final value precisely
             {

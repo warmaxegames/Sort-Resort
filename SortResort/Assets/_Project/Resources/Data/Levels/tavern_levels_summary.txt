@@ -1,0 +1,112 @@
+Tavern Levels Summary
+================================================================================
+
+L  1:  9c, 11t,  33i, 2r,  61% fill, thresh=[21, 24, 27, 29], timer=61s, solver=21m, construct=29m, [locked]
+L  2: 10c, 21t,  63i, 3r,  70% fill, thresh=[38, 44, 49, 53], timer=116s, solver=38m, construct=54m, [locked]
+L  3: 10c, 11t,  33i, 2r,  55% fill, thresh=[21, 24, 27, 29], timer=60s, solver=21m, construct=25m, [locked]
+L  4: 11c, 23t,  69i, 3r,  70% fill, thresh=[46, 53, 60, 64], timer=124s, solver=46m, construct=61m, [locked]
+L  5: 11c, 25t,  75i, 3r,  76% fill, thresh=[51, 59, 66, 71], timer=134s, solver=51m, construct=68m, [locked]
+L  6: 10c, 21t,  63i, 3r,  75% fill, thresh=[43, 49, 56, 60], timer=112s, solver=43m, construct=59m, [locked, single]
+L  7: 10c, 19t,  57i, 3r,  68% fill, thresh=[37, 43, 48, 52], timer=100s, solver=37m, construct=49m, [single]
+L  8: 10c, 21t,  63i, 3r,  75% fill, thresh=[42, 48, 55, 59], timer=110s, solver=42m, construct=55m, [locked, single]
+L  9: 11c, 21t,  63i, 3r,  68% fill, thresh=[44, 51, 57, 62], timer=109s, solver=44m, construct=53m, [single]
+L 10: 11c, 25t,  75i, 3r,  81% fill, thresh=[55, 63, 72, 77], timer=128s, solver=55m, construct=63m, [locked, single]
+L 11: 11c, 21t,  63i, 3r,  68% fill, thresh=[42, 48, 55, 59], timer=107s, solver=42m, construct=54m, [locked, single]
+L 12: 12c, 25t,  75i, 3r,  74% fill, thresh=[46, 53, 60, 64], timer=126s, solver=46m, construct=68m, [locked, single]
+L 13: 12c, 25t,  75i, 3r,  69% fill, thresh=[47, 54, 61, 66], timer=125s, solver=47m, construct=63m
+L 14: 12c, 27t,  81i, 3r,  75% fill, thresh=[56, 64, 73, 78], timer=134s, solver=56m, construct=71m
+L 15: 13c, 28t,  84i, 3r,  76% fill, thresh=[57, 66, 74, 80], timer=137s, solver=57m, construct=70m, [single]
+L 16: 13c, 28t,  84i, 3r,  72% fill, thresh=[53, 61, 69, 74], timer=136s, solver=53m, construct=77m
+L 17: 13c, 30t,  90i, 3r,  77% fill, thresh=[59, 68, 77, 83], timer=145s, solver=59m, construct=77m, [locked]
+L 18: 14c, 31t,  93i, 3r,  74% fill, thresh=[64, 74, 83, 90], timer=148s, solver=64m, construct=85m
+L 19: 14c, 30t,  90i, 3r,  71% fill, thresh=[62, 71, 81, 87], timer=142s, solver=62m, construct=80m
+L 20: 14c, 31t,  93i, 3r,  74% fill, thresh=[63, 72, 82, 88], timer=145s, solver=63m, construct=81m
+L 21: 14c, 26t,  78i, 3r,  70% fill, thresh=[48, 55, 62, 67], timer=121s, solver=48m, construct=70m, [b&f, carousel]
+L 22: 14c, 26t,  78i, 3r,  70% fill, thresh=[50, 57, 65, 70], timer=119s, solver=50m, construct=72m, [carousel]
+L 23: 14c, 26t,  78i, 3r,  74% fill, thresh=[50, 57, 65, 70], timer=118s, solver=50m, construct=66m, [carousel, locked, single]
+L 24: 14c, 26t,  78i, 3r,  74% fill, thresh=[59, 68, 77, 83], timer=117s, solver=59m, construct=65m, [carousel, locked, single]
+L 25: 14c, 26t,  78i, 3r,  70% fill, thresh=[51, 59, 66, 71], timer=116s, solver=51m, construct=68m, [b&f, carousel]
+L 26: 22c, 42t, 126i, 3r,  78% fill, thresh=[85, 98, 110, 119], timer=185s, solver=85m, construct=104m, [despawn, single]
+L 27: 22c, 40t, 120i, 3r,  74% fill, thresh=[75, 86, 98, 105], timer=175s, solver=75m, construct=89m, [despawn, locked, single]
+L 28: 22c, 40t, 120i, 3r,  74% fill, thresh=[77, 89, 100, 108], timer=173s, solver=77m, construct=92m, [despawn, locked, single]
+L 29: 22c, 42t, 126i, 3r,  78% fill, thresh=[85, 98, 110, 119], timer=179s, solver=85m, construct=99m, [despawn, locked, single]
+L 30: 22c, 44t, 132i, 3r,  81% fill, thresh=[87, 100, 113, 122], timer=186s, solver=87m, construct=92m, [despawn, locked, single]
+L 31: 16c, 29t,  87i, 3r,  67% fill, thresh=[56, 64, 73, 78], timer=121s, solver=56m, construct=75m, [carousel]
+L 32: 16c, 31t,  93i, 3r,  70% fill, thresh=[64, 74, 83, 90], timer=128s, solver=64m, construct=80m, [locked, single]
+L 33: 16c, 25t,  75i, 3r,  64% fill, thresh=[62, 71, 81, 87], timer=102s, solver=62m, construct=66m, [b&f, carousel, locked, single]
+L 34: 16c, 35t, 105i, 3r,  73% fill, thresh=[67, 77, 87, 94], timer=142s, solver=67m, construct=90m
+L 35: 16c, 34t, 102i, 3r,  71% fill, thresh=[68, 78, 88, 95], timer=136s, solver=68m, construct=90m
+L 36: 22c, 43t, 129i, 3r,  77% fill, thresh=[83, 95, 108, 116], timer=170s, solver=83m, construct=106m, [despawn, locked]
+L 37: 17c, 32t,  96i, 3r,  70% fill, thresh=[65, 75, 84, 91], timer=125s, solver=65m, construct=86m, [carousel]
+L 38: 17c, 28t,  84i, 3r,  67% fill, thresh=[58, 67, 75, 81], timer=108s, solver=58m, construct=72m, [carousel, single]
+L 39: 17c, 40t, 120i, 3r,  78% fill, thresh=[80, 92, 104, 112], timer=153s, solver=80m, construct=101m
+L 40: 22c, 37t, 111i, 3r,  71% fill, thresh=[73, 84, 95, 102], timer=140s, solver=73m, construct=97m, [despawn, single]
+L 41: 18c, 41t, 123i, 3r,  76% fill, thresh=[81, 93, 105, 113], timer=153s, solver=81m, construct=104m
+L 42: 22c, 41t, 123i, 3r,  73% fill, thresh=[89, 102, 116, 125], timer=151s, solver=89m, construct=108m, [carousel, locked]
+L 43: 22c, 36t, 108i, 3r,  69% fill, thresh=[69, 79, 90, 97], timer=131s, solver=69m, construct=88m, [carousel, locked, single]
+L 44: 18c, 37t, 111i, 3r,  69% fill, thresh=[72, 83, 94, 101], timer=133s, solver=72m, construct=95m, [locked]
+L 45: 26c, 41t, 123i, 3r,  76% fill, thresh=[78, 90, 101, 109], timer=145s, solver=78m, construct=88m, [despawn, single]
+L 46: 22c, 43t, 129i, 3r,  77% fill, thresh=[89, 102, 116, 125], timer=150s, solver=89m, construct=108m, [despawn]
+L 47: 22c, 41t, 123i, 3r,  73% fill, thresh=[77, 89, 100, 108], timer=142s, solver=77m, construct=100m, [despawn, locked]
+L 48: 22c, 39t, 117i, 3r,  70% fill, thresh=[71, 82, 92, 99], timer=133s, solver=71m, construct=97m, [carousel, locked]
+L 49: 22c, 39t, 117i, 3r,  75% fill, thresh=[77, 89, 100, 108], timer=131s, solver=77m, construct=103m, [despawn, single]
+L 50: 18c, 42t, 126i, 3r,  78% fill, thresh=[82, 94, 107, 115], timer=139s, solver=82m, construct=110m
+L 51: 26c, 47t, 141i, 3r,  81% fill, thresh=[84, 97, 109, 118], timer=154s, solver=84m, construct=111m, [despawn]
+L 52: 22c, 38t, 114i, 3r,  73% fill, thresh=[77, 89, 100, 108], timer=123s, solver=77m, construct=92m, [carousel, locked, single]
+L 53: 22c, 39t, 117i, 3r,  75% fill, thresh=[78, 90, 101, 109], timer=124s, solver=78m, construct=89m, [despawn, locked, single]
+L 54: 22c, 45t, 135i, 3r,  80% fill, thresh=[95, 109, 124, 133], timer=141s, solver=95m, construct=107m, [despawn]
+L 55: 22c, 35t, 105i, 3r,  67% fill, thresh=[64, 74, 83, 90], timer=108s, solver=64m, construct=93m, [despawn, locked, single]
+L 56: 26c, 41t, 123i, 3r,  79% fill, thresh=[73, 84, 95, 102], timer=125s, solver=73m, construct=86m, [despawn, single]
+L 57: 22c, 45t, 135i, 3r,  80% fill, thresh=[94, 108, 122, 132], timer=135s, solver=94m, construct=108m, [despawn, locked]
+L 58: 18c, 40t, 120i, 3r,  74% fill, thresh=[76, 87, 99, 106], timer=118s, solver=76m, construct=97m, [locked]
+L 59: 22c, 41t, 123i, 3r,  73% fill, thresh=[85, 98, 110, 119], timer=119s, solver=85m, construct=107m, [despawn, locked]
+L 60: 26c, 35t, 105i, 3r,  67% fill, thresh=[69, 79, 90, 97], timer=100s, solver=69m, construct=82m, [despawn, single]
+L 61: 22c, 44t, 132i, 3r,  79% fill, thresh=[93, 107, 121, 130], timer=124s, solver=93m, construct=99m, [despawn, locked]
+L 62: 18c, 34t, 102i, 3r,  71% fill, thresh=[80, 92, 104, 112], timer=94s, solver=80m, construct=92m (attempt 2), [locked, single]
+L 63: 18c, 33t,  99i, 3r,  69% fill, thresh=[69, 79, 90, 97], timer=90s, solver=69m, construct=90m, [single]
+L 64: 18c, 39t, 117i, 3r,  72% fill, thresh=[77, 89, 100, 108], timer=105s, solver=77m, construct=102m
+L 65: 17c, 34t, 102i, 3r,  74% fill, thresh=[100, 115, 130, 140], timer=90s, solver=100m, construct=87m (attempt 2), [carousel, locked]
+L 66: 22c, 35t, 105i, 3r,  70% fill, thresh=[76, 87, 99, 106], timer=91s, solver=76m, construct=91m, [carousel, single]
+L 67: 26c, 39t, 117i, 3r,  75% fill, thresh=[76, 87, 99, 106], timer=99s, solver=76m, construct=80m, [despawn, single]
+L 68: 30c, 48t, 144i, 2r,  80% fill, thresh=[89, 102, 116, 125], timer=120s, solver=89m, construct=95m, [despawn]
+L 69: 26c, 46t, 138i, 3r,  79% fill, thresh=[88, 101, 114, 123], timer=113s, solver=88m, construct=103m, [despawn]
+L 70: 18c, 32t,  96i, 3r,  67% fill, thresh=[68, 78, 88, 95], timer=77s, solver=68m, construct=80m (attempt 8), [locked, single]
+L 71: 17c, 24t,  72i, 3r,  60% fill, thresh=[50, 57, 65, 70], timer=57s, solver=50m, construct=64m, [carousel, single]
+L 72: 26c, 37t, 111i, 3r,  71% fill, thresh=[68, 78, 88, 95], timer=86s, solver=68m, construct=70m, [despawn, single]
+L 73: 18c, 33t,  99i, 3r,  69% fill, thresh=[76, 87, 99, 106], timer=75s, solver=76m, construct=86m (attempt 2), [locked, single]
+L 74: 22c, 41t, 123i, 3r,  73% fill, thresh=[79, 91, 103, 111], timer=91s, solver=79m, construct=101m, [carousel]
+L 75: 22c, 36t, 108i, 3r,  72% fill, thresh=[87, 100, 113, 122], timer=79s, solver=87m, construct=96m, [carousel, locked, single]
+L 76: 26c, 39t, 117i, 3r,  75% fill, thresh=[75, 86, 98, 105], timer=83s, solver=75m, construct=74m, [despawn, locked, single]
+L 77: 18c, 41t, 123i, 3r,  76% fill, thresh=[83, 95, 108, 116], timer=86s, solver=83m, construct=105m (attempt 2), [locked]
+L 78: 26c, 39t, 117i, 3r,  75% fill, thresh=[70, 80, 91, 98], timer=80s, solver=70m, construct=74m, [despawn, locked, single]
+L 79: 26c, 38t, 114i, 3r,  73% fill, thresh=[69, 79, 90, 97], timer=76s, solver=69m, construct=91m, [despawn, single]
+L 80: 18c, 36t, 108i, 3r,  75% fill, thresh=[83, 95, 108, 116], timer=70s, solver=83m, construct=104m (attempt 2), [locked, single]
+L 81: 26c, 44t, 132i, 3r,  76% fill, thresh=[84, 97, 109, 118], timer=84s, solver=84m, construct=102m, [despawn]
+L 82: 18c, 31t,  93i, 3r,  67% fill, thresh=[65, 75, 84, 91], timer=58s, solver=65m, construct=79m (attempt 12), [locked, single]
+L 83: 17c, 23t,  69i, 3r,  61% fill, thresh=[62, 71, 81, 87], timer=42s, solver=62m, construct=60m (attempt 3), [carousel, locked, single]
+L 84: 17c, 22t,  66i, 3r,  58% fill, thresh=[50, 57, 65, 70], timer=39s, solver=50m, construct=53m (attempt 3), [carousel, locked, single]
+L 85: 22c, 34t, 102i, 3r,  71% fill, thresh=[77, 89, 100, 108], timer=59s, solver=77m, construct=83m (attempt 4), [carousel, locked, single]
+L 86: 17c, 23t,  69i, 3r,  61% fill, thresh=[53, 61, 69, 74], timer=39s, solver=53m, construct=56m (attempt 4), [carousel, locked, single]
+L 87: 17c, 34t, 102i, 3r,  74% fill, thresh=[68, 78, 88, 95], timer=56s, solver=68m, construct=88m, [carousel, locked]
+L 88: 22c, 34t, 102i, 3r,  71% fill, thresh=[79, 91, 103, 111], timer=54s, solver=79m, construct=90m (attempt 3), [carousel, locked, single]
+L 89: 26c, 44t, 132i, 3r,  76% fill, thresh=[84, 97, 109, 118], timer=68s, solver=84m, construct=103m, [despawn, locked]
+L 90: 26c, 36t, 108i, 3r,  72% fill, thresh=[65, 75, 84, 91], timer=54s, solver=65m, construct=78m, [despawn, locked, single]
+L 91: 22c, 41t, 123i, 3r,  73% fill, thresh=[77, 89, 100, 108], timer=62s, solver=77m, construct=96m, [carousel]
+L 92: 17c, 22t,  66i, 3r,  58% fill, thresh=[60, 69, 78, 84], timer=33s, solver=60m, construct=62m, [carousel, locked, single]
+L 93: 22c, 41t, 123i, 3r,  73% fill, thresh=[87, 100, 113, 122], timer=62s, solver=87m, construct=96m, [carousel, locked]
+L 94: 17c, 25t,  75i, 3r,  66% fill, thresh=[77, 89, 100, 108], timer=38s, solver=77m, construct=67m (attempt 3), [carousel, locked, single]
+L 95: 22c, 33t,  99i, 3r,  69% fill, thresh=[71, 82, 92, 99], timer=50s, solver=71m, construct=84m (attempt 2), [despawn, locked, single]
+L 96: 22c, 37t, 111i, 3r,  77% fill, thresh=[79, 91, 103, 111], timer=56s, solver=79m, construct=88m, [despawn, locked, single]
+L 97: 22c, 40t, 120i, 3r,  71% fill, thresh=[75, 86, 98, 105], timer=60s, solver=75m, construct=100m, [despawn, locked]
+L 98: 18c, 30t,  90i, 3r,  65% fill, thresh=[61, 70, 79, 85], timer=45s, solver=61m, construct=75m, [single]
+L 99: 17c, 33t,  99i, 3r,  72% fill, thresh=[65, 75, 84, 91], timer=50s, solver=65m, construct=85m, [carousel]
+L100: 22c, 36t, 108i, 3r,  75% fill, thresh=[88, 101, 114, 123], timer=54s, solver=88m, construct=84m, [despawn, locked, single]
+
+Item usage: min=81, max=88
+
+Mechanic histogram:
+  b&f: 3/100
+  carousel: 29/100
+  despawn: 34/100
+  locked: 57/100
+  single: 53/100
