@@ -449,8 +449,10 @@ To update all level thresholds: `Tools > Sort Resort > Solver > Update All Level
    git commit -m "Deploy WebGL build - <brief description>"
    git push origin gh-pages
    ```
+   - The push triggers a **GitHub Actions workflow** that checks out with LFS resolution and deploys
 
-4. **Verify**: Remind user to hard refresh (Ctrl+Shift+R) after ~1 minute for GitHub Pages to update
+4. **Verify deployment**: Check https://github.com/warmaxegames/Sort-Resort/actions for the workflow run
+   - Wait for the workflow to complete (green checkmark), then hard refresh (Ctrl+Shift+R)
 
 #### Build Steps (user does manually in Unity before asking to deploy)
 1. Unity: **File → Build Settings → WebGL → Build** (output: `WebGL_Build/`)
@@ -458,6 +460,10 @@ To update all level thresholds: `Tools > Sort Resort > Solver > Update All Level
 
 #### Notes
 - `WebGL_Build/` is a separate git repo on the `gh-pages` branch
+- **Git LFS is required** for `.data` and `.wasm` files (>100MB GitHub limit). LFS is configured in `WebGL_Build/.gitattributes`
+- **GitHub Pages Source MUST be set to "GitHub Actions"** (not "Deploy from a branch") in repo settings. Without this, GitHub Pages serves raw LFS pointer files instead of actual binaries, causing `CompileError: wasm validation error: failed to match magic number`
+  - Settings URL: https://github.com/warmaxegames/Sort-Resort/settings/pages → Source → GitHub Actions
+- **NEVER remove Git LFS tracking** from the WebGL_Build repo — the .data file exceeds GitHub's 100MB limit and cannot be stored as a regular git object
 - Build compression is disabled (`webGLCompressionFormat: 2`) to avoid hosting issues
 - `wasm-opt.exe` is replaced with a shim on this machine (crashes otherwise); teammate builds are fully optimized
 - `patch_webgl_build.py` fixes WASM import module mismatch — the shim skips `--minify-imports-and-exports`, so WASM uses `"env"` but framework JS expects `"a"`. Patch maps both.
