@@ -3,11 +3,8 @@ guid: 29a3a626607debb4e88631db637107ad
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 508434528351956451
-    second: pinkpolkadotbikini_0
-  - first:
       213: 7162551892451704433
-    second: pinkpolkadotbikini_1
+    second: pinkpolkadotbikini_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -49,7 +46,7 @@ TextureImporter:
   nPOTScale: 0
   lightmap: 0
   compressionQuality: 50
-  spriteMode: 1
+  spriteMode: 2
   spriteExtrude: 1
   spriteMeshType: 1
   alignment: 0
@@ -145,28 +142,6 @@ TextureImporter:
       name: pinkpolkadotbikini_0
       rect:
         serializedVersion: 2
-        x: 10
-        y: 139
-        width: 111
-        height: 55
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 3ed26fd72825e0700800000000000000
-      internalID: 508434528351956451
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: pinkpolkadotbikini_1
-      rect:
-        serializedVersion: 2
         x: 0
         y: 7
         width: 125
@@ -199,8 +174,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      pinkpolkadotbikini_0: 508434528351956451
-      pinkpolkadotbikini_1: 7162551892451704433
+      pinkpolkadotbikini_0: 7162551892451704433
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

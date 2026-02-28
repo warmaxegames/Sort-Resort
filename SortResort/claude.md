@@ -63,7 +63,7 @@
    - Supermarket
 6. ~~**Generate Levels for Remaining Worlds**~~ - DONE. All 5 worlds have 100 solver-verified levels (500 total):
    - ~~Supermarket~~ - DONE (`generate_supermarket_levels.py`, 51 items, offset=10, 100/100 solver-verified)
-   - ~~Farm~~ - DONE (`generate_farm_levels.py`, 53 items, offset=10, 100/100 solver-verified)
+   - ~~Farm~~ - DONE (`generate_farm_levels.py`, 52 items, offset=10, 100/100 solver-verified)
    - ~~Tavern~~ - DONE (`generate_tavern_levels.py`, 50 items, offset=10, 100/100 solver-verified)
    - ~~Space~~ - DONE (`generate_space_levels.py`, 50 items, offset=10, 100/100 solver-verified)
 7. **World Icon Assets** - HUD world icons for non-Island worlds:

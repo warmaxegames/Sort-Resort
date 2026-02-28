@@ -3,14 +3,8 @@ guid: 81c2339df61dd414497ece30876e8594
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 9088537865656282905
-    second: green_potion_0
-  - first:
       213: -1279436935280458765
-    second: green_potion_1
-  - first:
-      213: -2961011965144242046
-    second: green_potion_2
+    second: green_potion_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -52,7 +46,7 @@ TextureImporter:
   nPOTScale: 0
   lightmap: 0
   compressionQuality: 50
-  spriteMode: 1
+  spriteMode: 2
   spriteExtrude: 1
   spriteMeshType: 1
   alignment: 0
@@ -148,28 +142,6 @@ TextureImporter:
       name: green_potion_0
       rect:
         serializedVersion: 2
-        x: 10
-        y: 23
-        width: 29
-        height: 12
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 91f21222909f02e70800000000000000
-      internalID: 9088537865656282905
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: green_potion_1
-      rect:
-        serializedVersion: 2
         x: 18
         y: 1
         width: 222
@@ -188,28 +160,6 @@ TextureImporter:
       indices: 
       edges: []
       weights: []
-    - serializedVersion: 2
-      name: green_potion_2
-      rect:
-        serializedVersion: 2
-        x: 204
-        y: 3
-        width: 44
-        height: 33
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 28865e94e4f58e6d0800000000000000
-      internalID: -2961011965144242046
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
     outline: []
     customData: 
     physicsShape: []
@@ -224,9 +174,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      green_potion_0: 9088537865656282905
-      green_potion_1: -1279436935280458765
-      green_potion_2: -2961011965144242046
+      green_potion_0: -1279436935280458765
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

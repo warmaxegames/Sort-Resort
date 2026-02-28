@@ -3,7 +3,7 @@
 Farm Level Generator for Sort Resort
 Uses the core level_generator module with Farm-specific item configuration.
 
-53 item types, complexity_offset=10 (L1 plays like Island L11).
+52 item types, complexity_offset=10 (L1 plays like Island L11).
 Mechanics unlock gradually across L1-L26, all unlocked by L31+.
 Run: python generate_farm_levels.py [start_level end_level]
 """
@@ -14,7 +14,7 @@ from level_generator import WorldConfig
 from reverse_generator import generate_levels
 
 # ── Farm World Configuration ─────────────────────────────────────────────────
-# 53 items grouped by category, unlocking progressively through L1-L20.
+# 52 items grouped by category, unlocking progressively through L1-L20.
 # Items unlock progressively L1-L20. complexity_offset=10 gives a gradual difficulty ramp.
 # Each tuple: (unlock_level, [item_ids])
 
@@ -22,15 +22,15 @@ FARM_CONFIG = WorldConfig(
     world_id="farm",
     complexity_offset=10,  # L1 plays like Island L11
     item_groups=[
-        # Wave 1: L1 - core vegetables (15 items)
+        # Wave 1: L1 - core vegetables (14 items)
         (1,  ["carrot", "potato", "corncob"]),
-        (1,  ["lettuce", "cabbage", "broccoli"]),
-        (1,  ["cauliflower", "cucumber", "redtomato"]),
-        (1,  ["greentomato", "eggplant", "mushroom"]),
-        (1,  ["bellpeppergreen", "bellpepperred", "bellpepperyellow"]),
+        (1,  ["lettuce", "broccoli", "cauliflower"]),
+        (1,  ["cucumber", "redtomato", "greentomato"]),
+        (1,  ["eggplant", "mushroom", "bellpeppergreen"]),
+        (1,  ["bellpepperred", "bellpepperyellow"]),
         # Wave 2: L5 - root veggies & greens (9 items)
         (5,  ["beet", "radish", "turnip"]),
-        (5,  ["turnip2", "whiteradish", "celery"]),
+        (5,  ["daikon", "whiteradish", "celery"]),
         (5,  ["celery2", "romaine", "leek"]),
         # Wave 3: L10 - fruits (9 items)
         (10, ["greenapple", "redapple", "lemon"]),
@@ -48,8 +48,8 @@ FARM_CONFIG = WorldConfig(
     ],
 )
 
-assert len(FARM_CONFIG.all_items) == 53, \
-    f"Expected 53 items, got {len(FARM_CONFIG.all_items)}"
+assert len(FARM_CONFIG.all_items) == 52, \
+    f"Expected 52 items, got {len(FARM_CONFIG.all_items)}"
 
 
 if __name__ == "__main__":

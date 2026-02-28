@@ -5,9 +5,6 @@ TextureImporter:
   - first:
       213: -3675109471912109876
     second: whiteradish_0
-  - first:
-      213: 843433533861741432
-    second: whiteradish_1
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -49,7 +46,7 @@ TextureImporter:
   nPOTScale: 0
   lightmap: 0
   compressionQuality: 50
-  spriteMode: 1
+  spriteMode: 2
   spriteExtrude: 1
   spriteMeshType: 1
   alignment: 0
@@ -163,28 +160,6 @@ TextureImporter:
       indices: 
       edges: []
       weights: []
-    - serializedVersion: 2
-      name: whiteradish_1
-      rect:
-        serializedVersion: 2
-        x: 29
-        y: 1
-        width: 18
-        height: 7
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 8734b71945a74bb00800000000000000
-      internalID: 843433533861741432
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
     outline: []
     customData: 
     physicsShape: []
@@ -200,7 +175,6 @@ TextureImporter:
       entries: []
     nameFileIdTable:
       whiteradish_0: -3675109471912109876
-      whiteradish_1: 843433533861741432
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

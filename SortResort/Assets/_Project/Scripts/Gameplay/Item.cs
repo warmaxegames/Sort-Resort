@@ -101,9 +101,9 @@ namespace SortResort
             itemId = id;
             itemSprite = sprite;
 
-            if (spriteRenderer != null && sprite != null)
+            if (spriteRenderer != null)
             {
-                spriteRenderer.sprite = sprite;
+                spriteRenderer.sprite = sprite;  // Always set — prevents stale pool sprites when load fails
             }
 
             gameObject.name = $"Item_{id}";

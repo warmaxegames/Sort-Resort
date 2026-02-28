@@ -5,9 +5,6 @@ TextureImporter:
   - first:
       213: 7717664252848932457
     second: orangedrink_0
-  - first:
-      213: 4431536491933304022
-    second: orangedrink_1
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -49,7 +46,7 @@ TextureImporter:
   nPOTScale: 0
   lightmap: 0
   compressionQuality: 50
-  spriteMode: 1
+  spriteMode: 2
   spriteExtrude: 1
   spriteMeshType: 1
   alignment: 0
@@ -163,28 +160,6 @@ TextureImporter:
       indices: 
       edges: []
       weights: []
-    - serializedVersion: 2
-      name: orangedrink_1
-      rect:
-        serializedVersion: 2
-        x: 100
-        y: 5
-        width: 12
-        height: 6
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 6d48ddac5faff7d30800000000000000
-      internalID: 4431536491933304022
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
     outline: []
     customData: 
     physicsShape: []
@@ -200,7 +175,6 @@ TextureImporter:
       entries: []
     nameFileIdTable:
       orangedrink_0: 7717664252848932457
-      orangedrink_1: 4431536491933304022
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

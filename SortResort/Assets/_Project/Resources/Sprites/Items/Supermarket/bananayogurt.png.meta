@@ -5,9 +5,6 @@ TextureImporter:
   - first:
       213: -4448568951240969457
     second: bananayogurt_0
-  - first:
-      213: -8536784399554962361
-    second: bananayogurt_1
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -49,7 +46,7 @@ TextureImporter:
   nPOTScale: 0
   lightmap: 0
   compressionQuality: 50
-  spriteMode: 1
+  spriteMode: 2
   spriteExtrude: 1
   spriteMeshType: 1
   alignment: 0
@@ -163,28 +160,6 @@ TextureImporter:
       indices: 
       edges: []
       weights: []
-    - serializedVersion: 2
-      name: bananayogurt_1
-      rect:
-        serializedVersion: 2
-        x: 10
-        y: 2
-        width: 18
-        height: 9
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 74c1e6481df378980800000000000000
-      internalID: -8536784399554962361
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
     outline: []
     customData: 
     physicsShape: []
@@ -200,7 +175,6 @@ TextureImporter:
       entries: []
     nameFileIdTable:
       bananayogurt_0: -4448568951240969457
-      bananayogurt_1: -8536784399554962361
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
