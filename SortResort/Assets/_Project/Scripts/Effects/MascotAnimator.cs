@@ -150,6 +150,67 @@ namespace SortResort
         }
 
         /// <summary>
+        /// Load animation frames from an arbitrary Resources path.
+        /// Frames must be named {prefix}_{NNNNN}.png (5-digit zero-padded).
+        /// </summary>
+        public bool LoadFramesFromPath(string resourceBasePath, string prefix)
+        {
+            string cacheKey = $"{resourceBasePath}/{prefix}";
+
+            if (frameCache.TryGetValue(cacheKey, out var cached))
+            {
+                frames = cached;
+                return true;
+            }
+
+            var frameList = new List<Sprite>();
+            for (int i = 0; i < 200; i++)
+            {
+                string framePath = $"{resourceBasePath}/{prefix}_{i:D5}";
+                var tex = Resources.Load<Texture2D>(framePath);
+                if (tex == null) break;
+                var frame = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), new Vector2(0.5f, 0.5f), 100f);
+                frameList.Add(frame);
+            }
+
+            if (frameList.Count == 0)
+            {
+                Debug.LogWarning($"[MascotAnimator] No frames found at {resourceBasePath}/{prefix}_NNNNN");
+                return false;
+            }
+
+            frames = frameList.ToArray();
+            frameCache[cacheKey] = frames;
+            Debug.Log($"[MascotAnimator] Loaded {frames.Length} frames from {cacheKey}");
+            return true;
+        }
+
+        /// <summary>
+        /// Preload animation frames from an arbitrary Resources path into the static cache.
+        /// </summary>
+        public static void PreloadFramesFromPath(string resourceBasePath, string prefix)
+        {
+            string cacheKey = $"{resourceBasePath}/{prefix}";
+            if (frameCache.ContainsKey(cacheKey)) return;
+
+            var frameList = new List<Sprite>();
+            for (int i = 0; i < 200; i++)
+            {
+                string framePath = $"{resourceBasePath}/{prefix}_{i:D5}";
+                var tex = Resources.Load<Texture2D>(framePath);
+                if (tex == null) break;
+                var frame = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), new Vector2(0.5f, 0.5f), 100f);
+                frameList.Add(frame);
+            }
+
+            if (frameList.Count > 0)
+            {
+                frameCache[cacheKey] = frameList.ToArray();
+                Debug.Log($"[MascotAnimator] Preloaded {frameList.Count} frames from {cacheKey}");
+            }
+        }
+
+        /// <summary>
         /// Play the animation from the beginning
         /// </summary>
         public void Play(System.Action onCompleteCallback = null)
@@ -199,6 +260,11 @@ namespace SortResort
         /// Set the frame rate for this animator instance
         /// </summary>
         public float FrameRate { get => frameRate; set => frameRate = value; }
+
+        /// <summary>
+        /// Set whether the animation should loop
+        /// </summary>
+        public bool Loop { get => loop; set => loop = value; }
 
         /// <summary>
         /// Get the total duration of the animation in seconds

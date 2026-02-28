@@ -264,7 +264,7 @@ namespace SortResort
         /// </summary>
         private void CreateWorldAchievements(string worldId)
         {
-            string worldName = Achievement.GetTabDisplayName(worldId);
+            string worldName = worldId == "supermarket" ? "Market" : Achievement.GetTabDisplayName(worldId);
 
             // Level completion in this world (3 milestones)
             var levelMilestones = new[] { 25, 50, 100 };

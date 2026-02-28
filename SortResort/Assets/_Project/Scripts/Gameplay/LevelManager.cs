@@ -346,6 +346,7 @@ namespace SortResort
             // Preload mascot animation frames for level complete screen
             // (loads into static cache so level complete plays instantly)
             MascotAnimator.PreloadFrames(worldId);
+            MascotAnimator.PreloadFramesFromPath("Sprites/UI/LevelComplete/MedalAnimation", "medal");
 
             // Load level data
             currentLevel = LevelDataLoader.LoadLevel(worldId, levelNumber);
