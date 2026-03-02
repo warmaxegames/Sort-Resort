@@ -42,6 +42,7 @@ namespace SortResort
         [SerializeField] private AudioClip achievementClip;
         [SerializeField] private AudioClip portalClip;
         [SerializeField] private AudioClip tickTockClip;
+        [SerializeField] private AudioClip levelCompleteVictoryClip;
 
         private AudioSource tickTockSource;
         private bool isUsingSourceA = true;
@@ -118,6 +119,8 @@ namespace SortResort
                 portalClip = Resources.Load<AudioClip>("Audio/SFX/portal");
             if (tickTockClip == null)
                 tickTockClip = Resources.Load<AudioClip>("Audio/SFX/tick_tock");
+            if (levelCompleteVictoryClip == null)
+                levelCompleteVictoryClip = Resources.Load<AudioClip>("Audio/SFX/level_complete_victory");
 
             Debug.Log($"[AudioManager] Audio clips loaded - match:{matchClip != null}, unlock:{unlockClip != null}, victory:{victoryClip != null}, button:{buttonClickClip != null}, warp:{warpClip != null}, achievement:{achievementClip != null}, portal:{portalClip != null}");
         }
@@ -634,6 +637,7 @@ namespace SortResort
         public void PlayWarpSound() => PlayUI(portalClip ?? warpClip);
         public void PlayAchievementSound() => PlaySFX(achievementClip, 1.3f);
         public void PlayPortalSound() => PlaySFX(portalClip);
+        public void PlayLevelCompleteVictory() => PlaySFX(levelCompleteVictoryClip);
 
         public void StartTickTock()
         {

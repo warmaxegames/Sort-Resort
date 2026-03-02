@@ -212,6 +212,9 @@ namespace SortResort
         private Coroutine achievementCoroutine;
         private Achievement currentAchievement;
 
+        // Power-up bar
+        private PowerUpBarUI powerUpBarUI;
+
         // Dialogue system
         private GameObject dialoguePanel;
         private DialogueUI dialogueUI;
@@ -244,6 +247,8 @@ namespace SortResort
             GameEvents.OnTimerUpdated += OnTimerUpdated;
             GameEvents.OnTimerFrozen += OnTimerFrozen;
             GameEvents.OnLevelFailed += OnLevelFailed;
+            GameEvents.OnPowerUpCountChanged += OnPowerUpCountChanged;
+            GameEvents.OnPowerUpUnlocked += OnPowerUpUnlocked;
 
             if (LevelManager.Instance != null)
             {
@@ -273,6 +278,8 @@ namespace SortResort
             GameEvents.OnTimerUpdated -= OnTimerUpdated;
             GameEvents.OnTimerFrozen -= OnTimerFrozen;
             GameEvents.OnLevelFailed -= OnLevelFailed;
+            GameEvents.OnPowerUpCountChanged -= OnPowerUpCountChanged;
+            GameEvents.OnPowerUpUnlocked -= OnPowerUpUnlocked;
 
             if (LevelManager.Instance != null)
             {
@@ -335,6 +342,7 @@ namespace SortResort
             CreateAchievementNotificationPanel();
             CreateAchievementsPanel();
             CreateDialoguePanel();
+            CreatePowerUpBar();
 
             // Hide all panels initially
             if (levelCompletePanel != null)
@@ -417,6 +425,7 @@ namespace SortResort
                 hudSettingsOverlay.SetActive(false);
             if (levelCompletePanel != null)
                 levelCompletePanel.SetActive(false);
+            powerUpBarUI?.Hide();
 
             // Notify level select it's being shown (triggers first-play dialogue once)
             levelSelectScreen?.OnShow();
@@ -519,7 +528,7 @@ namespace SortResort
             containerRect.anchorMax = new Vector2(0.5f, 0);
             containerRect.pivot = new Vector2(0.5f, 0);
             containerRect.anchoredPosition = new Vector2(0, 200); // 200 pixels from bottom
-            containerRect.sizeDelta = new Vector2(366, 114); // Match Godot dimensions
+            containerRect.sizeDelta = new Vector2(366, 114); // Match container dimensions
 
             // Play button
             var playBtnGO = new GameObject("PlayButton");
@@ -1122,7 +1131,7 @@ namespace SortResort
             // Connect level selected callback
             levelSelectScreen.OnLevelSelected += OnLevelSelectedFromMenu;
 
-            Debug.Log("[UIManager] Level select panel created (Godot style)");
+            Debug.Log("[UIManager] Level select panel created");
         }
 
         private void OnCloseFromLevelSelect()
@@ -1565,6 +1574,32 @@ namespace SortResort
             threeStarTargetGO.SetActive(false);
 
             hudModeOverlay.SetActive(false);
+        }
+
+        private void CreatePowerUpBar()
+        {
+            if (mainCanvas == null) return;
+
+            var barGO = new GameObject("PowerUpBarUI");
+            barGO.transform.SetParent(mainCanvas.transform, false);
+            powerUpBarUI = barGO.AddComponent<PowerUpBarUI>();
+            powerUpBarUI.CreateButtons(mainCanvas.transform);
+
+            // Place above HUD overlays in sibling order
+            if (hudSettingsOverlay != null)
+                barGO.transform.SetSiblingIndex(hudSettingsOverlay.transform.GetSiblingIndex() + 1);
+        }
+
+        private void OnPowerUpCountChanged(PowerUpType type, int newCount)
+        {
+            powerUpBarUI?.UpdateCount(type, newCount);
+        }
+
+        private void OnPowerUpUnlocked(PowerUpType type)
+        {
+            // Don't reconfigure bar here - the tutorial handles showing the button
+            // via AnimateButtonToBar(). Reconfiguring here would show the button
+            // before the tween animation places it.
         }
 
         /// <summary>
@@ -3810,6 +3845,18 @@ Antonia and Joakim Engfors
                     statsContainerGO.SetActive(true);
             }
 
+            // Configure power-up bar for current mode and level
+            if (powerUpBarUI != null && LevelManager.Instance?.CurrentLevel != null)
+            {
+                powerUpBarUI.ConfigureForLevel(currentMode, LevelManager.Instance.CurrentLevel);
+            }
+
+            // Check for power-up unlock tutorials
+            if (PowerUpTutorial.Instance != null)
+            {
+                PowerUpTutorial.Instance.CheckUnlocks(levelNumber, currentMode);
+            }
+
 #if UNITY_EDITOR
             // Reset record button text (recording is stopped when level changes)
             if (recordButton != null)
@@ -3849,6 +3896,7 @@ Antonia and Joakim Engfors
                 hudModeOverlay.SetActive(false);
             if (hudSettingsOverlay != null)
                 hudSettingsOverlay.SetActive(false);
+            powerUpBarUI?.Hide();
 
             if (levelCompletePanel != null)
             {
@@ -3945,6 +3993,9 @@ Antonia and Joakim Engfors
             // Start rays + curtains animation
             if (animatedLevelComplete != null)
                 animatedLevelComplete.PlayRaysAndCurtains();
+
+            // Play victory sound when rays/curtains appear
+            AudioManager.Instance?.PlayLevelCompleteVictory();
 
             // Fade in mode-specific overlay on rays+curtains screen
             if (mode == GameMode.FreePlay && freeOverlayCanvasGroup != null)
@@ -4210,6 +4261,7 @@ Antonia and Joakim Engfors
                 hudModeOverlay.SetActive(false);
             if (hudSettingsOverlay != null)
                 hudSettingsOverlay.SetActive(false);
+            powerUpBarUI?.Hide();
 
             if (levelFailedPanel != null)
             {

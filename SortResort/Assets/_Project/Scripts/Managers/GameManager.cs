@@ -173,6 +173,10 @@ namespace SortResort
 
         public void IncrementMoveCount()
         {
+            // Skip counting during Moves Freeze power-up
+            if (PowerUpManager.Instance != null && PowerUpManager.Instance.IsMovesFrozen)
+                return;
+
             currentMoveCount++;
             GameEvents.InvokeMoveUsed(currentMoveCount);
 

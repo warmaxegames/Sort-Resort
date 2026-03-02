@@ -333,6 +333,44 @@ namespace SortResort
             SaveGame();
         }
 
+        // Power-Up Inventory
+        public int GetPowerUpCount(PowerUpType type)
+        {
+            int typeInt = (int)type;
+            var entry = currentSaveData.powerUpInventory.Find(e => e.type == typeInt);
+            return entry?.count ?? 0;
+        }
+
+        public void SetPowerUpCount(PowerUpType type, int count)
+        {
+            int typeInt = (int)type;
+            var entry = currentSaveData.powerUpInventory.Find(e => e.type == typeInt);
+            if (entry != null)
+            {
+                entry.count = count;
+            }
+            else
+            {
+                currentSaveData.powerUpInventory.Add(new PowerUpSaveEntry { type = typeInt, count = count });
+            }
+            SaveGame();
+        }
+
+        public bool IsPowerUpUnlocked(PowerUpType type)
+        {
+            return currentSaveData.unlockedPowerUps.Contains((int)type);
+        }
+
+        public void UnlockPowerUp(PowerUpType type)
+        {
+            int typeInt = (int)type;
+            if (!currentSaveData.unlockedPowerUps.Contains(typeInt))
+            {
+                currentSaveData.unlockedPowerUps.Add(typeInt);
+                SaveGame();
+            }
+        }
+
         // Reset All Progress
         public void ResetAllProgress()
         {
@@ -436,6 +474,10 @@ namespace SortResort
         public bool hapticsEnabled = true;
         public bool voiceEnabled = true;
 
+        // Power-ups
+        public List<PowerUpSaveEntry> powerUpInventory = new List<PowerUpSaveEntry>();
+        public List<int> unlockedPowerUps = new List<int>();
+
         public SaveData()
         {
             saveVersion = 2;
@@ -445,6 +487,13 @@ namespace SortResort
             hapticsEnabled = true;
             voiceEnabled = true;
         }
+    }
+
+    [Serializable]
+    public class PowerUpSaveEntry
+    {
+        public int type;
+        public int count;
     }
 
     [Serializable]

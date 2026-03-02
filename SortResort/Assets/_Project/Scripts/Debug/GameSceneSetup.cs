@@ -127,6 +127,18 @@ namespace SortResort
             dialogueGO.AddComponent<DialogueManager>();
             Debug.Log("[GameSceneSetup] DialogueManager created");
 
+            // PowerUpManager (before UIManager so bar can configure)
+            var puGO = new GameObject("PowerUpManager");
+            puGO.transform.SetParent(managersRoot.transform);
+            puGO.AddComponent<PowerUpManager>();
+            Debug.Log("[GameSceneSetup] PowerUpManager created");
+
+            // PowerUpTutorial (before UIManager for unlock checks)
+            var putGO = new GameObject("PowerUpTutorial");
+            putGO.transform.SetParent(managersRoot.transform);
+            putGO.AddComponent<PowerUpTutorial>();
+            Debug.Log("[GameSceneSetup] PowerUpTutorial created");
+
             // LevelSolverRunner (debug tool for auto-solving levels)
             var solverGO = new GameObject("LevelSolverRunner");
             solverGO.transform.SetParent(managersRoot.transform);

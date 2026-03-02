@@ -104,6 +104,8 @@ namespace SortResort
 
         private void OnPointerDown(InputAction.CallbackContext context)
         {
+            if (!enabled) return;
+
             if (GameManager.Instance != null && GameManager.Instance.CurrentState != GameState.Playing)
             {
                 return;

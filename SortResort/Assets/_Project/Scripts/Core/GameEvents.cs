@@ -65,6 +65,11 @@ namespace SortResort
         public static event Action OnTimerExpired;
         public static event Action<bool> OnTimerFrozen; // isFrozen (for timer freeze power-up)
 
+        // Power-Up Events
+        public static event Action<PowerUpType> OnPowerUpUsed;
+        public static event Action<PowerUpType, int> OnPowerUpCountChanged; // type, newCount
+        public static event Action<PowerUpType> OnPowerUpUnlocked;
+
         // Invoke Methods - Game State
         public static void InvokeGameStateChanged(GameState newState) => OnGameStateChanged?.Invoke(newState);
         public static void InvokeGamePaused() => OnGamePaused?.Invoke();
@@ -114,6 +119,11 @@ namespace SortResort
         public static void InvokeTimerExpired() => OnTimerExpired?.Invoke();
         public static void InvokeTimerFrozen(bool isFrozen) => OnTimerFrozen?.Invoke(isFrozen);
 
+        // Invoke Methods - Power-Ups
+        public static void InvokePowerUpUsed(PowerUpType type) => OnPowerUpUsed?.Invoke(type);
+        public static void InvokePowerUpCountChanged(PowerUpType type, int newCount) => OnPowerUpCountChanged?.Invoke(type, newCount);
+        public static void InvokePowerUpUnlocked(PowerUpType type) => OnPowerUpUnlocked?.Invoke(type);
+
         // Cleanup - call when changing scenes or resetting
         public static void ClearAllListeners()
         {
@@ -148,6 +158,9 @@ namespace SortResort
             OnTimerUpdated = null;
             OnTimerExpired = null;
             OnTimerFrozen = null;
+            OnPowerUpUsed = null;
+            OnPowerUpCountChanged = null;
+            OnPowerUpUnlocked = null;
         }
     }
 }
