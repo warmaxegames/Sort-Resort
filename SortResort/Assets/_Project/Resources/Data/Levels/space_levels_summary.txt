@@ -1,16 +1,15 @@
 Space Levels Summary
 ================================================================================
 
-L 81: 26c, 44t, 132i, 3r,  76% fill, thresh=[84, 97, 109, 118], timer=84s, solver=84m, construct=102m, [despawn]
-L 82: 18c, 31t,  93i, 3r,  67% fill, thresh=[65, 75, 84, 91], timer=58s, solver=65m, construct=79m (attempt 12), [locked, single]
-L 83: 17c, 23t,  69i, 3r,  61% fill, thresh=[62, 71, 81, 87], timer=42s, solver=62m, construct=60m (attempt 3), [carousel, locked, single]
-L 84: 17c, 22t,  66i, 3r,  58% fill, thresh=[50, 57, 65, 70], timer=39s, solver=50m, construct=53m (attempt 3), [carousel, locked, single]
-L 85: 22c, 34t, 102i, 3r,  71% fill, thresh=[77, 89, 100, 108], timer=59s, solver=77m, construct=83m (attempt 4), [carousel, locked, single]
+L 34: 16c, 32t,  96i, 3r,  74% fill, thresh=[64, 74, 83, 90], timer=129s, solver=64m, construct=83m, [carousel]
 
-Item usage: min=4, max=5
+Item usage: min=0, max=1
+UNUSED: ['jupiter', 'neptune', 'pluto', 'sun', 'alien', 'alien_2', 'ufo_2', 'drone', 'sputnik']
 
 Mechanic histogram:
-  carousel: 3/5
-  despawn: 1/5
-  locked: 4/5
-  single: 4/5
+  carousel: 1/1
+
+Errors:
+  L34: container_15 bbox (200-540, 1503-1739) off-screen
+  L34: container_16 bbox (540-880, 1503-1739) off-screen
+  Unused items: ['jupiter', 'neptune', 'pluto', 'sun', 'alien', 'alien_2', 'ufo_2', 'drone', 'sputnik']

@@ -1442,6 +1442,22 @@ namespace SortResort
         {
             var moves = new List<Move>();
 
+            // Optimization 1: Completely empty containers - only one representative per slot_count
+            // is used as destination, since moves to different empty containers of the same shape
+            // are functionally identical.
+            var emptyRepresentatives = new Dictionary<int, int>(); // slotCount -> container index
+            var emptyContainerSet = new HashSet<int>();
+            for (int ci = 0; ci < state.Containers.Count; ci++)
+            {
+                var c = state.Containers[ci];
+                if (!c.IsLocked && c.IsEmpty())
+                {
+                    emptyContainerSet.Add(ci);
+                    if (!emptyRepresentatives.ContainsKey(c.SlotCount))
+                        emptyRepresentatives[c.SlotCount] = ci;
+                }
+            }
+
             // Find all accessible items (front row of unlocked containers)
             for (int fromCi = 0; fromCi < state.Containers.Count; fromCi++)
             {
@@ -1461,6 +1477,15 @@ namespace SortResort
                         var toContainer = state.Containers[toCi];
                         if (toContainer.IsLocked) continue;
 
+                        // Skip non-representative empty containers
+                        if (emptyContainerSet.Contains(toCi))
+                        {
+                            int rep;
+                            if (emptyRepresentatives.TryGetValue(toContainer.SlotCount, out rep) && toCi != rep)
+                                continue;
+                        }
+
+                        // Optimization 2: Only the first empty slot in each destination
                         for (int toSlot = 0; toSlot < toContainer.SlotCount; toSlot++)
                         {
                             if (toContainer.IsFrontSlotEmpty(toSlot))
@@ -1473,6 +1498,7 @@ namespace SortResort
                                     ToSlot = toSlot,
                                     ItemId = item
                                 });
+                                break; // Only first empty slot
                             }
                         }
                     }

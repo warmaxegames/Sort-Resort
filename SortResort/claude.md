@@ -9,7 +9,7 @@
 - Triple match system (3 identical items = cleared)
 - Multi-row containers with depth visualization
 - Locked containers with countdown unlock
-- Moving containers on paths (carousel, back-and-forth)
+- Moving containers on paths (carousel)
 - Star rating based on move efficiency (1-3 stars)
 - 100 levels per world, 5 worlds planned
 
@@ -127,10 +127,11 @@
 - **Data-Driven**: JSON files for levels, items, worlds
 - **State Machine**: GameState enum (Playing, LevelSelection, Paused, etc.)
 
-### Coordinate Conversion (Portrait Mode)
+### Coordinate System (Portrait Mode)
+Level positions use **screen pixels** (origin top-left, 1080×1920):
 ```csharp
-float unityX = (godotPos.x - 540f) / 100f;  // Center for portrait
-float unityY = (600f - godotPos.y) / 100f;  // Flip Y, portrait center
+float unityX = (screenPos.x - 540f) / 100f;   // Screen center X = 540
+float unityY = (960f - screenPos.y) / 100f;    // Screen center Y = 960, flip Y
 ```
 
 ### Container & Item Scaling System
@@ -139,10 +140,12 @@ float unityY = (600f - godotPos.y) / 100f;  // Flip Y, portrait center
 
 #### Screen & Camera
 - **Resolution**: 1080×1920 (portrait)
-- **Screen center**: (540, 600) in Godot pixels
+- **Screen center**: (540, 960) in screen pixels
 - **Camera orthoSize**: 9.6
 - **Coordinate divisor**: 100 (pixels to Unity units)
 - **Visible area**: 10.8 × 19.2 Unity units
+- **Top HUD bar**: Y=0 to ~230 (level/moves/timer badges)
+- **Bottom items bar**: Y=1752 to 1920 (168px tall, power-up items)
 
 #### Container Scaling
 ```
@@ -151,12 +154,12 @@ Uniform scale: 1.14
 Container border scale: 1.2 (17% border around slots)
 ```
 
-#### Standard 3-Column Layout (Godot X → Unity X)
-| Position | Godot X | Unity X |
-|----------|---------|---------|
-| Left     | 200     | -3.4    |
-| Center   | 540     | 0       |
-| Right    | 880     | +3.4    |
+#### Standard 3-Column Layout (Screen X → Unity X)
+| Position | Screen X | Unity X |
+|----------|----------|---------|
+| Left     | 200      | -3.4    |
+| Center   | 540      | 0       |
+| Right    | 880      | +3.4    |
 
 #### Key Files
 | File | Purpose |
@@ -170,7 +173,7 @@ Container border scale: 1.2 (17% border around slots)
 |--------|---------|------------|---------------|-------|
 | Horizontal | ~351px (X) | 5 min | 5 × spacing | First container 100px off-screen at spawn |
 | Vertical | ~227px (Y) | 10 fixed | 10 × spacing | L50+, 40% chance. Edge-to-edge positioning. Statics use 2-col |
-- **Mutual exclusion**: Carousel and despawn never appear on the same level (spatial conflict: carousel path at Y=200 overlaps despawn stack). When both selected by probability, prefer whichever is in its introduction range; otherwise coin flip.
+- **Mutual exclusion**: Carousel and despawn never appear on the same level (spatial conflict: carousel path at Y=560 overlaps despawn stack). When both selected by probability, prefer whichever is in its introduction range; otherwise coin flip.
 
 ### Layer Configuration
 - Layer 6: "Items" - for item raycasting
@@ -350,18 +353,18 @@ Mechanics unlock at fixed levels and persist via probability (30-70%). A complex
 - `SLOT_HEIGHT`: ~227px (includes border_scale 1.2), `ROW_DEPTH_OFFSET`: ~4.56px per extra row
 - `CAROUSEL_H_SPACING`: ~351px (10px gap), `CAROUSEL_V_SPACING`: ~227px (touching, no gap)
 - `MIN_CONTAINER_GAP`: 30px between container edges
-- `HUD_BAR_BOTTOM_Y`: -230 (Godot coords, above visible screen top)
-- `SCREEN_BOTTOM_Y`: 1560px (Godot, bottom of visible area)
-- Screen safe bounds: X: 200-880, Y: 100-1430 (container centers)
+- `HUD_BAR_BOTTOM_Y`: 130 (screen pixels, bottom of top HUD bar)
+- `BOTTOM_BAR_TOP_Y`: 1752 (screen pixels, top of bottom items bar)
+- `SCREEN_BOTTOM_Y`: 1752 (same as BOTTOM_BAR_TOP_Y, effective gameplay bottom)
+- Screen safe bounds: X: 200-880, Y: 460-1634 (container centers)
 
 #### Spatial Layout Design
 - **Standard layout**: 3-column grid (X=200, 540, 880) with dynamic vertical spacing via `get_y_gap()`
 - **Despawn layout**: Full-screen stacked columns, 1-3 columns based on level. Bottom container at SCREEN_BOTTOM_Y, stacks upward to HUD bar, then extends off-screen above. Per-column count: `n_visible_per_col + 3`. Bottom 3 have full depth; upper ones single-row. Only `min(4, n_columns * 2)` from static budget; rest additional. L36-50: 1 column (X=540). L51-70: 1-2 columns (67%/33%). L71+: 1-3 columns (25%/50%/25%). Column positions: `{1: [540], 2: [200, 880], 3: [200, 540, 880]}`. Each column cascades independently (ContainerMovement uses X-tolerance matching).
-- **Off-screen scatter exclusion**: Containers whose top edge is above HUD_BAR_BOTTOM_Y (-230) are excluded from scatter destinations in reverse-play. Triples CAN be placed in off-screen containers, but scattered items cannot go TO them.
+- **Off-screen scatter exclusion**: Containers whose top edge is above HUD_BAR_BOTTOM_Y (130) are excluded from scatter destinations in reverse-play. Triples CAN be placed in off-screen containers, but scattered items cannot go TO them.
 - **Vertical carousel layout**: 10 containers at X=540 scrolling up/down. Edge-to-edge positioning (first container at visible screen edge + half-height). Statics use 2-column layout. Only subtracts budgeted carousel_count from static pool. X=540 tracked in `occupied_col_xs`.
-- **Horizontal carousel layout**: 5+ containers scrolling left/right at Y=200. First container starts 100px off-screen. Static y_offset computed dynamically via `get_y_gap()`.
-- **B&F layout**: Back-and-forth movers (L26-50 only) get dedicated wide-spacing rows at screen edges (X=200, 880). If center column is occupied, odd B&F containers use left column instead. Disabled after L50 to free screen space for more containers at higher levels.
-- **2D AABB collision**: `_get_bounding_box()`, `_boxes_overlap()`, `_get_travel_box()` for overlap prevention between statics, B&F sweep paths, AND carousel swept bounding boxes. Carousel containers now included in `placed_ranges` (horizontal: full-width sweep at carousel Y; vertical: full-height sweep at carousel X).
+- **Horizontal carousel layout**: 5+ containers scrolling left/right at Y=560. First container starts 100px off-screen. Static y_offset computed dynamically via `get_y_gap()`.
+- **2D AABB collision**: `_get_bounding_box()`, `_boxes_overlap()`, `_get_travel_box()` for overlap prevention between statics AND carousel swept bounding boxes. Carousel containers now included in `placed_ranges` (horizontal: full-width sweep at carousel Y; vertical: full-height sweep at carousel X).
 - **Screen-fit cap**: Static container count is capped by `max_rows_fit * n_cols` to prevent overflow when container count ramp produces more containers than screen can fit.
 
 #### Lock System
@@ -376,7 +379,6 @@ Mechanics unlock at fixed levels and persist via probability (30-70%). A complex
 - Levels 8-15: 8-12 containers
 - Levels 11+: locked containers introduced (1-9 matches to unlock, widening with level)
 - Levels 16+: single-slot containers (can also be locked, uses own lock overlay)
-- Levels 26-50: back-and-forth movement (symmetric pairs, 2D collision-checked; disabled after L50 to make room for more containers)
 - Levels 31+: carousel movement (horizontal 5+ containers, 100px off-screen spawn; mutually exclusive with despawn)
 - Levels 36+: despawn-on-match (full-screen stacked columns, 1-3 columns, cascade falling; mutually exclusive with carousel)
 - Levels 41+: all mechanics combined (probability-based, no complexity cap)

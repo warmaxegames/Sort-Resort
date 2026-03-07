@@ -135,7 +135,7 @@
       "x": 0,
       "y": 0,
       "w": 1080,
-      "h": 225,
+      "h": 1920,
       "orig_w": 1080,
       "orig_h": 1920
     },
@@ -143,7 +143,7 @@
       "x": 0,
       "y": 0,
       "w": 1080,
-      "h": 225,
+      "h": 1920,
       "orig_w": 1080,
       "orig_h": 1920
     },
@@ -159,7 +159,7 @@
       "x": 0,
       "y": 0,
       "w": 1080,
-      "h": 225,
+      "h": 1920,
       "orig_w": 1080,
       "orig_h": 1920
     },
@@ -167,7 +167,7 @@
       "x": 0,
       "y": 0,
       "w": 1080,
-      "h": 225,
+      "h": 1920,
       "orig_w": 1080,
       "orig_h": 1920
     },
@@ -612,5 +612,45 @@
       "orig_w": 1080,
       "orig_h": 1920
     }
+  },
+  "Sprites/UI/LevelFailed/mara_level_failed": {
+    "x": 97,
+    "y": 715,
+    "w": 844,
+    "h": 857,
+    "orig_w": 1080,
+    "orig_h": 1920
+  },
+  "Sprites/UI/LevelFailed/tom_level_failed": {
+    "x": 83,
+    "y": 802,
+    "w": 871,
+    "h": 789,
+    "orig_w": 1080,
+    "orig_h": 1920
+  },
+  "Sprites/UI/HUD/freeze_timer_overlay": {
+    "x": 14,
+    "y": 12,
+    "w": 236,
+    "h": 219,
+    "orig_w": 250,
+    "orig_h": 250
+  },
+  "Sprites/UI/LevelFailed/whiskers_level_failed": {
+    "x": 97,
+    "y": 785,
+    "w": 844,
+    "h": 787,
+    "orig_w": 1080,
+    "orig_h": 1920
+  },
+  "Sprites/UI/LevelFailed/level_failed_board": {
+    "x": 213,
+    "y": 133,
+    "w": 639,
+    "h": 637,
+    "orig_w": 1080,
+    "orig_h": 1920
   }
 }

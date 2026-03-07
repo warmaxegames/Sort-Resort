@@ -14,7 +14,7 @@ namespace SortResort
         [SerializeField] private float referenceWidth = 1080f;
         [SerializeField] private float referenceHeight = 1920f;
         // OrthoSize calculated to show full 1080px width: 1080/100 / (2 * 0.5625) = 9.6
-        // This ensures Godot coordinates map correctly to visible screen area
+        // This ensures screen pixel coordinates (1080x1920) map correctly to visible area
         [SerializeField] private float baseOrthoSize = 9.6f;
 
         [Header("Scaling")]

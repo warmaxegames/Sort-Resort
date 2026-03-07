@@ -5,22 +5,22 @@ using UnityEngine.UI;
 namespace SortResort
 {
     /// <summary>
-    /// Handles the animated level complete background with rays, curtains, level board, and star ribbon.
+    /// Handles the animated level complete background with rays (static bg + rotating spinner),
+    /// curtains, level board, and star ribbon.
     /// Supports staged playback — each layer can be started independently.
     /// </summary>
     public class AnimatedLevelComplete : MonoBehaviour
     {
         private Image raysImage;
+        private RectTransform raysSpinnerRect;
         private Image curtainsImage;
         private Image levelBoardImage;
         private Image starRibbonImage;
 
-        private Sprite[] raysFrames;
         private Sprite[] curtainsFrames;
         private Sprite[] levelBoardFrames;
         private Sprite[] starRibbonFrames;
 
-        private int currentRaysFrame = 0;
         private int currentCurtainsFrame = 0;
         private int currentLevelBoardFrame = 0;
         private int currentStarRibbonFrame = 0;
@@ -36,17 +36,19 @@ namespace SortResort
         private bool levelBoardComplete = false;
         private bool starRibbonComplete = false;
 
-        private float raysFrameRate = 30f;
         private float curtainsFrameRate = 24f;
         private float levelBoardFrameRate = 24f;
         private float starRibbonFrameRate = 24f;
 
-        private float raysTimer = 0f;
         private float curtainsTimer = 0f;
         private float levelBoardTimer = 0f;
         private float starRibbonTimer = 0f;
 
-        private static Sprite[] cachedRaysFrames;
+        // Rays spinner settings
+        private const float RAYS_DURATION = 2.5f; // total spin time in seconds
+        private const float RAYS_ROTATION_SPEED = -80.6f; // degrees/sec clockwise (100.8 * 0.8 = 20% slower)
+        private float raysElapsed = 0f;
+
         private static Sprite[] cachedCurtainsFrames;
         private static Sprite[] cachedLevelBoardFrames;
         private static Sprite[] cachedStarRibbonFrames;
@@ -54,16 +56,13 @@ namespace SortResort
         public bool IsLevelBoardComplete => levelBoardComplete;
         public bool IsStarRibbonComplete => starRibbonComplete;
 
-        public void Initialize(Image raysImg, Image curtainsImg)
+        public void Initialize(Image raysImg, RectTransform spinnerRect, Image curtainsImg)
         {
             raysImage = raysImg;
+            raysSpinnerRect = spinnerRect;
             curtainsImage = curtainsImg;
 
             LoadFrames();
-
-            // Set initial frames
-            if (raysFrames != null && raysFrames.Length > 0)
-                raysImage.sprite = raysFrames[0];
 
             if (curtainsFrames != null && curtainsFrames.Length > 0)
                 curtainsImage.sprite = curtainsFrames[0];
@@ -85,9 +84,6 @@ namespace SortResort
 
         private void LoadFrames()
         {
-            if (cachedRaysFrames == null)
-                cachedRaysFrames = LoadFramesFromFolder("Sprites/UI/LevelComplete/Rays", "rays");
-
             if (cachedCurtainsFrames == null)
                 cachedCurtainsFrames = LoadFramesFromFolder("Sprites/UI/LevelComplete/Curtains", "curtains");
 
@@ -97,7 +93,6 @@ namespace SortResort
             if (cachedStarRibbonFrames == null)
                 cachedStarRibbonFrames = LoadFramesFromFolder("Sprites/UI/LevelComplete/StarRibbon", "star ribbon");
 
-            raysFrames = cachedRaysFrames;
             curtainsFrames = cachedCurtainsFrames;
             levelBoardFrames = cachedLevelBoardFrames;
             starRibbonFrames = cachedStarRibbonFrames;
@@ -147,17 +142,21 @@ namespace SortResort
             levelBoardComplete = false;
             starRibbonComplete = false;
 
-            currentRaysFrame = 0;
             currentCurtainsFrame = 0;
             currentLevelBoardFrame = 0;
             currentStarRibbonFrame = 0;
 
-            raysTimer = 0f;
             curtainsTimer = 0f;
             levelBoardTimer = 0f;
             starRibbonTimer = 0f;
 
+            // Reset spinner rotation
+            raysElapsed = 0f;
+            if (raysSpinnerRect != null)
+                raysSpinnerRect.localRotation = Quaternion.identity;
+
             if (raysImage != null) raysImage.gameObject.SetActive(true);
+            if (raysSpinnerRect != null) raysSpinnerRect.gameObject.SetActive(true);
             if (curtainsImage != null) curtainsImage.gameObject.SetActive(true);
             if (levelBoardImage != null) levelBoardImage.gameObject.SetActive(false);
             if (starRibbonImage != null) starRibbonImage.gameObject.SetActive(false);
@@ -196,16 +195,19 @@ namespace SortResort
             curtainsComplete = false;
             levelBoardComplete = false;
             starRibbonComplete = false;
-            currentRaysFrame = 0;
             currentCurtainsFrame = 0;
             currentLevelBoardFrame = 0;
             currentStarRibbonFrame = 0;
-            raysTimer = 0f;
             curtainsTimer = 0f;
             levelBoardTimer = 0f;
             starRibbonTimer = 0f;
 
+            raysElapsed = 0f;
+            if (raysSpinnerRect != null)
+                raysSpinnerRect.localRotation = Quaternion.identity;
+
             if (raysImage != null) raysImage.gameObject.SetActive(true);
+            if (raysSpinnerRect != null) raysSpinnerRect.gameObject.SetActive(true);
             if (curtainsImage != null) curtainsImage.gameObject.SetActive(true);
             if (levelBoardImage != null) levelBoardImage.gameObject.SetActive(true);
             if (starRibbonImage != null) starRibbonImage.gameObject.SetActive(true);
@@ -224,6 +226,7 @@ namespace SortResort
             levelBoardActive = false;
             starRibbonActive = false;
             if (raysImage != null) raysImage.gameObject.SetActive(false);
+            if (raysSpinnerRect != null) raysSpinnerRect.gameObject.SetActive(false);
             if (curtainsImage != null) curtainsImage.gameObject.SetActive(false);
             if (levelBoardImage != null) levelBoardImage.gameObject.SetActive(false);
             if (starRibbonImage != null) starRibbonImage.gameObject.SetActive(false);
@@ -233,8 +236,17 @@ namespace SortResort
         {
             if (!isPlaying) return;
 
-            if (raysActive)
-                UpdateLayer(ref currentRaysFrame, ref raysTimer, ref raysComplete, raysFrames, raysImage, raysFrameRate);
+            // Rays spinner rotation
+            if (raysActive && !raysComplete)
+            {
+                raysElapsed += Time.unscaledDeltaTime;
+                if (raysSpinnerRect != null)
+                    raysSpinnerRect.Rotate(0f, 0f, RAYS_ROTATION_SPEED * Time.unscaledDeltaTime);
+
+                if (raysElapsed >= RAYS_DURATION)
+                    raysComplete = true;
+            }
+
             if (curtainsActive)
                 UpdateLayer(ref currentCurtainsFrame, ref curtainsTimer, ref curtainsComplete, curtainsFrames, curtainsImage, curtainsFrameRate);
             if (levelBoardActive)

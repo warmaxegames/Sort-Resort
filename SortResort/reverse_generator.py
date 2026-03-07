@@ -94,7 +94,7 @@ def reverse_place_items(containers, item_ids, max_rows, rng, level=1):
         cy = c["position"]["y"]
         mr = c.get("max_rows_per_slot", max_rows)
         half_h = _container_half_height(mr)
-        # In Godot Y coords: smaller Y = higher on screen
+        # Smaller Y = higher on screen (origin at top-left)
         # Container's top edge (smallest Y) is above HUD bar bottom
         top_edge = cy - half_h
         if top_edge < HUD_BAR_BOTTOM_Y:

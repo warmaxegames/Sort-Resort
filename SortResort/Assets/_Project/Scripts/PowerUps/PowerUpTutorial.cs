@@ -12,13 +12,17 @@ namespace SortResort
         private Canvas tutorialCanvas;
         private GameObject overlayPanel;
         private Image dimBackground;
+        private Image backdropImage;
         private Image powerUpImage;
         private TextMeshProUGUI titleText;
         private TextMeshProUGUI descriptionText;
         private TextMeshProUGUI tapToDismissText;
+        private Image glowImage;
+        private Coroutine glowPulseCoroutine;
         private bool isShowing;
         private PowerUpType currentType;
         private System.Action onDismissed;
+        private static Texture2D cachedGlowTexture;
 
         private void Awake()
         {
@@ -72,6 +76,7 @@ namespace SortResort
             currentType = type;
 
             CreateTutorialUI(type);
+            AudioManager.Instance?.PlaySpecialItemUnlockSound();
 
             // Wait for tap to dismiss (using unscaled time since game is paused)
             yield return new WaitUntil(() => !isShowing);
@@ -152,31 +157,69 @@ namespace SortResort
             dismissBtn.colors = colors;
             dismissBtn.onClick.AddListener(DismissTutorial);
 
-            // Power-up icon (large, centered)
+            // Backdrop board (860x701) - centered, positioned so icon sits on ribbon center
+            // Board center at Y=0.48, top edge at ~0.663, ribbon center at ~0.63 (matches icon)
+            var backdropGO = new GameObject("Backdrop");
+            backdropGO.transform.SetParent(overlayPanel.transform, false);
+            var backdropRect = backdropGO.AddComponent<RectTransform>();
+            backdropRect.anchorMin = new Vector2(0.5f, 0.48f);
+            backdropRect.anchorMax = new Vector2(0.5f, 0.48f);
+            backdropRect.pivot = new Vector2(0.5f, 0.5f);
+            backdropRect.anchoredPosition = Vector2.zero;
+            backdropRect.sizeDelta = new Vector2(860, 701);
+            backdropImage = backdropGO.AddComponent<Image>();
+            backdropImage.preserveAspect = true;
+            backdropImage.raycastTarget = false;
+            var backdropTex = Resources.Load<Texture2D>("Sprites/UI/PowerUps/powerup_backdrop");
+            if (backdropTex != null)
+            {
+                backdropImage.sprite = Sprite.Create(backdropTex,
+                    new Rect(0, 0, backdropTex.width, backdropTex.height),
+                    new Vector2(0.5f, 0.5f), 100f);
+            }
+
+            // Radial glow halo behind icon - raised above board
+            var glowGO = new GameObject("GlowHalo");
+            glowGO.transform.SetParent(overlayPanel.transform, false);
+            var glowRect = glowGO.AddComponent<RectTransform>();
+            glowRect.anchorMin = new Vector2(0.5f, 0.63f);
+            glowRect.anchorMax = new Vector2(0.5f, 0.63f);
+            glowRect.pivot = new Vector2(0.5f, 0.5f);
+            glowRect.anchoredPosition = Vector2.zero;
+            glowRect.sizeDelta = new Vector2(450, 450);
+            glowImage = glowGO.AddComponent<Image>();
+            glowImage.raycastTarget = false;
+            glowImage.sprite = CreateGlowSprite();
+            glowImage.color = new Color(1f, 0.95f, 0.7f, 0.6f); // warm golden white
+            glowPulseCoroutine = StartCoroutine(PulseGlow());
+
+            // Power-up icon (large) - raised above board, overlapping ribbon top
             var iconGO = new GameObject("PowerUpIcon");
             iconGO.transform.SetParent(overlayPanel.transform, false);
             var iconRect = iconGO.AddComponent<RectTransform>();
-            iconRect.anchorMin = new Vector2(0.5f, 0.55f);
-            iconRect.anchorMax = new Vector2(0.5f, 0.55f);
+            iconRect.anchorMin = new Vector2(0.5f, 0.63f);
+            iconRect.anchorMax = new Vector2(0.5f, 0.63f);
             iconRect.pivot = new Vector2(0.5f, 0.5f);
             iconRect.anchoredPosition = Vector2.zero;
             iconRect.sizeDelta = new Vector2(250, 250);
             powerUpImage = iconGO.AddComponent<Image>();
             powerUpImage.preserveAspect = true;
 
-            var tex = Resources.Load<Texture2D>($"Sprites/UI/PowerUps/{config.spriteName}");
+            // Use intro sprite (no white circle badge) for the tutorial display
+            var introTex = Resources.Load<Texture2D>($"Sprites/UI/PowerUps/{config.introSpriteName}");
+            var tex = introTex ?? Resources.Load<Texture2D>($"Sprites/UI/PowerUps/{config.spriteName}");
             if (tex != null)
             {
                 powerUpImage.sprite = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height),
                     new Vector2(0.5f, 0.5f), 100f);
             }
 
-            // Title text
+            // Title text - below the red ribbon on the wooden area
             var titleGO = new GameObject("Title");
             titleGO.transform.SetParent(overlayPanel.transform, false);
             var titleRect = titleGO.AddComponent<RectTransform>();
-            titleRect.anchorMin = new Vector2(0.1f, 0.44f);
-            titleRect.anchorMax = new Vector2(0.9f, 0.50f);
+            titleRect.anchorMin = new Vector2(0.15f, 0.488f);
+            titleRect.anchorMax = new Vector2(0.85f, 0.538f);
             titleRect.offsetMin = Vector2.zero;
             titleRect.offsetMax = Vector2.zero;
             titleText = titleGO.AddComponent<TextMeshProUGUI>();
@@ -187,28 +230,30 @@ namespace SortResort
             titleText.color = Color.white;
             titleText.raycastTarget = false;
 
-            // Description text
+            // Description text - on the wooden area, width = backdrop (860) minus 30px padding each side
             var descGO = new GameObject("Description");
             descGO.transform.SetParent(overlayPanel.transform, false);
             var descRect = descGO.AddComponent<RectTransform>();
-            descRect.anchorMin = new Vector2(0.1f, 0.34f);
-            descRect.anchorMax = new Vector2(0.9f, 0.43f);
-            descRect.offsetMin = Vector2.zero;
-            descRect.offsetMax = Vector2.zero;
+            descRect.anchorMin = new Vector2(0.5f, 0.38f);
+            descRect.anchorMax = new Vector2(0.5f, 0.50f);
+            descRect.pivot = new Vector2(0.5f, 0.5f);
+            descRect.anchoredPosition = Vector2.zero;
+            descRect.sizeDelta = new Vector2(620f, 0f); // 860 - 120px padding each side
             descriptionText = descGO.AddComponent<TextMeshProUGUI>();
             descriptionText.text = config.description;
             descriptionText.fontSize = 36;
             descriptionText.font = FontManager.SemiBold;
             descriptionText.alignment = TextAlignmentOptions.Center;
-            descriptionText.color = new Color(1f, 1f, 1f, 0.85f);
+            descriptionText.textWrappingMode = TextWrappingModes.Normal;
+            descriptionText.color = new Color(1f, 1f, 1f, 0.9f);
             descriptionText.raycastTarget = false;
 
-            // "Tap to continue" text
+            // "Tap to continue" text - near bottom of the board
             var tapGO = new GameObject("TapToDismiss");
             tapGO.transform.SetParent(overlayPanel.transform, false);
             var tapRect = tapGO.AddComponent<RectTransform>();
-            tapRect.anchorMin = new Vector2(0.2f, 0.22f);
-            tapRect.anchorMax = new Vector2(0.8f, 0.27f);
+            tapRect.anchorMin = new Vector2(0.2f, 0.318f);
+            tapRect.anchorMax = new Vector2(0.8f, 0.358f);
             tapRect.offsetMin = Vector2.zero;
             tapRect.offsetMax = Vector2.zero;
             tapToDismissText = tapGO.AddComponent<TextMeshProUGUI>();
@@ -221,6 +266,55 @@ namespace SortResort
 
             // Pulse the tap text
             StartCoroutine(PulseTapText());
+        }
+
+        private Sprite CreateGlowSprite()
+        {
+            if (cachedGlowTexture == null)
+            {
+                int size = 128;
+                cachedGlowTexture = new Texture2D(size, size, TextureFormat.RGBA32, false);
+                cachedGlowTexture.wrapMode = TextureWrapMode.Clamp;
+                float center = (size - 1) * 0.5f;
+                var pixels = new Color32[size * size];
+                for (int y = 0; y < size; y++)
+                {
+                    for (int x = 0; x < size; x++)
+                    {
+                        float dx = (x - center) / center;
+                        float dy = (y - center) / center;
+                        float dist = Mathf.Sqrt(dx * dx + dy * dy);
+                        // Smooth falloff: solid center, soft fade to transparent
+                        float alpha = Mathf.Clamp01(1f - dist);
+                        alpha = alpha * alpha; // quadratic for softer edge
+                        byte a = (byte)(alpha * 255);
+                        pixels[y * size + x] = new Color32(255, 255, 255, a);
+                    }
+                }
+                cachedGlowTexture.SetPixels32(pixels);
+                cachedGlowTexture.Apply();
+            }
+            return Sprite.Create(cachedGlowTexture,
+                new Rect(0, 0, cachedGlowTexture.width, cachedGlowTexture.height),
+                new Vector2(0.5f, 0.5f), 100f);
+        }
+
+        private IEnumerator PulseGlow()
+        {
+            if (glowImage == null) yield break;
+            var baseColor = glowImage.color;
+            var rt = glowImage.rectTransform;
+            while (isShowing && glowImage != null)
+            {
+                float t = Mathf.PingPong(Time.unscaledTime * 1.2f, 1f);
+                // Smooth sine for natural pulse
+                float ease = Mathf.Sin(t * Mathf.PI);
+                float scale = Mathf.Lerp(0.85f, 1.15f, ease);
+                float alpha = Mathf.Lerp(0.35f, 0.7f, ease);
+                rt.localScale = Vector3.one * scale;
+                glowImage.color = new Color(baseColor.r, baseColor.g, baseColor.b, alpha);
+                yield return null;
+            }
         }
 
         private IEnumerator PulseTapText()
@@ -274,10 +368,12 @@ namespace SortResort
             float elapsed = 0f;
             float fadeDuration = 0.3f;
 
-            // Hide text elements
+            // Hide text elements and backdrop
             if (titleText != null) titleText.gameObject.SetActive(false);
             if (descriptionText != null) descriptionText.gameObject.SetActive(false);
             if (tapToDismissText != null) tapToDismissText.gameObject.SetActive(false);
+            if (backdropImage != null) backdropImage.gameObject.SetActive(false);
+            if (glowImage != null) glowImage.gameObject.SetActive(false);
 
             while (elapsed < fadeDuration)
             {
@@ -325,7 +421,10 @@ namespace SortResort
 
             yield return new WaitForSecondsRealtime(0.1f);
 
-            // Show the actual bar button now that the tween has arrived
+            // Hide the tweened intro icon and show the real bar button in the same frame
+            // The bar button has the white circle badge, creating a seamless "circle appears" effect
+            if (powerUpImage != null)
+                powerUpImage.gameObject.SetActive(false);
             if (targetButton != null)
                 targetButton.SetActive(true);
 
@@ -334,10 +433,17 @@ namespace SortResort
 
         private void CleanupTutorialUI()
         {
+            if (glowPulseCoroutine != null)
+            {
+                StopCoroutine(glowPulseCoroutine);
+                glowPulseCoroutine = null;
+            }
             if (overlayPanel != null)
                 Destroy(overlayPanel);
             overlayPanel = null;
             powerUpImage = null;
+            backdropImage = null;
+            glowImage = null;
             titleText = null;
             descriptionText = null;
             tapToDismissText = null;

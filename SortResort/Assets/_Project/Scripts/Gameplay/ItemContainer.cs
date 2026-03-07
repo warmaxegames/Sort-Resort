@@ -89,14 +89,12 @@ namespace SortResort
             unlockMatchesRequired = definition.unlock_matches_required;
             currentUnlockProgress = 0;
 
-            // Set position - convert from Godot pixel coords to Unity world units
-            // Godot uses top-left origin with Y increasing downward
-            // Portrait phone layout: center around (540, 600) for typical level layouts
-            Vector3 godotPos = definition.position.ToVector3();
-            float unityX = (godotPos.x - 540f) / 100f;  // Center X (portrait phone center ~540)
-            float unityY = (600f - godotPos.y) / 100f;  // Flip Y axis, center around 600 for portrait
+            // Set position - convert from screen pixels (1080x1920, origin top-left) to Unity world units
+            Vector3 screenPos = definition.position.ToVector3();
+            float unityX = (screenPos.x - 540f) / 100f;   // Center X (screen center = 540)
+            float unityY = (960f - screenPos.y) / 100f;    // Flip Y axis (screen center = 960)
             transform.position = new Vector3(unityX, unityY, 0f);
-            Debug.Log($"[ItemContainer] {definition.id} position: Godot({godotPos.x}, {godotPos.y}) -> Unity({unityX:F2}, {unityY:F2})");
+            Debug.Log($"[ItemContainer] {definition.id} position: Screen({screenPos.x}, {screenPos.y}) -> Unity({unityX:F2}, {unityY:F2})");
 
             // Initialize slot structure
             InitializeSlots();

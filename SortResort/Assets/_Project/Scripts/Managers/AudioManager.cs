@@ -43,6 +43,13 @@ namespace SortResort
         [SerializeField] private AudioClip portalClip;
         [SerializeField] private AudioClip tickTockClip;
         [SerializeField] private AudioClip levelCompleteVictoryClip;
+        [SerializeField] private AudioClip freezeClip;
+        [SerializeField] private AudioClip unfreezeClip;
+        [SerializeField] private AudioClip levelFailedClip;
+        [SerializeField] private AudioClip specialItemUnlockClip;
+        [SerializeField] private AudioClip freezeMovesClip;
+        [SerializeField] private AudioClip hammerHitClip;
+        [SerializeField] private AudioClip swapClip;
 
         private AudioSource tickTockSource;
         private bool isUsingSourceA = true;
@@ -121,6 +128,20 @@ namespace SortResort
                 tickTockClip = Resources.Load<AudioClip>("Audio/SFX/tick_tock");
             if (levelCompleteVictoryClip == null)
                 levelCompleteVictoryClip = Resources.Load<AudioClip>("Audio/SFX/level_complete_victory");
+            if (freezeClip == null)
+                freezeClip = Resources.Load<AudioClip>("Audio/SFX/freeze");
+            if (unfreezeClip == null)
+                unfreezeClip = Resources.Load<AudioClip>("Audio/SFX/unfreeze");
+            if (levelFailedClip == null)
+                levelFailedClip = Resources.Load<AudioClip>("Audio/SFX/level_failed");
+            if (specialItemUnlockClip == null)
+                specialItemUnlockClip = Resources.Load<AudioClip>("Audio/SFX/special_item_unlock");
+            if (freezeMovesClip == null)
+                freezeMovesClip = Resources.Load<AudioClip>("Audio/SFX/freeze_moves");
+            if (hammerHitClip == null)
+                hammerHitClip = Resources.Load<AudioClip>("Audio/SFX/hammer_hit");
+            if (swapClip == null)
+                swapClip = Resources.Load<AudioClip>("Audio/SFX/swap");
 
             Debug.Log($"[AudioManager] Audio clips loaded - match:{matchClip != null}, unlock:{unlockClip != null}, victory:{victoryClip != null}, button:{buttonClickClip != null}, warp:{warpClip != null}, achievement:{achievementClip != null}, portal:{portalClip != null}");
         }
@@ -638,6 +659,13 @@ namespace SortResort
         public void PlayAchievementSound() => PlaySFX(achievementClip, 1.3f);
         public void PlayPortalSound() => PlaySFX(portalClip);
         public void PlayLevelCompleteVictory() => PlaySFX(levelCompleteVictoryClip);
+        public void PlayFreezeSound() => PlaySFX(freezeClip, 2.5f);
+        public void PlayUnfreezeSound() => PlaySFX(unfreezeClip, 2.5f);
+        public void PlayLevelFailedSound() => PlaySFX(levelFailedClip, 2.5f);
+        public void PlaySpecialItemUnlockSound() => PlaySFX(specialItemUnlockClip, 2.5f);
+        public void PlayFreezeMovesSound() => PlaySFX(freezeMovesClip, 2.5f);
+        public void PlayHammerHitSound() => PlaySFX(hammerHitClip, 2.5f);
+        public void PlaySwapSound() => PlaySFX(swapClip, 2.5f);
 
         public void StartTickTock()
         {

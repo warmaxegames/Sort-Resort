@@ -158,8 +158,20 @@ namespace SortResort
         private GameObject hudSettingsOverlay;
         private Button undoSpriteButton;
         private CanvasGroup undoSpriteCanvasGroup;
+        private Image freezeTimerOverlayImage;
+        private Image freezeMovesOverlayImage;
+        private Sprite[] freezeMovesFrames;
+        private Coroutine freezeMovesAnimCoroutine;
+        private Sprite starParticleSprite;
+        private Sprite snowflakeParticleSprite;
 
         private GameObject levelFailedPanel;
+        private Image failedBgImage;
+        private Image failedBoardImage;
+        private Image failedMascotOverlay;
+        private CanvasGroup failedBoardCanvasGroup;
+        private CanvasGroup failedMascotCanvasGroup;
+        private SortResort.UI.KOStarsTween koStarsTween;
         private TextMeshProUGUI levelFailedReasonText;
         private Coroutine failedReasonPulseCoroutine;
         private Image failedBottomBoardImage;
@@ -246,9 +258,11 @@ namespace SortResort
             GameEvents.OnSettingsClosed += OnSettingsClosedUI;
             GameEvents.OnTimerUpdated += OnTimerUpdated;
             GameEvents.OnTimerFrozen += OnTimerFrozen;
+            GameEvents.OnMovesFrozen += OnMovesFrozen;
             GameEvents.OnLevelFailed += OnLevelFailed;
             GameEvents.OnPowerUpCountChanged += OnPowerUpCountChanged;
             GameEvents.OnPowerUpUnlocked += OnPowerUpUnlocked;
+            GameEvents.OnPowerUpUsed += OnPowerUpUsed;
 
             if (LevelManager.Instance != null)
             {
@@ -277,9 +291,11 @@ namespace SortResort
             GameEvents.OnSettingsClosed -= OnSettingsClosedUI;
             GameEvents.OnTimerUpdated -= OnTimerUpdated;
             GameEvents.OnTimerFrozen -= OnTimerFrozen;
+            GameEvents.OnMovesFrozen -= OnMovesFrozen;
             GameEvents.OnLevelFailed -= OnLevelFailed;
             GameEvents.OnPowerUpCountChanged -= OnPowerUpCountChanged;
             GameEvents.OnPowerUpUnlocked -= OnPowerUpUnlocked;
+            GameEvents.OnPowerUpUsed -= OnPowerUpUsed;
 
             if (LevelManager.Instance != null)
             {
@@ -1528,6 +1544,55 @@ namespace SortResort
             overlayTimerText = CreateOverlayCounterText(hudModeOverlay.transform, "Overlay Timer",
                 new Vector2(0.5f, 0.9162f), 174f, 120f, 45);
 
+            // Freeze timer overlay - new tight image (236x219, no excess alpha).
+            // Upper-left corner at screen (548, 29) in TimerMode.
+            // Pivot (0,1) = upper-left. Anchor tracks timer position per mode;
+            // offset from timer anchor to UL: dX = 548/1080 - 0.621 = -0.1136,
+            // dY = (1-29/1920) - 0.9162 = +0.0687. Applied in PositionFreezeOverlay.
+            var freezeOverlayGO = new GameObject("Freeze Timer Overlay");
+            freezeOverlayGO.transform.SetParent(hudModeOverlay.transform, false);
+            // Place behind the timer text in sibling order
+            if (overlayTimerText != null)
+                freezeOverlayGO.transform.SetSiblingIndex(overlayTimerText.transform.GetSiblingIndex());
+            var freezeRect = freezeOverlayGO.AddComponent<RectTransform>();
+            freezeRect.anchorMin = new Vector2(0.5083f, 0.9865f);
+            freezeRect.anchorMax = new Vector2(0.5083f, 0.9865f);
+            freezeRect.pivot = new Vector2(0f, 1f);
+            freezeRect.anchoredPosition = Vector2.zero;
+            freezeRect.sizeDelta = new Vector2(236f, 219f);
+            freezeTimerOverlayImage = freezeOverlayGO.AddComponent<Image>();
+            freezeTimerOverlayImage.preserveAspect = false;
+            freezeTimerOverlayImage.raycastTarget = false;
+            var freezeSprite = LoadFullRectSprite("Sprites/UI/HUD/freeze_timer_overlay");
+            if (freezeSprite != null)
+                freezeTimerOverlayImage.sprite = freezeSprite;
+            freezeOverlayGO.SetActive(false);
+
+            // Freeze moves overlay - frame animation centered on moves bubble
+            // 13 frames at 24fps = ~0.54s, loaded from Resources
+            freezeMovesFrames = LoadFreezeMovesFrames();
+            var freezeMovesGO = new GameObject("Freeze Moves Overlay");
+            freezeMovesGO.transform.SetParent(hudModeOverlay.transform, false);
+            // Place behind the moves text in sibling order
+            if (overlayMovesText != null)
+                freezeMovesGO.transform.SetSiblingIndex(overlayMovesText.transform.GetSiblingIndex());
+            var fmRect = freezeMovesGO.AddComponent<RectTransform>();
+            fmRect.anchorMin = new Vector2(0.5f, 0.9162f);
+            fmRect.anchorMax = new Vector2(0.5f, 0.9162f);
+            fmRect.pivot = new Vector2(0.5f, 0.5f);
+            fmRect.anchoredPosition = Vector2.zero;
+            fmRect.sizeDelta = new Vector2(148f, 140f);
+            freezeMovesOverlayImage = freezeMovesGO.AddComponent<Image>();
+            freezeMovesOverlayImage.preserveAspect = true;
+            freezeMovesOverlayImage.raycastTarget = false;
+            if (freezeMovesFrames != null && freezeMovesFrames.Length > 0)
+                freezeMovesOverlayImage.sprite = freezeMovesFrames[0];
+            freezeMovesGO.SetActive(false);
+
+            // Power-up particle tween sprites (star for moves freeze, snowflake for time freeze)
+            starParticleSprite = LoadParticleSprite("Sprites/UI/PowerUps/star_particle");
+            snowflakeParticleSprite = LoadParticleSprite("Sprites/UI/PowerUps/snowflake_particle");
+
             // 3-star target indicator - shown below moves bubble in Star/Hard modes
             threeStarTargetGO = new GameObject("ThreeStarTarget");
             threeStarTargetGO.transform.SetParent(hudModeOverlay.transform, false);
@@ -1612,6 +1677,8 @@ namespace SortResort
             if (overlayMovesText != null) overlayMovesText.gameObject.SetActive(false);
             if (overlayTimerText != null) overlayTimerText.gameObject.SetActive(false);
             if (threeStarTargetGO != null) threeStarTargetGO.SetActive(false);
+            if (freezeTimerOverlayImage != null) freezeTimerOverlayImage.gameObject.SetActive(false);
+            if (freezeMovesOverlayImage != null) freezeMovesOverlayImage.gameObject.SetActive(false);
 
             switch (mode)
             {
@@ -1630,6 +1697,8 @@ namespace SortResort
                     // Position 3-star target below moves bubble
                     SetAnchor(threeStarTargetGO, new Vector2(0.614f, 0.87f));
                     if (threeStarTargetGO != null) threeStarTargetGO.SetActive(true);
+                    // Position freeze moves overlay at moves bubble
+                    PositionFreezeMovesOverlay(new Vector2(0.614f, 0.9162f));
                     break;
 
                 case GameMode.TimerMode:
@@ -1638,6 +1707,8 @@ namespace SortResort
                     SetOverlayTextAnchor(overlayTimerText, new Vector2(0.621f, 0.9162f));
                     if (overlayLevelText != null) overlayLevelText.gameObject.SetActive(true);
                     if (overlayTimerText != null) overlayTimerText.gameObject.SetActive(true);
+                    // Position freeze overlay at timer location
+                    PositionFreezeOverlay(new Vector2(0.621f, 0.9162f));
                     break;
 
                 case GameMode.HardMode:
@@ -1648,6 +1719,10 @@ namespace SortResort
                     if (overlayLevelText != null) overlayLevelText.gameObject.SetActive(true);
                     if (overlayMovesText != null) overlayMovesText.gameObject.SetActive(true);
                     if (overlayTimerText != null) overlayTimerText.gameObject.SetActive(true);
+                    // Position freeze overlay at timer location
+                    PositionFreezeOverlay(new Vector2(0.732f, 0.9162f));
+                    // Position freeze moves overlay at moves bubble
+                    PositionFreezeMovesOverlay(new Vector2(0.500f, 0.9162f));
                     // Position 3-star target below moves bubble
                     SetAnchor(threeStarTargetGO, new Vector2(0.500f, 0.87f));
                     if (threeStarTargetGO != null) threeStarTargetGO.SetActive(true);
@@ -1670,6 +1745,47 @@ namespace SortResort
             var rt = text.GetComponent<RectTransform>();
             rt.anchorMin = anchor;
             rt.anchorMax = anchor;
+        }
+
+        private void PositionFreezeOverlay(Vector2 timerAnchor)
+        {
+            if (freezeTimerOverlayImage == null) return;
+            var rt = freezeTimerOverlayImage.rectTransform;
+            // Offset from timer anchor to upper-left corner position
+            // Based on TimerMode: UL at screen (548,29) with timer at anchor (0.621, 0.9162)
+            // dX = 549/1080 - 0.621 = -0.1127, dY = (1-26/1920) - 0.9162 = +0.0703
+            float ulX = timerAnchor.x - 0.1127f;
+            float ulY = timerAnchor.y + 0.0703f;
+            rt.anchorMin = new Vector2(ulX, ulY);
+            rt.anchorMax = new Vector2(ulX, ulY);
+        }
+
+        private void PositionFreezeMovesOverlay(Vector2 movesAnchor)
+        {
+            if (freezeMovesOverlayImage == null) return;
+            var rt = freezeMovesOverlayImage.rectTransform;
+            rt.anchorMin = movesAnchor;
+            rt.anchorMax = movesAnchor;
+        }
+
+        private static Sprite[] LoadFreezeMovesFrames()
+        {
+            var textures = Resources.LoadAll<Texture2D>("Sprites/Effects/FreezeMovesEffect");
+            if (textures.Length == 0)
+            {
+                Debug.LogWarning("[UIManager] No freeze moves frames found");
+                return null;
+            }
+            System.Array.Sort(textures, (a, b) => a.name.CompareTo(b.name));
+            var sprites = new Sprite[textures.Length];
+            for (int i = 0; i < textures.Length; i++)
+            {
+                var tex = textures[i];
+                sprites[i] = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height),
+                    new Vector2(0.5f, 0.5f), 100f);
+            }
+            Debug.Log($"[UIManager] Loaded {sprites.Length} freeze moves frames");
+            return sprites;
         }
 
         private string GetOverlayBarPath(GameMode mode)
@@ -1848,10 +1964,10 @@ namespace SortResort
             navRect.anchorMax = new Vector2(0.5f, 0f);
             navRect.pivot = new Vector2(0.5f, 0f);
             navRect.anchoredPosition = new Vector2(0, 20);
-            navRect.sizeDelta = new Vector2(300, 50);
+            navRect.sizeDelta = new Vector2(600, 50);
 
             var layout = navGO.AddComponent<HorizontalLayoutGroup>();
-            layout.spacing = 160;
+            layout.spacing = 460;
             layout.childAlignment = TextAnchor.MiddleCenter;
             layout.childForceExpandWidth = false;
 
@@ -1981,16 +2097,33 @@ namespace SortResort
 
             // === PHASE B ELEMENTS ===
 
-            // 3. Animated background - Rays (behind everything in Phase B, loops)
-            var raysGO = new GameObject("Rays Background");
-            raysGO.transform.SetParent(levelCompletePanel.transform, false);
-            var raysRect = raysGO.AddComponent<RectTransform>();
-            raysRect.anchorMin = Vector2.zero;
-            raysRect.anchorMax = Vector2.one;
-            raysRect.offsetMin = Vector2.zero;
-            raysRect.offsetMax = Vector2.zero;
-            var raysImage = raysGO.AddComponent<Image>();
+            // 3. Rays background (static) + spinner (rotates clockwise)
+            var raysBgGO = new GameObject("Rays Background");
+            raysBgGO.transform.SetParent(levelCompletePanel.transform, false);
+            var raysBgRect = raysBgGO.AddComponent<RectTransform>();
+            raysBgRect.anchorMin = Vector2.zero;
+            raysBgRect.anchorMax = Vector2.one;
+            raysBgRect.offsetMin = Vector2.zero;
+            raysBgRect.offsetMax = Vector2.zero;
+            var raysImage = raysBgGO.AddComponent<Image>();
             raysImage.preserveAspect = false;
+            var raysBgSprite = LoadFullRectSprite("Sprites/UI/LevelComplete/rays_background");
+            if (raysBgSprite != null) raysImage.sprite = raysBgSprite;
+
+            var raysSpinnerGO = new GameObject("Rays Spinner");
+            raysSpinnerGO.transform.SetParent(levelCompletePanel.transform, false);
+            var raysSpinnerRect = raysSpinnerGO.AddComponent<RectTransform>();
+            raysSpinnerRect.anchorMin = new Vector2(0.5f, 0.5f);
+            raysSpinnerRect.anchorMax = new Vector2(0.5f, 0.5f);
+            raysSpinnerRect.pivot = new Vector2(0.5f, 0.5f);
+            raysSpinnerRect.anchoredPosition = Vector2.zero;
+            // Size large enough to cover screen diagonal when rotated (~2203px at 1080x1920)
+            raysSpinnerRect.sizeDelta = new Vector2(2500f, 2500f);
+            var raysSpinnerImage = raysSpinnerGO.AddComponent<Image>();
+            raysSpinnerImage.preserveAspect = true;
+            raysSpinnerImage.raycastTarget = false;
+            var spinnerSprite = LoadFullRectSprite("Sprites/UI/LevelComplete/rays_spinner");
+            if (spinnerSprite != null) raysSpinnerImage.sprite = spinnerSprite;
 
             // 4. Animated background - Curtains (on top of rays, plays once)
             var curtainsGO = new GameObject("Curtains");
@@ -2155,7 +2288,7 @@ namespace SortResort
 
             // Add and initialize the animation controller
             animatedLevelComplete = levelCompletePanel.AddComponent<AnimatedLevelComplete>();
-            animatedLevelComplete.Initialize(raysImage, curtainsImage);
+            animatedLevelComplete.Initialize(raysImage, raysSpinnerRect, curtainsImage);
             animatedLevelComplete.SetStarRibbonImage(starRibbonImage);
 
             // 9. Grey Stars - static fullscreen, always visible as baseline
@@ -2363,14 +2496,66 @@ namespace SortResort
             rect.offsetMax = Vector2.zero;
 
             // Fullscreen fail screen background image
-            var bgImage = levelFailedPanel.AddComponent<Image>();
+            failedBgImage = levelFailedPanel.AddComponent<Image>();
             var failSprite = LoadSpriteFromTexture("Sprites/UI/LevelFailed/fail_screen");
-            bgImage.sprite = failSprite;
-            bgImage.preserveAspect = true;
-            bgImage.type = Image.Type.Simple;
-            bgImage.color = Color.white;
+            failedBgImage.sprite = failSprite;
+            failedBgImage.preserveAspect = true;
+            failedBgImage.type = Image.Type.Simple;
+            failedBgImage.color = Color.white;
 
-            // Reason text overlay - positioned on the brown board area
+            // "Level Failed" board overlay (positioned via crop metadata)
+            var boardGO = new GameObject("Level Failed Board");
+            boardGO.transform.SetParent(levelFailedPanel.transform, false);
+            var boardRect = boardGO.AddComponent<RectTransform>();
+            boardRect.anchorMin = Vector2.zero;
+            boardRect.anchorMax = Vector2.one;
+            boardRect.offsetMin = Vector2.zero;
+            boardRect.offsetMax = Vector2.zero;
+            failedBoardImage = boardGO.AddComponent<Image>();
+            failedBoardImage.preserveAspect = true;
+            failedBoardImage.raycastTarget = false;
+            var boardSprite = LoadFullRectSprite("Sprites/UI/LevelFailed/level_failed_board");
+            if (boardSprite != null)
+            {
+                failedBoardImage.sprite = boardSprite;
+                CropMetadata.ApplyCropAnchors(boardRect, "Sprites/UI/LevelFailed/level_failed_board");
+            }
+            failedBoardCanvasGroup = boardGO.AddComponent<CanvasGroup>();
+            failedBoardCanvasGroup.alpha = 0f;
+            boardGO.transform.localScale = Vector3.one * 0.3f;
+
+            // World-specific mascot overlay (replaces Whiskers for non-Island worlds)
+            var mascotOverlayGO = new GameObject("Mascot Overlay");
+            mascotOverlayGO.transform.SetParent(levelFailedPanel.transform, false);
+            var mascotRect = mascotOverlayGO.AddComponent<RectTransform>();
+            mascotRect.anchorMin = Vector2.zero;
+            mascotRect.anchorMax = Vector2.one;
+            mascotRect.offsetMin = Vector2.zero;
+            mascotRect.offsetMax = Vector2.zero;
+            failedMascotOverlay = mascotOverlayGO.AddComponent<Image>();
+            failedMascotOverlay.preserveAspect = true;
+            failedMascotOverlay.raycastTarget = false;
+            failedMascotCanvasGroup = mascotOverlayGO.AddComponent<CanvasGroup>();
+            failedMascotCanvasGroup.alpha = 0f;
+            mascotOverlayGO.transform.localScale = Vector3.one * 0.3f;
+            mascotOverlayGO.SetActive(false);
+
+            // KO Stars effect (orbiting stars above mascot)
+            var starSprite = LoadFullRectSprite("Sprites/UI/LevelFailed/single_star");
+            if (starSprite != null)
+            {
+                koStarsTween = SortResort.UI.KOStarsTween.Create(
+                    levelFailedPanel.transform, starSprite, new Vector2(350f, 170f));
+                // Position above the mascot area (mascots are ~y=715-1572 in 1080x1920,
+                // head area ~y=750 → anchor Y = 1 - 750/1920 ≈ 0.61)
+                var koRect = koStarsTween.GetComponent<RectTransform>();
+                koRect.anchorMin = new Vector2(0.5f, 0.60f);
+                koRect.anchorMax = new Vector2(0.5f, 0.60f);
+                koRect.anchoredPosition = new Vector2(0f, -50f);
+                koStarsTween.gameObject.SetActive(false);
+            }
+
+            // Reason text overlay - removed (replaced by level_failed_board image)
             var reasonGO = new GameObject("Reason Text");
             reasonGO.transform.SetParent(levelFailedPanel.transform, false);
             var reasonRect = reasonGO.AddComponent<RectTransform>();
@@ -4265,11 +4450,12 @@ Antonia and Joakim Engfors
 
             if (levelFailedPanel != null)
             {
-                // Update reason text
+                // Update reason text (hidden until board tween completes)
                 if (levelFailedReasonText != null)
                 {
                     levelFailedReasonText.text = reason;
                     levelFailedReasonText.transform.localScale = Vector3.one;
+                    levelFailedReasonText.gameObject.SetActive(false);
                 }
 
                 // Stop any existing pulse
@@ -4283,8 +4469,26 @@ Antonia and Joakim Engfors
                 if (failedBottomBoardImage != null) failedBottomBoardImage.gameObject.SetActive(false);
                 if (failedButtonsContainerGO != null) failedButtonsContainerGO.SetActive(false);
 
+                // Reset board and mascot tween state (start small + transparent)
+                if (failedBoardCanvasGroup != null)
+                {
+                    failedBoardCanvasGroup.alpha = 0f;
+                    failedBoardImage.transform.localScale = Vector3.one * 0.3f;
+                }
+                if (failedMascotCanvasGroup != null)
+                {
+                    failedMascotCanvasGroup.alpha = 0f;
+                    failedMascotOverlay.transform.localScale = Vector3.one * 0.3f;
+                }
+                if (koStarsTween != null)
+                    koStarsTween.Stop();
+
+                // Load world-specific mascot overlay
+                UpdateFailedScreenMascot();
+
                 levelFailedPanel.SetActive(true);
                 Debug.Log($"[UIManager] Showing level failed screen: {reason}");
+                AudioManager.Instance?.PlayLevelFailedSound();
 
                 // Start the animation sequence
                 if (failedScreenSequence != null)
@@ -4293,12 +4497,103 @@ Antonia and Joakim Engfors
             }
         }
 
+        private void UpdateFailedScreenMascot()
+        {
+            if (failedMascotOverlay == null) return;
+
+            string worldId = GameManager.Instance?.CurrentWorldId;
+            string mascotPath = null;
+
+            switch (worldId)
+            {
+                case "island":
+                    mascotPath = "Sprites/UI/LevelFailed/whiskers_level_failed";
+                    break;
+                case "farm":
+                    mascotPath = "Sprites/UI/LevelFailed/mara_level_failed";
+                    break;
+                case "supermarket":
+                    mascotPath = "Sprites/UI/LevelFailed/tom_level_failed";
+                    break;
+            }
+
+            if (mascotPath != null)
+            {
+                var sprite = LoadFullRectSprite(mascotPath);
+                if (sprite != null)
+                {
+                    failedMascotOverlay.sprite = sprite;
+                    // Reset anchors to fullscreen before applying crop
+                    var rt = failedMascotOverlay.rectTransform;
+                    rt.anchorMin = Vector2.zero;
+                    rt.anchorMax = Vector2.one;
+                    rt.offsetMin = Vector2.zero;
+                    rt.offsetMax = Vector2.zero;
+                    CropMetadata.ApplyCropAnchors(rt, mascotPath);
+                    failedMascotOverlay.gameObject.SetActive(true);
+                }
+                else
+                {
+                    failedMascotOverlay.gameObject.SetActive(false);
+                }
+            }
+            else
+            {
+                failedMascotOverlay.gameObject.SetActive(false);
+            }
+        }
+
         private IEnumerator FailedScreenAnimationSequence()
         {
-            // Brief pause to let the screen appear
-            yield return new WaitForSecondsRealtime(0.5f);
+            float tweenDuration = 0.4f;
 
-            // Start pulsing the reason text
+            // Brief pause to let the screen appear
+            yield return new WaitForSecondsRealtime(0.3f);
+
+            // --- Phase 1: Tween in the mascot ---
+            if (failedMascotCanvasGroup != null && failedMascotOverlay.gameObject.activeSelf)
+            {
+                float elapsed = 0f;
+                while (elapsed < tweenDuration)
+                {
+                    elapsed += Time.unscaledDeltaTime;
+                    float t = Mathf.Clamp01(elapsed / tweenDuration);
+                    float ease = 1f - (1f - t) * (1f - t) * (1f - t); // ease out cubic
+                    failedMascotCanvasGroup.alpha = Mathf.Lerp(0f, 1f, ease);
+                    failedMascotOverlay.transform.localScale = Vector3.one * Mathf.Lerp(0.3f, 1f, ease);
+                    yield return null;
+                }
+                failedMascotCanvasGroup.alpha = 1f;
+                failedMascotOverlay.transform.localScale = Vector3.one;
+            }
+
+            // Start KO stars orbiting after mascot appears
+            if (koStarsTween != null)
+                koStarsTween.Play();
+
+            // Short pause between mascot and board
+            yield return new WaitForSecondsRealtime(0.15f);
+
+            // --- Phase 2: Tween in the "Level Failed" board ---
+            if (failedBoardCanvasGroup != null)
+            {
+                float elapsed = 0f;
+                while (elapsed < tweenDuration)
+                {
+                    elapsed += Time.unscaledDeltaTime;
+                    float t = Mathf.Clamp01(elapsed / tweenDuration);
+                    float ease = 1f - (1f - t) * (1f - t) * (1f - t); // ease out cubic
+                    failedBoardCanvasGroup.alpha = Mathf.Lerp(0f, 1f, ease);
+                    failedBoardImage.transform.localScale = Vector3.one * Mathf.Lerp(0.3f, 1f, ease);
+                    yield return null;
+                }
+                failedBoardCanvasGroup.alpha = 1f;
+                failedBoardImage.transform.localScale = Vector3.one;
+            }
+
+            // Show and start pulsing the reason text after board is fully loaded
+            if (levelFailedReasonText != null)
+                levelFailedReasonText.gameObject.SetActive(true);
             failedReasonPulseCoroutine = StartCoroutine(PulseFailedReasonText());
 
             // Play bottom board animation
@@ -4353,6 +4648,8 @@ Antonia and Joakim Engfors
                 if (levelFailedReasonText != null)
                     levelFailedReasonText.transform.localScale = Vector3.one;
             }
+            if (koStarsTween != null)
+                koStarsTween.Stop();
         }
 
         private void OnBackToLevelsFromFailedClicked()
@@ -4435,6 +4732,16 @@ Antonia and Joakim Engfors
                 overlayTimerText.text = "0:00.00";
                 overlayTimerText.color = Color.white;
             }
+            if (freezeTimerOverlayImage != null)
+                freezeTimerOverlayImage.gameObject.SetActive(false);
+            // Hide freeze moves overlay and stop animation
+            if (freezeMovesAnimCoroutine != null)
+            {
+                StopCoroutine(freezeMovesAnimCoroutine);
+                freezeMovesAnimCoroutine = null;
+            }
+            if (freezeMovesOverlayImage != null)
+                freezeMovesOverlayImage.gameObject.SetActive(false);
         }
 
         private void UpdateLevelCompleteMascot(int stars)
@@ -4601,6 +4908,137 @@ Antonia and Joakim Engfors
             // Overlay timer: use cyan for frozen, white for normal
             if (overlayTimerText != null)
                 overlayTimerText.color = isFrozen ? Color.cyan : Color.white;
+            // Show/hide freeze timer overlay image
+            if (freezeTimerOverlayImage != null)
+                freezeTimerOverlayImage.gameObject.SetActive(isFrozen);
+            // Play freeze sound (unfreeze sound is triggered 0.5s early in FreezeTimerCoroutine)
+            if (isFrozen)
+                AudioManager.Instance?.PlayFreezeSound();
+        }
+
+        private void OnMovesFrozen(bool isFrozen)
+        {
+            if (isFrozen)
+            {
+                // Play sound and start frame animation
+                AudioManager.Instance?.PlayFreezeMovesSound();
+                if (freezeMovesOverlayImage != null && freezeMovesFrames != null && freezeMovesFrames.Length > 0)
+                {
+                    freezeMovesOverlayImage.gameObject.SetActive(true);
+                    if (freezeMovesAnimCoroutine != null)
+                        StopCoroutine(freezeMovesAnimCoroutine);
+                    freezeMovesAnimCoroutine = StartCoroutine(PlayFreezeMovesAnimation());
+                }
+            }
+            else
+            {
+                // Stop animation and hide
+                if (freezeMovesAnimCoroutine != null)
+                {
+                    StopCoroutine(freezeMovesAnimCoroutine);
+                    freezeMovesAnimCoroutine = null;
+                }
+                if (freezeMovesOverlayImage != null)
+                    freezeMovesOverlayImage.gameObject.SetActive(false);
+            }
+        }
+
+        private IEnumerator PlayFreezeMovesAnimation()
+        {
+            if (freezeMovesFrames == null || freezeMovesFrames.Length == 0) yield break;
+
+            float frameRate = 24f;
+            float frameTime = 1f / frameRate;
+            int frameCount = freezeMovesFrames.Length;
+            int currentFrame = 0;
+            float timer = 0f;
+
+            freezeMovesOverlayImage.sprite = freezeMovesFrames[0];
+
+            while (currentFrame < frameCount - 1)
+            {
+                timer += Time.deltaTime;
+                if (timer >= frameTime)
+                {
+                    timer -= frameTime;
+                    currentFrame++;
+                    if (currentFrame < frameCount)
+                        freezeMovesOverlayImage.sprite = freezeMovesFrames[currentFrame];
+                }
+                yield return null;
+            }
+
+            // Hide after animation finishes instead of holding the last frame
+            if (freezeMovesOverlayImage != null)
+                freezeMovesOverlayImage.gameObject.SetActive(false);
+            freezeMovesAnimCoroutine = null;
+        }
+
+        private void OnPowerUpUsed(PowerUpType type)
+        {
+            if (mainCanvas == null || powerUpBarUI == null) return;
+
+            var mode = GameManager.Instance?.CurrentGameMode ?? GameMode.FreePlay;
+
+            if (type == PowerUpType.MoveFreeze && starParticleSprite != null)
+            {
+                Vector2 targetAnchor = GetMovesAnchorForMode(mode);
+                if (targetAnchor != Vector2.zero)
+                    SpawnPowerUpParticles(type, starParticleSprite, targetAnchor, false);
+            }
+            else if (type == PowerUpType.TimeFreeze && snowflakeParticleSprite != null)
+            {
+                Vector2 targetAnchor = GetTimerAnchorForMode(mode);
+                if (targetAnchor != Vector2.zero)
+                    SpawnPowerUpParticles(type, snowflakeParticleSprite, targetAnchor, true);
+            }
+        }
+
+        private void SpawnPowerUpParticles(PowerUpType type, Sprite sprite, Vector2 targetAnchor, bool spin)
+        {
+            // Get button world position and convert to normalized anchor on the canvas
+            var buttonRoot = powerUpBarUI.GetButtonRoot(type);
+            if (buttonRoot == null) return;
+
+            var canvasRect = mainCanvas.GetComponent<RectTransform>();
+            Vector2 screenPos = RectTransformUtility.WorldToScreenPoint(null, buttonRoot.transform.position);
+            RectTransformUtility.ScreenPointToLocalPointInRectangle(canvasRect, screenPos, null, out Vector2 localPos);
+
+            // Convert local position to normalized anchor
+            Vector2 canvasSize = canvasRect.rect.size;
+            Vector2 startAnchor = new Vector2(
+                (localPos.x + canvasSize.x * canvasRect.pivot.x) / canvasSize.x,
+                (localPos.y + canvasSize.y * canvasRect.pivot.y) / canvasSize.y
+            );
+
+            SortResort.UI.PowerUpParticleTween.Play(mainCanvas.transform, sprite, startAnchor, targetAnchor, spin);
+        }
+
+        private Vector2 GetMovesAnchorForMode(GameMode mode)
+        {
+            switch (mode)
+            {
+                case GameMode.StarMode: return new Vector2(0.614f, 0.9162f);
+                case GameMode.HardMode: return new Vector2(0.500f, 0.9162f);
+                default: return Vector2.zero; // MoveFreeze not available in FreePlay/TimerMode
+            }
+        }
+
+        private Vector2 GetTimerAnchorForMode(GameMode mode)
+        {
+            switch (mode)
+            {
+                case GameMode.TimerMode: return new Vector2(0.621f, 0.9162f);
+                case GameMode.HardMode:  return new Vector2(0.732f, 0.9162f);
+                default: return Vector2.zero; // TimeFreeze not available in FreePlay/StarMode
+            }
+        }
+
+        private static Sprite LoadParticleSprite(string resourcePath)
+        {
+            var tex = Resources.Load<Texture2D>(resourcePath);
+            if (tex == null) return null;
+            return Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), new Vector2(0.5f, 0.5f), 100f);
         }
 
         private void UpdateTimerDisplay(float timeRemaining)

@@ -15,7 +15,7 @@
             "id": "carousel_1",
             "position": {
                 "x": -270.29998779296877,
-                "y": 200.0
+                "y": 560.0
             },
             "container_type": "standard",
             "container_image": "island_container",
@@ -52,7 +52,7 @@
                     "slot": 1
                 },
                 {
-                    "id": "surfboardredorange",
+                    "id": "surfboardbluewhitestripes",
                     "row": 0,
                     "slot": 2
                 }
@@ -62,7 +62,7 @@
             "id": "carousel_2",
             "position": {
                 "x": 79.69999694824219,
-                "y": 200.0
+                "y": 560.0
             },
             "container_type": "standard",
             "container_image": "island_container",
@@ -94,7 +94,7 @@
                     "slot": 1
                 },
                 {
-                    "id": "piratepopsicle",
+                    "id": "popsiclemintchocolate",
                     "row": 1,
                     "slot": 1
                 },
@@ -109,7 +109,7 @@
             "id": "carousel_3",
             "position": {
                 "x": 429.70001220703127,
-                "y": 200.0
+                "y": 560.0
             },
             "container_type": "standard",
             "container_image": "island_container",
@@ -156,7 +156,7 @@
             "id": "carousel_4",
             "position": {
                 "x": 779.7000122070313,
-                "y": 200.0
+                "y": 560.0
             },
             "container_type": "standard",
             "container_image": "island_container",
@@ -183,7 +183,7 @@
                     "slot": 0
                 },
                 {
-                    "id": "piratepopsicle",
+                    "id": "popsiclemintchocolate",
                     "row": 1,
                     "slot": 0
                 },
@@ -208,7 +208,7 @@
             "id": "carousel_5",
             "position": {
                 "x": 1129.699951171875,
-                "y": 200.0
+                "y": 560.0
             },
             "container_type": "standard",
             "container_image": "island_container",
@@ -255,7 +255,7 @@
             "id": "container_6",
             "position": {
                 "x": 200.0,
-                "y": 463.0
+                "y": 823.0
             },
             "container_type": "standard",
             "container_image": "island_container",
@@ -287,7 +287,7 @@
                     "slot": 0
                 },
                 {
-                    "id": "popsiclemintchocolate",
+                    "id": "piratepopsicle",
                     "row": 0,
                     "slot": 1
                 },
@@ -312,7 +312,7 @@
             "id": "container_7",
             "position": {
                 "x": 540.0,
-                "y": 463.0
+                "y": 823.0
             },
             "container_type": "standard",
             "container_image": "island_container",
@@ -349,7 +349,7 @@
                     "slot": 0
                 },
                 {
-                    "id": "popsiclemintchocolate",
+                    "id": "piratepopsicle",
                     "row": 0,
                     "slot": 1
                 },
@@ -379,7 +379,7 @@
             "id": "container_8",
             "position": {
                 "x": 880.0,
-                "y": 463.0
+                "y": 823.0
             },
             "container_type": "standard",
             "container_image": "island_container",
@@ -401,7 +401,7 @@
             "despawn_on_match": false,
             "initial_items": [
                 {
-                    "id": "popsiclemintchocolate",
+                    "id": "piratepopsicle",
                     "row": 0,
                     "slot": 0
                 },
@@ -436,7 +436,7 @@
             "id": "container_9",
             "position": {
                 "x": 200.0,
-                "y": 763.0
+                "y": 1123.0
             },
             "container_type": "standard",
             "container_image": "island_container",
@@ -473,7 +473,7 @@
                     "slot": 2
                 },
                 {
-                    "id": "surfboardredorange",
+                    "id": "surfboardbluewhitestripes",
                     "row": 2,
                     "slot": 2
                 }
@@ -483,7 +483,7 @@
             "id": "container_10",
             "position": {
                 "x": 540.0,
-                "y": 763.0
+                "y": 1123.0
             },
             "container_type": "standard",
             "container_image": "island_container",
@@ -535,7 +535,7 @@
                     "slot": 2
                 },
                 {
-                    "id": "surfboardredorange",
+                    "id": "surfboardbluewhitestripes",
                     "row": 1,
                     "slot": 2
                 }
@@ -545,7 +545,7 @@
             "id": "container_11",
             "position": {
                 "x": 880.0,
-                "y": 763.0
+                "y": 1123.0
             },
             "container_type": "standard",
             "container_image": "island_container",
@@ -577,7 +577,7 @@
                     "slot": 1
                 },
                 {
-                    "id": "piratepopsicle",
+                    "id": "popsiclemintchocolate",
                     "row": 1,
                     "slot": 1
                 },
@@ -592,7 +592,7 @@
             "id": "container_12",
             "position": {
                 "x": 200.0,
-                "y": 1063.0
+                "y": 1423.0
             },
             "container_type": "standard",
             "container_image": "island_container",
@@ -654,7 +654,7 @@
             "id": "container_13",
             "position": {
                 "x": 540.0,
-                "y": 1063.0
+                "y": 1423.0
             },
             "container_type": "standard",
             "container_image": "island_container",
@@ -711,7 +711,7 @@
             "id": "container_14",
             "position": {
                 "x": 880.0,
-                "y": 1063.0
+                "y": 1423.0
             },
             "container_type": "standard",
             "container_image": "island_container",

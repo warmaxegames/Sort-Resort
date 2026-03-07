@@ -489,7 +489,18 @@ namespace SortResort
             GameEvents.InvokeTimerFrozen(true);
             Debug.Log($"[LevelManager] Timer frozen for {duration}s");
 
-            yield return new WaitForSeconds(duration);
+            // Play unfreeze sound 0.5s before freeze ends
+            float unfreezeLeadTime = 0.5f;
+            if (duration > unfreezeLeadTime)
+            {
+                yield return new WaitForSeconds(duration - unfreezeLeadTime);
+                AudioManager.Instance?.PlayUnfreezeSound();
+                yield return new WaitForSeconds(unfreezeLeadTime);
+            }
+            else
+            {
+                yield return new WaitForSeconds(duration);
+            }
 
             timerFrozen = false;
             GameEvents.InvokeTimerFrozen(false);

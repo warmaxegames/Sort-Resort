@@ -15,7 +15,7 @@
             "id": "container_1",
             "position": {
                 "x": 200.0,
-                "y": 100.0
+                "y": 460.0
             },
             "container_type": "standard",
             "container_image": "island_container",
@@ -72,7 +72,7 @@
             "id": "container_2",
             "position": {
                 "x": 540.0,
-                "y": 100.0
+                "y": 460.0
             },
             "container_type": "standard",
             "container_image": "island_container",
@@ -124,7 +124,7 @@
             "id": "container_3",
             "position": {
                 "x": 880.0,
-                "y": 100.0
+                "y": 460.0
             },
             "container_type": "standard",
             "container_image": "island_container",
@@ -186,7 +186,7 @@
             "id": "container_4",
             "position": {
                 "x": 200.0,
-                "y": 366.0
+                "y": 726.0
             },
             "container_type": "standard",
             "container_image": "island_container",
@@ -243,7 +243,7 @@
                     "slot": 2
                 },
                 {
-                    "id": "popsiclemintchocolate",
+                    "id": "icecreamparfait",
                     "row": 2,
                     "slot": 2
                 }
@@ -253,7 +253,7 @@
             "id": "container_5",
             "position": {
                 "x": 540.0,
-                "y": 366.0
+                "y": 726.0
             },
             "container_type": "standard",
             "container_image": "island_container",
@@ -305,7 +305,7 @@
                     "slot": 2
                 },
                 {
-                    "id": "popsiclemintchocolate",
+                    "id": "icecreamparfait",
                     "row": 2,
                     "slot": 2
                 }
@@ -315,7 +315,7 @@
             "id": "container_6",
             "position": {
                 "x": 880.0,
-                "y": 366.0
+                "y": 726.0
             },
             "container_type": "standard",
             "container_image": "island_single_slot_container",
@@ -352,7 +352,7 @@
             "id": "container_7",
             "position": {
                 "x": 200.0,
-                "y": 632.0
+                "y": 992.0
             },
             "container_type": "standard",
             "container_image": "island_container",
@@ -389,7 +389,7 @@
                     "slot": 1
                 },
                 {
-                    "id": "popsiclemintchocolate",
+                    "id": "icecreamparfait",
                     "row": 2,
                     "slot": 1
                 },
@@ -414,7 +414,7 @@
             "id": "container_8",
             "position": {
                 "x": 540.0,
-                "y": 632.0
+                "y": 992.0
             },
             "container_type": "standard",
             "container_image": "island_container",
@@ -471,7 +471,7 @@
             "id": "container_9",
             "position": {
                 "x": 880.0,
-                "y": 632.0
+                "y": 992.0
             },
             "container_type": "standard",
             "container_image": "island_container",
@@ -528,7 +528,7 @@
             "id": "container_10",
             "position": {
                 "x": 370.0,
-                "y": 898.0
+                "y": 1258.0
             },
             "container_type": "standard",
             "container_image": "island_container",
@@ -590,7 +590,7 @@
             "id": "container_11",
             "position": {
                 "x": 710.0,
-                "y": 898.0
+                "y": 1258.0
             },
             "container_type": "standard",
             "container_image": "island_container",

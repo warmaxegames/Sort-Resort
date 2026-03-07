@@ -19,6 +19,7 @@ namespace SortResort
         {
             public PowerUpType type;
             public string spriteName;
+            public string introSpriteName;
             public string pressedSpriteName;
             public string displayName;
             public string description;
@@ -33,6 +34,7 @@ namespace SortResort
             {
                 type = PowerUpType.SwapItems,
                 spriteName = "swap_items",
+                introSpriteName = "swap_items_intro",
                 pressedSpriteName = "swap_items_pressed",
                 displayName = "Swap Items",
                 description = "Select two front-row items to swap their positions. Doesn't count as a move!",
@@ -43,8 +45,9 @@ namespace SortResort
             new PowerUpConfig
             {
                 type = PowerUpType.DestroyLocker,
-                spriteName = "destroy_locker",
-                pressedSpriteName = "destroy_locker_pressed",
+                spriteName = "hammer_icon",
+                introSpriteName = "destroy_locker_intro",
+                pressedSpriteName = "hammer_icon_pressed",
                 displayName = "Destroy Locker",
                 description = "Tap a locked container to instantly unlock it!",
                 availableModes = new[] { GameMode.FreePlay, GameMode.StarMode, GameMode.TimerMode, GameMode.HardMode },
@@ -55,6 +58,7 @@ namespace SortResort
             {
                 type = PowerUpType.MoveFreeze,
                 spriteName = "moves_freeze",
+                introSpriteName = "moves_freeze_intro",
                 pressedSpriteName = "moves_freeze_pressed",
                 displayName = "Moves Freeze",
                 description = "Freeze the move counter for 5 seconds! Make moves without them counting.",
@@ -66,6 +70,7 @@ namespace SortResort
             {
                 type = PowerUpType.TimeFreeze,
                 spriteName = "time_freeze",
+                introSpriteName = "time_freeze_intro",
                 pressedSpriteName = "time_freeze_pressed",
                 displayName = "Time Freeze",
                 description = "Freeze the timer for 10 seconds!",

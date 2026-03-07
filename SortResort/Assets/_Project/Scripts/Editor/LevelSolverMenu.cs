@@ -1,6 +1,11 @@
 #if UNITY_EDITOR
+using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityEditor;
 
@@ -18,126 +23,30 @@ namespace SortResort
         }
 
         [MenuItem("Tools/Sort Resort/Solver/Solve All Island Levels")]
-        public static void SolveAllIslandLevels()
-        {
-            SolveWorldLevels("island", 1, 100);
-        }
+        public static void SolveAllIslandLevels() => SolveWorldLevels("island", 1, 100);
 
         [MenuItem("Tools/Sort Resort/Solver/Solve All Supermarket Levels")]
-        public static void SolveAllSupermarketLevels()
-        {
-            SolveWorldLevels("supermarket", 1, 100);
-        }
+        public static void SolveAllSupermarketLevels() => SolveWorldLevels("supermarket", 1, 100);
 
         [MenuItem("Tools/Sort Resort/Solver/Solve All Farm Levels")]
-        public static void SolveAllFarmLevels()
-        {
-            SolveWorldLevels("farm", 1, 100);
-        }
+        public static void SolveAllFarmLevels() => SolveWorldLevels("farm", 1, 100);
 
         [MenuItem("Tools/Sort Resort/Solver/Solve All Tavern Levels")]
-        public static void SolveAllTavernLevels()
-        {
-            SolveWorldLevels("tavern", 1, 100);
-        }
+        public static void SolveAllTavernLevels() => SolveWorldLevels("tavern", 1, 100);
 
         [MenuItem("Tools/Sort Resort/Solver/Solve All Space Levels")]
-        public static void SolveAllSpaceLevels()
-        {
-            SolveWorldLevels("space", 1, 100);
-        }
+        public static void SolveAllSpaceLevels() => SolveWorldLevels("space", 1, 100);
 
-        [MenuItem("Tools/Sort Resort/Solver/Update All Level Thresholds")]
+        [MenuItem("Tools/Sort Resort/Solver/Update All Level Thresholds (Parallel)")]
         public static void UpdateAllLevelThresholds()
         {
-            string[] worlds = { "island", "supermarket", "farm", "tavern", "space" };
-            var report = new StringBuilder();
-            report.AppendLine("=== THRESHOLD UPDATE REPORT ===\n");
+            ParallelThresholdRunner.Start(changedOnly: false);
+        }
 
-            int totalUpdated = 0;
-            int totalFailed = 0;
-
-            foreach (var worldId in worlds)
-            {
-                report.AppendLine($"\n--- {worldId.ToUpper()} ---");
-
-                for (int level = 1; level <= 100; level++)
-                {
-                    var levelData = LevelDataLoader.LoadLevel(worldId, level);
-                    if (levelData == null) continue;
-
-                    var solver = new LevelSolver();
-                    solver.VerboseLogging = false;
-
-                    // Progress bar
-                    if (EditorUtility.DisplayCancelableProgressBar(
-                        "Updating Thresholds",
-                        $"{worldId} Level {level}",
-                        (float)level / 100f))
-                    {
-                        EditorUtility.ClearProgressBar();
-                        report.AppendLine("\n(Cancelled by user)");
-                        Debug.Log(report.ToString());
-                        return;
-                    }
-
-                    var result = solver.SolveLevelBest(levelData);
-
-                    if (result.Success)
-                    {
-                        // Calculate new thresholds
-                        int optimal = result.TotalMoves;
-                        int[] newThresholds = new int[]
-                        {
-                            optimal,
-                            Mathf.RoundToInt(optimal * 1.15f),
-                            Mathf.RoundToInt(optimal * 1.30f),
-                            Mathf.RoundToInt(optimal * 1.40f)
-                        };
-
-                        // Ensure each threshold is at least 1 move apart
-                        for (int i = 1; i < newThresholds.Length; i++)
-                        {
-                            if (newThresholds[i] <= newThresholds[i - 1])
-                                newThresholds[i] = newThresholds[i - 1] + 1;
-                        }
-
-                        // Update file
-                        string worldFolder = char.ToUpper(worldId[0]) + worldId.Substring(1);
-                        string filePath = $"Assets/_Project/Resources/Data/Levels/{worldFolder}/level_{level:D3}.json";
-
-                        if (File.Exists(filePath))
-                        {
-                            string json = File.ReadAllText(filePath);
-                            var data = JsonUtility.FromJson<LevelData>(json);
-                            data.star_move_thresholds = newThresholds;
-                            string updatedJson = JsonUtility.ToJson(data, true);
-                            File.WriteAllText(filePath, updatedJson);
-
-                            report.AppendLine($"Level {level:D3}: {optimal} moves -> [{newThresholds[0]}, {newThresholds[1]}, {newThresholds[2]}, {newThresholds[3]}]");
-                            totalUpdated++;
-                        }
-                    }
-                    else
-                    {
-                        report.AppendLine($"Level {level:D3}: FAILED - {result.FailureReason}");
-                        totalFailed++;
-                    }
-                }
-            }
-
-            EditorUtility.ClearProgressBar();
-            AssetDatabase.Refresh();
-
-            report.AppendLine($"\n=== SUMMARY ===");
-            report.AppendLine($"Updated: {totalUpdated} levels");
-            report.AppendLine($"Failed: {totalFailed} levels");
-
-            Debug.Log(report.ToString());
-
-            EditorUtility.DisplayDialog("Thresholds Updated",
-                $"Updated {totalUpdated} levels\nFailed: {totalFailed} levels\n\nSee console for details.",
-                "OK");
+        [MenuItem("Tools/Sort Resort/Solver/Update Changed Level Thresholds Only (Parallel)")]
+        public static void UpdateChangedLevelThresholds()
+        {
+            ParallelThresholdRunner.Start(changedOnly: true);
         }
 
         private static void SolveWorldLevels(string worldId, int start, int end)
@@ -164,7 +73,6 @@ namespace SortResort
                 var solver = new LevelSolver();
                 solver.VerboseLogging = false;
 
-                // Set up cancelable progress for this level
                 solver.OnProgressUpdate = (moves, itemsRemaining, elapsed) =>
                 {
                     return EditorUtility.DisplayCancelableProgressBar(
@@ -232,6 +140,264 @@ namespace SortResort
     }
 
     /// <summary>
+    /// Runs parallel threshold updates using background threads with a responsive progress bar.
+    /// Levels are solved on worker threads; the main thread polls for completion via EditorApplication.update.
+    /// </summary>
+    public static class ParallelThresholdRunner
+    {
+        private struct LevelEntry
+        {
+            public string WorldId;
+            public int Level;
+            public LevelData Data;
+            public string FilePath;
+        }
+
+        private struct ThresholdResult
+        {
+            public string WorldId;
+            public int Level;
+            public bool Success;
+            public int SolverMoves;
+            public int[] NewThresholds;
+            public string FailureReason;
+        }
+
+        private static List<LevelEntry> _entries;
+        private static ConcurrentBag<ThresholdResult> _results;
+        private static int _completedCount;
+        private static int _totalCount;
+        private static int _skippedCount;
+        private static bool _running;
+        private static Task _solveTask;
+        private static System.Diagnostics.Stopwatch _stopwatch;
+
+        public static void Start(bool changedOnly)
+        {
+            if (_running)
+            {
+                EditorUtility.DisplayDialog("Already Running", "A parallel threshold update is already in progress.", "OK");
+                return;
+            }
+
+            string[] worlds = { "island", "supermarket", "farm", "tavern", "space" };
+
+            // Load all level data on main thread
+            EditorUtility.DisplayProgressBar("Loading Levels", "Loading all level data...", 0f);
+
+            _entries = new List<LevelEntry>();
+            _skippedCount = 0;
+
+            foreach (var worldId in worlds)
+            {
+                string worldFolder = char.ToUpper(worldId[0]) + worldId.Substring(1);
+                for (int level = 1; level <= 100; level++)
+                {
+                    var levelData = LevelDataLoader.LoadLevel(worldId, level);
+                    if (levelData == null) continue;
+
+                    string filePath = $"Assets/_Project/Resources/Data/Levels/{worldFolder}/level_{level:D3}.json";
+
+                    if (changedOnly && levelData.construction_moves > 0 &&
+                        levelData.star_move_thresholds != null &&
+                        levelData.star_move_thresholds.Length >= 1 &&
+                        levelData.star_move_thresholds[0] == levelData.construction_moves)
+                    {
+                        _skippedCount++;
+                        continue;
+                    }
+
+                    _entries.Add(new LevelEntry
+                    {
+                        WorldId = worldId,
+                        Level = level,
+                        Data = levelData,
+                        FilePath = filePath
+                    });
+                }
+            }
+
+            _totalCount = _entries.Count;
+            _completedCount = 0;
+            _results = new ConcurrentBag<ThresholdResult>();
+
+            if (_totalCount == 0)
+            {
+                EditorUtility.ClearProgressBar();
+                EditorUtility.DisplayDialog("No Levels to Update",
+                    changedOnly ? $"All levels already have matching thresholds.\n({_skippedCount} skipped)" : "No levels found.",
+                    "OK");
+                return;
+            }
+
+            _stopwatch = System.Diagnostics.Stopwatch.StartNew();
+            _running = true;
+
+            // Launch background solving
+            int maxThreads = Mathf.Max(2, System.Environment.ProcessorCount - 1);
+            Debug.Log($"[Solver] Starting parallel threshold update: {_totalCount} levels on {maxThreads} threads" +
+                      (_skippedCount > 0 ? $" ({_skippedCount} skipped)" : ""));
+
+            _solveTask = Task.Run(() =>
+            {
+                Parallel.ForEach(_entries,
+                    new ParallelOptions { MaxDegreeOfParallelism = maxThreads },
+                    entry =>
+                    {
+                        var solver = new LevelSolver();
+                        solver.VerboseLogging = false;
+                        var result = solver.SolveLevelBest(entry.Data);
+
+                        if (result.Success)
+                        {
+                            int optimal = result.TotalMoves;
+                            int[] thresholds = new int[]
+                            {
+                                optimal,
+                                Mathf.RoundToInt(optimal * 1.15f),
+                                Mathf.RoundToInt(optimal * 1.30f),
+                                Mathf.RoundToInt(optimal * 1.40f)
+                            };
+                            for (int i = 1; i < thresholds.Length; i++)
+                            {
+                                if (thresholds[i] <= thresholds[i - 1])
+                                    thresholds[i] = thresholds[i - 1] + 1;
+                            }
+                            _results.Add(new ThresholdResult
+                            {
+                                WorldId = entry.WorldId, Level = entry.Level,
+                                Success = true, SolverMoves = optimal, NewThresholds = thresholds
+                            });
+                        }
+                        else
+                        {
+                            _results.Add(new ThresholdResult
+                            {
+                                WorldId = entry.WorldId, Level = entry.Level,
+                                Success = false, FailureReason = result.FailureReason
+                            });
+                        }
+
+                        Interlocked.Increment(ref _completedCount);
+                    }
+                );
+            });
+
+            // Register update callback to poll progress
+            EditorApplication.update += PollProgress;
+        }
+
+        private static void PollProgress()
+        {
+            if (!_running) return;
+
+            int completed = _completedCount;
+            float progress = (float)completed / _totalCount;
+            float elapsed = (float)_stopwatch.Elapsed.TotalSeconds;
+            float estimatedTotal = completed > 0 ? elapsed / progress : 0f;
+            float remaining = estimatedTotal - elapsed;
+
+            string timeStr = remaining > 0
+                ? $" ~{remaining:F0}s remaining"
+                : "";
+
+            bool cancelled = EditorUtility.DisplayCancelableProgressBar(
+                "Solving Levels (Parallel)",
+                $"{completed}/{_totalCount} levels solved ({elapsed:F0}s elapsed{timeStr})",
+                progress
+            );
+
+            if (cancelled)
+            {
+                // Can't easily cancel Parallel.ForEach, but clear UI
+                EditorUtility.ClearProgressBar();
+                EditorApplication.update -= PollProgress;
+                _running = false;
+                Debug.LogWarning("[Solver] Cancelled by user. Background threads may still be running briefly.");
+                return;
+            }
+
+            if (_solveTask.IsCompleted)
+            {
+                EditorApplication.update -= PollProgress;
+                _running = false;
+                _stopwatch.Stop();
+                OnComplete();
+            }
+        }
+
+        private static void OnComplete()
+        {
+            EditorUtility.DisplayProgressBar("Writing Results", "Updating JSON files...", 0.95f);
+
+            var report = new StringBuilder();
+            report.AppendLine("=== THRESHOLD UPDATE REPORT ===\n");
+
+            int totalUpdated = 0;
+            int totalFailed = 0;
+
+            var sortedResults = _results.ToList();
+            // Sort: worlds alphabetically, then by level number
+            sortedResults.Sort((a, b) =>
+            {
+                int wCmp = string.Compare(a.WorldId, b.WorldId, System.StringComparison.Ordinal);
+                return wCmp != 0 ? wCmp : a.Level.CompareTo(b.Level);
+            });
+
+            string currentWorld = "";
+            foreach (var r in sortedResults)
+            {
+                if (r.WorldId != currentWorld)
+                {
+                    currentWorld = r.WorldId;
+                    report.AppendLine($"\n--- {currentWorld.ToUpper()} ---");
+                }
+
+                if (r.Success)
+                {
+                    // Find the file path for this level
+                    var entry = _entries.FirstOrDefault(e => e.WorldId == r.WorldId && e.Level == r.Level);
+                    if (File.Exists(entry.FilePath))
+                    {
+                        string json = File.ReadAllText(entry.FilePath);
+                        var data = JsonUtility.FromJson<LevelData>(json);
+                        data.star_move_thresholds = r.NewThresholds;
+                        string updatedJson = JsonUtility.ToJson(data, true);
+                        File.WriteAllText(entry.FilePath, updatedJson);
+                    }
+
+                    report.AppendLine($"Level {r.Level:D3}: {r.SolverMoves} moves -> [{r.NewThresholds[0]}, {r.NewThresholds[1]}, {r.NewThresholds[2]}, {r.NewThresholds[3]}]");
+                    totalUpdated++;
+                }
+                else
+                {
+                    report.AppendLine($"Level {r.Level:D3}: FAILED - {r.FailureReason}");
+                    totalFailed++;
+                }
+            }
+
+            EditorUtility.ClearProgressBar();
+            AssetDatabase.Refresh();
+
+            report.AppendLine($"\n=== SUMMARY ===");
+            report.AppendLine($"Updated: {totalUpdated} levels");
+            report.AppendLine($"Failed: {totalFailed} levels");
+            if (_skippedCount > 0)
+                report.AppendLine($"Skipped (unchanged): {_skippedCount} levels");
+            report.AppendLine($"Time: {_stopwatch.Elapsed.TotalSeconds:F1}s");
+
+            Debug.Log(report.ToString());
+
+            EditorUtility.DisplayDialog("Thresholds Updated",
+                $"Updated {totalUpdated} levels\nFailed: {totalFailed} levels" +
+                (_skippedCount > 0 ? $"\nSkipped (unchanged): {_skippedCount}" : "") +
+                $"\nTime: {_stopwatch.Elapsed.TotalSeconds:F1}s" +
+                "\n\nSee console for details.",
+                "OK");
+        }
+    }
+
+    /// <summary>
     /// Editor window for solving individual levels with detailed output
     /// </summary>
     public class LevelSolverWindow : EditorWindow
@@ -260,14 +426,12 @@ namespace SortResort
             EditorGUILayout.LabelField("Level Solver", EditorStyles.boldLabel);
             EditorGUILayout.Space();
 
-            // World selection
             EditorGUILayout.LabelField("Select Level", EditorStyles.boldLabel);
             selectedWorldIndex = EditorGUILayout.Popup("World", selectedWorldIndex, worldOptions);
             levelNumber = EditorGUILayout.IntField("Level Number", levelNumber);
 
             EditorGUILayout.Space();
 
-            // Solve button
             if (GUILayout.Button("SOLVE LEVEL", GUILayout.Height(40)))
             {
                 SolveLevel();
@@ -275,14 +439,12 @@ namespace SortResort
 
             EditorGUILayout.Space(20);
 
-            // Results
             if (lastResult != null)
             {
                 EditorGUILayout.LabelField("Results", EditorStyles.boldLabel);
 
                 if (lastResult.Success)
                 {
-                    // Success info
                     EditorGUILayout.BeginVertical(EditorStyles.helpBox);
 
                     EditorGUILayout.LabelField($"Status: SOLVED", EditorStyles.boldLabel);
@@ -292,7 +454,6 @@ namespace SortResort
 
                     EditorGUILayout.Space();
 
-                    // Threshold comparison
                     EditorGUILayout.LabelField("Star Thresholds", EditorStyles.boldLabel);
                     EditorGUILayout.LabelField($"Current 3-star threshold: {current3StarThreshold}");
                     EditorGUILayout.LabelField($"Solver optimal: {lastResult.TotalMoves}");
@@ -320,7 +481,6 @@ namespace SortResort
 
                     EditorGUILayout.Space();
 
-                    // Move sequence
                     EditorGUILayout.LabelField("Move Sequence", EditorStyles.boldLabel);
                     EditorGUILayout.BeginVertical(EditorStyles.helpBox);
 
@@ -334,7 +494,6 @@ namespace SortResort
 
                     EditorGUILayout.EndVertical();
 
-                    // Copy button
                     EditorGUILayout.Space();
                     if (GUILayout.Button("Copy Move Sequence to Clipboard"))
                     {
@@ -343,7 +502,6 @@ namespace SortResort
                 }
                 else
                 {
-                    // Failed
                     EditorGUILayout.HelpBox(
                         $"FAILED: {lastResult.FailureReason}\nTime: {lastResult.SolveTimeMs:F1}ms",
                         MessageType.Error
@@ -371,15 +529,12 @@ namespace SortResort
             var solver = new LevelSolver();
             solver.VerboseLogging = false;
 
-            // Set up cancelable progress bar
             solver.OnProgressUpdate = (moves, itemsRemaining, elapsed) =>
             {
-                // Show progress bar with Cancel button
-                // Returns true if user clicked Cancel
                 return EditorUtility.DisplayCancelableProgressBar(
                     "Solving Level",
                     $"Moves: {moves} | Items remaining: {itemsRemaining} | Time: {elapsed:F1}s",
-                    itemsRemaining > 0 ? 1f - (itemsRemaining / 30f) : 1f  // Estimate progress
+                    itemsRemaining > 0 ? 1f - (itemsRemaining / 30f) : 1f
                 );
             };
 
@@ -395,7 +550,6 @@ namespace SortResort
             if (lastResult.Success)
             {
                 thresholdNeedsUpdate = lastResult.TotalMoves != current3StarThreshold;
-
                 Debug.Log($"[Solver] {worldId} Level {levelNumber}: {lastResult.TotalMoves} moves " +
                           $"(threshold: {current3StarThreshold}, match: {!thresholdNeedsUpdate})");
             }
@@ -420,39 +574,30 @@ namespace SortResort
                 return;
             }
 
-            // Calculate new thresholds based on solver optimal:
-            // 3-star: solver moves (optimal)
-            // 2-star: solver × 1.15 (rounded)
-            // 1-star: solver × 1.30 (rounded)
-            // Fail:   solver × 1.40 (rounded)
             int optimal = lastResult.TotalMoves;
             int[] newThresholds = new int[]
             {
-                optimal,                              // 3-star = solver's exact score
-                Mathf.RoundToInt(optimal * 1.15f),    // 2-star = 15% more moves
-                Mathf.RoundToInt(optimal * 1.30f),    // 1-star = 30% more moves
-                Mathf.RoundToInt(optimal * 1.40f)     // Fail = 40% more moves
+                optimal,
+                Mathf.RoundToInt(optimal * 1.15f),
+                Mathf.RoundToInt(optimal * 1.30f),
+                Mathf.RoundToInt(optimal * 1.40f)
             };
 
-            // Ensure each threshold is at least 1 move apart
             for (int i = 1; i < newThresholds.Length; i++)
             {
                 if (newThresholds[i] <= newThresholds[i - 1])
                     newThresholds[i] = newThresholds[i - 1] + 1;
             }
 
-            // Read and update JSON
             string json = File.ReadAllText(filePath);
             var levelData = JsonUtility.FromJson<LevelData>(json);
             levelData.star_move_thresholds = newThresholds;
 
-            // Write back
             string updatedJson = JsonUtility.ToJson(levelData, true);
             File.WriteAllText(filePath, updatedJson);
 
             AssetDatabase.Refresh();
 
-            // Update local state
             current3StarThreshold = optimal;
             thresholdNeedsUpdate = false;
 

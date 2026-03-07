@@ -307,8 +307,8 @@ namespace SortResort
             // Use charge (swap is free - no move counted)
             UseCharge(PowerUpType.SwapItems);
 
-            // Play button click sound
-            AudioManager.Instance?.PlayButtonClick();
+            // Play swap sound during the tween
+            AudioManager.Instance?.PlaySwapSound();
 
             // End interaction
             firstSelectedItem = null;
@@ -382,11 +382,14 @@ namespace SortResort
 
             if (lockedContainer == null) return;
 
+            // Play hammer hit animation and sound at the click position
+            // The sparks pivot aligns the impact effect with where the user tapped
+            HammerHitEffect.Play(worldPos);
+            AudioManager.Instance?.PlayHammerHitSound();
+
             // Unlock the container
             lockedContainer.Unlock();
             UseCharge(PowerUpType.DestroyLocker);
-
-            AudioManager.Instance?.PlayButtonClick();
 
             // End interaction
             interactionMode = PowerUpInteractionMode.None;
@@ -409,7 +412,6 @@ namespace SortResort
             if (isMovesFrozen) return;
 
             UseCharge(PowerUpType.MoveFreeze);
-            AudioManager.Instance?.PlayButtonClick();
 
             if (movesFreezeCoroutine != null)
                 StopCoroutine(movesFreezeCoroutine);
@@ -421,6 +423,7 @@ namespace SortResort
         private IEnumerator MovesFreezeCoroutine(float duration)
         {
             isMovesFrozen = true;
+            GameEvents.InvokeMovesFrozen(true);
 
             // Play tick-tock during freeze window
             AudioManager.Instance?.StartTickTock();
@@ -428,6 +431,7 @@ namespace SortResort
             yield return new WaitForSeconds(duration);
 
             isMovesFrozen = false;
+            GameEvents.InvokeMovesFrozen(false);
             AudioManager.Instance?.StopTickTock();
             movesFreezeCoroutine = null;
 
@@ -526,7 +530,11 @@ namespace SortResort
                 StopCoroutine(movesFreezeCoroutine);
                 movesFreezeCoroutine = null;
             }
-            isMovesFrozen = false;
+            if (isMovesFrozen)
+            {
+                isMovesFrozen = false;
+                GameEvents.InvokeMovesFrozen(false);
+            }
         }
 
         #endregion

@@ -64,6 +64,7 @@ namespace SortResort
         public static event Action<float> OnTimerUpdated; // timeRemaining
         public static event Action OnTimerExpired;
         public static event Action<bool> OnTimerFrozen; // isFrozen (for timer freeze power-up)
+        public static event Action<bool> OnMovesFrozen; // isFrozen (for moves freeze power-up)
 
         // Power-Up Events
         public static event Action<PowerUpType> OnPowerUpUsed;
@@ -118,6 +119,7 @@ namespace SortResort
         public static void InvokeTimerUpdated(float timeRemaining) => OnTimerUpdated?.Invoke(timeRemaining);
         public static void InvokeTimerExpired() => OnTimerExpired?.Invoke();
         public static void InvokeTimerFrozen(bool isFrozen) => OnTimerFrozen?.Invoke(isFrozen);
+        public static void InvokeMovesFrozen(bool isFrozen) => OnMovesFrozen?.Invoke(isFrozen);
 
         // Invoke Methods - Power-Ups
         public static void InvokePowerUpUsed(PowerUpType type) => OnPowerUpUsed?.Invoke(type);
@@ -158,6 +160,7 @@ namespace SortResort
             OnTimerUpdated = null;
             OnTimerExpired = null;
             OnTimerFrozen = null;
+            OnMovesFrozen = null;
             OnPowerUpUsed = null;
             OnPowerUpCountChanged = null;
             OnPowerUpUnlocked = null;

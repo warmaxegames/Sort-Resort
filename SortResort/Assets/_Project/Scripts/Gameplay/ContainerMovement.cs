@@ -87,8 +87,8 @@ namespace SortResort
             {
                 isFalling = true;
                 fallSpeed = definition.fall_speed > 0 ? definition.fall_speed : 100f;
-                // Convert Godot Y to Unity Y
-                fallTargetY = (600f - definition.fall_target_y) / 100f;
+                // Convert screen pixel Y to Unity Y
+                fallTargetY = (960f - definition.fall_target_y) / 100f;
                 despawnOnMatch = definition.despawn_on_match;
 
                 Debug.Log($"[ContainerMovement] {definition.id} falling: speed={fallSpeed}, targetY={fallTargetY}");

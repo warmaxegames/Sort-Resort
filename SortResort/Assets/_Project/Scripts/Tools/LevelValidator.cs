@@ -8,11 +8,11 @@ namespace SortResort
     /// </summary>
     public static class LevelValidator
     {
-        // Screen bounds in Godot coordinates (portrait 1080x1920)
+        // Screen bounds in screen pixels (portrait 1080x1920, origin top-left)
         private const float SCREEN_WIDTH = 1080f;
         private const float SCREEN_HEIGHT = 1920f;
         private const float SCREEN_CENTER_X = 540f;
-        private const float SCREEN_CENTER_Y = 600f;  // Y center for gameplay area
+        private const float SCREEN_CENTER_Y = 960f;  // Y center of screen
 
         // Unity camera settings (must match ScreenManager)
         // OrthoSize 9.6 shows full 1080px width: 1080/100 / (2 * 0.5625) = 9.6
@@ -20,7 +20,7 @@ namespace SortResort
         private const float REFERENCE_ASPECT = 0.5625f;  // 1080/1920
         private const float COORD_DIVISOR = 100f;  // Pixels to Unity units
 
-        // Minimum spacing between container centers (in Godot pixels)
+        // Minimum spacing between container centers (in screen pixels)
         private const float MIN_CONTAINER_SPACING = 20f;
 
         // Calculated visible area in Unity units
@@ -28,7 +28,7 @@ namespace SortResort
         private static float VisibleHeightUnits => 2f * CAMERA_ORTHO_SIZE;  // = 16 units
         private static float VisibleHalfWidth => VisibleWidthUnits / 2f;  // = 4.5 units
 
-        // Container dimensions (Godot pixels)
+        // Container dimensions (screen pixels)
         // Base slot 83x166 scaled uniformly by 1.14, then container sprite adds 1.2x border
         // Total container width = 83 * 1.14 * 3 * 1.2 = 341px at positions 200, 540, 880
         // This maintains original 83% slot-to-container ratio
@@ -36,12 +36,12 @@ namespace SortResort
         private const float SLOT_HEIGHT = 166f * 1.14f; // ~189px (uniformly scaled)
         private const float CONTAINER_BORDER_SCALE = 1.2f;  // Container sprite is 1.2x wider than slots
 
-        // Edge margin - extra padding from screen edge for visual comfort (in Godot pixels)
+        // Edge margin - extra padding from screen edge for visual comfort (in screen pixels)
         private const float EDGE_MARGIN_PIXELS = 15f;
 
-        // UI reserved areas (in Godot pixels from edges)
-        private const float TOP_UI_HEIGHT = 150f;   // HUD area at top
-        private const float BOTTOM_UI_HEIGHT = 130f; // Bottom safe area
+        // UI reserved areas (in screen pixels from edges)
+        private const float TOP_UI_HEIGHT = 230f;   // HUD bar at top (badges extend to ~230px)
+        private const float BOTTOM_UI_HEIGHT = 168f; // Bottom items bar (Y=1752 to 1920)
 
         // Calculate container width in UNITY units based on slot count
         private static float GetContainerWidthUnits(int slotCount)
@@ -61,7 +61,7 @@ namespace SortResort
             // Min Unity X = -VisibleHalfWidth + containerHalfWidth + margin
             float minUnityX = -VisibleHalfWidth + containerHalfWidthUnits + edgeMarginUnits;
 
-            // Convert back to Godot coords: GodotX = UnityX * 100 + 540
+            // Convert back to screen pixels: ScreenX = UnityX * 100 + 540
             return minUnityX * COORD_DIVISOR + SCREEN_CENTER_X;
         }
 
@@ -74,7 +74,7 @@ namespace SortResort
             // Max Unity X = +VisibleHalfWidth - containerHalfWidth - margin
             float maxUnityX = VisibleHalfWidth - containerHalfWidthUnits - edgeMarginUnits;
 
-            // Convert back to Godot coords: GodotX = UnityX * 100 + 540
+            // Convert back to screen pixels: ScreenX = UnityX * 100 + 540
             return maxUnityX * COORD_DIVISOR + SCREEN_CENTER_X;
         }
 
@@ -159,7 +159,7 @@ namespace SortResort
                 float minY = GetMinY();
                 float maxY = GetMaxY();
 
-                // Container width in Godot pixels for error messages
+                // Container width in screen pixels for error messages
                 float containerWidthPixels = GetContainerWidthUnits(slotCount) * COORD_DIVISOR;
 
                 // Check X bounds
@@ -230,7 +230,7 @@ namespace SortResort
                     float width2 = GetContainerWidthUnits(slots2) * COORD_DIVISOR;
                     float height = SLOT_HEIGHT;  // Approximate height
 
-                    // Calculate bounding boxes (in Godot pixels)
+                    // Calculate bounding boxes (in screen pixels)
                     float left1 = c1.position.x - width1 / 2f;
                     float right1 = c1.position.x + width1 / 2f;
                     float top1 = c1.position.y - height / 2f;
@@ -301,7 +301,7 @@ namespace SortResort
             float width1Units = GetContainerWidthUnits(1);
 
             return $@"
-=== SAFE CONTAINER POSITIONS (Godot Coordinates) ===
+=== SAFE CONTAINER POSITIONS (Screen Pixels) ===
 
 Screen: {SCREEN_WIDTH} x {SCREEN_HEIGHT} (portrait)
 Camera visible area: {VisibleWidthUnits:F1} x {VisibleHeightUnits:F1} Unity units

@@ -1,0 +1,702 @@
+fileFormatVersion: 2
+guid: 72bbbb4ac01af3e41b8c603fdcb95b8e
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -7848284970987049497
+    second: freeze_moves_00011_0
+  - first:
+      213: -1427629832585275537
+    second: freeze_moves_00011_1
+  - first:
+      213: -7489671322021006177
+    second: freeze_moves_00011_2
+  - first:
+      213: 430056390934421052
+    second: freeze_moves_00011_3
+  - first:
+      213: -7806339595790217512
+    second: freeze_moves_00011_4
+  - first:
+      213: 6458908600046607044
+    second: freeze_moves_00011_5
+  - first:
+      213: -7582064172903437423
+    second: freeze_moves_00011_6
+  - first:
+      213: 3972275140436787930
+    second: freeze_moves_00011_7
+  - first:
+      213: 4595200254093105444
+    second: freeze_moves_00011_8
+  - first:
+      213: -6935518743709926261
+    second: freeze_moves_00011_9
+  - first:
+      213: 798247195676331872
+    second: freeze_moves_00011_10
+  - first:
+      213: 1940546432542548762
+    second: freeze_moves_00011_11
+  - first:
+      213: -7541100936359094925
+    second: freeze_moves_00011_12
+  - first:
+      213: -1005423315649783920
+    second: freeze_moves_00011_13
+  - first:
+      213: -5962262818022951525
+    second: freeze_moves_00011_14
+  - first:
+      213: 4201853915291126373
+    second: freeze_moves_00011_15
+  - first:
+      213: -7369068608724014944
+    second: freeze_moves_00011_16
+  - first:
+      213: 4664986946130250276
+    second: freeze_moves_00011_17
+  - first:
+      213: 4165857826392883564
+    second: freeze_moves_00011_18
+  - first:
+      213: 4418118043671186857
+    second: freeze_moves_00011_19
+  - first:
+      213: 6653731188294323772
+    second: freeze_moves_00011_20
+  - first:
+      213: -7043699077397953563
+    second: freeze_moves_00011_21
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: freeze_moves_00011_0
+      rect:
+        serializedVersion: 2
+        x: 69
+        y: 128
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7eda740a66a451390800000000000000
+      internalID: -7848284970987049497
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: freeze_moves_00011_1
+      rect:
+        serializedVersion: 2
+        x: 86
+        y: 114
+        width: 27
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f67110e2b3a003ce0800000000000000
+      internalID: -1427629832585275537
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: freeze_moves_00011_2
+      rect:
+        serializedVersion: 2
+        x: 34
+        y: 97
+        width: 15
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f94f1865d975f0890800000000000000
+      internalID: -7489671322021006177
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: freeze_moves_00011_3
+      rect:
+        serializedVersion: 2
+        x: 52
+        y: 109
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c3e580f420ed7f500800000000000000
+      internalID: 430056390934421052
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: freeze_moves_00011_4
+      rect:
+        serializedVersion: 2
+        x: 57
+        y: 62
+        width: 57
+        height: 63
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8de8bd45f7f4aa390800000000000000
+      internalID: -7806339595790217512
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: freeze_moves_00011_5
+      rect:
+        serializedVersion: 2
+        x: 17
+        y: 91
+        width: 12
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4ca5e76a627a2a950800000000000000
+      internalID: 6458908600046607044
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: freeze_moves_00011_6
+      rect:
+        serializedVersion: 2
+        x: 38
+        y: 79
+        width: 17
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 19befd56ec817c690800000000000000
+      internalID: -7582064172903437423
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: freeze_moves_00011_7
+      rect:
+        serializedVersion: 2
+        x: 111
+        y: 64
+        width: 34
+        height: 36
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ad289d7b13b502730800000000000000
+      internalID: 3972275140436787930
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: freeze_moves_00011_8
+      rect:
+        serializedVersion: 2
+        x: 5
+        y: 81
+        width: 8
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4291101e84e65cf30800000000000000
+      internalID: 4595200254093105444
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: freeze_moves_00011_9
+      rect:
+        serializedVersion: 2
+        x: 3
+        y: 60
+        width: 14
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b8c3b14d27610cf90800000000000000
+      internalID: -6935518743709926261
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: freeze_moves_00011_10
+      rect:
+        serializedVersion: 2
+        x: 17
+        y: 38
+        width: 37
+        height: 33
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 06f4d3d5891f31b00800000000000000
+      internalID: 798247195676331872
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: freeze_moves_00011_11
+      rect:
+        serializedVersion: 2
+        x: 59
+        y: 61
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a13a9dde2b43eea10800000000000000
+      internalID: 1940546432542548762
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: freeze_moves_00011_12
+      rect:
+        serializedVersion: 2
+        x: 88
+        y: 39
+        width: 24
+        height: 27
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 37553f027a0a85790800000000000000
+      internalID: -7541100936359094925
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: freeze_moves_00011_13
+      rect:
+        serializedVersion: 2
+        x: 136
+        y: 53
+        width: 8
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0979cc542d40c02f0800000000000000
+      internalID: -1005423315649783920
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: freeze_moves_00011_14
+      rect:
+        serializedVersion: 2
+        x: 71
+        y: 39
+        width: 7
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b95f8327e89c14da0800000000000000
+      internalID: -5962262818022951525
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: freeze_moves_00011_15
+      rect:
+        serializedVersion: 2
+        x: 121
+        y: 42
+        width: 12
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 56a0303afdbff4a30800000000000000
+      internalID: 4201853915291126373
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: freeze_moves_00011_16
+      rect:
+        serializedVersion: 2
+        x: 36
+        y: 8
+        width: 26
+        height: 21
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0a8e583b42fcbb990800000000000000
+      internalID: -7369068608724014944
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: freeze_moves_00011_17
+      rect:
+        serializedVersion: 2
+        x: 39
+        y: 28
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 42a8ded49ec5db040800000000000000
+      internalID: 4664986946130250276
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: freeze_moves_00011_18
+      rect:
+        serializedVersion: 2
+        x: 52
+        y: 15
+        width: 39
+        height: 24
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c61cde61f9910d930800000000000000
+      internalID: 4165857826392883564
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: freeze_moves_00011_19
+      rect:
+        serializedVersion: 2
+        x: 91
+        y: 26
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9adc3c8d3fe405d30800000000000000
+      internalID: 4418118043671186857
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: freeze_moves_00011_20
+      rect:
+        serializedVersion: 2
+        x: 101
+        y: 25
+        width: 14
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c3e8835434dc65c50800000000000000
+      internalID: 6653731188294323772
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: freeze_moves_00011_21
+      rect:
+        serializedVersion: 2
+        x: 73
+        y: 5
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5e3c2fa1201cf3e90800000000000000
+      internalID: -7043699077397953563
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      freeze_moves_00011_0: -7848284970987049497
+      freeze_moves_00011_1: -1427629832585275537
+      freeze_moves_00011_10: 798247195676331872
+      freeze_moves_00011_11: 1940546432542548762
+      freeze_moves_00011_12: -7541100936359094925
+      freeze_moves_00011_13: -1005423315649783920
+      freeze_moves_00011_14: -5962262818022951525
+      freeze_moves_00011_15: 4201853915291126373
+      freeze_moves_00011_16: -7369068608724014944
+      freeze_moves_00011_17: 4664986946130250276
+      freeze_moves_00011_18: 4165857826392883564
+      freeze_moves_00011_19: 4418118043671186857
+      freeze_moves_00011_2: -7489671322021006177
+      freeze_moves_00011_20: 6653731188294323772
+      freeze_moves_00011_21: -7043699077397953563
+      freeze_moves_00011_3: 430056390934421052
+      freeze_moves_00011_4: -7806339595790217512
+      freeze_moves_00011_5: 6458908600046607044
+      freeze_moves_00011_6: -7582064172903437423
+      freeze_moves_00011_7: 3972275140436787930
+      freeze_moves_00011_8: 4595200254093105444
+      freeze_moves_00011_9: -6935518743709926261
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

@@ -3,10 +3,10 @@
     "world_id": "island",
     "name": "level_002",
     "star_move_thresholds": [
+        9,
         10,
         12,
-        13,
-        14
+        13
     ],
     "time_limit_seconds": 30,
     "construction_moves": 14,
@@ -15,7 +15,7 @@
             "id": "container_1",
             "position": {
                 "x": 200.0,
-                "y": 100.0
+                "y": 460.0
             },
             "container_type": "standard",
             "container_image": "island_container",
@@ -57,7 +57,7 @@
             "id": "container_2",
             "position": {
                 "x": 540.0,
-                "y": 100.0
+                "y": 460.0
             },
             "container_type": "standard",
             "container_image": "island_container",
@@ -109,7 +109,7 @@
             "id": "container_3",
             "position": {
                 "x": 880.0,
-                "y": 100.0
+                "y": 460.0
             },
             "container_type": "standard",
             "container_image": "island_container",
@@ -156,7 +156,7 @@
             "id": "container_4",
             "position": {
                 "x": 540.0,
-                "y": 361.0
+                "y": 721.0
             },
             "container_type": "standard",
             "container_image": "island_container",
@@ -193,76 +193,6 @@
                     "slot": 1
                 }
             ]
-        }
-        ,
-        {
-            "id": "container_5",
-            "position": { "x": 200.0, "y": 622.0 },
-            "container_type": "standard",
-            "container_image": "island_container",
-            "slot_count": 3,
-            "max_rows_per_slot": 1,
-            "is_locked": false,
-            "unlock_matches_required": 0,
-            "lock_overlay_image": "",
-            "unlock_animation": "",
-            "is_moving": false,
-            "move_type": "",
-            "move_direction": "",
-            "move_speed": 50.0,
-            "move_distance": 200.0,
-            "track_id": "",
-            "is_falling": false,
-            "fall_speed": 100.0,
-            "fall_target_y": 0.0,
-            "despawn_on_match": false,
-            "initial_items": []
-        },
-        {
-            "id": "container_6",
-            "position": { "x": 540.0, "y": 622.0 },
-            "container_type": "standard",
-            "container_image": "island_container",
-            "slot_count": 3,
-            "max_rows_per_slot": 1,
-            "is_locked": false,
-            "unlock_matches_required": 0,
-            "lock_overlay_image": "",
-            "unlock_animation": "",
-            "is_moving": false,
-            "move_type": "",
-            "move_direction": "",
-            "move_speed": 50.0,
-            "move_distance": 200.0,
-            "track_id": "",
-            "is_falling": false,
-            "fall_speed": 100.0,
-            "fall_target_y": 0.0,
-            "despawn_on_match": false,
-            "initial_items": []
-        },
-        {
-            "id": "container_7",
-            "position": { "x": 880.0, "y": 622.0 },
-            "container_type": "standard",
-            "container_image": "island_container",
-            "slot_count": 3,
-            "max_rows_per_slot": 1,
-            "is_locked": false,
-            "unlock_matches_required": 0,
-            "lock_overlay_image": "",
-            "unlock_animation": "",
-            "is_moving": false,
-            "move_type": "",
-            "move_direction": "",
-            "move_speed": 50.0,
-            "move_distance": 200.0,
-            "track_id": "",
-            "is_falling": false,
-            "fall_speed": 100.0,
-            "fall_target_y": 0.0,
-            "despawn_on_match": false,
-            "initial_items": []
         }
     ],
     "moving_tracks": []

@@ -146,7 +146,7 @@ def select_items(rng, available, n_types, item_usage):
     return selected
 
 
-# ── Container Dimensions (Godot Pixels) ─────────────────────────────────────
+# ── Container Dimensions (screen pixels, 1080×1920 portrait) ────────────────
 # Base slot: 83px × uniform_scale(1.14) × border_scale(1.2)
 CONTAINER_WIDTH_3SLOT = 83 * 1.14 * 3 * 1.2   # ~341px
 CONTAINER_WIDTH_1SLOT = 83 * 1.14 * 1 * 1.2   # ~114px
@@ -154,19 +154,27 @@ SLOT_HEIGHT = 166 * 1.14 * 1.2                   # ~227px (includes border_scale
 ROW_DEPTH_OFFSET = 4 * 1.14                     # ~4.56px per extra row
 MIN_CONTAINER_GAP = 30  # minimum gap between container edges (pixels)
 
-# Screen safe bounds (Godot pixels) — container centers must keep edges inside
-# Camera at Unity Y=0, orthoSize=9.6 → visible Godot Y range: -360 to 1560
-# SCREEN_MIN_Y accounts for HUD bar (~130px from screen top at Godot Y=-360)
-# SCREEN_MAX_Y ensures container bottom edges stay above visible bottom (1560)
+# Screen coordinates: origin (0,0) at top-left, Y increases downward
+# Full screen: 1080×1920 pixels. Camera orthoSize=9.6.
+# Unity conversion: unityX = (screenX - 540) / 100, unityY = (960 - screenY) / 100
 SCREEN_MIN_X, SCREEN_MAX_X = 200, 880
-SCREEN_MIN_Y, SCREEN_MAX_Y = 100, 1430
 
-# HUD bar: bottom edge of wood bar in Godot Y coordinates
-# Screen top is at Godot Y=-360, HUD bar extends ~130px down → bottom at -230
-HUD_BAR_BOTTOM_Y = -230
-# Screen bottom edge (Godot Y pixels) — below this is off-screen
-# Unity Y=-9.6 → Godot Y = 600 + 960 = 1560
-SCREEN_BOTTOM_Y = 1560
+# HUD bar: top UI bar extends ~130px down from screen top (Y=0)
+HUD_BAR_BOTTOM_Y = 130
+# Bottom bar: items/power-ups bar, top edge at Y=1752 (168px tall)
+BOTTOM_BAR_TOP_Y = 1752
+# Effective screen bottom for gameplay (containers must stay above bottom bar)
+SCREEN_BOTTOM_Y = BOTTOM_BAR_TOP_Y
+# Actual screen edges (for off-screen carousel spawn positions)
+SCREEN_TOP_Y = 0
+SCREEN_ACTUAL_BOTTOM_Y = 1920
+
+# Container center Y bounds: keep edges inside playable area
+# SCREEN_MIN_Y: below top bar with margin for container half-height
+# SCREEN_MAX_Y: above bottom bar with margin for tallest container (3-row ~118px)
+_MAX_HALF_HEIGHT = (SLOT_HEIGHT + ROW_DEPTH_OFFSET * 2) / 2  # ~118.1px for 3-row
+SCREEN_MIN_Y = 460   # top bar ends ~230px, plus margin for container half-height
+SCREEN_MAX_Y = BOTTOM_BAR_TOP_Y - int(math.ceil(_MAX_HALF_HEIGHT))  # 1633
 
 # Carousel horizontal spacing (edge-to-edge + small gap)
 CAROUSEL_H_SPACING = int(CONTAINER_WIDTH_3SLOT) + 10  # ~351px
@@ -174,14 +182,14 @@ CAROUSEL_V_SPACING = int(SLOT_HEIGHT)                                 # ~227px (
 
 
 def _container_half_width(slot_count):
-    """Half-width of a container in Godot pixels."""
+    """Half-width of a container in screen pixels."""
     if slot_count == 1:
         return CONTAINER_WIDTH_1SLOT / 2
     return CONTAINER_WIDTH_3SLOT / 2
 
 
 def _container_half_height(max_rows):
-    """Half visual height of a container in Godot pixels."""
+    """Half visual height of a container in screen pixels."""
     base = SLOT_HEIGHT
     extra = ROW_DEPTH_OFFSET * max(0, max_rows - 1)
     return (base + extra) / 2
@@ -224,7 +232,7 @@ def _get_safe_backforth_distance(px, py, slot_count, max_rows, move_dir, placed_
     same-row). This prevents movers from passing through statics on adjacent rows.
 
     Args:
-        px, py: container center position (Godot pixels)
+        px, py: container center position (screen pixels)
         slot_count: number of slots (1 or 3)
         max_rows: row depth for height calculation
         move_dir: "left" or "right"
@@ -468,8 +476,11 @@ def get_static_positions(count, max_rows, y_offset=0, level=1):
     y_min = SCREEN_MIN_Y + y_offset
     y_max = SCREEN_MAX_Y
     available = y_max - y_min
+    # Enforce minimum gap (container height + gap) as hard floor when compressing
+    gap = MIN_CONTAINER_GAP if level < 60 else max(10, MIN_CONTAINER_GAP // 2)
+    min_y_gap = int(SLOT_HEIGHT + ROW_DEPTH_OFFSET * max(0, max_rows - 1)) + gap
     if total_height > available and n_rows_needed > 1:
-        y_gap = available // (n_rows_needed - 1)
+        y_gap = max(min_y_gap, available // (n_rows_needed - 1))
 
     y0 = y_min
     positions = []
@@ -567,18 +578,17 @@ def get_level_spec(level, complexity_offset=0):
     # ── Mechanic unlock levels ─────────────────────────────────────────
     UNLOCK_LOCKED    = 11
     UNLOCK_SINGLE    = 16
-    UNLOCK_BACKFORTH = 26
     UNLOCK_CAROUSEL  = 31
     UNLOCK_DESPAWN   = 36
     INTRO_RANGE      = 5  # levels after unlock where mechanic is guaranteed
 
     # ── Cumulative mechanic availability ───────────────────────────────
     # Each mechanic: (unlock_level, name)
+    # Note: back-and-forth removed (took too much screen space, rarely appeared)
     mechanics_available = []
     for unlock, name in [
         (UNLOCK_LOCKED,    "locked"),
         (UNLOCK_SINGLE,    "singleslot"),
-        (UNLOCK_BACKFORTH, "backforth"),
         (UNLOCK_CAROUSEL,  "carousel"),
         (UNLOCK_DESPAWN,   "despawn"),
     ]:
@@ -624,11 +634,11 @@ def get_level_spec(level, complexity_offset=0):
     # ── Configure each mechanic's parameters ───────────────────────────
     use_locked = "locked" in active_mechanics
     use_singleslot = "singleslot" in active_mechanics
-    use_backforth = "backforth" in active_mechanics and effective <= 50
+    use_backforth = False  # Removed: took too much screen space
     use_carousel = "carousel" in active_mechanics
     use_despawn = "despawn" in active_mechanics
 
-    # Carousel and despawn cannot coexist: horizontal carousel path at Y=200
+    # Carousel and despawn cannot coexist: horizontal carousel path at Y=560
     # overlaps the despawn stack extending upward through that zone, and vertical
     # carousel occupies the same center column. Prefer whichever is in intro range.
     if use_carousel and use_despawn:
@@ -741,14 +751,14 @@ def build_containers(spec, config):
             hh = _container_half_height(car_mr)
 
             # Position first container just off the entry edge of the visible screen
-            # Visible screen: Godot Y [-360, 1560]. Place center at edge + half-height
+            # Visible screen Y: [0, 1920]. Place center at edge + half-height
             # so container is fully off-screen but immediately adjacent to visible area.
             if car_dir == "down":
-                # Entry from top: center just above visible top (-360)
-                start_y = -360 - hh
+                # Entry from top: center just above visible top (Y=0)
+                start_y = SCREEN_TOP_Y - hh
             else:
-                # Entry from bottom: center just below visible bottom (1560)
-                start_y = 1560 + hh
+                # Entry from bottom: center just below visible bottom (Y=1920)
+                start_y = SCREEN_ACTUAL_BOTTOM_Y + hh
 
             for i in range(n_car):
                 if car_dir == "down":
@@ -772,7 +782,7 @@ def build_containers(spec, config):
 
             car_dir = rng.choice(["right", "left"])
             spacing = CAROUSEL_H_SPACING
-            car_y = 200
+            car_y = 560  # horizontal carousel row, below top HUD bar
 
             # Start positions: first container fully off-screen (100px margin)
             if car_dir == "right":
@@ -841,7 +851,7 @@ def build_containers(spec, config):
             bottom_y = SCREEN_BOTTOM_Y - half_h
 
             for i in range(per_column_count):
-                desp_y = bottom_y - i * v_spacing  # stack upward (decreasing Y in Godot)
+                desp_y = bottom_y - i * v_spacing  # stack upward (decreasing Y)
 
                 # All despawn containers use full depth (desp_mr=2) for dense item placement
                 this_mr = desp_mr
@@ -1008,7 +1018,7 @@ def build_containers(spec, config):
                 # Vertical carousel: full-height swept box at carousel X
                 sweep_box = (cx - _container_half_width(c["slot_count"]),
                              cx + _container_half_width(c["slot_count"]),
-                             -200, 2120)
+                             -200, 2500)
             placed_ranges.append((*sweep_box, -1))
         else:
             box = _get_bounding_box(cx, cy, c["slot_count"], mr)
