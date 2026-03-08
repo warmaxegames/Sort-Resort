@@ -185,12 +185,14 @@ namespace SortResort
         private void OnGamePaused()
         {
             // Timer automatically pauses when Time.timeScale = 0
-            // but we track state for UI purposes
+            // Pause tick-tock sound (looping AudioSource ignores timeScale)
+            AudioManager.Instance?.PauseTickTock();
         }
 
         private void OnGameResumed()
         {
             // Timer automatically resumes when Time.timeScale = 1
+            AudioManager.Instance?.ResumeTickTock();
         }
 
         #region Database Loading

@@ -180,8 +180,19 @@ namespace SortResort.UI
         private void Hide()
         {
             isPlaying = false;
+            reachedEnd = false;
+            hideTimer = -1f;
             DestroyOverlayClones();
             canvas.enabled = false;
+        }
+
+        /// <summary>
+        /// Force-hides the portal animation immediately.
+        /// Called when returning to level select to prevent stale vortex flashing.
+        /// </summary>
+        public void ForceHide()
+        {
+            Hide();
         }
 
         private void PositionOverButton(RectTransform sourceButton)

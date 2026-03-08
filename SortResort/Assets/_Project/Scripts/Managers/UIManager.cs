@@ -220,6 +220,7 @@ namespace SortResort
         private static Sprite cachedFrameGold;
         private static Sprite cachedFrameGrey; // Generated at runtime by desaturating bronze
         private static readonly Dictionary<string, Sprite> cachedIcons = new Dictionary<string, Sprite>();
+        private static readonly Dictionary<string, Sprite> cachedGreyIcons = new Dictionary<string, Sprite>();
 
         // Achievement notification
         private GameObject achievementNotificationPanel;
@@ -3815,17 +3816,31 @@ Antonia and Joakim Engfors
 
         /// <summary>
         /// Load and cache an achievement icon sprite.
+        /// When grey is true, returns a greyscale version (generated from the color icon).
         /// </summary>
-        private static Sprite GetAchievementIcon(string artKey)
+        private static Sprite GetAchievementIcon(string artKey, bool grey = false)
         {
             if (string.IsNullOrEmpty(artKey)) return null;
 
-            if (cachedIcons.TryGetValue(artKey, out var cached))
-                return cached;
+            // Return cached greyscale version if requested
+            if (grey && cachedGreyIcons.TryGetValue(artKey, out var cachedGrey))
+                return cachedGrey;
 
-            var sprite = LoadFullRectSprite($"Sprites/UI/Achievements/Icons/{artKey}");
-            cachedIcons[artKey] = sprite;
-            return sprite;
+            // Ensure color version is loaded and cached
+            if (!cachedIcons.TryGetValue(artKey, out var colorSprite))
+            {
+                colorSprite = LoadFullRectSprite($"Sprites/UI/Achievements/Icons/{artKey}");
+                cachedIcons[artKey] = colorSprite;
+            }
+
+            if (!grey || colorSprite == null)
+                return colorSprite;
+
+            // Generate greyscale version from color icon
+            var greyTex = CreateGreyscaleTexture(colorSprite.texture);
+            var greySprite = Sprite.Create(greyTex, new Rect(0, 0, greyTex.width, greyTex.height), new Vector2(0.5f, 0.5f), 100f);
+            cachedGreyIcons[artKey] = greySprite;
+            return greySprite;
         }
 
         private static Sprite LoadSpriteFromTexture(string resourcePath)
@@ -6255,7 +6270,8 @@ Antonia and Joakim Engfors
             // Frame uses preserveAspect, so its rendered area is smaller than the RectTransform.
             // Create an intermediate container matching the frame's rendered size so anchors
             // map directly to frame pixel coordinates.
-            var iconSprite = GetAchievementIcon(artKey);
+            bool isGrey = tierSuffix == "grey";
+            var iconSprite = GetAchievementIcon(artKey, grey: isGrey);
             if (iconSprite != null)
             {
                 var frameAreaGO = new GameObject("FrameArea");
@@ -6270,23 +6286,33 @@ Antonia and Joakim Engfors
                 var iconGO = new GameObject("Icon");
                 iconGO.transform.SetParent(frameAreaGO.transform, false);
                 var iconRect = iconGO.AddComponent<RectTransform>();
-                // Circle interior in frame pixels: x=48-252, y=50-250 (of 687x301)
-                // Unity Y is flipped: anchorY = 1 - pixelY/301
-                // 5% inset from cream edges for padding
-                iconRect.anchorMin = new Vector2(58f / 687f, 1f - 240f / 301f);  // (0.084, 0.203)
-                iconRect.anchorMax = new Vector2(242f / 687f, 1f - 60f / 301f);  // (0.352, 0.801)
-                iconRect.offsetMin = Vector2.zero;
-                iconRect.offsetMax = Vector2.zero;
+                // Circle interior centered at pixel (150, 150) in the 687x301 frame.
+                // Square icon area: 164x164px centered on the circle, provides ~18px
+                // padding from the cream circle edge to prevent icons touching the border.
+                iconRect.anchorMin = new Vector2(68f / 687f, 1f - 232f / 301f);   // (0.099, 0.229)
+                iconRect.anchorMax = new Vector2(232f / 687f, 1f - 68f / 301f);   // (0.338, 0.774)
+
+                // Per-icon vertical nudge (pixels in FrameArea space) to fine-tune centering
+                float iconYNudge = artKey switch
+                {
+                    "levels" or "world_levels" => -7f,   // flag icon: down 7px
+                    "3star_levels" => 4f,                 // star student: up 4px
+                    "stars" => 4f,                        // rising star: up 4px
+                    "world_stars" => 3f,                  // star icon: up 3px
+                    _ => 0f
+                };
+                iconRect.offsetMin = new Vector2(0, iconYNudge);
+                iconRect.offsetMax = new Vector2(0, iconYNudge);
 
                 var iconImg = iconGO.AddComponent<Image>();
                 iconImg.sprite = iconSprite;
                 iconImg.preserveAspect = true;
                 iconImg.raycastTarget = false;
 
-                // Grey out icon when locked (no tier unlocked)
-                if (tierSuffix == "grey")
+                // Slight transparency for locked icons
+                if (isGrey)
                 {
-                    iconImg.color = new Color(0.5f, 0.5f, 0.5f, 0.7f);
+                    iconImg.color = new Color(1f, 1f, 1f, 0.7f);
                 }
             }
 

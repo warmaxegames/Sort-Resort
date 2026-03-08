@@ -26,6 +26,51 @@ TextureImporter:
   - first:
       213: 27312875283534912
     second: tommythumbsup_00018_7
+  - first:
+      213: -2120102337040593161
+    second: tommythumbsup_00018_8
+  - first:
+      213: 8126401561615322927
+    second: tommythumbsup_00018_9
+  - first:
+      213: -5384674176632483786
+    second: tommythumbsup_00018_10
+  - first:
+      213: -6786281132832941764
+    second: tommythumbsup_00018_11
+  - first:
+      213: -223814479182475047
+    second: tommythumbsup_00018_12
+  - first:
+      213: -4621407535175544789
+    second: tommythumbsup_00018_13
+  - first:
+      213: -5090815954603614302
+    second: tommythumbsup_00018_14
+  - first:
+      213: -3681927989680296600
+    second: tommythumbsup_00018_15
+  - first:
+      213: 5975949541193884883
+    second: tommythumbsup_00018_16
+  - first:
+      213: 6874353605955073658
+    second: tommythumbsup_00018_17
+  - first:
+      213: 5156456986926942019
+    second: tommythumbsup_00018_18
+  - first:
+      213: -6968548236680096758
+    second: tommythumbsup_00018_19
+  - first:
+      213: 5872823076384205758
+    second: tommythumbsup_00018_20
+  - first:
+      213: 7926964747892614974
+    second: tommythumbsup_00018_21
+  - first:
+      213: -2174021600355456153
+    second: tommythumbsup_00018_22
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -137,10 +182,10 @@ TextureImporter:
       name: tommythumbsup_00018_0
       rect:
         serializedVersion: 2
-        x: 0
-        y: 19
-        width: 179
-        height: 363
+        x: 32
+        y: 342
+        width: 29
+        height: 79
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -159,10 +204,10 @@ TextureImporter:
       name: tommythumbsup_00018_1
       rect:
         serializedVersion: 2
-        x: 33
-        y: 338
-        width: 33
-        height: 83
+        x: 63
+        y: 337
+        width: 56
+        height: 45
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -182,9 +227,9 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 67
-        y: 369
-        width: 45
-        height: 68
+        y: 373
+        width: 40
+        height: 64
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -203,10 +248,10 @@ TextureImporter:
       name: tommythumbsup_00018_3
       rect:
         serializedVersion: 2
-        x: 123
+        x: 121
         y: 0
         width: 594
-        height: 593
+        height: 621
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -226,9 +271,9 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 721
-        y: 333
-        width: 61
-        height: 49
+        y: 337
+        width: 56
+        height: 45
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -247,10 +292,10 @@ TextureImporter:
       name: tommythumbsup_00018_5
       rect:
         serializedVersion: 2
-        x: 734
-        y: 369
-        width: 45
-        height: 68
+        x: 733
+        y: 373
+        width: 41
+        height: 64
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -270,9 +315,9 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 780
-        y: 338
-        width: 33
-        height: 83
+        y: 342
+        width: 28
+        height: 79
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -291,10 +336,10 @@ TextureImporter:
       name: tommythumbsup_00018_7
       rect:
         serializedVersion: 2
-        x: 667
-        y: 19
-        width: 179
-        height: 348
+        x: 2
+        y: 235
+        width: 40
+        height: 73
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -305,6 +350,336 @@ TextureImporter:
       bones: []
       spriteID: 044d1155ae8016000800000000000000
       internalID: 27312875283534912
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tommythumbsup_00018_8
+      rect:
+        serializedVersion: 2
+        x: 14
+        y: 289
+        width: 31
+        height: 78
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7fe48314822e392e0800000000000000
+      internalID: -2120102337040593161
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tommythumbsup_00018_9
+      rect:
+        serializedVersion: 2
+        x: 45
+        y: 29
+        width: 128
+        height: 289
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f2fc24e2a27c6c070800000000000000
+      internalID: 8126401561615322927
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tommythumbsup_00018_10
+      rect:
+        serializedVersion: 2
+        x: 53
+        y: 287
+        width: 49
+        height: 53
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6301a969d5bc545b0800000000000000
+      internalID: -5384674176632483786
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tommythumbsup_00018_11
+      rect:
+        serializedVersion: 2
+        x: 667
+        y: 29
+        width: 128
+        height: 289
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c399e83d34942d1a0800000000000000
+      internalID: -6786281132832941764
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tommythumbsup_00018_12
+      rect:
+        serializedVersion: 2
+        x: 738
+        y: 287
+        width: 49
+        height: 53
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9d05db0cae9d4ecf0800000000000000
+      internalID: -223814479182475047
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tommythumbsup_00018_13
+      rect:
+        serializedVersion: 2
+        x: 795
+        y: 289
+        width: 32
+        height: 78
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b205c8ff4567ddfb0800000000000000
+      internalID: -4621407535175544789
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tommythumbsup_00018_14
+      rect:
+        serializedVersion: 2
+        x: 798
+        y: 235
+        width: 41
+        height: 73
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2afd5f09cd9c959b0800000000000000
+      internalID: -5090815954603614302
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tommythumbsup_00018_15
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 179
+        width: 52
+        height: 66
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 86da986400a27ecc0800000000000000
+      internalID: -3681927989680296600
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tommythumbsup_00018_16
+      rect:
+        serializedVersion: 2
+        x: 8
+        y: 123
+        width: 66
+        height: 59
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3d4258e1276dee250800000000000000
+      internalID: 5975949541193884883
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tommythumbsup_00018_17
+      rect:
+        serializedVersion: 2
+        x: 766
+        y: 123
+        width: 66
+        height: 59
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a76b067ce2c966f50800000000000000
+      internalID: 6874353605955073658
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tommythumbsup_00018_18
+      rect:
+        serializedVersion: 2
+        x: 788
+        y: 179
+        width: 52
+        height: 66
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3478c5d3f4a6f8740800000000000000
+      internalID: 5156456986926942019
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tommythumbsup_00018_19
+      rect:
+        serializedVersion: 2
+        x: 31
+        y: 70
+        width: 77
+        height: 48
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a041288bc4eba4f90800000000000000
+      internalID: -6968548236680096758
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tommythumbsup_00018_20
+      rect:
+        serializedVersion: 2
+        x: 732
+        y: 70
+        width: 77
+        height: 48
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ebbe890f875708150800000000000000
+      internalID: 5872823076384205758
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tommythumbsup_00018_21
+      rect:
+        serializedVersion: 2
+        x: 68
+        y: 22
+        width: 84
+        height: 38
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e37ee29707c320e60800000000000000
+      internalID: 7926964747892614974
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tommythumbsup_00018_22
+      rect:
+        serializedVersion: 2
+        x: 688
+        y: 22
+        width: 84
+        height: 38
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 76b69c87fd254d1e0800000000000000
+      internalID: -2174021600355456153
       vertices: []
       indices: 
       edges: []
@@ -325,12 +700,27 @@ TextureImporter:
     nameFileIdTable:
       tommythumbsup_00018_0: 1728904652152158624
       tommythumbsup_00018_1: -3621212602626160927
+      tommythumbsup_00018_10: -5384674176632483786
+      tommythumbsup_00018_11: -6786281132832941764
+      tommythumbsup_00018_12: -223814479182475047
+      tommythumbsup_00018_13: -4621407535175544789
+      tommythumbsup_00018_14: -5090815954603614302
+      tommythumbsup_00018_15: -3681927989680296600
+      tommythumbsup_00018_16: 5975949541193884883
+      tommythumbsup_00018_17: 6874353605955073658
+      tommythumbsup_00018_18: 5156456986926942019
+      tommythumbsup_00018_19: -6968548236680096758
       tommythumbsup_00018_2: -3306476513010023451
+      tommythumbsup_00018_20: 5872823076384205758
+      tommythumbsup_00018_21: 7926964747892614974
+      tommythumbsup_00018_22: -2174021600355456153
       tommythumbsup_00018_3: 8427852753693140439
       tommythumbsup_00018_4: -7561863748876356052
       tommythumbsup_00018_5: 1818063266556900968
       tommythumbsup_00018_6: -9089539621792906394
       tommythumbsup_00018_7: 27312875283534912
+      tommythumbsup_00018_8: -2120102337040593161
+      tommythumbsup_00018_9: 8126401561615322927
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

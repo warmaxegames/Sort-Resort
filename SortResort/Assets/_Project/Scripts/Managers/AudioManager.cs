@@ -682,6 +682,18 @@ namespace SortResort
                 tickTockSource.Stop();
         }
 
+        public void PauseTickTock()
+        {
+            if (tickTockSource != null && tickTockSource.isPlaying)
+                tickTockSource.Pause();
+        }
+
+        public void ResumeTickTock()
+        {
+            if (tickTockSource != null && tickTockSource.time > 0f && !tickTockSource.isPlaying)
+                tickTockSource.UnPause();
+        }
+
         /// <summary>
         /// Play victory sound (stops gameplay audio first)
         /// </summary>

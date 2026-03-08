@@ -131,14 +131,14 @@ TextureImporter:
     forceMaximumCompressionQuality_BC6H_BC7: 0
   - serializedVersion: 4
     buildTarget: WebGL
-    maxTextureSize: 1024
+    maxTextureSize: 2048
     resizeAlgorithm: 0
-    textureFormat: 50
+    textureFormat: -1
     textureCompression: 1
     compressionQuality: 50
-    crunchedCompression: 1
+    crunchedCompression: 0
     allowsAlphaSplitting: 0
-    overridden: 1
+    overridden: 0
     ignorePlatformSupport: 0
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
@@ -149,10 +149,10 @@ TextureImporter:
       name: marathumbsup_00009_0
       rect:
         serializedVersion: 2
-        x: 10
-        y: 1
+        x: 8
+        y: 0
         width: 766
-        height: 798
+        height: 797
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -171,8 +171,8 @@ TextureImporter:
       name: marathumbsup_00009_1
       rect:
         serializedVersion: 2
-        x: 723
-        y: 339
+        x: 721
+        y: 337
         width: 56
         height: 45
       alignment: 0
@@ -193,8 +193,8 @@ TextureImporter:
       name: marathumbsup_00009_2
       rect:
         serializedVersion: 2
-        x: 782
-        y: 344
+        x: 780
+        y: 342
         width: 28
         height: 79
       alignment: 0
@@ -215,8 +215,8 @@ TextureImporter:
       name: marathumbsup_00009_3
       rect:
         serializedVersion: 2
-        x: 797
-        y: 291
+        x: 795
+        y: 289
         width: 32
         height: 78
       alignment: 0
@@ -237,8 +237,8 @@ TextureImporter:
       name: marathumbsup_00009_4
       rect:
         serializedVersion: 2
-        x: 4
-        y: 237
+        x: 2
+        y: 235
         width: 40
         height: 73
       alignment: 0
@@ -259,8 +259,8 @@ TextureImporter:
       name: marathumbsup_00009_5
       rect:
         serializedVersion: 2
-        x: 669
-        y: 31
+        x: 667
+        y: 29
         width: 128
         height: 289
       alignment: 0
@@ -281,8 +281,8 @@ TextureImporter:
       name: marathumbsup_00009_6
       rect:
         serializedVersion: 2
-        x: 740
-        y: 289
+        x: 738
+        y: 287
         width: 49
         height: 53
       alignment: 0
@@ -303,8 +303,8 @@ TextureImporter:
       name: marathumbsup_00009_7
       rect:
         serializedVersion: 2
-        x: 800
-        y: 237
+        x: 798
+        y: 235
         width: 41
         height: 73
       alignment: 0
@@ -325,9 +325,9 @@ TextureImporter:
       name: marathumbsup_00009_8
       rect:
         serializedVersion: 2
-        x: 1
-        y: 181
-        width: 53
+        x: 0
+        y: 179
+        width: 52
         height: 66
       alignment: 0
       pivot: {x: 0, y: 0}
@@ -347,8 +347,8 @@ TextureImporter:
       name: marathumbsup_00009_9
       rect:
         serializedVersion: 2
-        x: 768
-        y: 125
+        x: 766
+        y: 123
         width: 66
         height: 59
       alignment: 0
@@ -369,9 +369,9 @@ TextureImporter:
       name: marathumbsup_00009_10
       rect:
         serializedVersion: 2
-        x: 790
-        y: 181
-        width: 53
+        x: 788
+        y: 179
+        width: 52
         height: 66
       alignment: 0
       pivot: {x: 0, y: 0}
@@ -391,8 +391,8 @@ TextureImporter:
       name: marathumbsup_00009_11
       rect:
         serializedVersion: 2
-        x: 734
-        y: 72
+        x: 732
+        y: 70
         width: 77
         height: 48
       alignment: 0

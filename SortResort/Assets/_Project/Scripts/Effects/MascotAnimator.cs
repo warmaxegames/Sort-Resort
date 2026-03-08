@@ -325,9 +325,9 @@ namespace SortResort
         {
             return worldId?.ToLower() switch
             {
-                "island" => 30f,       // 56 frames / 30fps = 1.87s
-                "supermarket" => 42f,  // 80 frames / 42fps = 1.90s (deduplicated from 99 frames)
-                "farm" => 16f,         // 31 frames / 16fps = 1.94s (deduplicated from 83 frames)
+                "island" => 22f,       // 42 frames / 22fps = 1.91s
+                "supermarket" => 33f,  // 63 frames / 33fps = 1.91s
+                "farm" => 16f,         // 31 frames / 16fps = 1.94s
                 _ => 30f
             };
         }

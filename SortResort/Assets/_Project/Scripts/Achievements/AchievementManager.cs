@@ -505,9 +505,9 @@ namespace SortResort
         /// </summary>
         private void CreateSpeedDemonAchievements()
         {
-            var milestones = new[] { 30, 20, 10 };
+            var milestones = new[] { 10, 5, 1 };
             var names = new[] { "Quick Sort", "Speed Demon", "Lightning Fast" };
-            var descs = new[] { "Complete a Level in Under 30 Seconds", "Complete a Level in Under 20 Seconds", "Complete a Level in Under 10 Seconds" };
+            var descs = new[] { "Complete a Level in Under 10 Seconds", "Complete a Level in Under 5 Seconds", "Complete a Level in Under 1 Second" };
             var tiers = new[] { AchievementTier.Bronze, AchievementTier.Silver, AchievementTier.Gold };
 
             for (int i = 0; i < milestones.Length; i++)
@@ -528,9 +528,9 @@ namespace SortResort
         /// </summary>
         private void CreateTimeSaverAchievements()
         {
-            var milestones = new[] { 50, 60, 75 };
+            var milestones = new[] { 85, 95, 99 };
             var names = new[] { "Ahead of Schedule", "Time Banker", "Time Hoarder" };
-            var descs = new[] { "Finish with 50% Time Remaining", "Finish with 60% Time Remaining", "Finish with 75% Time Remaining" };
+            var descs = new[] { "Finish with 85% Time Remaining", "Finish with 95% Time Remaining", "Finish with 99% Time Remaining" };
             var tiers = new[] { AchievementTier.Bronze, AchievementTier.Silver, AchievementTier.Gold };
 
             for (int i = 0; i < milestones.Length; i++)
@@ -1069,38 +1069,42 @@ namespace SortResort
                         IncrementProgressUnique(a.id, $"{data.mode}_{levelIdentifier}");
                 }
 
-                // Speed demon - check elapsed time against thresholds
-                // For "lower is better": we check if time is under each threshold
+                // Speed demon & time saver - skip Island level 1 (2-move tutorial is too trivial)
                 float completionTime = data.timeTaken;
-                int[] speedThresholds = { 30, 20, 10 };
-                foreach (int threshold in speedThresholds)
+                if (!(worldId == "island" && data.levelNumber == 1))
                 {
-                    if (completionTime < threshold && completionTime >= 0)
+                    // Speed demon - check elapsed time against thresholds
+                    // For "lower is better": we check if time is under each threshold
+                    int[] speedThresholds = { 10, 5, 1 };
+                    foreach (int threshold in speedThresholds)
                     {
-                        string achId = $"speed_demon_{threshold}";
-                        if (achievements.ContainsKey(achId))
+                        if (completionTime < threshold && completionTime >= 0)
                         {
-                            var prog = GetOrCreateProgress(achId);
-                            if (!prog.isUnlocked)
+                            string achId = $"speed_demon_{threshold}";
+                            if (achievements.ContainsKey(achId))
                             {
-                                prog.currentValue = threshold; // Met the threshold
-                                UnlockAchievement(achId);
+                                var prog = GetOrCreateProgress(achId);
+                                if (!prog.isUnlocked)
+                                {
+                                    prog.currentValue = threshold; // Met the threshold
+                                    UnlockAchievement(achId);
+                                }
                             }
                         }
                     }
-                }
 
-                // Time saver - percentage of time remaining
-                float totalTimeLimit = LevelManager.Instance?.TotalTimeLimit ?? 0f;
-                if (totalTimeLimit > 0)
-                {
-                    float timeRemaining = totalTimeLimit - completionTime;
-                    int percentRemaining = Mathf.RoundToInt((timeRemaining / totalTimeLimit) * 100f);
-
-                    foreach (var a in achievements.Values)
+                    // Time saver - percentage of time remaining
+                    float totalTimeLimit = LevelManager.Instance?.TotalTimeLimit ?? 0f;
+                    if (totalTimeLimit > 0)
                     {
-                        if (a.groupId == "time_saver")
-                            UpdateBestValue(a.id, percentRemaining);
+                        float timeRemaining = totalTimeLimit - completionTime;
+                        int percentRemaining = Mathf.RoundToInt((timeRemaining / totalTimeLimit) * 100f);
+
+                        foreach (var a in achievements.Values)
+                        {
+                            if (a.groupId == "time_saver")
+                                UpdateBestValue(a.id, percentRemaining);
+                        }
                     }
                 }
 

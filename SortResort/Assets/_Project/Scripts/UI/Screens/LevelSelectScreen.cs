@@ -602,6 +602,10 @@ namespace SortResort.UI
 
         public void RefreshDisplay()
         {
+            // Force-hide any lingering portal vortex animation from a previous level click
+            if (PortalAnimation.Instance != null)
+                PortalAnimation.Instance.ForceHide();
+
             string worldId = worldIds[currentWorldIndex];
             Sprite modePortalSprite = GetPortalSpriteForMode();
             bool worldUnlocked = IsWorldUnlocked(worldId);
