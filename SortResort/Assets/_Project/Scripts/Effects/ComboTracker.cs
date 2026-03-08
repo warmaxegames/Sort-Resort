@@ -45,6 +45,12 @@ namespace SortResort
             {
                 ComboTextEffect.Spawn(matchCenter, comboStreak);
                 ComboTimerBonus.Spawn(comboStreak);
+                GameEvents.InvokeComboTriggered(comboStreak);
+            }
+            else if (comboStreak == 1)
+            {
+                // Chain broken - notify achievement manager to save best chain before resetting
+                AchievementManager.Instance?.OnComboChainBroken();
             }
         }
 

@@ -214,6 +214,13 @@ namespace SortResort
         private Sprite achvTabSprite;
         private Sprite achvTabPressedSprite;
 
+        // Achievement frame + icon compositing system
+        private static Sprite cachedFrameBronze;
+        private static Sprite cachedFrameSilver;
+        private static Sprite cachedFrameGold;
+        private static Sprite cachedFrameGrey; // Generated at runtime by desaturating bronze
+        private static readonly Dictionary<string, Sprite> cachedIcons = new Dictionary<string, Sprite>();
+
         // Achievement notification
         private GameObject achievementNotificationPanel;
         private TextMeshProUGUI achievementNameText;
@@ -3732,6 +3739,95 @@ Antonia and Joakim Engfors
             return null;
         }
 
+        /// <summary>
+        /// Creates a greyscale copy of a texture by averaging RGB channels.
+        /// Used to generate the grey (locked) achievement frame from the bronze frame at runtime.
+        /// </summary>
+        private static Texture2D CreateGreyscaleTexture(Texture2D source)
+        {
+            // Need readable texture — create a copy via RenderTexture if not readable
+            Texture2D readable = source;
+            if (!source.isReadable)
+            {
+                RenderTexture rt = RenderTexture.GetTemporary(source.width, source.height, 0, RenderTextureFormat.ARGB32);
+                Graphics.Blit(source, rt);
+                RenderTexture prev = RenderTexture.active;
+                RenderTexture.active = rt;
+                readable = new Texture2D(source.width, source.height, TextureFormat.RGBA32, false);
+                readable.ReadPixels(new Rect(0, 0, source.width, source.height), 0, 0);
+                readable.Apply();
+                RenderTexture.active = prev;
+                RenderTexture.ReleaseTemporary(rt);
+            }
+
+            var pixels = readable.GetPixels();
+            for (int i = 0; i < pixels.Length; i++)
+            {
+                // Luminance-weighted greyscale
+                float grey = pixels[i].r * 0.299f + pixels[i].g * 0.587f + pixels[i].b * 0.114f;
+                pixels[i] = new Color(grey, grey, grey, pixels[i].a);
+            }
+
+            var greyTex = new Texture2D(source.width, source.height, TextureFormat.RGBA32, false);
+            greyTex.filterMode = FilterMode.Bilinear;
+            greyTex.SetPixels(pixels);
+            greyTex.Apply();
+
+            if (readable != source)
+                UnityEngine.Object.Destroy(readable);
+
+            return greyTex;
+        }
+
+        /// <summary>
+        /// Load and cache achievement frame sprites. Grey frame is generated from bronze.
+        /// </summary>
+        private static void EnsureAchievementFramesLoaded()
+        {
+            if (cachedFrameBronze != null) return;
+
+            cachedFrameBronze = LoadFullRectSprite("Sprites/UI/Achievements/Frames/frame_bronze");
+            cachedFrameSilver = LoadFullRectSprite("Sprites/UI/Achievements/Frames/frame_silver");
+            cachedFrameGold = LoadFullRectSprite("Sprites/UI/Achievements/Frames/frame_gold");
+
+            // Generate grey from bronze
+            if (cachedFrameBronze != null)
+            {
+                var greyTex = CreateGreyscaleTexture(cachedFrameBronze.texture);
+                cachedFrameGrey = Sprite.Create(greyTex, new Rect(0, 0, greyTex.width, greyTex.height), new Vector2(0.5f, 0.5f), 100f);
+            }
+        }
+
+        /// <summary>
+        /// Get the achievement frame sprite for a given tier.
+        /// </summary>
+        private static Sprite GetAchievementFrame(string tierSuffix)
+        {
+            EnsureAchievementFramesLoaded();
+            switch (tierSuffix)
+            {
+                case "gold": return cachedFrameGold;
+                case "silver": return cachedFrameSilver;
+                case "bronze": return cachedFrameBronze;
+                default: return cachedFrameGrey;
+            }
+        }
+
+        /// <summary>
+        /// Load and cache an achievement icon sprite.
+        /// </summary>
+        private static Sprite GetAchievementIcon(string artKey)
+        {
+            if (string.IsNullOrEmpty(artKey)) return null;
+
+            if (cachedIcons.TryGetValue(artKey, out var cached))
+                return cached;
+
+            var sprite = LoadFullRectSprite($"Sprites/UI/Achievements/Icons/{artKey}");
+            cachedIcons[artKey] = sprite;
+            return sprite;
+        }
+
         private static Sprite LoadSpriteFromTexture(string resourcePath)
         {
             var sprite = Resources.Load<Sprite>(resourcePath);
@@ -4514,6 +4610,12 @@ Antonia and Joakim Engfors
                     break;
                 case "supermarket":
                     mascotPath = "Sprites/UI/LevelFailed/tom_level_failed";
+                    break;
+                case "tavern":
+                    mascotPath = "Sprites/UI/LevelFailed/mason_level_failed";
+                    break;
+                case "space":
+                    mascotPath = "Sprites/UI/LevelFailed/leika_level_failed";
                     break;
             }
 
@@ -5989,22 +6091,22 @@ Antonia and Joakim Engfors
             }
             else
             {
-                // World tab: show world name on title bar
-                string displayName = GetWorldTitleBarName(currentAchievementTab);
+                // Mode or world tab: show name on title bar
+                string displayName = GetAchievementTitleBarName(currentAchievementTab);
                 achievementTitleBarText.text = displayName;
                 if (shadowText != null) shadowText.text = displayName;
 
-                // Hide points text
+                // Hide points text for non-general tabs
                 if (achievementPointsText != null)
                     achievementPointsText.gameObject.SetActive(false);
 
-                // Show world icon
+                // Show tab icon
                 if (achievementWorldIconImage != null)
                 {
-                    var iconSprite = LoadFullRectSprite($"Sprites/UI/Achievements/achv_{currentAchievementTab}_icon");
-                    if (iconSprite != null)
+                    var tabIconSprite = LoadFullRectSprite($"Sprites/UI/Achievements/achv_{currentAchievementTab}_icon");
+                    if (tabIconSprite != null)
                     {
-                        achievementWorldIconImage.sprite = iconSprite;
+                        achievementWorldIconImage.sprite = tabIconSprite;
                         achievementWorldIconImage.enabled = true;
                     }
                     else
@@ -6015,16 +6117,19 @@ Antonia and Joakim Engfors
             }
         }
 
-        private static string GetWorldTitleBarName(string worldId)
+        private static string GetAchievementTitleBarName(string tabId)
         {
-            switch (worldId)
+            switch (tabId)
             {
+                case Achievement.TAB_STAR_MODE: return "Star Mode";
+                case Achievement.TAB_TIMER_MODE: return "Timer Mode";
+                case Achievement.TAB_HARD_MODE: return "Hard Mode";
                 case "island": return "St. Games\nIsland";
                 case "supermarket": return "Superstore";
                 case "farm": return "Wilty Acres";
                 case "tavern": return "The Oink\n& Anchor";
                 case "space": return "Space\nStation";
-                default: return Achievement.GetTabDisplayName(worldId);
+                default: return Achievement.GetTabDisplayName(tabId);
             }
         }
 
@@ -6091,8 +6196,6 @@ Antonia and Joakim Engfors
                 tierSuffix = currentTier.Value.ToString().ToLower();
             }
 
-            string spritePath = $"Sprites/UI/Achievements/{artKey}_{tierSuffix}";
-
             // Card container (no background — sits directly on yellow panel)
             // Compute card height dynamically so progress bar matches rect width exactly.
             // Rect art is 687×301 (aspect 2.283). Progress bar is 457×98 (aspect 4.663).
@@ -6122,8 +6225,9 @@ Antonia and Joakim Engfors
             cardLayout.preferredHeight = cardHeight;
 
             // ============================================
-            // Achievement rectangle image (upper portion, centered)
-            // Uses preserveAspect so rendered width = RECT_DISPLAY_HEIGHT × RECT_ASPECT
+            // Achievement rectangle: frame + icon overlay (upper portion, centered)
+            // Frame = tier-colored border with empty circle
+            // Icon = achievement-specific image overlaid on the circle area
             // ============================================
             var rectImgGO = new GameObject("RectImage");
             rectImgGO.transform.SetParent(cardGO.transform, false);
@@ -6134,16 +6238,56 @@ Antonia and Joakim Engfors
             rectImgRect.offsetMin = new Vector2(-30, 0);
             rectImgRect.offsetMax = new Vector2(-30, 0);
 
+            // Frame image (background)
             var rectImg = rectImgGO.AddComponent<Image>();
-            var rectSprite = LoadFullRectSprite(spritePath);
-            if (rectSprite != null)
+            var frameSprite = GetAchievementFrame(tierSuffix);
+            if (frameSprite != null)
             {
-                rectImg.sprite = rectSprite;
+                rectImg.sprite = frameSprite;
                 rectImg.preserveAspect = true;
             }
             else
             {
                 rectImg.color = new Color(0.7f, 0.7f, 0.7f, 1f);
+            }
+
+            // Icon image (overlaid on the circle area of the frame)
+            // Frame uses preserveAspect, so its rendered area is smaller than the RectTransform.
+            // Create an intermediate container matching the frame's rendered size so anchors
+            // map directly to frame pixel coordinates.
+            var iconSprite = GetAchievementIcon(artKey);
+            if (iconSprite != null)
+            {
+                var frameAreaGO = new GameObject("FrameArea");
+                frameAreaGO.transform.SetParent(rectImgGO.transform, false);
+                var frameAreaRect = frameAreaGO.AddComponent<RectTransform>();
+                frameAreaRect.anchorMin = new Vector2(0.5f, 0.5f);
+                frameAreaRect.anchorMax = new Vector2(0.5f, 0.5f);
+                frameAreaRect.pivot = new Vector2(0.5f, 0.5f);
+                frameAreaRect.sizeDelta = new Vector2(renderedRectWidth, RECT_DISPLAY_HEIGHT);
+                frameAreaRect.anchoredPosition = Vector2.zero;
+
+                var iconGO = new GameObject("Icon");
+                iconGO.transform.SetParent(frameAreaGO.transform, false);
+                var iconRect = iconGO.AddComponent<RectTransform>();
+                // Circle interior in frame pixels: x=48-252, y=50-250 (of 687x301)
+                // Unity Y is flipped: anchorY = 1 - pixelY/301
+                // 5% inset from cream edges for padding
+                iconRect.anchorMin = new Vector2(58f / 687f, 1f - 240f / 301f);  // (0.084, 0.203)
+                iconRect.anchorMax = new Vector2(242f / 687f, 1f - 60f / 301f);  // (0.352, 0.801)
+                iconRect.offsetMin = Vector2.zero;
+                iconRect.offsetMax = Vector2.zero;
+
+                var iconImg = iconGO.AddComponent<Image>();
+                iconImg.sprite = iconSprite;
+                iconImg.preserveAspect = true;
+                iconImg.raycastTarget = false;
+
+                // Grey out icon when locked (no tier unlocked)
+                if (tierSuffix == "grey")
+                {
+                    iconImg.color = new Color(0.5f, 0.5f, 0.5f, 0.7f);
+                }
             }
 
             // Title text ON the rectangle — centered in the open area right of the badge

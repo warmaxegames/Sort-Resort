@@ -66,6 +66,9 @@ namespace SortResort
         public static event Action<bool> OnTimerFrozen; // isFrozen (for timer freeze power-up)
         public static event Action<bool> OnMovesFrozen; // isFrozen (for moves freeze power-up)
 
+        // Combo Events
+        public static event Action<int> OnComboTriggered; // comboStreak (2=GOOD, 3=AMAZING, 4+=PERFECT)
+
         // Power-Up Events
         public static event Action<PowerUpType> OnPowerUpUsed;
         public static event Action<PowerUpType, int> OnPowerUpCountChanged; // type, newCount
@@ -121,6 +124,9 @@ namespace SortResort
         public static void InvokeTimerFrozen(bool isFrozen) => OnTimerFrozen?.Invoke(isFrozen);
         public static void InvokeMovesFrozen(bool isFrozen) => OnMovesFrozen?.Invoke(isFrozen);
 
+        // Invoke Methods - Combo
+        public static void InvokeComboTriggered(int comboStreak) => OnComboTriggered?.Invoke(comboStreak);
+
         // Invoke Methods - Power-Ups
         public static void InvokePowerUpUsed(PowerUpType type) => OnPowerUpUsed?.Invoke(type);
         public static void InvokePowerUpCountChanged(PowerUpType type, int newCount) => OnPowerUpCountChanged?.Invoke(type, newCount);
@@ -161,6 +167,7 @@ namespace SortResort
             OnTimerExpired = null;
             OnTimerFrozen = null;
             OnMovesFrozen = null;
+            OnComboTriggered = null;
             OnPowerUpUsed = null;
             OnPowerUpCountChanged = null;
             OnPowerUpUnlocked = null;

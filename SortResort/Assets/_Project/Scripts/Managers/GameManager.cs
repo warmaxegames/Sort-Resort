@@ -242,6 +242,13 @@ namespace SortResort
             {
                 DialogueManager.Instance.CheckHardModeUnlock(currentWorldId);
             }
+
+            // Notify achievement system of hard mode unlocks
+            if (AchievementManager.Instance != null && SaveManager.Instance != null
+                && SaveManager.Instance.IsHardModeUnlocked(currentWorldId))
+            {
+                AchievementManager.Instance.NotifyHardModeUnlocked(currentWorldId);
+            }
         }
 
         public void FailLevel(string reason = null)

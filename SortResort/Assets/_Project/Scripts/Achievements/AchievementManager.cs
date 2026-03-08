@@ -52,6 +52,25 @@ namespace SortResort
         private int totalStarsEarned;
         private float totalPlaytimeSeconds;
 
+        // Persistent counters for new achievements
+        private int totalCombos;
+        private int totalPowerUpsUsed;
+        private int totalSimultaneousPowerUps;
+        private int totalComboTimerBonus; // stored as integer seconds (truncated)
+        private int totalPhotoFinishes;
+        private int totalNegativeTimeCompletions;
+        private int bestPowerUpsInOneLevel;
+        private int bestComboTimerChain;
+
+        // Persistent streaks (survive app close)
+        private int threeStarStreak;
+        private int hardModeStreak;
+
+        // Per-level session stats (reset on level start)
+        private int powerUpsUsedThisLevel;
+        private float comboTimerBonusThisLevel;
+        private int comboTimerChainThisLevel;
+
         // Events
         public event Action<Achievement> OnAchievementUnlocked;
         public event Action<Achievement, int, int> OnAchievementProgress; // achievement, current, target
@@ -96,6 +115,9 @@ namespace SortResort
         {
             availableTabs.Clear();
             availableTabs.Add(Achievement.TAB_GENERAL);
+            availableTabs.Add(Achievement.TAB_STAR_MODE);
+            availableTabs.Add(Achievement.TAB_TIMER_MODE);
+            availableTabs.Add(Achievement.TAB_HARD_MODE);
             foreach (var world in RegisteredWorlds)
             {
                 availableTabs.Add(world);
@@ -134,6 +156,41 @@ namespace SortResort
             CreateExplorationAchievements();
 
             // ==========================================
+            // GENERAL - Combos, Power-Ups
+            // ==========================================
+            CreateComboMasterAchievements();
+            CreatePowerUserAchievements();
+            CreatePowerFrenzyAchievements();
+            CreateDoublePowerAchievements();
+
+            // ==========================================
+            // STAR MODE
+            // ==========================================
+            CreateStarStreakAchievements();
+            CreatePerfectWorldAchievements();
+            CreateUnderParAchievements();
+
+            // ==========================================
+            // TIMER MODE
+            // ==========================================
+            CreateTimerLevelAchievements();
+            CreateSpeedDemonAchievements();
+            CreateTimeSaverAchievements();
+            CreateComboTimerAchievements();
+            CreatePhotoFinishAchievements();
+            CreateNegativeTimeAchievements();
+            CreateComboChainAchievements();
+
+            // ==========================================
+            // HARD MODE
+            // ==========================================
+            CreateHardLevelAchievements();
+            CreateHardPerfectionAchievements();
+            CreateHardUnlockAchievements();
+            CreateHardIroncladAchievements();
+            CreateHardWorldAchievements();
+
+            // ==========================================
             // PER-WORLD - Generated for each world
             // ==========================================
             foreach (var worldId in RegisteredWorlds)
@@ -160,7 +217,7 @@ namespace SortResort
                     AchievementCategory.Mastery, tiers[i], milestones[i],
                     new[] { new AchievementReward(RewardType.Coins, milestones[i] * 2) },
                     AchievementTrackingType.Unique,
-                    groupId: "3star_levels_total", groupOrder: i + 1, tab: Achievement.TAB_GENERAL
+                    groupId: "3star_levels_total", groupOrder: i + 1, tab: Achievement.TAB_STAR_MODE
                 ));
             }
         }
@@ -223,7 +280,7 @@ namespace SortResort
                     AchievementCategory.Mastery, tiers[i], milestones[i],
                     new[] { new AchievementReward(RewardType.Coins, milestones[i]) },
                     AchievementTrackingType.Total,
-                    groupId: "stars_total", groupOrder: i + 1, tab: Achievement.TAB_GENERAL
+                    groupId: "stars_total", groupOrder: i + 1, tab: Achievement.TAB_STAR_MODE
                 ));
             }
         }
@@ -257,6 +314,463 @@ namespace SortResort
                 AchievementTrackingType.Unique,
                 groupId: "world_explorer", groupOrder: 3, tab: Achievement.TAB_GENERAL
             ));
+        }
+
+        // ==========================================
+        // NEW GENERAL ACHIEVEMENTS
+        // ==========================================
+
+        /// <summary>
+        /// Combo achievements - total combos earned across all gameplay
+        /// </summary>
+        private void CreateComboMasterAchievements()
+        {
+            var milestones = new[] { 25, 100, 500 };
+            var names = new[] { "Nice Combo", "Combo King", "Combo Legend" };
+            var tiers = new[] { AchievementTier.Bronze, AchievementTier.Silver, AchievementTier.Gold };
+
+            for (int i = 0; i < milestones.Length; i++)
+            {
+                AddAchievement(new Achievement(
+                    $"combo_master_{milestones[i]}", names[i], $"Get {milestones[i]} Combos",
+                    AchievementCategory.Milestone, tiers[i], milestones[i],
+                    new[] { new AchievementReward(RewardType.Coins, milestones[i] * 2) },
+                    AchievementTrackingType.Total,
+                    groupId: "combo_master", groupOrder: i + 1, tab: Achievement.TAB_GENERAL
+                ));
+            }
+        }
+
+        /// <summary>
+        /// Power-up usage achievements - total power-ups used
+        /// </summary>
+        private void CreatePowerUserAchievements()
+        {
+            var milestones = new[] { 10, 50, 200 };
+            var names = new[] { "Power Up", "Power Player", "Power Legend" };
+            var tiers = new[] { AchievementTier.Bronze, AchievementTier.Silver, AchievementTier.Gold };
+
+            for (int i = 0; i < milestones.Length; i++)
+            {
+                AddAchievement(new Achievement(
+                    $"power_user_{milestones[i]}", names[i], $"Use {milestones[i]} Power-Ups",
+                    AchievementCategory.Milestone, tiers[i], milestones[i],
+                    new[] { new AchievementReward(RewardType.Coins, milestones[i] * 3) },
+                    AchievementTrackingType.Total,
+                    groupId: "power_user", groupOrder: i + 1, tab: Achievement.TAB_GENERAL
+                ));
+            }
+        }
+
+        /// <summary>
+        /// Power frenzy - most power-ups used in a single level
+        /// </summary>
+        private void CreatePowerFrenzyAchievements()
+        {
+            var milestones = new[] { 3, 5, 7 };
+            var names = new[] { "Helping Hand", "Power Frenzy", "Power Overload" };
+            var tiers = new[] { AchievementTier.Bronze, AchievementTier.Silver, AchievementTier.Gold };
+
+            for (int i = 0; i < milestones.Length; i++)
+            {
+                AddAchievement(new Achievement(
+                    $"power_frenzy_{milestones[i]}", names[i], $"Use {milestones[i]} Power-Ups in One Level",
+                    AchievementCategory.Challenge, tiers[i], milestones[i],
+                    new[] { new AchievementReward(RewardType.Coins, milestones[i] * 20) },
+                    AchievementTrackingType.BestValue,
+                    groupId: "power_frenzy", groupOrder: i + 1, tab: Achievement.TAB_GENERAL
+                ));
+            }
+        }
+
+        /// <summary>
+        /// Simultaneous power-up usage achievements
+        /// </summary>
+        private void CreateDoublePowerAchievements()
+        {
+            var milestones = new[] { 1, 10, 25 };
+            var names = new[] { "Double Trouble", "Dual Wielder", "Overcharged" };
+            var descs = new[] { "Use 2 Power-Ups at the Same Time", "Use 2 Power-Ups at the Same Time 10 Times", "Use 2 Power-Ups at the Same Time 25 Times" };
+            var tiers = new[] { AchievementTier.Bronze, AchievementTier.Silver, AchievementTier.Gold };
+
+            for (int i = 0; i < milestones.Length; i++)
+            {
+                AddAchievement(new Achievement(
+                    $"double_power_{milestones[i]}", names[i], descs[i],
+                    AchievementCategory.Challenge, tiers[i], milestones[i],
+                    new[] { new AchievementReward(RewardType.Coins, milestones[i] * 15) },
+                    AchievementTrackingType.Total,
+                    groupId: "double_power", groupOrder: i + 1, tab: Achievement.TAB_GENERAL
+                ));
+            }
+        }
+
+        // ==========================================
+        // NEW STAR MODE ACHIEVEMENTS
+        // ==========================================
+
+        /// <summary>
+        /// 3-star streak achievements - consecutive 3-star completions
+        /// </summary>
+        private void CreateStarStreakAchievements()
+        {
+            var milestones = new[] { 5, 10, 25 };
+            var names = new[] { "Hot Streak", "On Fire", "Untouchable" };
+            var tiers = new[] { AchievementTier.Bronze, AchievementTier.Silver, AchievementTier.Gold };
+
+            for (int i = 0; i < milestones.Length; i++)
+            {
+                AddAchievement(new Achievement(
+                    $"star_streak_{milestones[i]}", names[i], $"3 Star {milestones[i]} Levels in a Row",
+                    AchievementCategory.Mastery, tiers[i], milestones[i],
+                    new[] { new AchievementReward(RewardType.Coins, milestones[i] * 10) },
+                    AchievementTrackingType.BestValue,
+                    groupId: "star_streak", groupOrder: i + 1, tab: Achievement.TAB_STAR_MODE
+                ));
+            }
+        }
+
+        /// <summary>
+        /// Perfect world - 3-star every level in a world
+        /// </summary>
+        private void CreatePerfectWorldAchievements()
+        {
+            var milestones = new[] { 1, 3, 5 };
+            var names = new[] { "World Perfectionist", "Triple Perfectionist", "Universal Perfection" };
+            var descs = new[] { "3 Star Every Level in 1 World", "3 Star Every Level in 3 Worlds", "3 Star Every Level in 5 Worlds" };
+            var tiers = new[] { AchievementTier.Bronze, AchievementTier.Silver, AchievementTier.Gold };
+
+            for (int i = 0; i < milestones.Length; i++)
+            {
+                AddAchievement(new Achievement(
+                    $"perfect_world_{milestones[i]}", names[i], descs[i],
+                    AchievementCategory.Mastery, tiers[i], milestones[i],
+                    new[] { new AchievementReward(RewardType.Coins, milestones[i] * 100) },
+                    AchievementTrackingType.Unique,
+                    groupId: "perfect_world", groupOrder: i + 1, tab: Achievement.TAB_STAR_MODE
+                ));
+            }
+        }
+
+        /// <summary>
+        /// Under par - beat the 3-star score by 2+ moves
+        /// </summary>
+        private void CreateUnderParAchievements()
+        {
+            var milestones = new[] { 1, 10, 50 };
+            var names = new[] { "Overachiever", "Efficiency Expert", "Sorting Prodigy" };
+            var descs = new[] { "Beat the 3 Star Score by 2+ Moves", "Beat the 3 Star Score by 2+ Moves 10 Times", "Beat the 3 Star Score by 2+ Moves 50 Times" };
+            var tiers = new[] { AchievementTier.Bronze, AchievementTier.Silver, AchievementTier.Gold };
+
+            for (int i = 0; i < milestones.Length; i++)
+            {
+                AddAchievement(new Achievement(
+                    $"under_par_{milestones[i]}", names[i], descs[i],
+                    AchievementCategory.Efficiency, tiers[i], milestones[i],
+                    new[] { new AchievementReward(RewardType.Coins, milestones[i] * 20) },
+                    AchievementTrackingType.Unique,
+                    groupId: "under_par", groupOrder: i + 1, tab: Achievement.TAB_STAR_MODE
+                ));
+            }
+        }
+
+        // ==========================================
+        // NEW TIMER MODE ACHIEVEMENTS
+        // ==========================================
+
+        /// <summary>
+        /// Timer mode level completion milestones
+        /// </summary>
+        private void CreateTimerLevelAchievements()
+        {
+            var milestones = new[] { 25, 100, 250 };
+            var names = new[] { "Ticking Along", "Clockwork", "Time Lord" };
+            var tiers = new[] { AchievementTier.Bronze, AchievementTier.Silver, AchievementTier.Gold };
+
+            for (int i = 0; i < milestones.Length; i++)
+            {
+                AddAchievement(new Achievement(
+                    $"timer_levels_{milestones[i]}", names[i], $"Complete {milestones[i]} Levels in Timer Mode",
+                    AchievementCategory.Progression, tiers[i], milestones[i],
+                    new[] { new AchievementReward(RewardType.Coins, milestones[i] * 3) },
+                    AchievementTrackingType.Unique,
+                    requiresTimer: true,
+                    groupId: "timer_levels", groupOrder: i + 1, tab: Achievement.TAB_TIMER_MODE
+                ));
+            }
+        }
+
+        /// <summary>
+        /// Speed demon - complete a level in under X seconds
+        /// </summary>
+        private void CreateSpeedDemonAchievements()
+        {
+            var milestones = new[] { 30, 20, 10 };
+            var names = new[] { "Quick Sort", "Speed Demon", "Lightning Fast" };
+            var descs = new[] { "Complete a Level in Under 30 Seconds", "Complete a Level in Under 20 Seconds", "Complete a Level in Under 10 Seconds" };
+            var tiers = new[] { AchievementTier.Bronze, AchievementTier.Silver, AchievementTier.Gold };
+
+            for (int i = 0; i < milestones.Length; i++)
+            {
+                AddAchievement(new Achievement(
+                    $"speed_demon_{milestones[i]}", names[i], descs[i],
+                    AchievementCategory.Speed, tiers[i], milestones[i],
+                    new[] { new AchievementReward(RewardType.Coins, (31 - milestones[i]) * 10) },
+                    AchievementTrackingType.BestValue,
+                    requiresTimer: true,
+                    groupId: "speed_demon", groupOrder: i + 1, tab: Achievement.TAB_TIMER_MODE
+                ));
+            }
+        }
+
+        /// <summary>
+        /// Time saver - finish with X% time remaining
+        /// </summary>
+        private void CreateTimeSaverAchievements()
+        {
+            var milestones = new[] { 50, 60, 75 };
+            var names = new[] { "Ahead of Schedule", "Time Banker", "Time Hoarder" };
+            var descs = new[] { "Finish with 50% Time Remaining", "Finish with 60% Time Remaining", "Finish with 75% Time Remaining" };
+            var tiers = new[] { AchievementTier.Bronze, AchievementTier.Silver, AchievementTier.Gold };
+
+            for (int i = 0; i < milestones.Length; i++)
+            {
+                AddAchievement(new Achievement(
+                    $"time_saver_{milestones[i]}", names[i], descs[i],
+                    AchievementCategory.Speed, tiers[i], milestones[i],
+                    new[] { new AchievementReward(RewardType.Coins, milestones[i] * 2) },
+                    AchievementTrackingType.BestValue,
+                    requiresTimer: true,
+                    groupId: "time_saver", groupOrder: i + 1, tab: Achievement.TAB_TIMER_MODE
+                ));
+            }
+        }
+
+        /// <summary>
+        /// Combo timer - bonus seconds earned from combos
+        /// </summary>
+        private void CreateComboTimerAchievements()
+        {
+            var milestones = new[] { 50, 200, 500 };
+            var names = new[] { "Bonus Time", "Time Thief", "Chrono Master" };
+            var tiers = new[] { AchievementTier.Bronze, AchievementTier.Silver, AchievementTier.Gold };
+
+            for (int i = 0; i < milestones.Length; i++)
+            {
+                AddAchievement(new Achievement(
+                    $"combo_timer_{milestones[i]}", names[i], $"Earn {milestones[i]} Seconds from Matches",
+                    AchievementCategory.Milestone, tiers[i], milestones[i],
+                    new[] { new AchievementReward(RewardType.Coins, milestones[i]) },
+                    AchievementTrackingType.Total,
+                    requiresTimer: true,
+                    groupId: "combo_timer", groupOrder: i + 1, tab: Achievement.TAB_TIMER_MODE
+                ));
+            }
+        }
+
+        /// <summary>
+        /// Photo finish - complete with less than 1 second left
+        /// </summary>
+        private void CreatePhotoFinishAchievements()
+        {
+            var milestones = new[] { 1, 5, 25 };
+            var names = new[] { "Photo Finish", "Clutch Player", "Edge Runner" };
+            var descs = new[] {
+                "Complete a Level with <1 Second Left",
+                "Complete 5 Levels with <1 Second Left",
+                "Complete 25 Levels with <1 Second Left"
+            };
+            var tiers = new[] { AchievementTier.Bronze, AchievementTier.Silver, AchievementTier.Gold };
+
+            for (int i = 0; i < milestones.Length; i++)
+            {
+                AddAchievement(new Achievement(
+                    $"photo_finish_{milestones[i]}", names[i], descs[i],
+                    AchievementCategory.Challenge, tiers[i], milestones[i],
+                    new[] { new AchievementReward(RewardType.Coins, milestones[i] * 25) },
+                    AchievementTrackingType.Total,
+                    requiresTimer: true,
+                    groupId: "photo_finish", groupOrder: i + 1, tab: Achievement.TAB_TIMER_MODE
+                ));
+            }
+        }
+
+        /// <summary>
+        /// Negative time - complete with negative time (combo bonuses exceeded elapsed time)
+        /// </summary>
+        private void CreateNegativeTimeAchievements()
+        {
+            var milestones = new[] { 1, 5, 10 };
+            var names = new[] { "Time Traveler", "Temporal Anomaly", "Chrono Breaker" };
+            var descs = new[] {
+                "Complete a Level with Negative Time",
+                "Complete 5 Levels with Negative Time",
+                "Complete 10 Levels with Negative Time"
+            };
+            var tiers = new[] { AchievementTier.Bronze, AchievementTier.Silver, AchievementTier.Gold };
+
+            for (int i = 0; i < milestones.Length; i++)
+            {
+                AddAchievement(new Achievement(
+                    $"negative_time_{milestones[i]}", names[i], descs[i],
+                    AchievementCategory.Challenge, tiers[i], milestones[i],
+                    new[] { new AchievementReward(RewardType.Coins, milestones[i] * 50) },
+                    AchievementTrackingType.Total,
+                    requiresTimer: true,
+                    groupId: "negative_time", groupOrder: i + 1, tab: Achievement.TAB_TIMER_MODE
+                ));
+            }
+        }
+
+        /// <summary>
+        /// Combo chain - consecutive timer extensions in a row
+        /// </summary>
+        private void CreateComboChainAchievements()
+        {
+            var milestones = new[] { 4, 6, 8 };
+            var names = new[] { "Chain Reaction", "Combo Blitz", "Endless Chain" };
+            var descs = new[] {
+                "Get 4 Timer Extensions in a Row",
+                "Get 6 Timer Extensions in a Row",
+                "Get 8 Timer Extensions in a Row"
+            };
+            var tiers = new[] { AchievementTier.Bronze, AchievementTier.Silver, AchievementTier.Gold };
+
+            for (int i = 0; i < milestones.Length; i++)
+            {
+                AddAchievement(new Achievement(
+                    $"combo_chain_{milestones[i]}", names[i], descs[i],
+                    AchievementCategory.Challenge, tiers[i], milestones[i],
+                    new[] { new AchievementReward(RewardType.Coins, milestones[i] * 15) },
+                    AchievementTrackingType.BestValue,
+                    requiresTimer: true,
+                    groupId: "combo_chain", groupOrder: i + 1, tab: Achievement.TAB_TIMER_MODE
+                ));
+            }
+        }
+
+        // ==========================================
+        // NEW HARD MODE ACHIEVEMENTS
+        // ==========================================
+
+        /// <summary>
+        /// Hard mode level completion milestones
+        /// </summary>
+        private void CreateHardLevelAchievements()
+        {
+            var milestones = new[] { 10, 50, 100 };
+            var names = new[] { "Hard Hitter", "Tough Cookie", "Hard as Nails" };
+            var tiers = new[] { AchievementTier.Bronze, AchievementTier.Silver, AchievementTier.Gold };
+
+            for (int i = 0; i < milestones.Length; i++)
+            {
+                AddAchievement(new Achievement(
+                    $"hard_levels_{milestones[i]}", names[i], $"Complete {milestones[i]} Levels in Hard Mode",
+                    AchievementCategory.Progression, tiers[i], milestones[i],
+                    new[] { new AchievementReward(RewardType.Coins, milestones[i] * 5) },
+                    AchievementTrackingType.Unique,
+                    groupId: "hard_levels", groupOrder: i + 1, tab: Achievement.TAB_HARD_MODE
+                ));
+            }
+        }
+
+        /// <summary>
+        /// Hard mode 3-star achievements
+        /// </summary>
+        private void CreateHardPerfectionAchievements()
+        {
+            var milestones = new[] { 10, 50, 100 };
+            var names = new[] { "Hard Brilliance", "Hard Prodigy", "Hard Flawless" };
+            var tiers = new[] { AchievementTier.Bronze, AchievementTier.Silver, AchievementTier.Gold };
+
+            for (int i = 0; i < milestones.Length; i++)
+            {
+                AddAchievement(new Achievement(
+                    $"hard_perfection_{milestones[i]}", names[i], $"3 Star {milestones[i]} Levels in Hard Mode",
+                    AchievementCategory.Mastery, tiers[i], milestones[i],
+                    new[] { new AchievementReward(RewardType.Coins, milestones[i] * 8) },
+                    AchievementTrackingType.Unique,
+                    groupId: "hard_perfection", groupOrder: i + 1, tab: Achievement.TAB_HARD_MODE
+                ));
+            }
+        }
+
+        /// <summary>
+        /// Hard mode unlock achievements - unlock hard mode in X worlds
+        /// </summary>
+        private void CreateHardUnlockAchievements()
+        {
+            var milestones = new[] { 1, 3, 5 };
+            var names = new[] { "Challenge Accepted", "Challenger", "Ultimate Challenger" };
+            var descs = new[] {
+                "Unlock Hard Mode in 1 World",
+                "Unlock Hard Mode in 3 Worlds",
+                "Unlock Hard Mode in 5 Worlds"
+            };
+            var tiers = new[] { AchievementTier.Bronze, AchievementTier.Silver, AchievementTier.Gold };
+
+            for (int i = 0; i < milestones.Length; i++)
+            {
+                AddAchievement(new Achievement(
+                    $"hard_unlock_{milestones[i]}", names[i], descs[i],
+                    AchievementCategory.Progression, tiers[i], milestones[i],
+                    new[] { new AchievementReward(RewardType.Coins, milestones[i] * 50) },
+                    AchievementTrackingType.Unique,
+                    groupId: "hard_unlock", groupOrder: i + 1, tab: Achievement.TAB_HARD_MODE
+                ));
+            }
+        }
+
+        /// <summary>
+        /// Hard mode ironclad - complete X hard mode levels without failing
+        /// </summary>
+        private void CreateHardIroncladAchievements()
+        {
+            var milestones = new[] { 5, 10, 25 };
+            var names = new[] { "Ironclad", "Unbreakable", "Invincible" };
+            var descs = new[] {
+                "Complete 5 Hard Modes in a Row",
+                "Complete 10 Hard Modes in a Row",
+                "Complete 25 Hard Modes in a Row"
+            };
+            var tiers = new[] { AchievementTier.Bronze, AchievementTier.Silver, AchievementTier.Gold };
+
+            for (int i = 0; i < milestones.Length; i++)
+            {
+                AddAchievement(new Achievement(
+                    $"hard_ironclad_{milestones[i]}", names[i], descs[i],
+                    AchievementCategory.Challenge, tiers[i], milestones[i],
+                    new[] { new AchievementReward(RewardType.Coins, milestones[i] * 15) },
+                    AchievementTrackingType.BestValue,
+                    groupId: "hard_ironclad", groupOrder: i + 1, tab: Achievement.TAB_HARD_MODE
+                ));
+            }
+        }
+
+        /// <summary>
+        /// Hard mode world completion - complete all 100 levels in a world on hard mode
+        /// </summary>
+        private void CreateHardWorldAchievements()
+        {
+            var milestones = new[] { 1, 3, 5 };
+            var names = new[] { "Hard World Beaten", "Hard Conqueror", "Hard Dominator" };
+            var descs = new[] {
+                "Complete All Hard Modes in a World",
+                "Complete All Hard Modes in 3 Worlds",
+                "Complete All Hard Modes in 5 Worlds"
+            };
+            var tiers = new[] { AchievementTier.Bronze, AchievementTier.Silver, AchievementTier.Gold };
+
+            for (int i = 0; i < milestones.Length; i++)
+            {
+                AddAchievement(new Achievement(
+                    $"hard_world_{milestones[i]}", names[i], descs[i],
+                    AchievementCategory.Mastery, tiers[i], milestones[i],
+                    new[] { new AchievementReward(RewardType.Coins, milestones[i] * 100) },
+                    AchievementTrackingType.Unique,
+                    groupId: "hard_world", groupOrder: i + 1, tab: Achievement.TAB_HARD_MODE
+                ));
+            }
         }
 
         /// <summary>
@@ -319,15 +833,25 @@ namespace SortResort
         private void SubscribeToEvents()
         {
             GameEvents.OnLevelCompleted += OnLevelCompleted;
+            GameEvents.OnLevelCompletedDetailed += OnLevelCompletedDetailed;
             GameEvents.OnMatchMade += OnMatchMade;
             GameEvents.OnLevelStarted += OnLevelStarted;
+            GameEvents.OnLevelFailed += OnLevelFailed;
+            GameEvents.OnLevelRestarted += OnLevelRestarted;
+            GameEvents.OnPowerUpUsed += OnPowerUpUsed;
+            GameEvents.OnComboTriggered += OnComboTriggered;
         }
 
         private void UnsubscribeFromEvents()
         {
             GameEvents.OnLevelCompleted -= OnLevelCompleted;
+            GameEvents.OnLevelCompletedDetailed -= OnLevelCompletedDetailed;
             GameEvents.OnMatchMade -= OnMatchMade;
             GameEvents.OnLevelStarted -= OnLevelStarted;
+            GameEvents.OnLevelFailed -= OnLevelFailed;
+            GameEvents.OnLevelRestarted -= OnLevelRestarted;
+            GameEvents.OnPowerUpUsed -= OnPowerUpUsed;
+            GameEvents.OnComboTriggered -= OnComboTriggered;
         }
 
         #endregion
@@ -336,6 +860,11 @@ namespace SortResort
 
         private void OnLevelStarted(int levelNumber)
         {
+            // Reset per-level session stats
+            powerUpsUsedThisLevel = 0;
+            comboTimerBonusThisLevel = 0f;
+            comboTimerChainThisLevel = 0;
+
             // Get world from LevelManager
             string worldId = LevelManager.Instance?.CurrentWorldId;
 
@@ -432,6 +961,370 @@ namespace SortResort
                     IncrementProgress(a.id, 1);
                 }
             }
+        }
+
+        /// <summary>
+        /// Detailed level completion handler for mode-specific achievements
+        /// </summary>
+        private void OnLevelCompletedDetailed(LevelCompletionData data)
+        {
+            string worldId = LevelManager.Instance?.CurrentWorldId ?? "unknown";
+            string levelIdentifier = $"{worldId}_{data.levelNumber}";
+            int movesUsed = GameManager.Instance?.CurrentMoveCount ?? 0;
+
+            // ==========================================
+            // POWER FRENZY - best power-ups in one level
+            // ==========================================
+            if (powerUpsUsedThisLevel > 0)
+            {
+                if (powerUpsUsedThisLevel > bestPowerUpsInOneLevel)
+                    bestPowerUpsInOneLevel = powerUpsUsedThisLevel;
+
+                foreach (var a in achievements.Values)
+                {
+                    if (a.groupId == "power_frenzy")
+                        UpdateBestValue(a.id, powerUpsUsedThisLevel);
+                }
+            }
+
+            // ==========================================
+            // COMBO CHAIN - best consecutive timer extensions
+            // ==========================================
+            if (comboTimerChainThisLevel > 0)
+            {
+                if (comboTimerChainThisLevel > bestComboTimerChain)
+                    bestComboTimerChain = comboTimerChainThisLevel;
+
+                foreach (var a in achievements.Values)
+                {
+                    if (a.groupId == "combo_chain")
+                        UpdateBestValue(a.id, comboTimerChainThisLevel);
+                }
+            }
+
+            // ==========================================
+            // STAR MODE ACHIEVEMENTS
+            // ==========================================
+            if (data.mode == GameMode.StarMode || data.mode == GameMode.HardMode)
+            {
+                // Star streak tracking
+                if (data.starsEarned == 3)
+                {
+                    threeStarStreak++;
+                    foreach (var a in achievements.Values)
+                    {
+                        if (a.groupId == "star_streak")
+                            UpdateBestValue(a.id, threeStarStreak);
+                    }
+
+                    // Perfect world check - see if all 100 levels in this world have 3 stars
+                    if (SaveManager.Instance != null)
+                    {
+                        bool allThreeStars = true;
+                        for (int lvl = 1; lvl <= LEVELS_PER_WORLD; lvl++)
+                        {
+                            if (SaveManager.Instance.GetLevelStars(worldId, lvl) < 3)
+                            {
+                                allThreeStars = false;
+                                break;
+                            }
+                        }
+                        if (allThreeStars)
+                        {
+                            foreach (var a in achievements.Values)
+                            {
+                                if (a.groupId == "perfect_world")
+                                    IncrementProgressUnique(a.id, worldId);
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    // Non-3-star resets the streak
+                    threeStarStreak = 0;
+                }
+
+                // Under par check (beat 3-star threshold by 2+ moves)
+                var thresholds = LevelManager.Instance?.StarThresholds;
+                if (thresholds != null && thresholds.Length > 0 && movesUsed <= thresholds[0] - 2)
+                {
+                    foreach (var a in achievements.Values)
+                    {
+                        if (a.groupId == "under_par")
+                            IncrementProgressUnique(a.id, levelIdentifier);
+                    }
+                }
+            }
+
+            // ==========================================
+            // TIMER MODE ACHIEVEMENTS
+            // ==========================================
+            if (data.mode == GameMode.TimerMode || data.mode == GameMode.HardMode)
+            {
+                // Timer level completion count
+                foreach (var a in achievements.Values)
+                {
+                    if (a.groupId == "timer_levels")
+                        IncrementProgressUnique(a.id, $"{data.mode}_{levelIdentifier}");
+                }
+
+                // Speed demon - check elapsed time against thresholds
+                // For "lower is better": we check if time is under each threshold
+                float completionTime = data.timeTaken;
+                int[] speedThresholds = { 30, 20, 10 };
+                foreach (int threshold in speedThresholds)
+                {
+                    if (completionTime < threshold && completionTime >= 0)
+                    {
+                        string achId = $"speed_demon_{threshold}";
+                        if (achievements.ContainsKey(achId))
+                        {
+                            var prog = GetOrCreateProgress(achId);
+                            if (!prog.isUnlocked)
+                            {
+                                prog.currentValue = threshold; // Met the threshold
+                                UnlockAchievement(achId);
+                            }
+                        }
+                    }
+                }
+
+                // Time saver - percentage of time remaining
+                float totalTimeLimit = LevelManager.Instance?.TotalTimeLimit ?? 0f;
+                if (totalTimeLimit > 0)
+                {
+                    float timeRemaining = totalTimeLimit - completionTime;
+                    int percentRemaining = Mathf.RoundToInt((timeRemaining / totalTimeLimit) * 100f);
+
+                    foreach (var a in achievements.Values)
+                    {
+                        if (a.groupId == "time_saver")
+                            UpdateBestValue(a.id, percentRemaining);
+                    }
+                }
+
+                // Photo finish - completed with less than 1 second remaining
+                float finalTimeRemaining = LevelManager.Instance?.TimeRemaining ?? float.MaxValue;
+                if (finalTimeRemaining >= 0f && finalTimeRemaining < 1f)
+                {
+                    totalPhotoFinishes++;
+                    foreach (var a in achievements.Values)
+                    {
+                        if (a.groupId == "photo_finish")
+                            IncrementProgress(a.id, 1);
+                    }
+                }
+
+                // Negative time - completed with negative elapsed time (combo bonuses exceeded real time)
+                if (completionTime < 0f)
+                {
+                    totalNegativeTimeCompletions++;
+                    foreach (var a in achievements.Values)
+                    {
+                        if (a.groupId == "negative_time")
+                            IncrementProgress(a.id, 1);
+                    }
+                }
+            }
+
+            // ==========================================
+            // HARD MODE ACHIEVEMENTS
+            // ==========================================
+            if (data.mode == GameMode.HardMode)
+            {
+                // Hard level completion count
+                foreach (var a in achievements.Values)
+                {
+                    if (a.groupId == "hard_levels")
+                        IncrementProgressUnique(a.id, levelIdentifier);
+                }
+
+                // Hard perfection - 3-star in hard mode
+                if (data.starsEarned == 3)
+                {
+                    foreach (var a in achievements.Values)
+                    {
+                        if (a.groupId == "hard_perfection")
+                            IncrementProgressUnique(a.id, levelIdentifier);
+                    }
+                }
+
+                // Hard ironclad streak
+                hardModeStreak++;
+                foreach (var a in achievements.Values)
+                {
+                    if (a.groupId == "hard_ironclad")
+                        UpdateBestValue(a.id, hardModeStreak);
+                }
+
+                // Hard world completion - check if all 100 levels done in hard mode
+                // Active mode is HardMode here, so SaveManager.IsLevelCompleted checks hard mode progress
+                if (SaveManager.Instance != null)
+                {
+                    int hardHighest = SaveManager.Instance.GetHighestLevelCompleted(worldId);
+                    if (hardHighest >= LEVELS_PER_WORLD)
+                    {
+                        foreach (var a in achievements.Values)
+                        {
+                            if (a.groupId == "hard_world")
+                                IncrementProgressUnique(a.id, worldId);
+                        }
+                    }
+                }
+            }
+
+            // Hard mode unlock tracking (fires when HardMode is unlocked for any world)
+            // This is handled separately via CheckHardModeUnlocks()
+
+            SaveProgress();
+        }
+
+        /// <summary>
+        /// Power-up usage handler
+        /// </summary>
+        private void OnPowerUpUsed(PowerUpType type)
+        {
+            // Check for simultaneous power-ups BEFORE incrementing
+            bool wasAlreadyFrozen = (LevelManager.Instance?.IsTimerFrozen ?? false) ||
+                                    (PowerUpManager.Instance?.IsMovesFrozen ?? false);
+
+            powerUpsUsedThisLevel++;
+            totalPowerUpsUsed++;
+
+            // Total power-up usage achievements
+            foreach (var a in achievements.Values)
+            {
+                if (a.groupId == "power_user")
+                    IncrementProgress(a.id, 1);
+            }
+
+            // Simultaneous power-up detection
+            // If a freeze was already active when this power-up was used, it's simultaneous
+            if (wasAlreadyFrozen)
+            {
+                totalSimultaneousPowerUps++;
+                foreach (var a in achievements.Values)
+                {
+                    if (a.groupId == "double_power")
+                        IncrementProgress(a.id, 1);
+                }
+            }
+
+            SaveProgress();
+        }
+
+        /// <summary>
+        /// Combo triggered handler
+        /// </summary>
+        private void OnComboTriggered(int comboStreak)
+        {
+            totalCombos++;
+
+            // Combo master achievements (total combos)
+            foreach (var a in achievements.Values)
+            {
+                if (a.groupId == "combo_master")
+                    IncrementProgress(a.id, 1);
+            }
+
+            // Timer combo chain tracking (only in timer modes)
+            var mode = GameManager.Instance?.CurrentGameMode ?? GameMode.FreePlay;
+            if (mode == GameMode.TimerMode || mode == GameMode.HardMode)
+            {
+                // Combo timer bonus seconds: streak 2 = 1s, 3 = 3s, 4+ = 5s
+                float bonusSeconds = comboStreak == 2 ? 1f : comboStreak == 3 ? 3f : 5f;
+                comboTimerBonusThisLevel += bonusSeconds;
+                totalComboTimerBonus += Mathf.RoundToInt(bonusSeconds);
+
+                // Combo timer total bonus achievements
+                foreach (var a in achievements.Values)
+                {
+                    if (a.groupId == "combo_timer")
+                        IncrementProgress(a.id, Mathf.RoundToInt(bonusSeconds));
+                }
+
+                // Combo chain tracking (consecutive timer extensions)
+                comboTimerChainThisLevel++;
+                // Best chain is checked at level completion
+            }
+
+            SaveProgress();
+        }
+
+        /// <summary>
+        /// Level failed handler - resets streaks
+        /// </summary>
+        private void OnLevelFailed(int levelNumber, string reason)
+        {
+            var mode = GameManager.Instance?.CurrentGameMode ?? GameMode.FreePlay;
+
+            if (mode == GameMode.HardMode)
+            {
+                hardModeStreak = 0;
+                SaveProgress();
+            }
+
+            if (mode == GameMode.StarMode || mode == GameMode.HardMode)
+            {
+                threeStarStreak = 0;
+                SaveProgress();
+            }
+
+            // Reset combo chain on failure
+            comboTimerChainThisLevel = 0;
+        }
+
+        /// <summary>
+        /// Level restarted handler - resets hard mode ironclad streak
+        /// </summary>
+        private void OnLevelRestarted()
+        {
+            var mode = GameManager.Instance?.CurrentGameMode ?? GameMode.FreePlay;
+
+            if (mode == GameMode.HardMode)
+            {
+                hardModeStreak = 0;
+                SaveProgress();
+            }
+
+            // Reset combo chain on restart
+            comboTimerChainThisLevel = 0;
+        }
+
+        /// <summary>
+        /// Called when a combo chain breaks (match without consecutive combo).
+        /// Saves the best chain seen before resetting.
+        /// </summary>
+        public void OnComboChainBroken()
+        {
+            if (comboTimerChainThisLevel > 0)
+            {
+                // Save best chain before resetting
+                if (comboTimerChainThisLevel > bestComboTimerChain)
+                    bestComboTimerChain = comboTimerChainThisLevel;
+
+                foreach (var a in achievements.Values)
+                {
+                    if (a.groupId == "combo_chain")
+                        UpdateBestValue(a.id, comboTimerChainThisLevel);
+                }
+
+                comboTimerChainThisLevel = 0;
+            }
+        }
+
+        /// <summary>
+        /// Call when Hard Mode is unlocked for a world (from DialogueManager or GameManager)
+        /// </summary>
+        public void NotifyHardModeUnlocked(string worldId)
+        {
+            foreach (var a in achievements.Values)
+            {
+                if (a.groupId == "hard_unlock")
+                    IncrementProgressUnique(a.id, worldId);
+            }
+            SaveProgress();
         }
 
         #endregion
@@ -555,6 +1448,45 @@ namespace SortResort
             if (prog.isUnlocked)
                 return;
 
+            prog.currentValue = value;
+
+            OnAchievementProgress?.Invoke(achievement, prog.currentValue, achievement.targetValue);
+
+            if (prog.currentValue >= achievement.targetValue)
+            {
+                UnlockAchievement(achievementId);
+            }
+
+            SaveProgress();
+        }
+
+        /// <summary>
+        /// For BestValue tracking: updates progress if the new value is higher than the current best.
+        /// Use for achievements like "3 Star 5 Levels in a Row" where only the best streak matters.
+        /// </summary>
+        public void UpdateBestValue(string achievementId, int value)
+        {
+            if (!achievements.TryGetValue(achievementId, out var achievement))
+                return;
+
+            if (achievement.trackingType != AchievementTrackingType.BestValue)
+            {
+                Debug.LogWarning($"[AchievementManager] UpdateBestValue called on non-BestValue achievement: {achievementId}");
+                return;
+            }
+
+            var currentMode = GameManager.Instance?.CurrentGameMode ?? GameMode.FreePlay;
+            if (achievement.requiresTimer && currentMode != GameMode.TimerMode && currentMode != GameMode.HardMode)
+                return;
+
+            var prog = GetOrCreateProgress(achievementId);
+            if (prog.isUnlocked)
+                return;
+
+            if (value <= prog.bestValue)
+                return;
+
+            prog.bestValue = value;
             prog.currentValue = value;
 
             OnAchievementProgress?.Invoke(achievement, prog.currentValue, achievement.targetValue);
@@ -787,14 +1719,37 @@ namespace SortResort
             return progress.TryGetValue(achievementId, out var p) && p.isUnlocked;
         }
 
-        // Map from groupId to the art resource key used for sprite loading
+        // Map from groupId to the icon resource name (loaded from Sprites/UI/Achievements/Icons/)
         private static readonly Dictionary<string, string> groupArtKeys = new Dictionary<string, string>
         {
+            // General
             { "3star_levels_total", "3star_levels" },
             { "levels_total", "levels" },
             { "matches_total", "matches" },
             { "stars_total", "stars" },
             { "world_explorer", "visit_worlds" },
+            { "combo_master", "combos" },
+            { "power_user", "power_ups" },
+            { "power_frenzy", "power_frenzy" },
+            { "double_power", "double_power" },
+            // Star Mode
+            { "star_streak", "star_streak" },
+            { "perfect_world", "perfect_world" },
+            { "under_par", "under_par" },
+            // Timer Mode
+            { "timer_levels", "timer_levels" },
+            { "speed_demon", "speed_demon" },
+            { "time_saver", "time_saver" },
+            { "combo_timer", "combo_timer" },
+            { "photo_finish", "photo_finish" },
+            { "negative_time", "negative_time" },
+            { "combo_chain", "combo_chain" },
+            // Hard Mode
+            { "hard_levels", "hard_levels" },
+            { "hard_perfection", "hard_perfection" },
+            { "hard_unlock", "hard_unlock" },
+            { "hard_ironclad", "hard_ironclad" },
+            { "hard_world", "hard_world" },
         };
 
         /// <summary>
@@ -988,7 +1943,18 @@ namespace SortResort
                 timerFreezeTokens = timerFreezeTokens,
                 unlockedCosmetics = unlockedCosmetics,
                 unlockedTrophies = unlockedTrophies,
-                visitedWorlds = new List<string>(visitedWorlds)
+                visitedWorlds = new List<string>(visitedWorlds),
+                // New persistent counters
+                totalCombos = totalCombos,
+                totalPowerUpsUsed = totalPowerUpsUsed,
+                totalSimultaneousPowerUps = totalSimultaneousPowerUps,
+                totalComboTimerBonus = totalComboTimerBonus,
+                totalPhotoFinishes = totalPhotoFinishes,
+                totalNegativeTimeCompletions = totalNegativeTimeCompletions,
+                bestPowerUpsInOneLevel = bestPowerUpsInOneLevel,
+                bestComboTimerChain = bestComboTimerChain,
+                threeStarStreak = threeStarStreak,
+                hardModeStreak = hardModeStreak
             };
 
             string json = JsonUtility.ToJson(saveData);
@@ -1028,6 +1994,18 @@ namespace SortResort
                 if (saveData.visitedWorlds != null)
                     visitedWorlds = new HashSet<string>(saveData.visitedWorlds);
 
+                // Load new persistent counters (default to 0 for backward compatibility)
+                totalCombos = saveData.totalCombos;
+                totalPowerUpsUsed = saveData.totalPowerUpsUsed;
+                totalSimultaneousPowerUps = saveData.totalSimultaneousPowerUps;
+                totalComboTimerBonus = saveData.totalComboTimerBonus;
+                totalPhotoFinishes = saveData.totalPhotoFinishes;
+                totalNegativeTimeCompletions = saveData.totalNegativeTimeCompletions;
+                bestPowerUpsInOneLevel = saveData.bestPowerUpsInOneLevel;
+                bestComboTimerChain = saveData.bestComboTimerChain;
+                threeStarStreak = saveData.threeStarStreak;
+                hardModeStreak = saveData.hardModeStreak;
+
                 Debug.Log($"[AchievementManager] Loaded {progress.Count} achievement progress entries");
             }
             catch (Exception e)
@@ -1048,6 +2026,16 @@ namespace SortResort
             unlockedCosmetics.Clear();
             unlockedTrophies.Clear();
             visitedWorlds.Clear();
+            totalCombos = 0;
+            totalPowerUpsUsed = 0;
+            totalSimultaneousPowerUps = 0;
+            totalComboTimerBonus = 0;
+            totalPhotoFinishes = 0;
+            totalNegativeTimeCompletions = 0;
+            bestPowerUpsInOneLevel = 0;
+            bestComboTimerChain = 0;
+            threeStarStreak = 0;
+            hardModeStreak = 0;
 
             PlayerPrefs.DeleteKey(ACHIEVEMENT_SAVE_KEY);
             Debug.Log("[AchievementManager] All achievements reset");
@@ -1066,6 +2054,17 @@ namespace SortResort
             public List<string> unlockedCosmetics;
             public List<string> unlockedTrophies;
             public List<string> visitedWorlds;
+            // New persistent counters (default to 0 for backward compatibility)
+            public int totalCombos;
+            public int totalPowerUpsUsed;
+            public int totalSimultaneousPowerUps;
+            public int totalComboTimerBonus;
+            public int totalPhotoFinishes;
+            public int totalNegativeTimeCompletions;
+            public int bestPowerUpsInOneLevel;
+            public int bestComboTimerChain;
+            public int threeStarStreak;
+            public int hardModeStreak;
         }
 
         #endregion

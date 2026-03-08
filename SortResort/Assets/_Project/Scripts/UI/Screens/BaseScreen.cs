@@ -8,7 +8,7 @@ namespace SortResort.UI
     {
         [Header("Screen Settings")]
         [SerializeField] protected CanvasGroup canvasGroup;
-        [SerializeField] protected float fadeInDuration = 0.3f;
+        [SerializeField] protected float fadeInDuration = 0.2f;
         [SerializeField] protected float fadeOutDuration = 0.2f;
 
         public bool IsVisible { get; protected set; }

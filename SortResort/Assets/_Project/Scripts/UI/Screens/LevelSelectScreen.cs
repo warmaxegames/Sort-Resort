@@ -916,8 +916,10 @@ namespace SortResort.UI
 
         private IEnumerator PlayWorldUnlockAnimation(string worldId)
         {
-            // Disable buy button during animation
+            // Disable all interaction during animation
             if (buyButton != null) buyButton.interactable = false;
+            if (prevWorldButton != null) prevWorldButton.interactable = false;
+            if (nextWorldButton != null) nextWorldButton.interactable = false;
 
             // Get the locked sprite before switching to unlocked
             Sprite lockedSprite = worldImage != null ? worldImage.sprite : null;
@@ -972,6 +974,10 @@ namespace SortResort.UI
             RefreshDisplay();
             UpdateModeTabVisuals();
 
+            // Re-disable navigation buttons (RefreshDisplay re-enabled them)
+            if (prevWorldButton != null) prevWorldButton.interactable = false;
+            if (nextWorldButton != null) nextWorldButton.interactable = false;
+
             // Keep lock background visible for fade-out (RefreshDisplay disabled it)
             if (lockBgCanvasGroup != null)
                 lockBackgroundImage.enabled = true;
@@ -1020,7 +1026,7 @@ namespace SortResort.UI
                 animImage = animGO.AddComponent<Image>();
                 animImage.sprite = unlockAnimFrames[0];
                 animImage.preserveAspect = true;
-                animImage.raycastTarget = false;
+                animImage.raycastTarget = true; // Block all input behind the animation
                 CropMetadata.ApplyCropAnchorsForFolder(animRect, "Sprites/UI/WorldUnlock");
             }
 
@@ -1085,8 +1091,13 @@ namespace SortResort.UI
             if (fadeOverlayGO != null) Destroy(fadeOverlayGO);
             if (animCanvasGO != null) Destroy(animCanvasGO);
 
-            // Re-enable buy button for future use (e.g. after debug lock/unlock cycle)
+            // Re-enable buttons after animation
             if (buyButton != null) buyButton.interactable = true;
+            // Restore correct arrow button states based on current world index
+            if (prevWorldButton != null)
+                prevWorldButton.interactable = currentWorldIndex > 0;
+            if (nextWorldButton != null)
+                nextWorldButton.interactable = currentWorldIndex < worldIds.Count - 1;
 
             unlockAnimCoroutine = null;
         }

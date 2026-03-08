@@ -48,7 +48,13 @@ namespace SortResort
         /// <summary>
         /// One-time trigger (e.g., "First Match" - unlocks immediately on first occurrence)
         /// </summary>
-        OneTime
+        OneTime,
+
+        /// <summary>
+        /// Tracks the best (highest) single value seen (e.g., "3 Star 5 Levels in a Row" - best streak)
+        /// For "lower is better" achievements (e.g., speed), store inverted or handle comparison specially.
+        /// </summary>
+        BestValue
     }
 
     /// <summary>
@@ -94,6 +100,9 @@ namespace SortResort
         public const string TAB_ALL = "all";
         public const string TAB_RECENT = "recent";
         public const string TAB_GENERAL = "general";
+        public const string TAB_STAR_MODE = "star_mode";
+        public const string TAB_TIMER_MODE = "timer_mode";
+        public const string TAB_HARD_MODE = "hard_mode";
 
         public string id;
         public string name;
@@ -190,6 +199,9 @@ namespace SortResort
             if (tab == TAB_ALL) return "All";
             if (tab == TAB_RECENT) return "Recent";
             if (tab == TAB_GENERAL) return "General";
+            if (tab == TAB_STAR_MODE) return "Star Mode";
+            if (tab == TAB_TIMER_MODE) return "Timer Mode";
+            if (tab == TAB_HARD_MODE) return "Hard Mode";
             // Capitalize first letter for world names
             return char.ToUpper(tab[0]) + tab.Substring(1).ToLower();
         }
@@ -202,6 +214,9 @@ namespace SortResort
             if (string.IsNullOrEmpty(tab) || tab == TAB_GENERAL) return "GENERAL";
             switch (tab)
             {
+                case TAB_STAR_MODE: return "STAR\nMODE";
+                case TAB_TIMER_MODE: return "TIMER\nMODE";
+                case TAB_HARD_MODE: return "HARD\nMODE";
                 case "island": return "ST. GAMES\nISLAND";
                 case "supermarket": return "SUPER\nSTORE";
                 case "farm": return "WILTY\nACRES";
@@ -226,6 +241,10 @@ namespace SortResort
         // For Unique tracking type - stores identifiers that have been counted
         // (e.g., level IDs for "complete 10 unique levels")
         public List<string> uniqueIdentifiers;
+
+        // For BestValue tracking type - stores the best single value achieved
+        // (e.g., best 3-star streak, most power-ups in one level)
+        public int bestValue;
 
         public AchievementProgress(string achievementId)
         {

@@ -70,6 +70,7 @@ namespace SortResort
         private float totalTimeLimit;
         private bool timerActive = false;
         private bool timerFrozen = false;
+        private Coroutine freezeTimerCoroutine;
 
         // Elapsed time tracking (all modes, for recording completion time)
         private float elapsedTime = 0f;
@@ -86,6 +87,7 @@ namespace SortResort
         public int ItemsRemaining => itemsRemaining;
         public int MatchesMade => matchesMade;
         public bool CanUndo => canUndo && moveHistory.Count > 0;
+        public int[] StarThresholds => starThresholds;
 
         // Events
         public event Action OnLevelLoaded;
@@ -165,11 +167,15 @@ namespace SortResort
         private void Update()
         {
             // Track elapsed time in all modes (for recording completion time)
+            // In timer modes, pause elapsed time when timer is frozen (freeze power-up shouldn't count)
             if (GameManager.Instance?.CurrentState == GameState.Playing)
             {
                 if (DialogueManager.Instance == null || !DialogueManager.Instance.IsDialogueActive)
                 {
-                    elapsedTime += Time.deltaTime;
+                    if (!timerFrozen)
+                    {
+                        elapsedTime += Time.deltaTime;
+                    }
                 }
             }
 
@@ -479,7 +485,9 @@ namespace SortResort
         {
             if (!timerActive) return;
 
-            StartCoroutine(FreezeTimerCoroutine(duration));
+            if (freezeTimerCoroutine != null)
+                StopCoroutine(freezeTimerCoroutine);
+            freezeTimerCoroutine = StartCoroutine(FreezeTimerCoroutine(duration));
         }
 
         private System.Collections.IEnumerator FreezeTimerCoroutine(float duration)
@@ -503,6 +511,7 @@ namespace SortResort
             }
 
             timerFrozen = false;
+            freezeTimerCoroutine = null;
             GameEvents.InvokeTimerFrozen(false);
             Debug.Log("[LevelManager] Timer unfrozen");
         }
@@ -520,12 +529,15 @@ namespace SortResort
                 timeRemaining = totalTimeLimit; // Cap at original time
             }
 
+            // Subtract bonus from elapsed time so completion time reflects earned time savings
+            elapsedTime = Mathf.Max(0f, elapsedTime - seconds);
+
             // Stop tick tock if time is back above 10s
             if (timeRemaining > 10f)
                 AudioManager.Instance?.StopTickTock();
 
             GameEvents.InvokeTimerUpdated(timeRemaining);
-            Debug.Log($"[LevelManager] Added {seconds}s to timer, now {timeRemaining}s");
+            Debug.Log($"[LevelManager] Added {seconds}s to timer, now {timeRemaining}s (elapsed adjusted to {elapsedTime}s)");
         }
 
         /// <summary>
@@ -647,7 +659,12 @@ namespace SortResort
                 colorBackgroundRenderer.color = new Color(1f, 1f, 1f, 0f);
             }
 
-            // Reset timer
+            // Reset timer and stop freeze coroutine
+            if (freezeTimerCoroutine != null)
+            {
+                StopCoroutine(freezeTimerCoroutine);
+                freezeTimerCoroutine = null;
+            }
             timerActive = false;
             timerFrozen = false;
             timeRemaining = 0;
@@ -877,8 +894,14 @@ namespace SortResort
                 StopRecording();
             }
 
-            // Stop tick-tock and timer before victory sound
+            // Stop tick-tock, timer freeze coroutine, and timer before victory sound
+            if (freezeTimerCoroutine != null)
+            {
+                StopCoroutine(freezeTimerCoroutine);
+                freezeTimerCoroutine = null;
+            }
             timerActive = false;
+            timerFrozen = false;
             AudioManager.Instance?.StopTickTock();
 
             // Play victory sound

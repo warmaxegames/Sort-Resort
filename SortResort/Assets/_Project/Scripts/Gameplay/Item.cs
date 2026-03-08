@@ -63,7 +63,7 @@ namespace SortResort
         // Properties
         public string ItemId => itemId;
         public ItemState CurrentState => currentState;
-        public bool IsInteractive => isInteractive && currentState != ItemState.Matched;
+        public bool IsInteractive => isInteractive && currentState != ItemState.Matched && (CurrentContainer == null || !CurrentContainer.IsLocked);
         public bool IsDragging => currentState == ItemState.Dragging;
         public bool IsMatched => currentState == ItemState.Matched;
         public Slot CurrentSlot { get; private set; }

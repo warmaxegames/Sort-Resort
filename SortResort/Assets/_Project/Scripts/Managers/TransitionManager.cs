@@ -11,7 +11,7 @@ namespace SortResort
         public static TransitionManager Instance { get; private set; }
 
         [Header("Transition Settings")]
-        [SerializeField] private float fadeDuration = 0.5f;
+        [SerializeField] private float fadeDuration = 0.35f;
         [SerializeField] private Color fadeColor = Color.black;
         [SerializeField] private AnimationCurve fadeCurve = AnimationCurve.EaseInOut(0, 0, 1, 1);
 
