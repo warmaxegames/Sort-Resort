@@ -460,6 +460,12 @@ To update all level thresholds: `Tools > Sort Resort > Solver > Update All Level
 1. Unity: **File → Build Settings → WebGL → Build** (output: `WebGL_Build/`)
 2. Steps 2-4 above are what Claude does when asked to "commit and push and deploy"
 
+#### CRITICAL: Never checkout gh-pages in the parent repo
+- The parent repo (`Unity Redo/`) has both `master` and `gh-pages` branches. **NEVER run `git checkout gh-pages` in the parent repo** — this wipes all Unity project files (`_Project/`, `Scenes/`, etc.) from disk since `gh-pages` only contains WebGL build output. This effectively destroys the working project and any uncommitted changes are lost permanently.
+- WebGL deploy commands MUST use the **nested** `WebGL_Build/` git repo (which has its own `.git` directory). Always `cd` into `WebGL_Build/` before running any `gh-pages` git commands.
+- Before any deploy step, verify you are in the correct repo: run `git rev-parse --show-toplevel` and confirm it ends with `WebGL_Build`, NOT `Unity Redo`.
+- If something goes wrong during deploy, do NOT attempt to fix it by running git branch/checkout commands from the parent `Unity Redo/SortResort/` directory.
+
 #### Notes
 - `WebGL_Build/` is a separate git repo on the `gh-pages` branch
 - **Git LFS is required** for `.data` and `.wasm` files (>100MB GitHub limit). LFS is configured in `WebGL_Build/.gitattributes`
