@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 9c9070a4472b35c449070a292f888805
+guid: 7e5a57b7bb353954980a76531c6b5a47
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -7096525001389135929
-    second: tavern_hog_welcome_0
+      213: 4854813017808607692
+    second: space_leika_happy_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -97,33 +97,7 @@ TextureImporter:
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
   - serializedVersion: 4
-    buildTarget: Android
-    maxTextureSize: 2048
-    resizeAlgorithm: 0
-    textureFormat: -1
-    textureCompression: 1
-    compressionQuality: 50
-    crunchedCompression: 0
-    allowsAlphaSplitting: 0
-    overridden: 0
-    ignorePlatformSupport: 0
-    androidETC2FallbackOverride: 0
-    forceMaximumCompressionQuality_BC6H_BC7: 0
-  - serializedVersion: 4
     buildTarget: WebGL
-    maxTextureSize: 1024
-    resizeAlgorithm: 0
-    textureFormat: 50
-    textureCompression: 1
-    compressionQuality: 50
-    crunchedCompression: 1
-    allowsAlphaSplitting: 0
-    overridden: 1
-    ignorePlatformSupport: 0
-    androidETC2FallbackOverride: 0
-    forceMaximumCompressionQuality_BC6H_BC7: 0
-  - serializedVersion: 4
-    buildTarget: iOS
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
@@ -139,13 +113,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: tavern_hog_welcome_0
+      name: space_leika_happy_0
       rect:
         serializedVersion: 2
-        x: 263
-        y: 30
-        width: 654
-        height: 776
+        x: 42
+        y: 88
+        width: 742
+        height: 1125
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -154,8 +128,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 7c7a5883c14148d90800000000000000
-      internalID: -7096525001389135929
+      spriteID: cc99c61c7b2cf5340800000000000000
+      internalID: 4854813017808607692
       vertices: []
       indices: 
       edges: []
@@ -174,7 +148,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      tavern_hog_welcome_0: -7096525001389135929
+      space_leika_happy_0: 4854813017808607692
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

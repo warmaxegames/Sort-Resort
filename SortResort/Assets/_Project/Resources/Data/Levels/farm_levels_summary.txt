@@ -1,15 +1,15 @@
 Farm Levels Summary
 ================================================================================
 
-L 34: 16c, 32t,  96i, 3r,  74% fill, thresh=[64, 74, 83, 90], timer=129s, solver=64m, construct=83m, [carousel]
+L 84: 25c, 34t, 102i, 3r,  72% fill, thresh=[60, 69, 78, 84], timer=60s, solver=60m, construct=71m, [despawn, locked, single]
 
 Item usage: min=0, max=1
-UNUSED: ['corncob', 'cucumber', 'greentomato', 'mushroom', 'bellpeppergreen', 'romaine', 'leek', 'raspberry', 'garlic', 'whiteonion', 'peapod']
+UNUSED: ['mushroom', 'bellpepperred', 'radish', 'leek', 'greenapple', 'lemon', 'chicken']
 
 Mechanic histogram:
-  carousel: 1/1
+  despawn: 1/1
+  locked: 1/1
+  single: 1/1
 
 Errors:
-  L34: container_15 bbox (200-540, 1503-1739) off-screen
-  L34: container_16 bbox (540-880, 1503-1739) off-screen
-  Unused items: ['corncob', 'cucumber', 'greentomato', 'mushroom', 'bellpeppergreen', 'romaine', 'leek', 'raspberry', 'garlic', 'whiteonion', 'peapod']
+  Unused items: ['mushroom', 'bellpepperred', 'radish', 'leek', 'greenapple', 'lemon', 'chicken']

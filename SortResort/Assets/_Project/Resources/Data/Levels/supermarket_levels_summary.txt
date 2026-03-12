@@ -1,15 +1,15 @@
 Supermarket Levels Summary
 ================================================================================
 
-L 82: 17c, 25t,  75i, 3r,  66% fill, thresh=[60, 69, 78, 84], timer=47s, solver=60m, construct=62m (attempt 4), [carousel, locked, single]
+L 84: 25c, 34t, 102i, 3r,  72% fill, thresh=[60, 69, 78, 84], timer=60s, solver=60m, construct=71m, [despawn, locked, single]
 
 Item usage: min=0, max=1
-UNUSED: ['milkbottle', 'carrotjuice', 'peas', 'oliveoil', 'strawberryjuice', 'chips', 'peanutbutter', 'raspberryjam', 'greenwaterbottle', 'orangewaterbottle', 'bluethermos', 'pinkthermosstraw', 'togocoffeebrown', 'eggs']
+UNUSED: ['lemonjuice', 'cannedtomato', 'redapplejuice', 'peachjuice', 'vinegar', 'coffeebeans']
 
 Mechanic histogram:
-  carousel: 1/1
+  despawn: 1/1
   locked: 1/1
   single: 1/1
 
 Errors:
-  Unused items: ['milkbottle', 'carrotjuice', 'peas', 'oliveoil', 'strawberryjuice', 'chips', 'peanutbutter', 'raspberryjam', 'greenwaterbottle', 'orangewaterbottle', 'bluethermos', 'pinkthermosstraw', 'togocoffeebrown', 'eggs']
+  Unused items: ['lemonjuice', 'cannedtomato', 'redapplejuice', 'peachjuice', 'vinegar', 'coffeebeans']

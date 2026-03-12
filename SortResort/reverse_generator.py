@@ -295,6 +295,7 @@ def reverse_place_items(containers, item_ids, max_rows, rng, level=1):
     _fix_starting_triples(grid, all_playable, rng, c_rows)
     _ensure_no_empty_containers(grid, all_playable, rng, c_rows)
     _ensure_singleslot_depth(grid, all_playable, rng, c_rows)
+    _fix_auto_advance_empties(grid, all_playable, rng, c_rows)
 
     # ── Convert grid → initial_items ───────────────────────────────────
     for c in containers:
@@ -441,6 +442,50 @@ def _ensure_singleslot_depth(grid, containers, rng, c_rows):
             if grid[cid][0][0] is not None and grid[cid][0][1] is None:
                 grid[cid][0][1] = grid[cid][0][0]
                 grid[cid][0][0] = None
+
+
+def _fix_auto_advance_empties(grid, containers, rng, c_rows):
+    """Fix containers where ALL front slots are empty but back items exist.
+
+    The game calls CheckAndAdvanceAllRows() on load, which advances back items
+    to the front when ALL front slots are empty. This eliminates what the
+    generator thought were empty front slots, potentially leaving zero playable
+    moves. Fix by pulling one back-row item to the front in each such container.
+    """
+    for c in containers:
+        cid = c["id"]
+        mr = c_rows[cid]
+        if mr <= 1:
+            continue
+
+        # Check: are ALL front slots empty?
+        all_front_empty = all(
+            grid[cid][s][0] is None for s in range(c["slot_count"])
+        )
+        if not all_front_empty:
+            continue
+
+        # Check: are there any back items that would auto-advance?
+        has_back = any(
+            grid[cid][s][r] is not None
+            for s in range(c["slot_count"])
+            for r in range(1, mr)
+        )
+        if not has_back:
+            continue
+
+        # Pull the first back-row item we find to the front of its slot.
+        # Only need one occupied front slot to prevent auto-advance.
+        fixed = False
+        for s in range(c["slot_count"]):
+            for r in range(1, mr):
+                if grid[cid][s][r] is not None:
+                    grid[cid][s][0] = grid[cid][s][r]
+                    grid[cid][s][r] = None
+                    fixed = True
+                    break
+            if fixed:
+                break
 
 
 # ── Capacity Calculation ─────────────────────────────────────────────────────

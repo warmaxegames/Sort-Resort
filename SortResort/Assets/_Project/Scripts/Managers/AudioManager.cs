@@ -690,7 +690,7 @@ namespace SortResort
 
         public void ResumeTickTock()
         {
-            if (tickTockSource != null && tickTockSource.time > 0f && !tickTockSource.isPlaying)
+            if (tickTockSource != null && tickTockSource.clip != null && tickTockSource.time > 0f && !tickTockSource.isPlaying)
                 tickTockSource.UnPause();
         }
 

@@ -5,6 +5,18 @@ TextureImporter:
   - first:
       213: 672493617883081044
     second: under_par_0
+  - first:
+      213: 9072525614160516129
+    second: under_par_1
+  - first:
+      213: 2281367577796418987
+    second: under_par_2
+  - first:
+      213: 7789200340318763546
+    second: under_par_3
+  - first:
+      213: -8139649169064364811
+    second: under_par_4
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -116,10 +128,10 @@ TextureImporter:
       name: under_par_0
       rect:
         serializedVersion: 2
-        x: 9
-        y: 8
-        width: 183
-        height: 183
+        x: 0
+        y: 0
+        width: 179
+        height: 178
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -130,6 +142,94 @@ TextureImporter:
       bones: []
       spriteID: 45963a7e16d255900800000000000000
       internalID: 672493617883081044
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: under_par_1
+      rect:
+        serializedVersion: 2
+        x: 33
+        y: 156
+        width: 42
+        height: 22
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1249baf4af518ed70800000000000000
+      internalID: 9072525614160516129
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: under_par_2
+      rect:
+        serializedVersion: 2
+        x: 103
+        y: 173
+        width: 12
+        height: 5
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bad16ac89bb09af10800000000000000
+      internalID: 2281367577796418987
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: under_par_3
+      rect:
+        serializedVersion: 2
+        x: 114
+        y: 156
+        width: 34
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a1a3d09c07cc81c60800000000000000
+      internalID: 7789200340318763546
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: under_par_4
+      rect:
+        serializedVersion: 2
+        x: 166
+        y: 114
+        width: 10
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5f47d99d4382a0f80800000000000000
+      internalID: -8139649169064364811
       vertices: []
       indices: 
       edges: []
@@ -149,6 +249,10 @@ TextureImporter:
       entries: []
     nameFileIdTable:
       under_par_0: 672493617883081044
+      under_par_1: 9072525614160516129
+      under_par_2: 2281367577796418987
+      under_par_3: 7789200340318763546
+      under_par_4: -8139649169064364811
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

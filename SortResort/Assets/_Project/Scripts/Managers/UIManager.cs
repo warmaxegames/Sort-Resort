@@ -214,6 +214,9 @@ namespace SortResort
         private Sprite achvTabSprite;
         private Sprite achvTabPressedSprite;
 
+        // Stats screen
+        private SortResort.UI.StatsScreen statsScreen;
+
         // Achievement frame + icon compositing system
         private static Sprite cachedFrameBronze;
         private static Sprite cachedFrameSilver;
@@ -365,6 +368,7 @@ namespace SortResort
             CreatePauseMenuPanel();
             CreateAchievementNotificationPanel();
             CreateAchievementsPanel();
+            CreateStatsPanel();
             CreateDialoguePanel();
             CreatePowerUpBar();
 
@@ -766,6 +770,42 @@ namespace SortResort
                 trophyBtn.spriteState = achSpriteState;
             }
             trophyBtn.onClick.AddListener(OnAchievementsClicked);
+
+            // Stats button - next to achievements button
+            var statsBtnGO = new GameObject("StatsButton");
+            statsBtnGO.transform.SetParent(topBar.transform, false);
+            var statsBtnRect = statsBtnGO.AddComponent<RectTransform>();
+            statsBtnRect.anchorMin = new Vector2(1, 0.5f);
+            statsBtnRect.anchorMax = new Vector2(1, 0.5f);
+            statsBtnRect.pivot = new Vector2(1, 0.5f);
+            statsBtnRect.anchoredPosition = new Vector2(-265, 0);
+            statsBtnRect.sizeDelta = new Vector2(100, 100);
+
+            var statsBtnImg = statsBtnGO.AddComponent<Image>();
+            var statsNormalSprite = LoadFullRectSprite("Sprites/UI/Stats/stats_button");
+            var statsPressedSprite = LoadFullRectSprite("Sprites/UI/Stats/stats_button_pressed");
+            if (statsNormalSprite != null)
+            {
+                statsBtnImg.sprite = statsNormalSprite;
+                statsBtnImg.preserveAspect = true;
+                statsBtnImg.color = Color.white;
+            }
+            else
+            {
+                // Fallback: simple colored square if sprite not yet available
+                statsBtnImg.color = new Color(0.4f, 0.7f, 0.9f, 1f);
+            }
+
+            var statsBtn = statsBtnGO.AddComponent<Button>();
+            statsBtn.transition = Selectable.Transition.SpriteSwap;
+            statsBtn.targetGraphic = statsBtnImg;
+            if (statsPressedSprite != null)
+            {
+                var statsSpriteState = new SpriteState();
+                statsSpriteState.pressedSprite = statsPressedSprite;
+                statsBtn.spriteState = statsSpriteState;
+            }
+            statsBtn.onClick.AddListener(OnStatsClicked);
 
             // Profile overlay - LARGER, positioned to hang OVER the topbar onto the background
             // Parent to levelSelectPanel so it can extend beyond topbar
@@ -1179,12 +1219,28 @@ namespace SortResort
             ShowAchievements();
         }
 
+        private void OnStatsClicked()
+        {
+            Debug.Log("[UIManager] Stats button clicked");
+            AudioManager.Instance?.PlayButtonClick();
+            statsScreen?.Show();
+        }
+
+        private void CreateStatsPanel()
+        {
+            statsScreen = new SortResort.UI.StatsScreen();
+            statsScreen.Create(mainCanvas.transform);
+        }
+
         private void OnLevelSelectedFromMenu(string worldId, int levelNumber)
         {
             Debug.Log($"[UIManager] Level selected: {worldId} #{levelNumber}");
 
             TransitionManager.Instance?.FadeOut(() =>
             {
+                // Kill portal animation before fade-in reveals gameplay
+                SortResort.UI.PortalAnimation.Instance?.ForceHide();
+
                 // Update GameManager state
                 if (GameManager.Instance != null)
                 {
@@ -6610,6 +6666,7 @@ Antonia and Joakim Engfors
             uiType.GetField("mascotImage", flags)?.SetValue(dialogueUI, dialogueMascotImage);
             uiType.GetField("dialogueText", flags)?.SetValue(dialogueUI, dialogueText);
             uiType.GetField("continueIndicator", flags)?.SetValue(dialogueUI, dialogueContinueIndicator);
+            uiType.GetField("textAreaRect", flags)?.SetValue(dialogueUI, textRect);
 
             // Wire up skip button sprites
             dialogueUI.SetSkipButtonSprites(skipImg, skipNormalSprite, skipPressedSprite);

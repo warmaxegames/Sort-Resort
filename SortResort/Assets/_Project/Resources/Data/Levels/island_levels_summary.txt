@@ -1,13 +1,15 @@
 Island Levels Summary
 ================================================================================
 
-L 34: 14c, 26t,  78i, 3r,  70% fill, thresh=[48, 55, 62, 67], timer=117s, solver=48m, construct=65m, [carousel]
+L100: 20c, 29t,  87i, 3r,  69% fill, thresh=[61, 70, 79, 85], timer=44s, solver=61m, construct=65m, [despawn, locked, single]
 
 Item usage: min=0, max=1
-UNUSED: ['sandpale_blue', 'pineapple', 'maitai', 'sparkleicecreamcone', 'icecreamparfait', 'surfboardpalmtrees', 'surfboardbluewhitestripes', 'surfboardbluewhitepeace', 'sunscreen', 'sunscreenspf50', 'sunglassespurple', 'watermelonslice', 'oysterblue', 'camera']
+UNUSED: ['greencoconut', 'maitai', 'sandals', 'surfboardbluepink', 'surfboardpalmtrees', 'bluesunglasses', 'sunscreen', 'sunhat', 'sunglassesorange', 'hibiscusflower']
 
 Mechanic histogram:
-  carousel: 1/1
+  despawn: 1/1
+  locked: 1/1
+  single: 1/1
 
 Errors:
-  Unused items: ['sandpale_blue', 'pineapple', 'maitai', 'sparkleicecreamcone', 'icecreamparfait', 'surfboardpalmtrees', 'surfboardbluewhitestripes', 'surfboardbluewhitepeace', 'sunscreen', 'sunscreenspf50', 'sunglassespurple', 'watermelonslice', 'oysterblue', 'camera']
+  Unused items: ['greencoconut', 'maitai', 'sandals', 'surfboardbluepink', 'surfboardpalmtrees', 'bluesunglasses', 'sunscreen', 'sunhat', 'sunglassesorange', 'hibiscusflower']

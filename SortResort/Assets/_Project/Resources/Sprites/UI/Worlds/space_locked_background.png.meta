@@ -1,10 +1,13 @@
 fileFormatVersion: 2
-guid: b08925f2da4fdf0498d44b71af89fb46
+guid: d6f4a66ff621f8c408254223cc1eba4e
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -5030912339748242602
-    second: space_leika_confused_0
+      213: -6850254051323494717
+    second: space_locked_background_0
+  - first:
+      213: 7594210746177792085
+    second: space_locked_background_1
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -97,33 +100,7 @@ TextureImporter:
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
   - serializedVersion: 4
-    buildTarget: Android
-    maxTextureSize: 2048
-    resizeAlgorithm: 0
-    textureFormat: -1
-    textureCompression: 1
-    compressionQuality: 50
-    crunchedCompression: 0
-    allowsAlphaSplitting: 0
-    overridden: 0
-    ignorePlatformSupport: 0
-    androidETC2FallbackOverride: 0
-    forceMaximumCompressionQuality_BC6H_BC7: 0
-  - serializedVersion: 4
     buildTarget: WebGL
-    maxTextureSize: 1024
-    resizeAlgorithm: 0
-    textureFormat: 50
-    textureCompression: 1
-    compressionQuality: 50
-    crunchedCompression: 1
-    allowsAlphaSplitting: 0
-    overridden: 1
-    ignorePlatformSupport: 0
-    androidETC2FallbackOverride: 0
-    forceMaximumCompressionQuality_BC6H_BC7: 0
-  - serializedVersion: 4
-    buildTarget: iOS
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
@@ -139,13 +116,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: space_leika_confused_0
+      name: space_locked_background_0
       rect:
         serializedVersion: 2
-        x: 21
-        y: 94
-        width: 763
-        height: 1119
+        x: 0
+        y: 0
+        width: 1080
+        height: 1121
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -154,8 +131,30 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 65b3d25c1eb9e2ab0800000000000000
-      internalID: -5030912339748242602
+      spriteID: 3cebea90c320fe0a0800000000000000
+      internalID: -6850254051323494717
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: space_locked_background_1
+      rect:
+        serializedVersion: 2
+        x: 257
+        y: 1056
+        width: 145
+        height: 158
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 558a163107e046960800000000000000
+      internalID: 7594210746177792085
       vertices: []
       indices: 
       edges: []
@@ -174,7 +173,8 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      space_leika_confused_0: -5030912339748242602
+      space_locked_background_0: -6850254051323494717
+      space_locked_background_1: 7594210746177792085
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

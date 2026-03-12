@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 20902355f23940f44b14814dab96fedd
+guid: 23e2b95b56fef1b43814f62815faff5d
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -2214050139887268729
-    second: combo_timer_0
+      213: -3416011311539059234
+    second: tavern_hog_default_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -113,13 +113,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: combo_timer_0
+      name: tavern_hog_default_0
       rect:
         serializedVersion: 2
-        x: 0
-        y: 14
-        width: 223
-        height: 217
+        x: 264
+        y: 30
+        width: 637
+        height: 776
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -128,8 +128,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 78c8d19d02d1641e0800000000000000
-      internalID: -2214050139887268729
+      spriteID: ed58ffa9fc3e790d0800000000000000
+      internalID: -3416011311539059234
       vertices: []
       indices: 
       edges: []
@@ -148,7 +148,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      combo_timer_0: -2214050139887268729
+      tavern_hog_default_0: -3416011311539059234
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

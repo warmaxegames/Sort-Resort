@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 20902355f23940f44b14814dab96fedd
+guid: 7dd893d124809fd4886410adb18c6e36
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -2214050139887268729
-    second: combo_timer_0
+      213: 8382758137636141619
+    second: island_whiskers_default_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -113,13 +113,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: combo_timer_0
+      name: island_whiskers_default_0
       rect:
         serializedVersion: 2
-        x: 0
-        y: 14
-        width: 223
-        height: 217
+        x: 124
+        y: 103
+        width: 487
+        height: 655
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -128,8 +128,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 78c8d19d02d1641e0800000000000000
-      internalID: -2214050139887268729
+      spriteID: 33a31d7cc1a855470800000000000000
+      internalID: 8382758137636141619
       vertices: []
       indices: 
       edges: []
@@ -148,7 +148,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      combo_timer_0: -2214050139887268729
+      island_whiskers_default_0: 8382758137636141619
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

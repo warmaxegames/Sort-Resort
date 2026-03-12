@@ -66,6 +66,20 @@ namespace SortResort
         private int threeStarStreak;
         private int hardModeStreak;
 
+        // Stats screen counters
+        private int totalLevelsFailed;
+        private int totalLevelsRestarted;
+        private int totalGoodCombos;    // 2-streak
+        private int totalAmazingCombos; // 3-streak
+        private int totalPerfectCombos; // 4+-streak
+        private int bestComboStreak;
+        private int powerUpsUsedSwap;
+        private int powerUpsUsedDestroyLocker;
+        private int powerUpsUsedMoveFreeze;
+        private int powerUpsUsedTimeFreeze;
+        private int dailyLoginCount;
+        private string lastLoginDate; // yyyy-MM-dd
+
         // Per-level session stats (reset on level start)
         private int powerUpsUsedThisLevel;
         private float comboTimerBonusThisLevel;
@@ -86,6 +100,30 @@ namespace SortResort
         public IReadOnlyList<string> AvailableTabs => availableTabs;
         public static IReadOnlyList<string> Worlds => RegisteredWorlds;
 
+        // Stats screen getters
+        public int TotalMatchesMade => totalMatchesMade;
+        public int TotalMovesMade => totalMovesMade;
+        public int TotalStarsEarned => totalStarsEarned;
+        public float TotalPlaytimeSeconds => totalPlaytimeSeconds;
+        public int TotalCombos => totalCombos;
+        public int TotalPowerUpsUsed => totalPowerUpsUsed;
+        public int TotalPhotoFinishes => totalPhotoFinishes;
+        public int TotalNegativeTimeCompletions => totalNegativeTimeCompletions;
+        public int ThreeStarStreak => threeStarStreak;
+        public int HardModeStreak => hardModeStreak;
+        public int BestComboTimerChain => bestComboTimerChain;
+        public int TotalLevelsFailed => totalLevelsFailed;
+        public int TotalLevelsRestarted => totalLevelsRestarted;
+        public int TotalGoodCombos => totalGoodCombos;
+        public int TotalAmazingCombos => totalAmazingCombos;
+        public int TotalPerfectCombos => totalPerfectCombos;
+        public int BestComboStreak => bestComboStreak;
+        public int PowerUpsUsedSwap => powerUpsUsedSwap;
+        public int PowerUpsUsedDestroyLocker => powerUpsUsedDestroyLocker;
+        public int PowerUpsUsedMoveFreeze => powerUpsUsedMoveFreeze;
+        public int PowerUpsUsedTimeFreeze => powerUpsUsedTimeFreeze;
+        public int DailyLoginCount => dailyLoginCount;
+
         private void Awake()
         {
             if (Instance != null && Instance != this)
@@ -99,6 +137,7 @@ namespace SortResort
             BuildAvailableTabs();
             InitializeAchievements();
             LoadProgress();
+            CheckDailyLogin();
             SubscribeToEvents();
         }
 
@@ -107,6 +146,26 @@ namespace SortResort
             UnsubscribeFromEvents();
             if (Instance == this)
                 Instance = null;
+        }
+
+        private void Update()
+        {
+            // Track playtime only while actively playing a level
+            if (GameManager.Instance != null && GameManager.Instance.CurrentState == GameState.Playing)
+            {
+                totalPlaytimeSeconds += Time.unscaledDeltaTime;
+            }
+        }
+
+        private void CheckDailyLogin()
+        {
+            string today = DateTime.Now.ToString("yyyy-MM-dd");
+            if (lastLoginDate != today)
+            {
+                dailyLoginCount++;
+                lastLoginDate = today;
+                SaveProgress();
+            }
         }
 
         #region Tab Management
@@ -835,7 +894,9 @@ namespace SortResort
             GameEvents.OnLevelCompleted += OnLevelCompleted;
             GameEvents.OnLevelCompletedDetailed += OnLevelCompletedDetailed;
             GameEvents.OnMatchMade += OnMatchMade;
+            GameEvents.OnMoveUsed += OnMoveUsed;
             GameEvents.OnLevelStarted += OnLevelStarted;
+            GameEvents.OnGamePaused += OnGamePaused;
             GameEvents.OnLevelFailed += OnLevelFailed;
             GameEvents.OnLevelRestarted += OnLevelRestarted;
             GameEvents.OnPowerUpUsed += OnPowerUpUsed;
@@ -847,7 +908,9 @@ namespace SortResort
             GameEvents.OnLevelCompleted -= OnLevelCompleted;
             GameEvents.OnLevelCompletedDetailed -= OnLevelCompletedDetailed;
             GameEvents.OnMatchMade -= OnMatchMade;
+            GameEvents.OnMoveUsed -= OnMoveUsed;
             GameEvents.OnLevelStarted -= OnLevelStarted;
+            GameEvents.OnGamePaused -= OnGamePaused;
             GameEvents.OnLevelFailed -= OnLevelFailed;
             GameEvents.OnLevelRestarted -= OnLevelRestarted;
             GameEvents.OnPowerUpUsed -= OnPowerUpUsed;
@@ -947,6 +1010,17 @@ namespace SortResort
             }
 
             Debug.Log($"[AchievementManager] Level completed ({levelIdentifier}, {stars} stars)");
+        }
+
+        private void OnMoveUsed(int currentMoveCount)
+        {
+            totalMovesMade++;
+        }
+
+        private void OnGamePaused()
+        {
+            // Save stats (playtime, moves) on pause so they aren't lost if app is killed
+            SaveProgress();
         }
 
         private void OnMatchMade(string itemId)
@@ -1196,6 +1270,15 @@ namespace SortResort
             powerUpsUsedThisLevel++;
             totalPowerUpsUsed++;
 
+            // Per-type tracking for stats screen
+            switch (type)
+            {
+                case PowerUpType.SwapItems: powerUpsUsedSwap++; break;
+                case PowerUpType.DestroyLocker: powerUpsUsedDestroyLocker++; break;
+                case PowerUpType.MoveFreeze: powerUpsUsedMoveFreeze++; break;
+                case PowerUpType.TimeFreeze: powerUpsUsedTimeFreeze++; break;
+            }
+
             // Total power-up usage achievements
             foreach (var a in achievements.Values)
             {
@@ -1224,6 +1307,15 @@ namespace SortResort
         private void OnComboTriggered(int comboStreak)
         {
             totalCombos++;
+
+            // Per-tier combo tracking for stats screen
+            if (comboStreak == 2) totalGoodCombos++;
+            else if (comboStreak == 3) totalAmazingCombos++;
+            else if (comboStreak >= 4) totalPerfectCombos++;
+
+            // Best combo streak
+            if (comboStreak > bestComboStreak)
+                bestComboStreak = comboStreak;
 
             // Combo master achievements (total combos)
             foreach (var a in achievements.Values)
@@ -1261,22 +1353,24 @@ namespace SortResort
         /// </summary>
         private void OnLevelFailed(int levelNumber, string reason)
         {
+            totalLevelsFailed++;
+
             var mode = GameManager.Instance?.CurrentGameMode ?? GameMode.FreePlay;
 
             if (mode == GameMode.HardMode)
             {
                 hardModeStreak = 0;
-                SaveProgress();
             }
 
             if (mode == GameMode.StarMode || mode == GameMode.HardMode)
             {
                 threeStarStreak = 0;
-                SaveProgress();
             }
 
             // Reset combo chain on failure
             comboTimerChainThisLevel = 0;
+
+            SaveProgress();
         }
 
         /// <summary>
@@ -1284,16 +1378,19 @@ namespace SortResort
         /// </summary>
         private void OnLevelRestarted()
         {
+            totalLevelsRestarted++;
+
             var mode = GameManager.Instance?.CurrentGameMode ?? GameMode.FreePlay;
 
             if (mode == GameMode.HardMode)
             {
                 hardModeStreak = 0;
-                SaveProgress();
             }
 
             // Reset combo chain on restart
             comboTimerChainThisLevel = 0;
+
+            SaveProgress();
         }
 
         /// <summary>
@@ -1958,7 +2055,25 @@ namespace SortResort
                 bestPowerUpsInOneLevel = bestPowerUpsInOneLevel,
                 bestComboTimerChain = bestComboTimerChain,
                 threeStarStreak = threeStarStreak,
-                hardModeStreak = hardModeStreak
+                hardModeStreak = hardModeStreak,
+                // Original stats (now persisted)
+                totalMatchesMade = totalMatchesMade,
+                totalMovesMade = totalMovesMade,
+                totalStarsEarned = totalStarsEarned,
+                totalPlaytimeSeconds = totalPlaytimeSeconds,
+                // Stats screen counters
+                totalLevelsFailed = totalLevelsFailed,
+                totalLevelsRestarted = totalLevelsRestarted,
+                totalGoodCombos = totalGoodCombos,
+                totalAmazingCombos = totalAmazingCombos,
+                totalPerfectCombos = totalPerfectCombos,
+                bestComboStreak = bestComboStreak,
+                powerUpsUsedSwap = powerUpsUsedSwap,
+                powerUpsUsedDestroyLocker = powerUpsUsedDestroyLocker,
+                powerUpsUsedMoveFreeze = powerUpsUsedMoveFreeze,
+                powerUpsUsedTimeFreeze = powerUpsUsedTimeFreeze,
+                dailyLoginCount = dailyLoginCount,
+                lastLoginDate = lastLoginDate
             };
 
             string json = JsonUtility.ToJson(saveData);
@@ -2010,6 +2125,26 @@ namespace SortResort
                 threeStarStreak = saveData.threeStarStreak;
                 hardModeStreak = saveData.hardModeStreak;
 
+                // Original stats (now persisted, default to 0 for backward compatibility)
+                totalMatchesMade = saveData.totalMatchesMade;
+                totalMovesMade = saveData.totalMovesMade;
+                totalStarsEarned = saveData.totalStarsEarned;
+                totalPlaytimeSeconds = saveData.totalPlaytimeSeconds;
+
+                // Stats screen counters (default to 0 for backward compatibility)
+                totalLevelsFailed = saveData.totalLevelsFailed;
+                totalLevelsRestarted = saveData.totalLevelsRestarted;
+                totalGoodCombos = saveData.totalGoodCombos;
+                totalAmazingCombos = saveData.totalAmazingCombos;
+                totalPerfectCombos = saveData.totalPerfectCombos;
+                bestComboStreak = saveData.bestComboStreak;
+                powerUpsUsedSwap = saveData.powerUpsUsedSwap;
+                powerUpsUsedDestroyLocker = saveData.powerUpsUsedDestroyLocker;
+                powerUpsUsedMoveFreeze = saveData.powerUpsUsedMoveFreeze;
+                powerUpsUsedTimeFreeze = saveData.powerUpsUsedTimeFreeze;
+                dailyLoginCount = saveData.dailyLoginCount;
+                lastLoginDate = saveData.lastLoginDate ?? "";
+
                 Debug.Log($"[AchievementManager] Loaded {progress.Count} achievement progress entries");
             }
             catch (Exception e)
@@ -2030,6 +2165,10 @@ namespace SortResort
             unlockedCosmetics.Clear();
             unlockedTrophies.Clear();
             visitedWorlds.Clear();
+            totalMatchesMade = 0;
+            totalMovesMade = 0;
+            totalStarsEarned = 0;
+            totalPlaytimeSeconds = 0;
             totalCombos = 0;
             totalPowerUpsUsed = 0;
             totalSimultaneousPowerUps = 0;
@@ -2040,6 +2179,18 @@ namespace SortResort
             bestComboTimerChain = 0;
             threeStarStreak = 0;
             hardModeStreak = 0;
+            totalLevelsFailed = 0;
+            totalLevelsRestarted = 0;
+            totalGoodCombos = 0;
+            totalAmazingCombos = 0;
+            totalPerfectCombos = 0;
+            bestComboStreak = 0;
+            powerUpsUsedSwap = 0;
+            powerUpsUsedDestroyLocker = 0;
+            powerUpsUsedMoveFreeze = 0;
+            powerUpsUsedTimeFreeze = 0;
+            dailyLoginCount = 0;
+            lastLoginDate = "";
 
             PlayerPrefs.DeleteKey(ACHIEVEMENT_SAVE_KEY);
             Debug.Log("[AchievementManager] All achievements reset");
@@ -2058,6 +2209,11 @@ namespace SortResort
             public List<string> unlockedCosmetics;
             public List<string> unlockedTrophies;
             public List<string> visitedWorlds;
+            // Original stats (now persisted)
+            public int totalMatchesMade;
+            public int totalMovesMade;
+            public int totalStarsEarned;
+            public float totalPlaytimeSeconds;
             // New persistent counters (default to 0 for backward compatibility)
             public int totalCombos;
             public int totalPowerUpsUsed;
@@ -2069,6 +2225,19 @@ namespace SortResort
             public int bestComboTimerChain;
             public int threeStarStreak;
             public int hardModeStreak;
+            // Stats screen counters
+            public int totalLevelsFailed;
+            public int totalLevelsRestarted;
+            public int totalGoodCombos;
+            public int totalAmazingCombos;
+            public int totalPerfectCombos;
+            public int bestComboStreak;
+            public int powerUpsUsedSwap;
+            public int powerUpsUsedDestroyLocker;
+            public int powerUpsUsedMoveFreeze;
+            public int powerUpsUsedTimeFreeze;
+            public int dailyLoginCount;
+            public string lastLoginDate;
         }
 
         #endregion

@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: ca29df5f195ca934881905b92a7edd45
+guid: 926072adb47af0a40b7acfeb4fb173f9
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -6139227588046384263
-    second: tavern_hog_thinking_0
+      213: -3494263680356526970
+    second: tavern_hog_happy_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -97,33 +97,7 @@ TextureImporter:
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
   - serializedVersion: 4
-    buildTarget: Android
-    maxTextureSize: 2048
-    resizeAlgorithm: 0
-    textureFormat: -1
-    textureCompression: 1
-    compressionQuality: 50
-    crunchedCompression: 0
-    allowsAlphaSplitting: 0
-    overridden: 0
-    ignorePlatformSupport: 0
-    androidETC2FallbackOverride: 0
-    forceMaximumCompressionQuality_BC6H_BC7: 0
-  - serializedVersion: 4
     buildTarget: WebGL
-    maxTextureSize: 1024
-    resizeAlgorithm: 0
-    textureFormat: 50
-    textureCompression: 1
-    compressionQuality: 50
-    crunchedCompression: 1
-    allowsAlphaSplitting: 0
-    overridden: 1
-    ignorePlatformSupport: 0
-    androidETC2FallbackOverride: 0
-    forceMaximumCompressionQuality_BC6H_BC7: 0
-  - serializedVersion: 4
-    buildTarget: iOS
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
@@ -139,12 +113,12 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: tavern_hog_thinking_0
+      name: tavern_hog_happy_0
       rect:
         serializedVersion: 2
-        x: 264
+        x: 263
         y: 30
-        width: 637
+        width: 654
         height: 776
       alignment: 0
       pivot: {x: 0, y: 0}
@@ -154,8 +128,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 973973329051dcaa0800000000000000
-      internalID: -6139227588046384263
+      spriteID: 684dcc432b1e18fc0800000000000000
+      internalID: -3494263680356526970
       vertices: []
       indices: 
       edges: []
@@ -174,7 +148,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      tavern_hog_thinking_0: -6139227588046384263
+      tavern_hog_happy_0: -3494263680356526970
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

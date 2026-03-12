@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 8fe953962cd7b9e438ea5655af73e8aa
+guid: 3dc7fdc5da7044444bef06f0b3dbc62a
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -3527508063268542350
-    second: supermarket_tommy_neutral_0
+      213: 3640472443056574611
+    second: space_leika_default_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -97,33 +97,7 @@ TextureImporter:
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
   - serializedVersion: 4
-    buildTarget: Android
-    maxTextureSize: 2048
-    resizeAlgorithm: 0
-    textureFormat: -1
-    textureCompression: 1
-    compressionQuality: 50
-    crunchedCompression: 0
-    allowsAlphaSplitting: 0
-    overridden: 0
-    ignorePlatformSupport: 0
-    androidETC2FallbackOverride: 0
-    forceMaximumCompressionQuality_BC6H_BC7: 0
-  - serializedVersion: 4
     buildTarget: WebGL
-    maxTextureSize: 1024
-    resizeAlgorithm: 0
-    textureFormat: 50
-    textureCompression: 1
-    compressionQuality: 50
-    crunchedCompression: 1
-    allowsAlphaSplitting: 0
-    overridden: 1
-    ignorePlatformSupport: 0
-    androidETC2FallbackOverride: 0
-    forceMaximumCompressionQuality_BC6H_BC7: 0
-  - serializedVersion: 4
-    buildTarget: iOS
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
@@ -139,13 +113,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: supermarket_tommy_neutral_0
+      name: space_leika_default_0
       rect:
         serializedVersion: 2
-        x: 0
-        y: 0
-        width: 391
-        height: 545
+        x: 94
+        y: 80
+        width: 690
+        height: 1133
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -154,8 +128,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 2786d822b16cb0fc0800000000000000
-      internalID: -3527508063268542350
+      spriteID: 3905cfe166e858230800000000000000
+      internalID: 3640472443056574611
       vertices: []
       indices: 
       edges: []
@@ -174,7 +148,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      supermarket_tommy_neutral_0: -3527508063268542350
+      space_leika_default_0: 3640472443056574611
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

@@ -20,6 +20,7 @@ namespace SortResort
         [SerializeField] private TextMeshProUGUI nameText;
         [SerializeField] private TextMeshProUGUI dialogueText;
         [SerializeField] private GameObject continueIndicator;
+        [SerializeField] private RectTransform textAreaRect;
 
         [Header("Settings")]
         [SerializeField] private float showAnimationDuration = 0.3f;
@@ -269,6 +270,14 @@ namespace SortResort
             if (worldBox != null)
             {
                 dialogueBoxImage.sprite = worldBox;
+            }
+
+            // Adjust text area position per-world (some dialogue boxes have different layouts)
+            if (textAreaRect != null)
+            {
+                float yOffset = (worldId == "space" || worldId == "tavern") ? 50f : 0f;
+                textAreaRect.offsetMin = new Vector2(40, 30 + yOffset);
+                textAreaRect.offsetMax = new Vector2(-30, -80 + yOffset);
             }
         }
 
