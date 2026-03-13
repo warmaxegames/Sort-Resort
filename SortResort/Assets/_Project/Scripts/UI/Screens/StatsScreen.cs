@@ -151,8 +151,8 @@ namespace SortResort.UI
             var shadowGO = new GameObject("TitleBarShadow");
             shadowGO.transform.SetParent(titleBarGO.transform, false);
             var shadowRect = shadowGO.AddComponent<RectTransform>();
-            var shadowMin = CropMetadata.ConvertAnchorToCropSpace(new Vector2(0.158f, 0.743f), "Sprites/UI/Achievements/achv_title_bar");
-            var shadowMax = CropMetadata.ConvertAnchorToCropSpace(new Vector2(0.831f, 0.843f), "Sprites/UI/Achievements/achv_title_bar");
+            var shadowMin = CropMetadata.ConvertAnchorToCropSpace(new Vector2(0.2315f, 0.743f), "Sprites/UI/Achievements/achv_title_bar");
+            var shadowMax = CropMetadata.ConvertAnchorToCropSpace(new Vector2(0.8333f, 0.843f), "Sprites/UI/Achievements/achv_title_bar");
             shadowRect.anchorMin = shadowMin;
             shadowRect.anchorMax = shadowMax;
             shadowRect.offsetMin = new Vector2(3, -3);
@@ -173,8 +173,8 @@ namespace SortResort.UI
             var textGO = new GameObject("TitleBarText");
             textGO.transform.SetParent(titleBarGO.transform, false);
             var textRect = textGO.AddComponent<RectTransform>();
-            var textMin = CropMetadata.ConvertAnchorToCropSpace(new Vector2(0.158f, 0.743f), "Sprites/UI/Achievements/achv_title_bar");
-            var textMax = CropMetadata.ConvertAnchorToCropSpace(new Vector2(0.831f, 0.843f), "Sprites/UI/Achievements/achv_title_bar");
+            var textMin = CropMetadata.ConvertAnchorToCropSpace(new Vector2(0.2315f, 0.743f), "Sprites/UI/Achievements/achv_title_bar");
+            var textMax = CropMetadata.ConvertAnchorToCropSpace(new Vector2(0.8333f, 0.843f), "Sprites/UI/Achievements/achv_title_bar");
             textRect.anchorMin = textMin;
             textRect.anchorMax = textMax;
             textRect.offsetMin = Vector2.zero;

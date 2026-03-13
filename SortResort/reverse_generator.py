@@ -313,11 +313,23 @@ def reverse_place_items(containers, item_ids, max_rows, rng, level=1):
     return total_triples, total_moves
 
 
+def _would_create_triple(grid, cid, slot_count, row, incoming_item):
+    """Check if placing incoming_item at any slot in this row would complete a triple."""
+    row_items = [grid[cid][s][row] for s in range(slot_count)]
+    # Count how many slots already have incoming_item (excluding the one being swapped)
+    match_count = sum(1 for item in row_items if item == incoming_item)
+    # If 2+ other slots have this item, placing it would create a triple
+    return match_count >= 2
+
+
 def _fix_starting_triples(grid, pool, rng, c_rows):
     """If any 3-slot container has 3 matching items in ANY row, swap one out.
     Checks all rows (not just front) to prevent hidden triples that auto-match
-    when row advancement occurs. Loops until none remain (max 50 iterations)."""
-    for _ in range(50):
+    when row advancement occurs. Loops until none remain (max 100 iterations).
+
+    Safety: verifies the swap won't create a new triple in the destination,
+    and varies which slot is swapped from to avoid cycling."""
+    for _ in range(100):
         found = False
         for c in pool:
             cid = c["id"]
@@ -331,26 +343,40 @@ def _fix_starting_triples(grid, pool, rng, c_rows):
                 if len(set(row_items)) != 1:
                     continue
 
-                # Triple found at row r — swap slot 0 at this row
+                # Triple found at row r — swap a random slot with another container
                 found = True
                 target_item = row_items[0]
+                # Vary which slot we swap from (not always slot 0)
+                swap_from_slots = list(range(c["slot_count"]))
+                rng.shuffle(swap_from_slots)
                 swapped = False
                 candidates = list(pool)
                 rng.shuffle(candidates)
-                for other in candidates:
-                    if other["id"] == cid:
-                        continue
-                    o_mr = c_rows[other["id"]]
-                    # Swap with same row in other container if possible
-                    swap_row = r if r < o_mr else 0
-                    for os_idx in range(other["slot_count"]):
-                        oi = grid[other["id"]][os_idx][swap_row]
-                        if oi is not None and oi != target_item:
-                            grid[cid][0][r], grid[other["id"]][os_idx][swap_row] = oi, target_item
-                            swapped = True
-                            break
+                for swap_from in swap_from_slots:
                     if swapped:
                         break
+                    for other in candidates:
+                        if other["id"] == cid:
+                            continue
+                        o_mr = c_rows[other["id"]]
+                        swap_row = r if r < o_mr else 0
+                        slot_indices = list(range(other["slot_count"]))
+                        rng.shuffle(slot_indices)
+                        for os_idx in slot_indices:
+                            oi = grid[other["id"]][os_idx][swap_row]
+                            if oi is None or oi == target_item:
+                                continue
+                            # Safety: verify swap won't create triple in destination
+                            if _would_create_triple(grid, other["id"],
+                                                    other["slot_count"],
+                                                    swap_row, target_item):
+                                continue
+                            grid[cid][swap_from][r] = oi
+                            grid[other["id"]][os_idx][swap_row] = target_item
+                            swapped = True
+                            break
+                        if swapped:
+                            break
                 if found:
                     break  # restart scan after a fix
             if found:

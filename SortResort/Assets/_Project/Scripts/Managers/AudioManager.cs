@@ -50,6 +50,7 @@ namespace SortResort
         [SerializeField] private AudioClip freezeMovesClip;
         [SerializeField] private AudioClip hammerHitClip;
         [SerializeField] private AudioClip swapClip;
+        [SerializeField] private AudioClip worldUnlockClip;
 
         private AudioSource tickTockSource;
         private bool isUsingSourceA = true;
@@ -142,6 +143,8 @@ namespace SortResort
                 hammerHitClip = Resources.Load<AudioClip>("Audio/SFX/hammer_hit");
             if (swapClip == null)
                 swapClip = Resources.Load<AudioClip>("Audio/SFX/swap");
+            if (worldUnlockClip == null)
+                worldUnlockClip = Resources.Load<AudioClip>("Audio/SFX/world_unlock_sound");
 
             Debug.Log($"[AudioManager] Audio clips loaded - match:{matchClip != null}, unlock:{unlockClip != null}, victory:{victoryClip != null}, button:{buttonClickClip != null}, warp:{warpClip != null}, achievement:{achievementClip != null}, portal:{portalClip != null}");
         }
@@ -638,6 +641,10 @@ namespace SortResort
         {
             // Play at higher volume (2.5x) since unlock_sound.mp3 has low internal audio levels
             PlaySFX(unlockClip, 2.5f);
+        }
+        public void PlayWorldUnlockSound()
+        {
+            PlaySFX(worldUnlockClip, 1.0f);
         }
         public void PlayFailureSound() => PlaySFX(failureClip);
         public void PlayButtonClick() => PlayUI(buttonClickClip);

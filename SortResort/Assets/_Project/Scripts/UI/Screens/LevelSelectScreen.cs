@@ -890,7 +890,7 @@ namespace SortResort.UI
             Debug.Log($"[LevelSelectScreen] Buy world: {worldId}");
 
             // TODO: Connect to real IAP purchase flow later
-            AudioManager.Instance?.PlayUnlockSound();
+            AudioManager.Instance?.PlayWorldUnlockSound();
             SaveManager.Instance?.UnlockWorld(worldId);
 
             // Play unlock animation instead of immediate refresh
@@ -1344,7 +1344,7 @@ namespace SortResort.UI
             }
             else
             {
-                AudioManager.Instance?.PlayUnlockSound();
+                AudioManager.Instance?.PlayWorldUnlockSound();
                 SaveManager.Instance?.UnlockWorld(worldId);
                 AudioManager.Instance?.PlayButtonClick();
                 UpdateDebugWorldLockText();

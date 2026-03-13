@@ -1,15 +1,15 @@
 Farm Levels Summary
 ================================================================================
 
-L 84: 25c, 34t, 102i, 3r,  72% fill, thresh=[60, 69, 78, 84], timer=60s, solver=60m, construct=71m, [despawn, locked, single]
+L 82: 17c, 25t,  75i, 3r,  66% fill, thresh=[66, 76, 86, 92], timer=47s, solver=66m, construct=62m (attempt 4), [carousel, locked, single]
 
 Item usage: min=0, max=1
-UNUSED: ['mushroom', 'bellpepperred', 'radish', 'leek', 'greenapple', 'lemon', 'chicken']
+UNUSED: ['potato', 'bellpeppergreen', 'turnip', 'celery2', 'redapple', 'pear', 'strawberry', 'raspberry', 'avocado', 'watermelon', 'chicken', 'rooster', 'pumpkin', 'sunflower', 'haystack']
 
 Mechanic histogram:
-  despawn: 1/1
+  carousel: 1/1
   locked: 1/1
   single: 1/1
 
 Errors:
-  Unused items: ['mushroom', 'bellpepperred', 'radish', 'leek', 'greenapple', 'lemon', 'chicken']
+  Unused items: ['potato', 'bellpeppergreen', 'turnip', 'celery2', 'redapple', 'pear', 'strawberry', 'raspberry', 'avocado', 'watermelon', 'chicken', 'rooster', 'pumpkin', 'sunflower', 'haystack']

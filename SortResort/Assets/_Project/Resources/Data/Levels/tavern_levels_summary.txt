@@ -1,15 +1,17 @@
 Tavern Levels Summary
 ================================================================================
 
-L 94: 25c, 34t, 102i, 3r,  72% fill, thresh=[63, 72, 82, 88], timer=51s, solver=63m, construct=70m, [despawn, locked, single]
+L 33: 16c, 24t,  72i, 3r,  62% fill, thresh=[52, 60, 68, 73], timer=98s, solver=52m, construct=64m, [carousel, locked, single]
 
 Item usage: min=0, max=1
-UNUSED: ['pies', 'ale_cup_4', 'blue_potion', 'green_potion', 'bow']
+UNUSED: ['ham', 'lamp', 'wine_jar', 'coin_purse', 'ale_cup_4', 'pink_potion', 'mace', 'shield_4', 'scroll_fire', 'scroll_wind', 'horn', 'flute']
 
 Mechanic histogram:
-  despawn: 1/1
+  carousel: 1/1
   locked: 1/1
   single: 1/1
 
 Errors:
-  Unused items: ['pies', 'ale_cup_4', 'blue_potion', 'green_potion', 'bow']
+  L33: container_15 bbox (200-540, 1503-1739) off-screen
+  L33: container_16 bbox (540-880, 1503-1739) off-screen
+  Unused items: ['ham', 'lamp', 'wine_jar', 'coin_purse', 'ale_cup_4', 'pink_potion', 'mace', 'shield_4', 'scroll_fire', 'scroll_wind', 'horn', 'flute']
