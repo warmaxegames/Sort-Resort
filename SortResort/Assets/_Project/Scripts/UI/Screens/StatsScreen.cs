@@ -30,6 +30,7 @@ namespace SortResort.UI
         private Dictionary<string, Image> tabImages = new Dictionary<string, Image>();
         private Sprite tabSprite;
         private Sprite tabPressedSprite;
+        private Sprite roundedBarSprite;
         private TextMeshProUGUI titleBarText;
         private TextMeshProUGUI titleBarShadow;
 
@@ -59,6 +60,9 @@ namespace SortResort.UI
             // Cache tab sprites (reuse achievements tab sprites)
             tabSprite = LoadFullRectSprite("Sprites/UI/Achievements/achv_tab");
             tabPressedSprite = LoadFullRectSprite("Sprites/UI/Achievements/achv_tab_pressed");
+
+            // Generate rounded bar sprite for stat rows (64x64 with r=26, 9-sliced)
+            roundedBarSprite = CreateRoundedRectSprite(64, 64, 26);
 
             // Layer 0: Dark background
             CreateFullscreenImage(panel.transform, "DimBg", null, new Color(0, 0, 0, 0.95f), true);
@@ -113,7 +117,7 @@ namespace SortResort.UI
 
             var vLayout = listContentGO.AddComponent<VerticalLayoutGroup>();
             vLayout.spacing = 8;
-            vLayout.padding = new RectOffset(10, 10, 20, 20);
+            vLayout.padding = new RectOffset(10, 10, 50, 20);
             vLayout.childAlignment = TextAnchor.UpperCenter;
             vLayout.childForceExpandWidth = true;
             vLayout.childForceExpandHeight = false;
@@ -151,12 +155,12 @@ namespace SortResort.UI
             var shadowGO = new GameObject("TitleBarShadow");
             shadowGO.transform.SetParent(titleBarGO.transform, false);
             var shadowRect = shadowGO.AddComponent<RectTransform>();
-            var shadowMin = CropMetadata.ConvertAnchorToCropSpace(new Vector2(0.2315f, 0.743f), "Sprites/UI/Achievements/achv_title_bar");
-            var shadowMax = CropMetadata.ConvertAnchorToCropSpace(new Vector2(0.8333f, 0.843f), "Sprites/UI/Achievements/achv_title_bar");
+            var shadowMin = CropMetadata.ConvertAnchorToCropSpace(new Vector2(0.158f, 0.743f), "Sprites/UI/Achievements/achv_title_bar");
+            var shadowMax = CropMetadata.ConvertAnchorToCropSpace(new Vector2(0.831f, 0.843f), "Sprites/UI/Achievements/achv_title_bar");
             shadowRect.anchorMin = shadowMin;
             shadowRect.anchorMax = shadowMax;
-            shadowRect.offsetMin = new Vector2(3, -3);
-            shadowRect.offsetMax = new Vector2(3, -3);
+            shadowRect.offsetMin = new Vector2(53, -3);
+            shadowRect.offsetMax = new Vector2(53, -3);
             titleBarShadow = shadowGO.AddComponent<TextMeshProUGUI>();
             titleBarShadow.text = "PLAYER STATS";
             titleBarShadow.fontSize = 48;
@@ -173,12 +177,12 @@ namespace SortResort.UI
             var textGO = new GameObject("TitleBarText");
             textGO.transform.SetParent(titleBarGO.transform, false);
             var textRect = textGO.AddComponent<RectTransform>();
-            var textMin = CropMetadata.ConvertAnchorToCropSpace(new Vector2(0.2315f, 0.743f), "Sprites/UI/Achievements/achv_title_bar");
-            var textMax = CropMetadata.ConvertAnchorToCropSpace(new Vector2(0.8333f, 0.843f), "Sprites/UI/Achievements/achv_title_bar");
+            var textMin = CropMetadata.ConvertAnchorToCropSpace(new Vector2(0.158f, 0.743f), "Sprites/UI/Achievements/achv_title_bar");
+            var textMax = CropMetadata.ConvertAnchorToCropSpace(new Vector2(0.831f, 0.843f), "Sprites/UI/Achievements/achv_title_bar");
             textRect.anchorMin = textMin;
             textRect.anchorMax = textMax;
-            textRect.offsetMin = Vector2.zero;
-            textRect.offsetMax = Vector2.zero;
+            textRect.offsetMin = new Vector2(50, 0);
+            textRect.offsetMax = new Vector2(50, 0);
             titleBarText = textGO.AddComponent<TextMeshProUGUI>();
             titleBarText.text = "PLAYER STATS";
             titleBarText.fontSize = 48;
@@ -192,10 +196,13 @@ namespace SortResort.UI
                 titleBarText.font = FontManager.ExtraBold;
 
             // Layer 6: Title Banner ("STATS" reuses achv_title or we show text)
-            CreateCroppedLayer(panel.transform, "TitleBanner", "Sprites/UI/Achievements/achv_title");
+            CreateCroppedLayer(panel.transform, "TitleBanner", "Sprites/UI/Stats/stats_title_bar");
 
             // Layer 7: Close Button
             CreateCloseButton(panel.transform);
+
+            // Layer 8: Whiskers mascot (bottom-right corner)
+            CreateMascotDecoration(panel.transform);
 
             panel.SetActive(false);
             Debug.Log("[StatsScreen] Stats panel created");
@@ -375,7 +382,7 @@ namespace SortResort.UI
             {
                 int completed = GetWorldLevelsCompletedAllModes(worldIds[i]);
                 int stars = GetWorldTotalStarsAllModes(worldIds[i]);
-                AddStatRow(worldNames[i], $"{completed}/100  ({stars} stars)");
+                AddStatRow(worldNames[i], $"{completed}/100\n({stars} Stars)");
             }
         }
 
@@ -510,14 +517,16 @@ namespace SortResort.UI
             layoutElem.preferredHeight = 60;
             layoutElem.minHeight = 60;
 
-            // Background
+            // Background - rounded rectangle matching bar.png style
             var rowImg = rowGO.AddComponent<Image>();
-            rowImg.color = new Color(0.95f, 0.88f, 0.7f, 0.6f);
+            rowImg.sprite = roundedBarSprite;
+            rowImg.type = Image.Type.Sliced;
+            rowImg.color = new Color(1f, 0.871f, 0.647f, 1f);
             rowImg.raycastTarget = false;
 
             // Horizontal layout
             var hLayout = rowGO.AddComponent<HorizontalLayoutGroup>();
-            hLayout.padding = new RectOffset(20, 20, 5, 5);
+            hLayout.padding = new RectOffset(20, 30, 5, 5);
             hLayout.spacing = 10;
             hLayout.childAlignment = TextAnchor.MiddleLeft;
             hLayout.childForceExpandWidth = false;
@@ -723,6 +732,80 @@ namespace SortResort.UI
             pointerUp.eventID = UnityEngine.EventSystems.EventTriggerType.PointerUp;
             pointerUp.callback.AddListener((data) => { closeBtnImg.sprite = normalSprite; });
             trigger.triggers.Add(pointerUp);
+        }
+
+        private static void CreateMascotDecoration(Transform parent)
+        {
+            var go = new GameObject("WhiskersMascot");
+            go.transform.SetParent(parent, false);
+            var r = go.AddComponent<RectTransform>();
+            // Anchor bottom-right: right edge of screen, bottom of viewport
+            r.anchorMin = new Vector2(1, 0);
+            r.anchorMax = new Vector2(1, 0);
+            r.pivot = new Vector2(1, 0); // pivot at bottom-right so it doesn't hang off
+            r.anchoredPosition = new Vector2(-20, 0); // 20px padding from right edge
+            r.sizeDelta = new Vector2(450, 510); // scaled to fit nicely
+            var img = go.AddComponent<Image>();
+            img.sprite = LoadFullRectSprite("Sprites/UI/Stats/whiskers_stats_screen");
+            img.preserveAspect = true;
+            img.raycastTarget = false;
+        }
+
+        /// <summary>
+        /// Generates a rounded rectangle sprite procedurally for use as a 9-sliced background.
+        /// </summary>
+        private static Sprite CreateRoundedRectSprite(int width, int height, int radius)
+        {
+            var tex = new Texture2D(width, height, TextureFormat.RGBA32, false);
+            var pixels = new Color32[width * height];
+            var clear = new Color32(0, 0, 0, 0);
+            var fill = new Color32(255, 255, 255, 255); // White; tinted via Image.color
+
+            for (int y = 0; y < height; y++)
+            {
+                for (int x = 0; x < width; x++)
+                {
+                    // Determine which corner circle to test against
+                    float dx = 0, dy = 0;
+                    bool inCorner = false;
+
+                    if (x < radius && y < radius) // bottom-left
+                    { dx = radius - x - 0.5f; dy = radius - y - 0.5f; inCorner = true; }
+                    else if (x >= width - radius && y < radius) // bottom-right
+                    { dx = x - (width - radius) + 0.5f; dy = radius - y - 0.5f; inCorner = true; }
+                    else if (x < radius && y >= height - radius) // top-left
+                    { dx = radius - x - 0.5f; dy = y - (height - radius) + 0.5f; inCorner = true; }
+                    else if (x >= width - radius && y >= height - radius) // top-right
+                    { dx = x - (width - radius) + 0.5f; dy = y - (height - radius) + 0.5f; inCorner = true; }
+
+                    if (inCorner)
+                    {
+                        float dist = Mathf.Sqrt(dx * dx + dy * dy);
+                        if (dist > radius)
+                            pixels[y * width + x] = clear;
+                        else if (dist > radius - 1f)
+                        {
+                            // Anti-alias the edge
+                            byte a = (byte)(255 * (radius - dist));
+                            pixels[y * width + x] = new Color32(255, 255, 255, a);
+                        }
+                        else
+                            pixels[y * width + x] = fill;
+                    }
+                    else
+                    {
+                        pixels[y * width + x] = fill;
+                    }
+                }
+            }
+
+            tex.SetPixels32(pixels);
+            tex.Apply();
+            tex.filterMode = FilterMode.Bilinear;
+
+            // 9-slice border = radius on all sides
+            var border = new Vector4(radius, radius, radius, radius);
+            return Sprite.Create(tex, new Rect(0, 0, width, height), new Vector2(0.5f, 0.5f), 100f, 0, SpriteMeshType.FullRect, border);
         }
 
         /// <summary>
