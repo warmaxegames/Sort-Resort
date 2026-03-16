@@ -311,7 +311,7 @@ namespace SortResort
                 "island" => "whiskerthumbsup",
                 "supermarket" => "tommythumbsup",
                 "farm" => "marathumbsup",
-                // "tavern" => "hogthumbsup",
+                "tavern" => "hogthumbsup",
                 // "space" => "leikathumbsup",
                 _ => null
             };
@@ -328,6 +328,7 @@ namespace SortResort
                 "island" => 22f,       // 42 frames / 22fps = 1.91s
                 "supermarket" => 33f,  // 63 frames / 33fps = 1.91s
                 "farm" => 16f,         // 31 frames / 16fps = 1.94s
+                "tavern" => 40f,       // 77 frames / 40fps = 1.93s
                 _ => 30f
             };
         }

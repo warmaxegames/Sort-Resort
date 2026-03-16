@@ -1,0 +1,780 @@
+fileFormatVersion: 2
+guid: f8014b612ecdd604ab592a7409e5f5b2
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -1446060064168448146
+    second: hogthumbsup_00005_0
+  - first:
+      213: 7778112833608517601
+    second: hogthumbsup_00005_1
+  - first:
+      213: 8629664528804057019
+    second: hogthumbsup_00005_2
+  - first:
+      213: -4224230033815524
+    second: hogthumbsup_00005_3
+  - first:
+      213: 9121318975106564392
+    second: hogthumbsup_00005_4
+  - first:
+      213: -1077415599107229289
+    second: hogthumbsup_00005_5
+  - first:
+      213: 6247062568404750485
+    second: hogthumbsup_00005_6
+  - first:
+      213: 2191513915155590010
+    second: hogthumbsup_00005_7
+  - first:
+      213: -6842685053524491217
+    second: hogthumbsup_00005_8
+  - first:
+      213: 4797006775395335495
+    second: hogthumbsup_00005_9
+  - first:
+      213: 1997136186638370910
+    second: hogthumbsup_00005_10
+  - first:
+      213: -6222512411364380591
+    second: hogthumbsup_00005_11
+  - first:
+      213: -5397417007719932862
+    second: hogthumbsup_00005_12
+  - first:
+      213: -9017246700380316100
+    second: hogthumbsup_00005_13
+  - first:
+      213: 2685286076051964869
+    second: hogthumbsup_00005_14
+  - first:
+      213: 7646403493870907979
+    second: hogthumbsup_00005_15
+  - first:
+      213: 7602882628633202389
+    second: hogthumbsup_00005_16
+  - first:
+      213: 6274978969578815635
+    second: hogthumbsup_00005_17
+  - first:
+      213: -4706726632059857690
+    second: hogthumbsup_00005_18
+  - first:
+      213: 7211023174621054231
+    second: hogthumbsup_00005_19
+  - first:
+      213: 2758944629220981199
+    second: hogthumbsup_00005_20
+  - first:
+      213: -5909355525392599162
+    second: hogthumbsup_00005_21
+  - first:
+      213: 5378343782096113721
+    second: hogthumbsup_00005_22
+  - first:
+      213: -7605675361284295044
+    second: hogthumbsup_00005_23
+  - first:
+      213: 5967054350087364480
+    second: hogthumbsup_00005_24
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: hogthumbsup_00005_0
+      rect:
+        serializedVersion: 2
+        x: 50
+        y: 351
+        width: 27
+        height: 73
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e6f6c5f78009eebe0800000000000000
+      internalID: -1446060064168448146
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hogthumbsup_00005_1
+      rect:
+        serializedVersion: 2
+        x: 79
+        y: 346
+        width: 53
+        height: 41
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1e78426796861fb60800000000000000
+      internalID: 7778112833608517601
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hogthumbsup_00005_2
+      rect:
+        serializedVersion: 2
+        x: 83
+        y: 380
+        width: 38
+        height: 60
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bbf8722ca2ab2c770800000000000000
+      internalID: 8629664528804057019
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hogthumbsup_00005_3
+      rect:
+        serializedVersion: 2
+        x: 135
+        y: 22
+        width: 567
+        height: 567
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c18826dc51ef0fff0800000000000000
+      internalID: -4224230033815524
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hogthumbsup_00005_4
+      rect:
+        serializedVersion: 2
+        x: 708
+        y: 346
+        width: 53
+        height: 41
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 821c142f74f659e70800000000000000
+      internalID: 9121318975106564392
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hogthumbsup_00005_5
+      rect:
+        serializedVersion: 2
+        x: 719
+        y: 380
+        width: 39
+        height: 60
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 799bfb398304c01f0800000000000000
+      internalID: -1077415599107229289
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hogthumbsup_00005_6
+      rect:
+        serializedVersion: 2
+        x: 764
+        y: 351
+        width: 26
+        height: 73
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 590976fbe4602b650800000000000000
+      internalID: 6247062568404750485
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hogthumbsup_00005_7
+      rect:
+        serializedVersion: 2
+        x: 21
+        y: 248
+        width: 38
+        height: 68
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a7bac217b42d96e10800000000000000
+      internalID: 2191513915155590010
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hogthumbsup_00005_8
+      rect:
+        serializedVersion: 2
+        x: 32
+        y: 300
+        width: 30
+        height: 73
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f244ccaa236e901a0800000000000000
+      internalID: -6842685053524491217
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hogthumbsup_00005_9
+      rect:
+        serializedVersion: 2
+        x: 62
+        y: 53
+        width: 122
+        height: 248
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 74db4902f34629240800000000000000
+      internalID: 4797006775395335495
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hogthumbsup_00005_10
+      rect:
+        serializedVersion: 2
+        x: 63
+        y: 301
+        width: 6
+        height: 22
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e5888acc7c047bb10800000000000000
+      internalID: 1997136186638370910
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hogthumbsup_00005_11
+      rect:
+        serializedVersion: 2
+        x: 68
+        y: 250
+        width: 41
+        height: 55
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 150ba2e1ee135a9a0800000000000000
+      internalID: -6222512411364380591
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hogthumbsup_00005_12
+      rect:
+        serializedVersion: 2
+        x: 70
+        y: 298
+        width: 46
+        height: 49
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 24c933604d58815b0800000000000000
+      internalID: -5397417007719932862
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hogthumbsup_00005_13
+      rect:
+        serializedVersion: 2
+        x: 656
+        y: 53
+        width: 122
+        height: 270
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c3e94c3c6ed4cd280800000000000000
+      internalID: -9017246700380316100
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hogthumbsup_00005_14
+      rect:
+        serializedVersion: 2
+        x: 724
+        y: 298
+        width: 47
+        height: 49
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5c3416b757d044520800000000000000
+      internalID: 2685286076051964869
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hogthumbsup_00005_15
+      rect:
+        serializedVersion: 2
+        x: 778
+        y: 300
+        width: 30
+        height: 73
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b423b7d177b7d1a60800000000000000
+      internalID: 7646403493870907979
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hogthumbsup_00005_16
+      rect:
+        serializedVersion: 2
+        x: 781
+        y: 248
+        width: 39
+        height: 68
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5de8bac087dd28960800000000000000
+      internalID: 7602882628633202389
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hogthumbsup_00005_17
+      rect:
+        serializedVersion: 2
+        x: 18
+        y: 195
+        width: 50
+        height: 62
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 390cac66024351750800000000000000
+      internalID: 6274978969578815635
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hogthumbsup_00005_18
+      rect:
+        serializedVersion: 2
+        x: 27
+        y: 141
+        width: 62
+        height: 55
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6e49331c0195eaeb0800000000000000
+      internalID: -4706726632059857690
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hogthumbsup_00005_19
+      rect:
+        serializedVersion: 2
+        x: 751
+        y: 141
+        width: 62
+        height: 55
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 715c5662f53b21460800000000000000
+      internalID: 7211023174621054231
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hogthumbsup_00005_20
+      rect:
+        serializedVersion: 2
+        x: 772
+        y: 195
+        width: 50
+        height: 62
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fc930b3d58db94620800000000000000
+      internalID: 2758944629220981199
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hogthumbsup_00005_21
+      rect:
+        serializedVersion: 2
+        x: 49
+        y: 90
+        width: 73
+        height: 46
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6877b717570cdfda0800000000000000
+      internalID: -5909355525392599162
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hogthumbsup_00005_22
+      rect:
+        serializedVersion: 2
+        x: 718
+        y: 90
+        width: 73
+        height: 45
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 93015c39c27b3aa40800000000000000
+      internalID: 5378343782096113721
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hogthumbsup_00005_23
+      rect:
+        serializedVersion: 2
+        x: 85
+        y: 45
+        width: 79
+        height: 35
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c7675b53e86337690800000000000000
+      internalID: -7605675361284295044
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hogthumbsup_00005_24
+      rect:
+        serializedVersion: 2
+        x: 676
+        y: 45
+        width: 79
+        height: 35
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 08f186c015c3fc250800000000000000
+      internalID: 5967054350087364480
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      hogthumbsup_00005_0: -1446060064168448146
+      hogthumbsup_00005_1: 7778112833608517601
+      hogthumbsup_00005_10: 1997136186638370910
+      hogthumbsup_00005_11: -6222512411364380591
+      hogthumbsup_00005_12: -5397417007719932862
+      hogthumbsup_00005_13: -9017246700380316100
+      hogthumbsup_00005_14: 2685286076051964869
+      hogthumbsup_00005_15: 7646403493870907979
+      hogthumbsup_00005_16: 7602882628633202389
+      hogthumbsup_00005_17: 6274978969578815635
+      hogthumbsup_00005_18: -4706726632059857690
+      hogthumbsup_00005_19: 7211023174621054231
+      hogthumbsup_00005_2: 8629664528804057019
+      hogthumbsup_00005_20: 2758944629220981199
+      hogthumbsup_00005_21: -5909355525392599162
+      hogthumbsup_00005_22: 5378343782096113721
+      hogthumbsup_00005_23: -7605675361284295044
+      hogthumbsup_00005_24: 5967054350087364480
+      hogthumbsup_00005_3: -4224230033815524
+      hogthumbsup_00005_4: 9121318975106564392
+      hogthumbsup_00005_5: -1077415599107229289
+      hogthumbsup_00005_6: 6247062568404750485
+      hogthumbsup_00005_7: 2191513915155590010
+      hogthumbsup_00005_8: -6842685053524491217
+      hogthumbsup_00005_9: 4797006775395335495
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
