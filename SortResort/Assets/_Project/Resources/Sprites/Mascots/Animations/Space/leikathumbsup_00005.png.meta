@@ -1,0 +1,728 @@
+fileFormatVersion: 2
+guid: b2f74402eedcd6146bc20dcf6600c5d8
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -528387662759643168
+    second: leikathumbsup_00005_0
+  - first:
+      213: -7432305324624929522
+    second: leikathumbsup_00005_1
+  - first:
+      213: 7667413093216408444
+    second: leikathumbsup_00005_2
+  - first:
+      213: 7808710774701557477
+    second: leikathumbsup_00005_3
+  - first:
+      213: -6360118765658485850
+    second: leikathumbsup_00005_4
+  - first:
+      213: -2650473982282057301
+    second: leikathumbsup_00005_5
+  - first:
+      213: 1370138842060062835
+    second: leikathumbsup_00005_6
+  - first:
+      213: -4616275172857855803
+    second: leikathumbsup_00005_7
+  - first:
+      213: 4029176040420720149
+    second: leikathumbsup_00005_8
+  - first:
+      213: -7004893124934917194
+    second: leikathumbsup_00005_9
+  - first:
+      213: 3568972092613503237
+    second: leikathumbsup_00005_10
+  - first:
+      213: -3990245856162675116
+    second: leikathumbsup_00005_11
+  - first:
+      213: -981791110572433848
+    second: leikathumbsup_00005_12
+  - first:
+      213: 594055260527561019
+    second: leikathumbsup_00005_13
+  - first:
+      213: -1479102481032712479
+    second: leikathumbsup_00005_14
+  - first:
+      213: 6305143765956835483
+    second: leikathumbsup_00005_15
+  - first:
+      213: -2625603142472163736
+    second: leikathumbsup_00005_16
+  - first:
+      213: 7588769094907770527
+    second: leikathumbsup_00005_17
+  - first:
+      213: -7056702339261012778
+    second: leikathumbsup_00005_18
+  - first:
+      213: 8242929999056977331
+    second: leikathumbsup_00005_19
+  - first:
+      213: 1176437236847352018
+    second: leikathumbsup_00005_20
+  - first:
+      213: 372983933310707672
+    second: leikathumbsup_00005_21
+  - first:
+      213: -1831965283194408190
+    second: leikathumbsup_00005_22
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: leikathumbsup_00005_0
+      rect:
+        serializedVersion: 2
+        x: 41
+        y: 346
+        width: 28
+        height: 76
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0e73381683acaa8f0800000000000000
+      internalID: -528387662759643168
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: leikathumbsup_00005_1
+      rect:
+        serializedVersion: 2
+        x: 71
+        y: 341
+        width: 55
+        height: 43
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e0d9c7f6fa52bd890800000000000000
+      internalID: -7432305324624929522
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: leikathumbsup_00005_2
+      rect:
+        serializedVersion: 2
+        x: 75
+        y: 377
+        width: 39
+        height: 61
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c73d757a59f186a60800000000000000
+      internalID: 7667413093216408444
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: leikathumbsup_00005_3
+      rect:
+        serializedVersion: 2
+        x: 128
+        y: 10
+        width: 580
+        height: 581
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5e60ad7c31d1e5c60800000000000000
+      internalID: 7808710774701557477
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: leikathumbsup_00005_4
+      rect:
+        serializedVersion: 2
+        x: 714
+        y: 341
+        width: 55
+        height: 43
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6ab41a31ea15cb7a0800000000000000
+      internalID: -6360118765658485850
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: leikathumbsup_00005_5
+      rect:
+        serializedVersion: 2
+        x: 726
+        y: 377
+        width: 40
+        height: 61
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ba9b9a7b4ff973bd0800000000000000
+      internalID: -2650473982282057301
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: leikathumbsup_00005_6
+      rect:
+        serializedVersion: 2
+        x: 772
+        y: 346
+        width: 27
+        height: 76
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 37084fd7406b30310800000000000000
+      internalID: 1370138842060062835
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: leikathumbsup_00005_7
+      rect:
+        serializedVersion: 2
+        x: 11
+        y: 241
+        width: 40
+        height: 71
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5c04a583032bfefb0800000000000000
+      internalID: -4616275172857855803
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: leikathumbsup_00005_8
+      rect:
+        serializedVersion: 2
+        x: 23
+        y: 294
+        width: 31
+        height: 76
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 51ebac2e2428ae730800000000000000
+      internalID: 4029176040420720149
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: leikathumbsup_00005_9
+      rect:
+        serializedVersion: 2
+        x: 54
+        y: 40
+        width: 125
+        height: 282
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6b3adaef0de99ce90800000000000000
+      internalID: -7004893124934917194
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: leikathumbsup_00005_10
+      rect:
+        serializedVersion: 2
+        x: 61
+        y: 293
+        width: 48
+        height: 51
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 509a2818539878130800000000000000
+      internalID: 3568972092613503237
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: leikathumbsup_00005_11
+      rect:
+        serializedVersion: 2
+        x: 661
+        y: 42
+        width: 126
+        height: 280
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 45603f8f88ccf98c0800000000000000
+      internalID: -3990245856162675116
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: leikathumbsup_00005_12
+      rect:
+        serializedVersion: 2
+        x: 731
+        y: 293
+        width: 48
+        height: 51
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 84e91bacf2aff52f0800000000000000
+      internalID: -981791110572433848
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: leikathumbsup_00005_13
+      rect:
+        serializedVersion: 2
+        x: 787
+        y: 294
+        width: 31
+        height: 76
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b3982bcac128e3800800000000000000
+      internalID: 594055260527561019
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: leikathumbsup_00005_14
+      rect:
+        serializedVersion: 2
+        x: 790
+        y: 241
+        width: 39
+        height: 71
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1ee65af412c297be0800000000000000
+      internalID: -1479102481032712479
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: leikathumbsup_00005_15
+      rect:
+        serializedVersion: 2
+        x: 8
+        y: 186
+        width: 52
+        height: 65
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b9830ab59de508750800000000000000
+      internalID: 6305143765956835483
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: leikathumbsup_00005_16
+      rect:
+        serializedVersion: 2
+        x: 17
+        y: 132
+        width: 65
+        height: 57
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 86e1ccb5adbff8bd0800000000000000
+      internalID: -2625603142472163736
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: leikathumbsup_00005_17
+      rect:
+        serializedVersion: 2
+        x: 759
+        y: 132
+        width: 64
+        height: 57
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f96b078e849b05960800000000000000
+      internalID: 7588769094907770527
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: leikathumbsup_00005_18
+      rect:
+        serializedVersion: 2
+        x: 780
+        y: 186
+        width: 52
+        height: 65
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6d4eda64c9e811e90800000000000000
+      internalID: -7056702339261012778
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: leikathumbsup_00005_19
+      rect:
+        serializedVersion: 2
+        x: 40
+        y: 80
+        width: 75
+        height: 47
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3bdb3364925c46270800000000000000
+      internalID: 8242929999056977331
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: leikathumbsup_00005_20
+      rect:
+        serializedVersion: 2
+        x: 725
+        y: 80
+        width: 75
+        height: 47
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2d814d21f6b835010800000000000000
+      internalID: 1176437236847352018
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: leikathumbsup_00005_21
+      rect:
+        serializedVersion: 2
+        x: 77
+        y: 34
+        width: 81
+        height: 36
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8d7a9e349ea1d2500800000000000000
+      internalID: 372983933310707672
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: leikathumbsup_00005_22
+      rect:
+        serializedVersion: 2
+        x: 682
+        y: 34
+        width: 82
+        height: 36
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2037956f74d8396e0800000000000000
+      internalID: -1831965283194408190
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      leikathumbsup_00005_0: -528387662759643168
+      leikathumbsup_00005_1: -7432305324624929522
+      leikathumbsup_00005_10: 3568972092613503237
+      leikathumbsup_00005_11: -3990245856162675116
+      leikathumbsup_00005_12: -981791110572433848
+      leikathumbsup_00005_13: 594055260527561019
+      leikathumbsup_00005_14: -1479102481032712479
+      leikathumbsup_00005_15: 6305143765956835483
+      leikathumbsup_00005_16: -2625603142472163736
+      leikathumbsup_00005_17: 7588769094907770527
+      leikathumbsup_00005_18: -7056702339261012778
+      leikathumbsup_00005_19: 8242929999056977331
+      leikathumbsup_00005_2: 7667413093216408444
+      leikathumbsup_00005_20: 1176437236847352018
+      leikathumbsup_00005_21: 372983933310707672
+      leikathumbsup_00005_22: -1831965283194408190
+      leikathumbsup_00005_3: 7808710774701557477
+      leikathumbsup_00005_4: -6360118765658485850
+      leikathumbsup_00005_5: -2650473982282057301
+      leikathumbsup_00005_6: 1370138842060062835
+      leikathumbsup_00005_7: -4616275172857855803
+      leikathumbsup_00005_8: 4029176040420720149
+      leikathumbsup_00005_9: -7004893124934917194
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

@@ -312,7 +312,7 @@ namespace SortResort
                 "supermarket" => "tommythumbsup",
                 "farm" => "marathumbsup",
                 "tavern" => "hogthumbsup",
-                // "space" => "leikathumbsup",
+                "space" => "leikathumbsup",
                 _ => null
             };
         }
@@ -329,6 +329,7 @@ namespace SortResort
                 "supermarket" => 33f,  // 63 frames / 33fps = 1.91s
                 "farm" => 16f,         // 31 frames / 16fps = 1.94s
                 "tavern" => 40f,       // 77 frames / 40fps = 1.93s
+                "space" => 38f,        // 73 frames / 38fps = 1.92s
                 _ => 30f
             };
         }
