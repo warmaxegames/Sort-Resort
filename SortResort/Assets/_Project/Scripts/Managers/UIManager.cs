@@ -217,6 +217,10 @@ namespace SortResort
         // Stats screen
         private SortResort.UI.StatsScreen statsScreen;
 
+        // Lucky Spin screen
+        private SortResort.UI.LuckySpinScreen luckySpinScreen;
+        private bool luckySpinPendingCheck;
+
         // Achievement frame + icon compositing system
         private static Sprite cachedFrameBronze;
         private static Sprite cachedFrameSilver;
@@ -369,6 +373,7 @@ namespace SortResort
             CreateAchievementNotificationPanel();
             CreateAchievementsPanel();
             CreateStatsPanel();
+            CreateLuckySpinPanel();
             CreateDialoguePanel();
             CreatePowerUpBar();
 
@@ -648,19 +653,34 @@ namespace SortResort
             // Update game state
             GameManager.Instance?.SetState(GameState.LevelSelection);
 
+            // Flag to check daily spin after transition to level select
+            luckySpinPendingCheck = true;
+
             // Use TransitionManager if available, otherwise just switch
             if (TransitionManager.Instance != null)
             {
                 TransitionManager.Instance.FadeOut(() =>
                 {
                     ShowLevelSelect();
-                    TransitionManager.Instance.FadeIn();
+                    TransitionManager.Instance.FadeIn(() =>
+                    {
+                        if (luckySpinPendingCheck)
+                        {
+                            luckySpinPendingCheck = false;
+                            CheckDailyLuckySpin();
+                        }
+                    });
                 });
             }
             else
             {
                 // Simple immediate transition
                 ShowLevelSelect();
+                if (luckySpinPendingCheck)
+                {
+                    luckySpinPendingCheck = false;
+                    CheckDailyLuckySpin();
+                }
             }
         }
 
@@ -1230,6 +1250,71 @@ namespace SortResort
         {
             statsScreen = new SortResort.UI.StatsScreen();
             statsScreen.Create(mainCanvas.transform);
+        }
+
+        private void CreateLuckySpinPanel()
+        {
+            luckySpinScreen = new SortResort.UI.LuckySpinScreen();
+            luckySpinScreen.Create(mainCanvas.transform, this);
+            luckySpinScreen.OnClosed += OnLuckySpinClosed;
+
+#if UNITY_EDITOR
+            // Debug button in editor - small button in top-left corner of level select
+            var debugBtnGO = new GameObject("LuckySpin Debug Btn");
+            debugBtnGO.transform.SetParent(mainCanvas.transform, false);
+            var debugRect = debugBtnGO.AddComponent<RectTransform>();
+            debugRect.anchorMin = new Vector2(0f, 0.96f);
+            debugRect.anchorMax = new Vector2(0.12f, 1f);
+            debugRect.offsetMin = Vector2.zero;
+            debugRect.offsetMax = Vector2.zero;
+
+            var debugCanvas = debugBtnGO.AddComponent<Canvas>();
+            debugCanvas.overrideSorting = true;
+            debugCanvas.sortingOrder = 5000;
+            debugBtnGO.AddComponent<GraphicRaycaster>();
+
+            var debugImg = debugBtnGO.AddComponent<Image>();
+            debugImg.color = new Color(0.9f, 0.5f, 0.1f, 0.8f);
+
+            var debugTxt = new GameObject("Text").AddComponent<TextMeshProUGUI>();
+            debugTxt.transform.SetParent(debugBtnGO.transform, false);
+            var dtRect = debugTxt.GetComponent<RectTransform>();
+            dtRect.anchorMin = Vector2.zero;
+            dtRect.anchorMax = Vector2.one;
+            dtRect.offsetMin = Vector2.zero;
+            dtRect.offsetMax = Vector2.zero;
+            debugTxt.text = "SPIN";
+            debugTxt.fontSize = 22;
+            debugTxt.alignment = TextAlignmentOptions.Center;
+            debugTxt.color = Color.white;
+            FontManager.ApplyBold(debugTxt);
+
+            var debugBtn = debugBtnGO.AddComponent<Button>();
+            debugBtn.targetGraphic = debugImg;
+            debugBtn.onClick.AddListener(() =>
+            {
+                Debug.Log("[UIManager] Debug: Opening Lucky Spin");
+                luckySpinScreen?.Show();
+            });
+#endif
+        }
+
+        private void OnLuckySpinClosed()
+        {
+            Debug.Log("[UIManager] Lucky Spin closed, returning to level select");
+        }
+
+        /// <summary>
+        /// Checks if the daily lucky spin should show and opens it.
+        /// Called after transitioning to level select.
+        /// </summary>
+        private void CheckDailyLuckySpin()
+        {
+            if (luckySpinScreen == null) return;
+            if (SortResort.UI.LuckySpinScreen.HasSpunToday()) return;
+
+            Debug.Log("[UIManager] Daily Lucky Spin available - showing wheel");
+            luckySpinScreen.Show();
         }
 
         private void OnLevelSelectedFromMenu(string worldId, int levelNumber)

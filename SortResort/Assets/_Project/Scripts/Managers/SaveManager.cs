@@ -474,6 +474,9 @@ namespace SortResort
         public bool hapticsEnabled = true;
         public bool voiceEnabled = true;
 
+        // Lucky Spin
+        public string lastLuckySpinDate = ""; // yyyy-MM-dd
+
         // Power-ups
         public List<PowerUpSaveEntry> powerUpInventory = new List<PowerUpSaveEntry>();
         public List<int> unlockedPowerUps = new List<int>();
