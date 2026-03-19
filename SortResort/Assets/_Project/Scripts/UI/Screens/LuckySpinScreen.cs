@@ -33,6 +33,8 @@ namespace SortResort.UI
 
         private GameObject panel;
         private RectTransform wheelRect;
+        private RectTransform raysSpinnerRect;
+        private Image raysSpinnerImage;
         private Image titleImage;
         private Button spinButton;
         private Image spinButtonImage;
@@ -45,6 +47,15 @@ namespace SortResort.UI
         private MonoBehaviour coroutineHost;
         private Coroutine pulseCoroutine;
         private Coroutine spinCoroutine;
+        private Coroutine raysSpinCoroutine;
+        private Coroutine wheelEffectCoroutine;
+        private GameObject wheelEffectGO;
+        private Image wheelEffectImage;
+        private Sprite[] wheelEffectSprites;
+        private AudioClip electricSoundClip;
+
+        // Rays spinner spin speed (degrees per second) � matched to wheel peak speed feel
+        private const float RaysSpinSpeed = 120f;
 
         public GameObject Panel => panel;
         public bool IsVisible => panel != null && panel.activeSelf;
@@ -76,23 +87,42 @@ namespace SortResort.UI
 
             // Load assets
             wheelClickClip = Resources.Load<AudioClip>("Audio/SFX/wheel_click");
+            electricSoundClip = Resources.Load<AudioClip>("Audio/SFX/electric_sound");
+            // Preload wheel effect frames as Texture2D and create full-rect sprites
+            // to avoid Unity's alpha-trim making the effect appear zoomed in.
+            var allLoadedTex = Resources.LoadAll<Texture2D>("Sprites/UI/LuckySpin/WheelEffect");
+            Debug.Log("[LuckySpinScreen] LoadAll<Texture2D> found: " + allLoadedTex.Length);
+            wheelEffectSprites = new Sprite[42];
+            System.Array.Sort(allLoadedTex, (a, b) => a.name.CompareTo(b.name));
+            for (int i = 0; i < allLoadedTex.Length && i < 42; i++)
+            {
+                var tex = allLoadedTex[i];
+                wheelEffectSprites[i] = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), new Vector2(0.5f, 0.5f), 100f);
+            }
+            Debug.Log("[LuckySpinScreen] Assigned " + allLoadedTex.Length + " frames to array");
 
-            // Layer 0: Full screen background
+            // Layer 0: Full screen background (new spin_screen_background)
             CreateBackground(panel.transform);
 
-            // Layer 1: Title (top)
+            // Layer 1: Rays spinner (behind wheel and title, above background)
+            CreateRaysSpinner(panel.transform);
+
+            // Layer 2: Title (top)
             CreateTitle(panel.transform);
 
-            // Layer 2: Wheel (center)
+            // Layer 3: Wheel (center)
             CreateWheel(panel.transform);
 
-            // Layer 3: Pointer (overlapping top of wheel)
+            // Layer 3.5: Wheel effect animation (ON TOP of wheel, below pointer)
+            CreateWheelEffect(panel.transform);
+
+            // Layer 4: Pointer (overlapping top of wheel)
             CreatePointer(panel.transform);
 
-            // Layer 4: Spin button (bottom)
+            // Layer 5: Spin button (bottom)
             CreateSpinButton(panel.transform);
 
-            // Layer 5: Reward popup (hidden)
+            // Layer 6: Reward popup (hidden)
             CreateRewardPopup(panel.transform);
 
             panel.SetActive(false);
@@ -109,6 +139,27 @@ namespace SortResort.UI
             int startSection = UnityEngine.Random.Range(0, 8);
             float startAngle = startSection * 45f;
             wheelRect.localEulerAngles = new Vector3(0, 0, startAngle);
+
+            // Reset rays spinner rotation and stop any leftover spin coroutine
+            if (raysSpinCoroutine != null)
+            {
+                coroutineHost.StopCoroutine(raysSpinCoroutine);
+                raysSpinCoroutine = null;
+            }
+            if (wheelEffectCoroutine != null)
+            {
+                coroutineHost.StopCoroutine(wheelEffectCoroutine);
+                wheelEffectCoroutine = null;
+            }
+            if (wheelEffectGO != null) wheelEffectGO.SetActive(false);
+            if (raysSpinnerRect != null)
+                raysSpinnerRect.localEulerAngles = Vector3.zero;
+            if (wheelEffectCoroutine != null)
+            {
+                coroutineHost.StopCoroutine(wheelEffectCoroutine);
+                wheelEffectCoroutine = null;
+            }
+            if (wheelEffectGO != null) wheelEffectGO.SetActive(false);
 
             panel.SetActive(true);
 
@@ -130,6 +181,17 @@ namespace SortResort.UI
                 coroutineHost.StopCoroutine(spinCoroutine);
                 spinCoroutine = null;
             }
+            if (raysSpinCoroutine != null)
+            {
+                coroutineHost.StopCoroutine(raysSpinCoroutine);
+                raysSpinCoroutine = null;
+            }
+            if (wheelEffectCoroutine != null)
+            {
+                coroutineHost.StopCoroutine(wheelEffectCoroutine);
+                wheelEffectCoroutine = null;
+            }
+            if (wheelEffectGO != null) wheelEffectGO.SetActive(false);
             panel.SetActive(false);
             OnClosed?.Invoke();
         }
@@ -156,7 +218,7 @@ namespace SortResort.UI
             SaveManager.Instance.SaveGame();
         }
 
-        // ─── UI CREATION ───
+        // --- UI CREATION ---
 
         private void CreateBackground(Transform parent)
         {
@@ -169,7 +231,8 @@ namespace SortResort.UI
             bgRect.offsetMax = Vector2.zero;
 
             var bgImg = bgGO.AddComponent<Image>();
-            var bgTex = Resources.Load<Texture2D>("Sprites/UI/LuckySpin/lucky_spin_background");
+            // Use new spin_screen_background; fall back to old background if missing
+            var bgTex = Resources.Load<Texture2D>("Sprites/UI/LuckySpin/spin_screen_background");
             if (bgTex != null)
             {
                 bgImg.sprite = Sprite.Create(bgTex, new Rect(0, 0, bgTex.width, bgTex.height), new Vector2(0.5f, 0.5f), 100f);
@@ -179,6 +242,43 @@ namespace SortResort.UI
             {
                 bgImg.color = new Color(0.1f, 0.05f, 0.2f);
             }
+        }
+
+        /// <summary>
+        /// Creates the rays spinner image: reuses rays_spinner.png, tinted white at 85% transparency.
+        /// Sits above the background but behind the wheel and title.
+        /// </summary>
+        private void CreateRaysSpinner(Transform parent)
+        {
+            var raysGO = new GameObject("Rays Spinner");
+            raysGO.transform.SetParent(parent, false);
+            raysSpinnerRect = raysGO.AddComponent<RectTransform>();
+
+            // Centered, fixed 2500x2500 � mirrors the level complete screen sizing
+            raysSpinnerRect.anchorMin = new Vector2(0.5f, 0.5f);
+            raysSpinnerRect.anchorMax = new Vector2(0.5f, 0.5f);
+            raysSpinnerRect.pivot = new Vector2(0.5f, 0.5f);
+            raysSpinnerRect.anchoredPosition = Vector2.zero;
+            raysSpinnerRect.sizeDelta = new Vector2(2500f, 2500f);
+
+            raysSpinnerImage = raysGO.AddComponent<Image>();
+            raysSpinnerImage.preserveAspect = true;
+            raysSpinnerImage.raycastTarget = false;
+
+            // rays_spinner is a multiple-sprite sheet; must load as Texture2D and create a full-rect sprite
+            // (same pattern as UIManager.LoadFullRectSprite) so that Image.color tinting works correctly
+            var raysTex = Resources.Load<Texture2D>("Sprites/UI/LuckySpin/rays_spinner");
+            if (raysTex != null)
+            {
+                raysSpinnerImage.sprite = Sprite.Create(raysTex, new Rect(0, 0, raysTex.width, raysTex.height), new Vector2(0.5f, 0.5f), 100f);
+            }
+            else
+            {
+                Debug.LogWarning("[LuckySpinScreen] rays_spinner texture not found.");
+            }
+
+            // Tint white, 85% transparent (alpha 0.15 = 15% opaque = 85% transparent)
+            raysSpinnerImage.color = new Color(1f, 1f, 1f, 0.15f); // white (asset recolored) at 85% transparency
         }
 
         private void CreateTitle(Transform parent)
@@ -250,8 +350,6 @@ namespace SortResort.UI
             btnGO.transform.SetParent(parent, false);
             var btnRect = btnGO.AddComponent<RectTransform>();
             // 15% larger than previous + moved up 50px
-            // Previous: 0.55 wide x 0.088 tall, center (0.5, 0.146)
-            // 15% larger: 0.6325 wide x 0.1012 tall
             btnRect.anchorMin = new Vector2(0.184f, 0.095f);
             btnRect.anchorMax = new Vector2(0.816f, 0.197f);
             btnRect.offsetMin = Vector2.zero;
@@ -378,11 +476,9 @@ namespace SortResort.UI
                 AudioManager.Instance?.PlayButtonClick();
                 Hide();
             });
-
-            rewardPopup.SetActive(false);
         }
 
-        // ─── SPIN LOGIC ───
+        // --- INPUT ---
 
         private void OnSpinClicked()
         {
@@ -400,10 +496,13 @@ namespace SortResort.UI
             spinCoroutine = coroutineHost.StartCoroutine(SpinWheelAnimation(rewardSection));
         }
 
+        // --- ANIMATIONS ---
+
         /// <summary>
         /// Smooth 3-phase clockwise spin using analytical sine-based speed curves.
         /// Speed transitions are C1-continuous (no jerks at phase boundaries).
         /// Position is computed analytically from time, so no frame-rate dependent drift.
+        /// After the wheel stops, the rays spinner animates for 2 seconds.
         /// </summary>
         private IEnumerator SpinWheelAnimation(int targetSection)
         {
@@ -430,12 +529,12 @@ namespace SortResort.UI
             float totalTime = accelTime + constTime + decelTime;
 
             // Speed curves:
-            //   Accel:  speed = maxSpeed * sin(t/accelTime * PI/2)     — smooth ramp 0 to max
-            //   Const:  speed = maxSpeed                               — holds at max
-            //   Decel:  speed = maxSpeed * (1 - tau)^(n-1)             — fast brake, long crawl
+            //   Accel:  speed = maxSpeed * sin(t/accelTime * PI/2)     � smooth ramp 0 to max
+            //   Const:  speed = maxSpeed                               � holds at max
+            //   Decel:  speed = maxSpeed * (1 - tau)^(n-1)             � fast brake, long crawl
             //
             // Decel uses power curve (n=3): drops to 25% speed at halfway,
-            // then crawls — last 30% of time covers only 2.7% of distance.
+            // then crawls � last 30% of time covers only 2.7% of distance.
             //
             // Integrated distances:
             //   Accel dist = maxSpeed * accelTime * 2/PI
@@ -476,25 +575,23 @@ namespace SortResort.UI
                     // where tau = decelElapsed / decelTime, n = decelPower
                     float decelElapsed = t - accelTime - constTime;
                     float tau = decelElapsed / decelTime;
-                    float decelDist = maxSpeed * decelTime / decelPower
-                        * (1f - Mathf.Pow(1f - tau, decelPower));
-                    rotation = accelDist + constDist + decelDist;
+                    float totalDecelDist = maxSpeed * decelTime / decelPower;
+                    rotation = accelDist + constDist + totalDecelDist * (1f - Mathf.Pow(1f - tau, decelPower));
                 }
 
-                // Apply clockwise: subtract rotation from starting Z
-                wheelRect.localEulerAngles = new Vector3(0, 0, startZ - rotation);
-
-                // Click sound — track incremental rotation
+                // Click sound at each section boundary
                 float delta = rotation - prevRotation;
                 clickAccum += delta;
                 while (clickAccum >= clickInterval)
                 {
                     clickAccum -= clickInterval;
-                    if (wheelClickClip != null && AudioManager.Instance != null)
-                        AudioManager.Instance.PlaySFX(wheelClickClip, 0.5f);
+                    if (wheelClickClip != null)
+                        AudioManager.Instance?.PlaySFX(wheelClickClip);
                 }
                 prevRotation = rotation;
 
+                // Apply rotation (clockwise = subtract Z)
+                wheelRect.localEulerAngles = new Vector3(0, 0, startZ - rotation);
                 yield return null;
             }
 
@@ -504,17 +601,123 @@ namespace SortResort.UI
             isSpinning = false;
 
             Debug.Log($"[LuckySpin] Wheel stopped at Z={desiredFinalZ:F1}. Reward: {SectionNames[targetSection]} (section {targetSection})");
-            yield return new WaitForSecondsRealtime(0.5f);
+
+            // Animate rays spinner and wheel effect simultaneously after wheel stops
+            if (raysSpinCoroutine != null) coroutineHost.StopCoroutine(raysSpinCoroutine);
+            raysSpinCoroutine = coroutineHost.StartCoroutine(SpinRaysAnimation(2f));
+            if (wheelEffectCoroutine != null) coroutineHost.StopCoroutine(wheelEffectCoroutine);
+
+            // Wait for the wheel effect animation to fully complete before showing reward
+            yield return coroutineHost.StartCoroutine(WheelEffectAnimation());
             ShowReward(targetSection);
         }
 
+        /// <summary>
+        /// Spins the rays spinner image clockwise at RaysSpinSpeed degrees/sec for the given duration,
+        /// then fades it back to its resting alpha.
+        /// </summary>
+        private IEnumerator SpinRaysAnimation(float duration)
+        {
+            if (raysSpinnerRect == null || raysSpinnerImage == null) yield break;
+
+            float elapsed = 0f;
+            float currentZ = raysSpinnerRect.localEulerAngles.z;
+
+            while (elapsed < duration)
+            {
+                elapsed += Time.unscaledDeltaTime;
+                currentZ -= RaysSpinSpeed * Time.unscaledDeltaTime; // clockwise
+                raysSpinnerRect.localEulerAngles = new Vector3(0, 0, currentZ);
+                yield return null;
+            }
+
+            raysSpinCoroutine = null;
+        }
+
+
+        /// <summary>
+        /// Creates a hidden Image GameObject centered on the wheel for the frame animation.
+        /// Sized to match the 900x900 effect sprite dimensions centered on the wheel.
+        /// </summary>
+        private void CreateWheelEffect(Transform parent)
+        {
+            wheelEffectGO = new GameObject("Wheel Effect");
+            wheelEffectGO.transform.SetParent(parent, false);
+            var rt = wheelEffectGO.AddComponent<RectTransform>();
+
+            // 900x900 sprites centered on the wheel (center anchor ~0.5, 0.498).
+            // Width: 900/1080 = 0.8333, Height: 900/1920 = 0.46875
+            rt.anchorMin = new Vector2(0.0833f, 0.2636f);
+            rt.anchorMax = new Vector2(0.9167f, 0.7324f);
+            rt.offsetMin = Vector2.zero;
+            rt.offsetMax = Vector2.zero;
+
+            wheelEffectImage = wheelEffectGO.AddComponent<Image>();
+            wheelEffectImage.raycastTarget = false;
+            wheelEffectImage.preserveAspect = true;
+            wheelEffectGO.SetActive(false);
+        }
+
+        /// <summary>
+        /// Plays the 42-frame wheel effect animation at 24fps, centered on the wheel.
+        /// Plays electric_sound simultaneously. Hides itself when complete.
+        /// </summary>
+        private IEnumerator WheelEffectAnimation()
+        {
+            if (wheelEffectGO == null || wheelEffectImage == null || wheelEffectSprites == null)
+            {
+                Debug.LogWarning($"[LuckySpinScreen] WheelEffect early exit: GO={wheelEffectGO != null}, Image={wheelEffectImage != null}, Sprites={wheelEffectSprites != null}");
+                yield break;
+            }
+
+            const int frameCount = 42;
+            const float fps = 33f;
+            float frameDuration = 1f / fps;
+
+            // Assign first frame BEFORE activating to prevent white-box flash
+            // (Image with no sprite renders as solid white rectangle)
+            if (wheelEffectSprites[0] != null)
+            {
+                wheelEffectImage.sprite = wheelEffectSprites[0];
+                Debug.Log($"[LuckySpinScreen] WheelEffect starting, sprite[0] size: {wheelEffectSprites[0].texture.width}x{wheelEffectSprites[0].texture.height}");
+            }
+            else
+            {
+                Debug.LogWarning("[LuckySpinScreen] WheelEffect sprite[0] is null, skipping animation");
+                yield break;
+            }
+
+            // Play electric sound on a dedicated AudioSource at full volume
+            // (the SFX system double-scales volume, making this clip too quiet)
+            if (electricSoundClip != null)
+            {
+                var tempGO = new GameObject("ElectricSound");
+                var src = tempGO.AddComponent<AudioSource>();
+                src.spatialBlend = 0f;
+                src.volume = 0.35f;
+                src.clip = electricSoundClip;
+                src.Play();
+                UnityEngine.Object.Destroy(tempGO, electricSoundClip.length + 0.1f);
+            }
+
+            wheelEffectGO.SetActive(true);
+
+            for (int i = 0; i < frameCount; i++)
+            {
+                if (wheelEffectSprites[i] != null)
+                    wheelEffectImage.sprite = wheelEffectSprites[i];
+
+                yield return new WaitForSecondsRealtime(frameDuration);
+            }
+
+            wheelEffectGO.SetActive(false);
+            wheelEffectCoroutine = null;
+        }
         private void ShowReward(int section)
         {
             rewardText.text = $"You landed on\n<color=#{ColorUtility.ToHtmlStringRGB(SectionColors[section])}><size=64>{SectionNames[section]}</size></color>";
             rewardPopup.SetActive(true);
         }
-
-        // ─── ANIMATIONS ───
 
         private IEnumerator PulseTitle()
         {
@@ -532,7 +735,7 @@ namespace SortResort.UI
             }
         }
 
-        // ─── UTILITY ───
+        // --- UTILITY ---
 
         private static Sprite LoadSprite(string resourcePath)
         {
