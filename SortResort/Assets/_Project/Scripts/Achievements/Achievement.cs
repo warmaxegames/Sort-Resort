@@ -123,9 +123,6 @@ namespace SortResort
         public string groupId;          // Group ID for related achievements (e.g., "levels" for complete 1,2,3 levels)
         public int groupOrder;          // Order within group (1, 2, 3...)
 
-        // Points
-        public int points;              // Achievement points earned when unlocked
-
         // UI Tab - string-based for extensibility (use worldId for world-specific, or TAB_GENERAL)
         public string tab;              // Which tab this achievement appears under
 
@@ -147,7 +144,6 @@ namespace SortResort
             string targetItemId = null,
             string groupId = null,
             int groupOrder = 0,
-            int points = -1,  // -1 means auto-calculate from tier
             string tab = TAB_GENERAL)
         {
             this.id = id;
@@ -166,28 +162,19 @@ namespace SortResort
             this.groupOrder = groupOrder;
             this.tab = tab;
             this.iconPath = $"Sprites/Achievements/{id}";
-
-            // Auto-calculate points from tier if not specified
-            if (points < 0)
-            {
-                this.points = GetPointsForTier(tier);
-            }
-            else
-            {
-                this.points = points;
-            }
         }
 
-        public static int GetPointsForTier(AchievementTier tier)
+        /// <summary>
+        /// Get the coin reward amount for this achievement (first Coins reward, or 0)
+        /// </summary>
+        public int GetCoinReward()
         {
-            switch (tier)
+            if (rewards == null) return 0;
+            foreach (var r in rewards)
             {
-                case AchievementTier.Bronze: return 10;
-                case AchievementTier.Silver: return 25;
-                case AchievementTier.Gold: return 50;
-                case AchievementTier.Platinum: return 100;
-                default: return 10;
+                if (r.type == RewardType.Coins) return r.amount;
             }
+            return 0;
         }
 
         /// <summary>

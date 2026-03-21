@@ -3,7 +3,7 @@ guid: ed573a71b6184aaa9bfcb93d2c6c7256
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 4256418075989244927
+      213: -4396541997031245344
     second: space_board_victory_screen_0
   externalObjects: {}
   serializedVersion: 13
@@ -116,10 +116,10 @@ TextureImporter:
       name: space_board_victory_screen_0
       rect:
         serializedVersion: 2
-        x: 42
-        y: 344
-        width: 996
-        height: 733
+        x: 1
+        y: 1
+        width: 1012
+        height: 749
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -128,8 +128,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 5372d961329743d3800066307ac723d3
-      internalID: 4256418075989244927
+      spriteID: 0e9bddaf8585cf2c0800000000000000
+      internalID: -4396541997031245344
       vertices: []
       indices: 
       edges: []
@@ -148,7 +148,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      space_board_victory_screen_0: 4256418075989244927
+      space_board_victory_screen_0: -4396541997031245344
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

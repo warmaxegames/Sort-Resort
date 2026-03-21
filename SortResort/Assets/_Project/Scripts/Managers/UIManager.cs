@@ -210,7 +210,7 @@ namespace SortResort
         private Transform achievementTabsContainer;
         private Image achievementWorldIconImage;
         private TextMeshProUGUI achievementTitleBarText;
-        private TextMeshProUGUI achievementPointsText;
+        private TextMeshProUGUI achievementCoinsText;
         private Sprite achvTabSprite;
         private Sprite achvTabPressedSprite;
 
@@ -233,10 +233,13 @@ namespace SortResort
         private GameObject achievementNotificationPanel;
         private TextMeshProUGUI achievementNameText;
         private TextMeshProUGUI achievementDescText;
-        private TextMeshProUGUI achievementPointsText_Notification;
+        private TextMeshProUGUI achievementCoinsText_Notification;
         private Queue<Achievement> achievementQueue = new Queue<Achievement>();
         private bool isShowingAchievement = false;
         private Coroutine achievementCoroutine;
+
+        // Coin counter on level select top bar
+        private TextMeshProUGUI coinBalanceText;
         private Achievement currentAchievement;
 
         // Power-up bar
@@ -290,6 +293,8 @@ namespace SortResort
                 // Unsubscribe first to prevent duplicates
                 AchievementManager.Instance.OnAchievementUnlocked -= OnAchievementUnlocked;
                 AchievementManager.Instance.OnAchievementUnlocked += OnAchievementUnlocked;
+                AchievementManager.Instance.OnCoinsChanged -= OnCoinsChanged;
+                AchievementManager.Instance.OnCoinsChanged += OnCoinsChanged;
             }
         }
 
@@ -321,7 +326,28 @@ namespace SortResort
             if (AchievementManager.Instance != null)
             {
                 AchievementManager.Instance.OnAchievementUnlocked -= OnAchievementUnlocked;
+                AchievementManager.Instance.OnCoinsChanged -= OnCoinsChanged;
             }
+        }
+
+        private void OnCoinsChanged(int newBalance)
+        {
+            UpdateCoinDisplay();
+        }
+
+        private void UpdateCoinDisplay()
+        {
+            if (coinBalanceText != null && AchievementManager.Instance != null)
+                coinBalanceText.text = FormatCoinsCompact(AchievementManager.Instance.Coins);
+        }
+
+        private static string FormatCoinsCompact(int amount)
+        {
+            if (amount < 1000) return amount.ToString();
+            if (amount < 10000) return $"{amount / 1000f:0.#}k";  // 1k, 1.5k, 9.9k
+            if (amount < 100000) return $"{amount / 1000f:0.#}k"; // 10k, 55.2k, 99.9k
+            if (amount < 1000000) return $"{amount / 1000:0}k";   // 100k, 999k
+            return $"{amount / 1000000f:0.#}m";                   // 1m, 1.5m
         }
 
         private void OnGamePausedUI()
@@ -827,46 +853,76 @@ namespace SortResort
             }
             statsBtn.onClick.AddListener(OnStatsClicked);
 
-            // Profile overlay - LARGER, positioned to hang OVER the topbar onto the background
-            // Parent to levelSelectPanel so it can extend beyond topbar
-            var profileGO = new GameObject("ProfileOverlay");
-            profileGO.transform.SetParent(levelSelectPanel.transform, false);
-            var profileRect = profileGO.AddComponent<RectTransform>();
-            profileRect.anchorMin = new Vector2(0, 1);
-            profileRect.anchorMax = new Vector2(0, 1);
-            profileRect.pivot = new Vector2(0, 1);
-            profileRect.anchoredPosition = new Vector2(5, -15); // Move right and down from edge
-            profileRect.sizeDelta = new Vector2(700, 240); // Even larger
+            // Coin counter - positioned top-left of level select screen
+            var coinCounterGO = new GameObject("CoinCounter");
+            coinCounterGO.transform.SetParent(levelSelectPanel.transform, false);
+            var coinCounterRect = coinCounterGO.AddComponent<RectTransform>();
+            coinCounterRect.anchorMin = new Vector2(0, 1);
+            coinCounterRect.anchorMax = new Vector2(0, 1);
+            coinCounterRect.pivot = new Vector2(0, 1);
+            coinCounterRect.anchoredPosition = new Vector2(10, -20);
+            coinCounterRect.sizeDelta = new Vector2(318, 98);
 
-            var profileImg = profileGO.AddComponent<Image>();
-            profileImg.raycastTarget = false;
-            var profileSprite = Resources.Load<Sprite>("Sprites/UI/Overlays/profile_overlay");
-            if (profileSprite != null)
+            var coinCounterImg = coinCounterGO.AddComponent<Image>();
+            coinCounterImg.raycastTarget = false;
+            var coinCounterSprite = Resources.Load<Sprite>("Sprites/UI/Icons/coins_counter_icon_ui_topbar");
+            if (coinCounterSprite != null)
             {
-                profileImg.sprite = profileSprite;
-                profileImg.preserveAspect = true;
+                coinCounterImg.sprite = coinCounterSprite;
+                coinCounterImg.preserveAspect = true;
             }
             else
             {
-                profileImg.color = new Color(0.9f, 0.7f, 0.5f, 1f);
+                coinCounterImg.color = new Color(0.9f, 0.7f, 0.2f, 1f);
             }
 
-            // Player name text - moved right to not overlap mascot
-            var playerNameGO = new GameObject("PlayerName");
-            playerNameGO.transform.SetParent(profileGO.transform, false);
-            var playerNameRect = playerNameGO.AddComponent<RectTransform>();
-            playerNameRect.anchorMin = new Vector2(0.38f, 0.38f); // Moved further right
-            playerNameRect.anchorMax = new Vector2(0.95f, 0.62f);
-            playerNameRect.offsetMin = Vector2.zero;
-            playerNameRect.offsetMax = Vector2.zero;
+            // Coin balance text - positioned on the dark area (right side of the image)
+            var coinTextGO = new GameObject("CoinBalanceText");
+            coinTextGO.transform.SetParent(coinCounterGO.transform, false);
+            var coinTextRect = coinTextGO.AddComponent<RectTransform>();
+            coinTextRect.anchorMin = new Vector2(0.19f, 0.15f);
+            coinTextRect.anchorMax = new Vector2(0.79f, 0.85f);
+            coinTextRect.offsetMin = Vector2.zero;
+            coinTextRect.offsetMax = Vector2.zero;
 
-            var playerNameText = playerNameGO.AddComponent<TextMeshProUGUI>();
-            playerNameText.text = "PLAYER";
-            playerNameText.fontSize = 32;
-            playerNameText.fontStyle = FontStyles.Bold;
-            playerNameText.alignment = TextAlignmentOptions.MidlineLeft;
-            playerNameText.color = Color.white;
-            playerNameText.raycastTarget = false;
+            coinBalanceText = coinTextGO.AddComponent<TextMeshProUGUI>();
+            coinBalanceText.text = "0";
+            coinBalanceText.fontSize = 36;
+            coinBalanceText.fontStyle = FontStyles.Bold;
+            coinBalanceText.alignment = TextAlignmentOptions.Center;
+            coinBalanceText.color = new Color(1f, 0.84f, 0f); // Gold color
+            coinBalanceText.raycastTarget = false;
+            if (FontManager.Bold != null)
+                coinBalanceText.font = FontManager.Bold;
+
+            UpdateCoinDisplay();
+
+            // Debug: +100 coins button underneath coin counter
+            var debugCoinBtnGO = new GameObject("DebugAddCoins");
+            debugCoinBtnGO.transform.SetParent(coinCounterGO.transform, false);
+            var debugCoinRect = debugCoinBtnGO.AddComponent<RectTransform>();
+            debugCoinRect.anchorMin = new Vector2(0.5f, 0);
+            debugCoinRect.anchorMax = new Vector2(0.5f, 0);
+            debugCoinRect.pivot = new Vector2(0.5f, 1);
+            debugCoinRect.anchoredPosition = new Vector2(0, -5);
+            debugCoinRect.sizeDelta = new Vector2(100, 35);
+            var debugCoinImg = debugCoinBtnGO.AddComponent<Image>();
+            debugCoinImg.color = new Color(0.2f, 0.7f, 0.2f, 0.9f);
+            var debugCoinBtn = debugCoinBtnGO.AddComponent<Button>();
+            debugCoinBtn.targetGraphic = debugCoinImg;
+            debugCoinBtn.onClick.AddListener(() => { AchievementManager.Instance?.AddCoins(100); });
+            var debugCoinTextGO = new GameObject("Text");
+            debugCoinTextGO.transform.SetParent(debugCoinBtnGO.transform, false);
+            var debugCoinTextRect = debugCoinTextGO.AddComponent<RectTransform>();
+            debugCoinTextRect.anchorMin = Vector2.zero;
+            debugCoinTextRect.anchorMax = Vector2.one;
+            debugCoinTextRect.offsetMin = Vector2.zero;
+            debugCoinTextRect.offsetMax = Vector2.zero;
+            var debugCoinText = debugCoinTextGO.AddComponent<TextMeshProUGUI>();
+            debugCoinText.text = "+100";
+            debugCoinText.fontSize = 20;
+            debugCoinText.alignment = TextAlignmentOptions.Center;
+            debugCoinText.color = Color.white;
 
             // ============================================
             // WORLD DISPLAY AREA - Large world image with navigation arrows
@@ -5556,12 +5612,12 @@ Antonia and Joakim Engfors
                 achievementDescText.font = liberationSans;
 
             // ==========================================
-            // Text: Achievement Points (bottom dark area)
+            // Text: Coin reward (bottom dark area)
             // White, Benzin-SemiBold, ALL CAPS, size 25
             // Image bottom dark area: ~y=248-280 (image coords)
             // RectTransform y: 315/2 - 265 = -107.5
             // ==========================================
-            var pointsGO = new GameObject("AchievementPoints");
+            var pointsGO = new GameObject("AchievementCoins");
             pointsGO.transform.SetParent(achievementNotificationPanel.transform, false);
             var pointsRect = pointsGO.AddComponent<RectTransform>();
             pointsRect.anchorMin = new Vector2(0.5f, 0.5f);
@@ -5570,16 +5626,16 @@ Antonia and Joakim Engfors
             pointsRect.anchoredPosition = new Vector2(0, -107);
             pointsRect.sizeDelta = new Vector2(450, 40);
 
-            achievementPointsText_Notification = pointsGO.AddComponent<TextMeshProUGUI>();
-            achievementPointsText_Notification.text = "";
-            achievementPointsText_Notification.fontSize = 25;
-            achievementPointsText_Notification.fontStyle = FontStyles.UpperCase;
-            achievementPointsText_Notification.color = Color.white;
-            achievementPointsText_Notification.alignment = TextAlignmentOptions.Center;
-            achievementPointsText_Notification.raycastTarget = false;
-            achievementPointsText_Notification.textWrappingMode = TextWrappingModes.NoWrap;
+            achievementCoinsText_Notification = pointsGO.AddComponent<TextMeshProUGUI>();
+            achievementCoinsText_Notification.text = "";
+            achievementCoinsText_Notification.fontSize = 25;
+            achievementCoinsText_Notification.fontStyle = FontStyles.UpperCase;
+            achievementCoinsText_Notification.color = Color.white;
+            achievementCoinsText_Notification.alignment = TextAlignmentOptions.Center;
+            achievementCoinsText_Notification.raycastTarget = false;
+            achievementCoinsText_Notification.textWrappingMode = TextWrappingModes.NoWrap;
             if (FontManager.SemiBold != null)
-                achievementPointsText_Notification.font = FontManager.SemiBold;
+                achievementCoinsText_Notification.font = FontManager.SemiBold;
 
             Debug.Log("[UIManager] Achievement notification panel created (sprite-based)");
         }
@@ -5643,8 +5699,8 @@ Antonia and Joakim Engfors
                 achievementNameText.text = currentAchievement.name;
             if (achievementDescText != null)
                 achievementDescText.text = currentAchievement.description;
-            if (achievementPointsText_Notification != null)
-                achievementPointsText_Notification.text = $"+{currentAchievement.points} Points";
+            if (achievementCoinsText_Notification != null)
+                achievementCoinsText_Notification.text = $"+{currentAchievement.GetCoinReward()} Coins";
 
             // Show notification
             if (achievementCoroutine != null)
@@ -5979,10 +6035,10 @@ Antonia and Joakim Engfors
             achievementWorldIconImage.raycastTarget = false;
 
             // ============================================
-            // Layer 8: Points text - positioned below/beside icon for General tab
+            // Layer 8: Coins text - positioned below/beside icon
             // Same area as icon: x(171-370), y(303-504)
             // ============================================
-            var pointsTextGO = new GameObject("PointsText");
+            var pointsTextGO = new GameObject("CoinsText");
             pointsTextGO.transform.SetParent(achievementsPanel.transform, false);
             var pointsTextRect = pointsTextGO.AddComponent<RectTransform>();
             // x: 171/1080≈0.158, 370/1080≈0.343
@@ -5993,17 +6049,17 @@ Antonia and Joakim Engfors
             pointsTextRect.offsetMin = Vector2.zero;
             pointsTextRect.offsetMax = Vector2.zero;
 
-            achievementPointsText = pointsTextGO.AddComponent<TextMeshProUGUI>();
-            achievementPointsText.text = "0";
-            achievementPointsText.fontSize = 42;
-            achievementPointsText.fontStyle = FontStyles.Bold;
-            achievementPointsText.alignment = TextAlignmentOptions.Center;
-            achievementPointsText.color = Color.black;
-            achievementPointsText.enableAutoSizing = true;
-            achievementPointsText.fontSizeMin = 20;
-            achievementPointsText.fontSizeMax = 42;
+            achievementCoinsText = pointsTextGO.AddComponent<TextMeshProUGUI>();
+            achievementCoinsText.text = "0";
+            achievementCoinsText.fontSize = 42;
+            achievementCoinsText.fontStyle = FontStyles.Bold;
+            achievementCoinsText.alignment = TextAlignmentOptions.Center;
+            achievementCoinsText.color = Color.black;
+            achievementCoinsText.enableAutoSizing = true;
+            achievementCoinsText.fontSizeMin = 20;
+            achievementCoinsText.fontSizeMax = 42;
             if (FontManager.ExtraBold != null)
-                achievementPointsText.font = FontManager.ExtraBold;
+                achievementCoinsText.font = FontManager.ExtraBold;
 
             // ============================================
             // Layer 9: Close Button (X in upper-right)
@@ -6201,12 +6257,6 @@ Antonia and Joakim Engfors
                 Destroy(child.gameObject);
             }
 
-            // Update points text
-            if (achievementPointsText != null && AchievementManager.Instance != null)
-            {
-                achievementPointsText.text = $"{AchievementManager.Instance.GetEarnedPoints()}";
-            }
-
             // All tabs show category-grouped cards (no more Recent tab)
             RefreshCategoryTab(currentAchievementTab);
         }
@@ -6218,19 +6268,15 @@ Antonia and Joakim Engfors
             bool isGeneral = currentAchievementTab == Achievement.TAB_GENERAL;
             var shadowText = achievementTitleBarText.transform.parent.Find("TitleBarShadow")?.GetComponent<TextMeshProUGUI>();
 
+            // Hide coin counter on all tabs (coins shown on level select top bar instead)
+            if (achievementCoinsText != null)
+                achievementCoinsText.gameObject.SetActive(false);
+
             if (isGeneral)
             {
-                achievementTitleBarText.text = "Achievement\nPoints";
-                if (shadowText != null) shadowText.text = "Achievement\nPoints";
+                achievementTitleBarText.text = "General";
+                if (shadowText != null) shadowText.text = "General";
 
-                // Show points text, show general icon
-                if (achievementPointsText != null)
-                {
-                    achievementPointsText.gameObject.SetActive(true);
-                    achievementPointsText.text = AchievementManager.Instance != null
-                        ? $"{AchievementManager.Instance.GetEarnedPoints()}"
-                        : "0";
-                }
                 if (achievementWorldIconImage != null)
                 {
                     var generalIcon = LoadFullRectSprite("Sprites/UI/Achievements/achv_general_icon");
@@ -6251,10 +6297,6 @@ Antonia and Joakim Engfors
                 string displayName = GetAchievementTitleBarName(currentAchievementTab);
                 achievementTitleBarText.text = displayName;
                 if (shadowText != null) shadowText.text = displayName;
-
-                // Hide points text for non-general tabs
-                if (achievementPointsText != null)
-                    achievementPointsText.gameObject.SetActive(false);
 
                 // Show tab icon
                 if (achievementWorldIconImage != null)
@@ -6772,6 +6814,7 @@ Antonia and Joakim Engfors
             if (AchievementManager.Instance != null)
             {
                 AchievementManager.Instance.OnAchievementUnlocked -= OnAchievementUnlocked;
+                AchievementManager.Instance.OnCoinsChanged -= OnCoinsChanged;
             }
 
             if (Instance == this)

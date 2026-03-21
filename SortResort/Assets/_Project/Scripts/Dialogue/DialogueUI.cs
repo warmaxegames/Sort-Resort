@@ -233,12 +233,25 @@ namespace SortResort
             {
                 mascotImage.sprite = defaultMascotSprite;
                 mascotImage.enabled = true;
+                ScaleMascotToFitHeight();
             }
             else if (mascotImage != null && defaultMascotSprite == null)
             {
                 mascotImage.enabled = false; // Hide to avoid blank white square
                 Debug.LogWarning($"[DialogueUI] Failed to load mascot sprite at {currentMascotFolder}_neutral");
             }
+        }
+
+        private const float TARGET_MASCOT_HEIGHT = 750f;
+
+        private void ScaleMascotToFitHeight()
+        {
+            if (mascotImage == null || mascotImage.sprite == null) return;
+
+            var rect = mascotImage.rectTransform;
+            var spriteRect = mascotImage.sprite.rect;
+            float aspect = spriteRect.width / spriteRect.height;
+            rect.sizeDelta = new Vector2(TARGET_MASCOT_HEIGHT * aspect, TARGET_MASCOT_HEIGHT);
         }
 
         private void UpdateMascotExpression(string expression)

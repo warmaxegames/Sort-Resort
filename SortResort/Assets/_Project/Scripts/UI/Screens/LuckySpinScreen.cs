@@ -12,23 +12,29 @@ namespace SortResort.UI
     /// </summary>
     public class LuckySpinScreen
     {
-        // 8 wheel sections clockwise from top, sampled from actual wheel art pixels.
-        // The wheel image has a divider at 12 o'clock. Going clockwise:
-        private static readonly Color[] SectionColors = new Color[]
-        {
-            new Color(0.91f, 0.39f, 0.09f),  // 0: Orange
-            new Color(0.98f, 0.02f, 0.69f),  // 1: Hot Pink
-            new Color(0.64f, 0.09f, 0.85f),  // 2: Purple
-            new Color(0.72f, 0.69f, 0.80f),  // 3: Lavender
-            new Color(0.72f, 0.91f, 0.05f),  // 4: Lime Green
-            new Color(0.32f, 0.49f, 0.89f),  // 5: Blue
-            new Color(0.51f, 0.78f, 0.65f),  // 6: Teal
-            new Color(0.91f, 0.70f, 0.11f),  // 7: Gold
-        };
+        // Reward types for spin wheel sections
+        private enum SpinRewardType { Coins, PowerUp, PresentBox }
 
-        private static readonly string[] SectionNames = new string[]
+        private struct SpinReward
         {
-            "Orange", "Hot Pink", "Purple", "Lavender", "Lime Green", "Blue", "Teal", "Gold"
+            public SpinRewardType type;
+            public int coinAmount;
+            public PowerUpType powerUpType;
+            public string iconPath;
+            public string displayName;
+        }
+
+        // 8 wheel sections clockwise from top (pointer position)
+        private static readonly SpinReward[] SectionRewards = new SpinReward[]
+        {
+            new SpinReward { type = SpinRewardType.Coins, coinAmount = 5, iconPath = "Sprites/UI/LuckySpin/coins_icon", displayName = "5 Coins" },
+            new SpinReward { type = SpinRewardType.PowerUp, powerUpType = PowerUpType.TimeFreeze, iconPath = "Sprites/UI/PowerUps/time_freeze", displayName = "Time Freeze" },
+            new SpinReward { type = SpinRewardType.Coins, coinAmount = 10, iconPath = "Sprites/UI/LuckySpin/coins_icon", displayName = "10 Coins" },
+            new SpinReward { type = SpinRewardType.PowerUp, powerUpType = PowerUpType.MoveFreeze, iconPath = "Sprites/UI/PowerUps/moves_freeze", displayName = "Move Freeze" },
+            new SpinReward { type = SpinRewardType.Coins, coinAmount = 20, iconPath = "Sprites/UI/LuckySpin/coins_icon", displayName = "20 Coins" },
+            new SpinReward { type = SpinRewardType.PresentBox, iconPath = "Sprites/UI/LuckySpin/normal_present_box", displayName = "Present Box" },
+            new SpinReward { type = SpinRewardType.PowerUp, powerUpType = PowerUpType.DestroyLocker, iconPath = "Sprites/UI/PowerUps/destroy_locker", displayName = "Destroy Lock" },
+            new SpinReward { type = SpinRewardType.PowerUp, powerUpType = PowerUpType.SwapItems, iconPath = "Sprites/UI/PowerUps/swap_items", displayName = "Swap Items" },
         };
 
         private GameObject panel;
@@ -41,8 +47,17 @@ namespace SortResort.UI
         private Sprite spinButtonNormal;
         private Sprite spinButtonPressed;
         private AudioClip wheelClickClip;
-        private GameObject rewardPopup;
-        private TextMeshProUGUI rewardText;
+        private GameObject rewardOverlay;
+        private Image rewardIconImage;
+        private Image rewardGlowImage;
+        private TextMeshProUGUI rewardAmountText;
+        private Image congratsImage;
+        private Image acceptButtonImage;
+        private Sprite acceptNormal;
+        private Sprite acceptPressed;
+        private Coroutine congratsPulseCoroutine;
+        private Coroutine glowPulseCoroutine;
+        private int pendingRewardSection;
         private bool isSpinning;
         private MonoBehaviour coroutineHost;
         private Coroutine pulseCoroutine;
@@ -132,8 +147,9 @@ namespace SortResort.UI
         {
             if (panel == null) return;
             isSpinning = false;
-            rewardPopup.SetActive(false);
+            rewardOverlay.SetActive(false);
             spinButton.interactable = true;
+            spinButtonImage.gameObject.SetActive(true);
 
             // Randomize starting angle to one of 8 section-aligned positions (divider at pointer)
             int startSection = UnityEngine.Random.Range(0, 8);
@@ -192,6 +208,16 @@ namespace SortResort.UI
                 wheelEffectCoroutine = null;
             }
             if (wheelEffectGO != null) wheelEffectGO.SetActive(false);
+            if (congratsPulseCoroutine != null)
+            {
+                coroutineHost.StopCoroutine(congratsPulseCoroutine);
+                congratsPulseCoroutine = null;
+            }
+            if (glowPulseCoroutine != null)
+            {
+                coroutineHost.StopCoroutine(glowPulseCoroutine);
+                glowPulseCoroutine = null;
+            }
             panel.SetActive(false);
             OnClosed?.Invoke();
         }
@@ -314,7 +340,7 @@ namespace SortResort.UI
             wheelRect.offsetMax = Vector2.zero;
 
             var wheelImg = wheelGO.AddComponent<Image>();
-            var wheelTex = Resources.Load<Texture2D>("Sprites/UI/LuckySpin/spin_wheel");
+            var wheelTex = Resources.Load<Texture2D>("Sprites/UI/LuckySpin/daily_spin_wheel");
             if (wheelTex != null)
             {
                 wheelImg.sprite = Sprite.Create(wheelTex, new Rect(0, 0, wheelTex.width, wheelTex.height), new Vector2(0.5f, 0.5f), 100f);
@@ -381,101 +407,173 @@ namespace SortResort.UI
 
         private void CreateRewardPopup(Transform parent)
         {
-            rewardPopup = new GameObject("Reward Popup");
-            rewardPopup.transform.SetParent(parent, false);
-            var popRect = rewardPopup.AddComponent<RectTransform>();
+            rewardOverlay = new GameObject("Reward Overlay");
+            rewardOverlay.transform.SetParent(parent, false);
+            var popRect = rewardOverlay.AddComponent<RectTransform>();
             popRect.anchorMin = Vector2.zero;
             popRect.anchorMax = Vector2.one;
             popRect.offsetMin = Vector2.zero;
             popRect.offsetMax = Vector2.zero;
 
-            // Dim overlay behind popup
-            var dimGO = new GameObject("Dim");
-            dimGO.transform.SetParent(rewardPopup.transform, false);
+            // Layer 1: Dark overlay (95% opacity)
+            var dimGO = new GameObject("DarkOverlay");
+            dimGO.transform.SetParent(rewardOverlay.transform, false);
             var dimRect = dimGO.AddComponent<RectTransform>();
             dimRect.anchorMin = Vector2.zero;
             dimRect.anchorMax = Vector2.one;
             dimRect.offsetMin = Vector2.zero;
             dimRect.offsetMax = Vector2.zero;
             var dimImg = dimGO.AddComponent<Image>();
-            dimImg.color = new Color(0, 0, 0, 0.7f);
+            dimImg.color = new Color(0, 0, 0, 0.95f);
 
-            // Popup card
-            var cardGO = new GameObject("Card");
-            cardGO.transform.SetParent(rewardPopup.transform, false);
-            var cardRect = cardGO.AddComponent<RectTransform>();
-            cardRect.anchorMin = new Vector2(0.1f, 0.3f);
-            cardRect.anchorMax = new Vector2(0.9f, 0.7f);
-            cardRect.offsetMin = Vector2.zero;
-            cardRect.offsetMax = Vector2.zero;
-            var cardImg = cardGO.AddComponent<Image>();
-            cardImg.color = new Color(0.95f, 0.92f, 0.82f);
+            // Layer 2: Glow behind reward icon (procedural white circle)
+            var glowGO = new GameObject("Glow");
+            glowGO.transform.SetParent(rewardOverlay.transform, false);
+            var glowRect = glowGO.AddComponent<RectTransform>();
+            glowRect.anchorMin = new Vector2(0.5f, 0.5f);
+            glowRect.anchorMax = new Vector2(0.5f, 0.5f);
+            glowRect.pivot = new Vector2(0.5f, 0.5f);
+            glowRect.sizeDelta = new Vector2(500, 500);
+            rewardGlowImage = glowGO.AddComponent<Image>();
+            rewardGlowImage.sprite = CreateGlowSprite();
+            rewardGlowImage.color = new Color(1f, 0.9f, 0.5f, 0.5f);
+            rewardGlowImage.raycastTarget = false;
 
-            // Reward text
-            var textGO = new GameObject("RewardText");
-            textGO.transform.SetParent(cardGO.transform, false);
-            var textRect = textGO.AddComponent<RectTransform>();
-            textRect.anchorMin = new Vector2(0.05f, 0.15f);
-            textRect.anchorMax = new Vector2(0.95f, 0.85f);
-            textRect.offsetMin = Vector2.zero;
-            textRect.offsetMax = Vector2.zero;
+            // Layer 3: Reward icon (centered, sized for visibility)
+            var iconGO = new GameObject("RewardIcon");
+            iconGO.transform.SetParent(rewardOverlay.transform, false);
+            var iconRect = iconGO.AddComponent<RectTransform>();
+            iconRect.anchorMin = new Vector2(0.5f, 0.5f);
+            iconRect.anchorMax = new Vector2(0.5f, 0.5f);
+            iconRect.pivot = new Vector2(0.5f, 0.5f);
+            iconRect.sizeDelta = new Vector2(300, 300);
+            rewardIconImage = iconGO.AddComponent<Image>();
+            rewardIconImage.preserveAspect = true;
+            rewardIconImage.raycastTarget = false;
 
-            rewardText = textGO.AddComponent<TextMeshProUGUI>();
-            rewardText.text = "You won a reward!";
-            rewardText.fontSize = 48;
-            rewardText.alignment = TextAlignmentOptions.Center;
-            rewardText.color = Color.black;
-            FontManager.ApplyBold(rewardText);
+            // Layer 4: Coin amount text (below icon, only visible for coin rewards)
+            var amountGO = new GameObject("CoinAmount");
+            amountGO.transform.SetParent(rewardOverlay.transform, false);
+            var amountRect = amountGO.AddComponent<RectTransform>();
+            amountRect.anchorMin = new Vector2(0.5f, 0.5f);
+            amountRect.anchorMax = new Vector2(0.5f, 0.5f);
+            amountRect.pivot = new Vector2(0.5f, 1f);
+            amountRect.anchoredPosition = new Vector2(0, -185);
+            amountRect.sizeDelta = new Vector2(300, 100);
+            rewardAmountText = amountGO.AddComponent<TextMeshProUGUI>();
+            rewardAmountText.text = "";
+            rewardAmountText.fontSize = 84;
+            rewardAmountText.fontStyle = FontStyles.Bold;
+            rewardAmountText.alignment = TextAlignmentOptions.Center;
+            rewardAmountText.color = new Color(1f, 0.84f, 0f);
+            rewardAmountText.raycastTarget = false;
+            rewardAmountText.outlineWidth = 0.25f;
+            rewardAmountText.outlineColor = Color.black;
+            if (FontManager.Bold != null)
+                rewardAmountText.font = FontManager.Bold;
 
-            // Title text
-            var titleTextGO = new GameObject("TitleText");
-            titleTextGO.transform.SetParent(cardGO.transform, false);
-            var titleTextRect = titleTextGO.AddComponent<RectTransform>();
-            titleTextRect.anchorMin = new Vector2(0.05f, 0.7f);
-            titleTextRect.anchorMax = new Vector2(0.85f, 0.95f);
-            titleTextRect.offsetMin = Vector2.zero;
-            titleTextRect.offsetMax = Vector2.zero;
-
-            var titleTmp = titleTextGO.AddComponent<TextMeshProUGUI>();
-            titleTmp.text = "CONGRATULATIONS!";
-            titleTmp.fontSize = 42;
-            titleTmp.alignment = TextAlignmentOptions.Center;
-            titleTmp.color = new Color(0.6f, 0.4f, 0.1f);
-            FontManager.ApplyBold(titleTmp);
-
-            // X close button (upper right)
-            var xGO = new GameObject("CloseButton");
-            xGO.transform.SetParent(cardGO.transform, false);
-            var xRect = xGO.AddComponent<RectTransform>();
-            xRect.anchorMin = new Vector2(0.88f, 0.85f);
-            xRect.anchorMax = new Vector2(1.0f, 1.0f);
-            xRect.offsetMin = Vector2.zero;
-            xRect.offsetMax = Vector2.zero;
-
-            var xImg = xGO.AddComponent<Image>();
-            xImg.color = new Color(0.8f, 0.2f, 0.2f);
-
-            var xTextGO = new GameObject("XText");
-            xTextGO.transform.SetParent(xGO.transform, false);
-            var xTextRect = xTextGO.AddComponent<RectTransform>();
-            xTextRect.anchorMin = Vector2.zero;
-            xTextRect.anchorMax = Vector2.one;
-            xTextRect.offsetMin = Vector2.zero;
-            xTextRect.offsetMax = Vector2.zero;
-            var xTmp = xTextGO.AddComponent<TextMeshProUGUI>();
-            xTmp.text = "X";
-            xTmp.fontSize = 40;
-            xTmp.alignment = TextAlignmentOptions.Center;
-            xTmp.color = Color.white;
-            FontManager.ApplyBold(xTmp);
-
-            var xBtn = xGO.AddComponent<Button>();
-            xBtn.targetGraphic = xImg;
-            xBtn.onClick.AddListener(() =>
+            // Layer 5: Congrats text (positioned via crop metadata)
+            var congratsGO = new GameObject("CongratsText");
+            congratsGO.transform.SetParent(rewardOverlay.transform, false);
+            var congratsRect = congratsGO.AddComponent<RectTransform>();
+            congratsImage = congratsGO.AddComponent<Image>();
+            var congratsTex = Resources.Load<Texture2D>("Sprites/UI/LuckySpin/congrats_text");
+            if (congratsTex != null)
             {
-                AudioManager.Instance?.PlayButtonClick();
-                Hide();
-            });
+                congratsImage.sprite = Sprite.Create(congratsTex, new Rect(0, 0, congratsTex.width, congratsTex.height), new Vector2(0.5f, 0.5f), 100f);
+                congratsImage.preserveAspect = true;
+            }
+            congratsImage.raycastTarget = false;
+            CropMetadata.ApplyCropAnchors(congratsRect, "Sprites/UI/LuckySpin/congrats_text");
+
+            // Layer 6: Accept button (positioned via crop metadata)
+            var acceptGO = new GameObject("AcceptButton");
+            acceptGO.transform.SetParent(rewardOverlay.transform, false);
+            var acceptRect = acceptGO.AddComponent<RectTransform>();
+
+            acceptButtonImage = acceptGO.AddComponent<Image>();
+            acceptNormal = LoadSprite("Sprites/UI/LuckySpin/accept_button");
+            acceptPressed = LoadSprite("Sprites/UI/LuckySpin/accept_button_pressed");
+            if (acceptNormal != null)
+                acceptButtonImage.sprite = acceptNormal;
+            acceptButtonImage.preserveAspect = true;
+            CropMetadata.ApplyCropAnchors(acceptRect, "Sprites/UI/LuckySpin/accept_button");
+            // Source image is ~9.5px left of center; nudge right to center on screen
+            acceptRect.offsetMin = new Vector2(10, acceptRect.offsetMin.y);
+            acceptRect.offsetMax = new Vector2(10, acceptRect.offsetMax.y);
+
+            var acceptBtn = acceptGO.AddComponent<Button>();
+            acceptBtn.targetGraphic = acceptButtonImage;
+            acceptBtn.transition = Selectable.Transition.None;
+            acceptBtn.onClick.AddListener(OnAcceptClicked);
+
+            // Manual press visual
+            var acceptTrigger = acceptGO.AddComponent<UnityEngine.EventSystems.EventTrigger>();
+            var acceptDown = new UnityEngine.EventSystems.EventTrigger.Entry();
+            acceptDown.eventID = UnityEngine.EventSystems.EventTriggerType.PointerDown;
+            acceptDown.callback.AddListener((_) => { if (acceptPressed != null) acceptButtonImage.sprite = acceptPressed; });
+            acceptTrigger.triggers.Add(acceptDown);
+            var acceptUp = new UnityEngine.EventSystems.EventTrigger.Entry();
+            acceptUp.eventID = UnityEngine.EventSystems.EventTriggerType.PointerUp;
+            acceptUp.callback.AddListener((_) => { if (acceptNormal != null) acceptButtonImage.sprite = acceptNormal; });
+            acceptTrigger.triggers.Add(acceptUp);
+        }
+
+        private void OnAcceptClicked()
+        {
+            AudioManager.Instance?.PlayButtonClick();
+            GrantReward(pendingRewardSection);
+            Hide();
+        }
+
+        private void GrantReward(int section)
+        {
+            var reward = SectionRewards[section];
+            switch (reward.type)
+            {
+                case SpinRewardType.Coins:
+                    AchievementManager.Instance?.AddCoins(reward.coinAmount);
+                    Debug.Log($"[LuckySpin] Granted {reward.coinAmount} coins");
+                    break;
+                case SpinRewardType.PowerUp:
+                    if (SaveManager.Instance != null)
+                    {
+                        int current = SaveManager.Instance.GetPowerUpCount(reward.powerUpType);
+                        SaveManager.Instance.SetPowerUpCount(reward.powerUpType, current + 1);
+                        Debug.Log($"[LuckySpin] Granted power-up: {reward.displayName}");
+                    }
+                    break;
+                case SpinRewardType.PresentBox:
+                    AchievementManager.Instance?.RecordPresentBoxOpened();
+                    Debug.Log($"[LuckySpin] Granted present box");
+                    break;
+            }
+        }
+
+        private static Sprite CreateGlowSprite()
+        {
+            int size = 128;
+            var tex = new Texture2D(size, size, TextureFormat.RGBA32, false);
+            var pixels = new Color32[size * size];
+            float center = size / 2f;
+            float radius = size / 2f;
+
+            for (int y = 0; y < size; y++)
+            {
+                for (int x = 0; x < size; x++)
+                {
+                    float dx = x - center;
+                    float dy = y - center;
+                    float dist = Mathf.Sqrt(dx * dx + dy * dy);
+                    float alpha = Mathf.Clamp01(1f - dist / radius);
+                    alpha = alpha * alpha; // quadratic falloff
+                    pixels[y * size + x] = new Color32(255, 255, 255, (byte)(alpha * 255));
+                }
+            }
+
+            tex.SetPixels32(pixels);
+            tex.Apply();
+            return Sprite.Create(tex, new Rect(0, 0, size, size), new Vector2(0.5f, 0.5f), 100f);
         }
 
         // --- INPUT ---
@@ -488,7 +586,7 @@ namespace SortResort.UI
 
             // Determine reward immediately
             int rewardSection = UnityEngine.Random.Range(0, 8);
-            Debug.Log($"[LuckySpin] Reward determined: Section {rewardSection} ({SectionNames[rewardSection]})");
+            Debug.Log($"[LuckySpin] Reward determined: Section {rewardSection} ({SectionRewards[rewardSection].displayName})");
 
             // Mark spin used
             MarkSpunToday();
@@ -600,7 +698,7 @@ namespace SortResort.UI
 
             isSpinning = false;
 
-            Debug.Log($"[LuckySpin] Wheel stopped at Z={desiredFinalZ:F1}. Reward: {SectionNames[targetSection]} (section {targetSection})");
+            Debug.Log($"[LuckySpin] Wheel stopped at Z={desiredFinalZ:F1}. Reward: {SectionRewards[targetSection].displayName} (section {targetSection})");
 
             // Animate rays spinner and wheel effect simultaneously after wheel stops
             if (raysSpinCoroutine != null) coroutineHost.StopCoroutine(raysSpinCoroutine);
@@ -715,8 +813,84 @@ namespace SortResort.UI
         }
         private void ShowReward(int section)
         {
-            rewardText.text = $"You landed on\n<color=#{ColorUtility.ToHtmlStringRGB(SectionColors[section])}><size=64>{SectionNames[section]}</size></color>";
-            rewardPopup.SetActive(true);
+            pendingRewardSection = section;
+            var reward = SectionRewards[section];
+
+            // Set reward icon
+            if (reward.type == SpinRewardType.Coins || reward.type == SpinRewardType.PresentBox)
+            {
+                // Use cropped sprites for coins/present — load as Texture2D for full-rect
+                var tex = Resources.Load<Texture2D>(reward.iconPath);
+                if (tex != null)
+                    rewardIconImage.sprite = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), new Vector2(0.5f, 0.5f), 100f);
+            }
+            else
+            {
+                // Power-up icons are already proper sprites
+                var sprite = Resources.Load<Sprite>(reward.iconPath);
+                if (sprite != null)
+                    rewardIconImage.sprite = sprite;
+            }
+
+            // Show coin amount text only for coin rewards
+            if (reward.type == SpinRewardType.Coins)
+            {
+                rewardAmountText.gameObject.SetActive(true);
+                rewardAmountText.text = reward.coinAmount.ToString();
+            }
+            else
+            {
+                rewardAmountText.gameObject.SetActive(false);
+            }
+
+            // Stop title pulse and hide spin button so they don't distract from reward
+            if (pulseCoroutine != null)
+            {
+                coroutineHost.StopCoroutine(pulseCoroutine);
+                pulseCoroutine = null;
+            }
+            if (titleImage != null)
+                titleImage.GetComponent<RectTransform>().localScale = Vector3.one;
+            if (spinButtonImage != null)
+                spinButtonImage.gameObject.SetActive(false);
+
+            // Start pulsing animations
+            if (congratsPulseCoroutine != null) coroutineHost.StopCoroutine(congratsPulseCoroutine);
+            congratsPulseCoroutine = coroutineHost.StartCoroutine(PulseCongrats());
+            if (glowPulseCoroutine != null) coroutineHost.StopCoroutine(glowPulseCoroutine);
+            glowPulseCoroutine = coroutineHost.StartCoroutine(PulseGlow());
+
+            rewardOverlay.SetActive(true);
+        }
+
+        private IEnumerator PulseCongrats()
+        {
+            if (congratsImage == null) yield break;
+            var rt = congratsImage.GetComponent<RectTransform>();
+            if (rt == null) yield break;
+
+            float time = 0f;
+            while (true)
+            {
+                time += Time.unscaledDeltaTime;
+                float scale = 1f + 0.085f * Mathf.Sin(time * 5f);
+                rt.localScale = Vector3.one * scale;
+                yield return null;
+            }
+        }
+
+        private IEnumerator PulseGlow()
+        {
+            if (rewardGlowImage == null) yield break;
+
+            float time = 0f;
+            while (true)
+            {
+                time += Time.unscaledDeltaTime;
+                float alpha = 0.4f + 0.3f * Mathf.Sin(time * 3f);
+                rewardGlowImage.color = new Color(1f, 0.9f, 0.5f, alpha);
+                yield return null;
+            }
         }
 
         private IEnumerator PulseTitle()

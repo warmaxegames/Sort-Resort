@@ -1,714 +1,722 @@
-﻿{
-    "version":  1,
-    "crops":  {
-                  "Sprites/Mascots/Animations/Farm":  {
-                                                          "x":  123,
-                                                          "y":  671,
-                                                          "w":  840,
-                                                          "h":  797,
-                                                          "orig_w":  1080,
-                                                          "orig_h":  1920,
-                                                          "is_group":  true
-                                                      },
-                  "Sprites/Mascots/Animations/Supermarket":  {
-                                                                 "x":  119,
-                                                                 "y":  832,
-                                                                 "w":  840,
-                                                                 "h":  634,
-                                                                 "orig_w":  1080,
-                                                                 "orig_h":  1920,
-                                                                 "is_group":  true
-                                                             },
-                  "Sprites/Mascots/Animations/Island":  {
-                                                            "x":  119,
-                                                            "y":  849,
-                                                            "w":  840,
-                                                            "h":  617,
-                                                            "orig_w":  1080,
-                                                            "orig_h":  1920,
-                                                            "is_group":  true
-                                                        },
-                  "Sprites/Mascots/Animations/Tavern":  {
-                                                            "x":  120,
-                                                            "y":  789,
-                                                            "w":  840,
-                                                            "h":  677,
-                                                            "orig_w":  1080,
-                                                            "orig_h":  1920,
-                                                            "is_group":  true
-                                                        },
-                  "Sprites/Mascots/Animations/Space":  {
-                                                           "x":  119,
-                                                           "y":  856,
-                                                           "w":  840,
-                                                           "h":  612,
-                                                           "orig_w":  1080,
-                                                           "orig_h":  1920,
-                                                           "is_group":  true
-                                                       },
-                  "Sprites/UI/LevelComplete/BottomBoard":  {
-                                                               "x":  0,
-                                                               "y":  1618,
-                                                               "w":  1080,
-                                                               "h":  302,
-                                                               "orig_w":  1080,
-                                                               "orig_h":  1920,
-                                                               "is_group":  true
-                                                           },
-                  "Sprites/UI/LevelComplete/Curtains":  {
-                                                            "x":  0,
-                                                            "y":  0,
-                                                            "w":  1080,
-                                                            "h":  597,
-                                                            "orig_w":  1080,
-                                                            "orig_h":  1920,
-                                                            "is_group":  true
-                                                        },
-                  "Sprites/UI/LevelComplete/DancingStars":  {
-                                                                "x":  209,
-                                                                "y":  281,
-                                                                "w":  656,
-                                                                "h":  368,
-                                                                "orig_w":  1080,
-                                                                "orig_h":  1920,
-                                                                "is_group":  true
-                                                            },
-                  "Sprites/UI/LevelComplete/LevelBoard":  {
-                                                              "x":  346,
-                                                              "y":  657,
-                                                              "w":  387,
-                                                              "h":  133,
-                                                              "orig_w":  1080,
-                                                              "orig_h":  1920,
-                                                              "is_group":  true
-                                                          },
-                  "Sprites/UI/LevelComplete/LevelCompleteText":  {
-                                                                     "x":  236,
-                                                                     "y":  529,
-                                                                     "w":  608,
-                                                                     "h":  291,
-                                                                     "orig_w":  1080,
-                                                                     "orig_h":  1920,
-                                                                     "is_group":  true
-                                                                 },
-                  "Sprites/UI/LevelComplete/StarRibbon":  {
-                                                              "x":  108,
-                                                              "y":  427,
-                                                              "w":  864,
-                                                              "h":  370,
-                                                              "orig_w":  1080,
-                                                              "orig_h":  1920,
-                                                              "is_group":  true
-                                                          },
-                  "Sprites/UI/WorldUnlock":  {
-                                                 "x":  101,
-                                                 "y":  139,
-                                                 "w":  917,
-                                                 "h":  882,
-                                                 "orig_w":  1080,
-                                                 "orig_h":  1920,
-                                                 "is_group":  true
-                                             },
-                  "Sprites/UI/Achievements/achv_bg_yellow":  {
-                                                                 "x":  130,
-                                                                 "y":  518,
-                                                                 "w":  811,
-                                                                 "h":  1287,
-                                                                 "orig_w":  1080,
-                                                                 "orig_h":  1920
-                                                             },
-                  "Sprites/UI/Achievements/achv_board":  {
-                                                             "x":  51,
-                                                             "y":  184,
-                                                             "w":  972,
-                                                             "h":  1678,
-                                                             "orig_w":  1080,
-                                                             "orig_h":  1920
-                                                         },
-                  "Sprites/UI/Achievements/achv_close_button":  {
-                                                                    "x":  913,
-                                                                    "y":  154,
-                                                                    "w":  122,
-                                                                    "h":  122,
-                                                                    "orig_w":  1080,
-                                                                    "orig_h":  1920
-                                                                },
-                  "Sprites/UI/Achievements/achv_title":  {
-                                                             "x":  222,
-                                                             "y":  37,
-                                                             "w":  636,
-                                                             "h":  298,
-                                                             "orig_w":  1080,
-                                                             "orig_h":  1920
-                                                         },
-                  "Sprites/UI/Achievements/achv_title_bar":  {
-                                                                 "x":  245,
-                                                                 "y":  300,
-                                                                 "w":  656,
-                                                                 "h":  197,
-                                                                 "orig_w":  1080,
-                                                                 "orig_h":  1920
-                                                             },
-                  "Sprites/UI/HUD/free_ui_top":  {
-                                                     "x":  0,
-                                                     "y":  0,
-                                                     "w":  1080,
-                                                     "h":  1920,
-                                                     "orig_w":  1080,
-                                                     "orig_h":  1920
-                                                 },
-                  "Sprites/UI/HUD/hard_mode_UI_top":  {
-                                                          "x":  0,
-                                                          "y":  0,
-                                                          "w":  1080,
-                                                          "h":  1920,
-                                                          "orig_w":  1080,
-                                                          "orig_h":  1920
-                                                      },
-                  "Sprites/UI/HUD/island_icon_UI_top":  {
-                                                            "x":  21,
-                                                            "y":  21,
-                                                            "w":  164,
-                                                            "h":  140,
-                                                            "orig_w":  1080,
-                                                            "orig_h":  1920
-                                                        },
-                  "Sprites/UI/HUD/stars_ui_top":  {
-                                                      "x":  0,
-                                                      "y":  0,
-                                                      "w":  1080,
-                                                      "h":  1920,
-                                                      "orig_w":  1080,
-                                                      "orig_h":  1920
-                                                  },
-                  "Sprites/UI/HUD/timer_ui_top":  {
-                                                      "x":  0,
-                                                      "y":  0,
-                                                      "w":  1080,
-                                                      "h":  1920,
-                                                      "orig_w":  1080,
-                                                      "orig_h":  1920
-                                                  },
-                  "Sprites/UI/LevelComplete/Buttons/level_label":  {
-                                                                       "x":  154,
-                                                                       "y":  701,
-                                                                       "w":  387,
-                                                                       "h":  133,
-                                                                       "orig_w":  1080,
-                                                                       "orig_h":  1920
-                                                                   },
-                  "Sprites/UI/LevelComplete/Buttons/moves_label":  {
-                                                                       "x":  555,
-                                                                       "y":  701,
-                                                                       "w":  387,
-                                                                       "h":  133,
-                                                                       "orig_w":  1080,
-                                                                       "orig_h":  1920
-                                                                   },
-                  "Sprites/UI/LevelComplete/free_levelcomplete_overlay":  {
-                                                                              "x":  108,
-                                                                              "y":  0,
-                                                                              "w":  864,
-                                                                              "h":  746,
-                                                                              "orig_w":  1080,
-                                                                              "orig_h":  1920
-                                                                          },
-                  "Sprites/UI/LevelComplete/MedalAnimation":  {
-                                                                  "x":  246,
-                                                                  "y":  0,
-                                                                  "w":  588,
-                                                                  "h":  717,
-                                                                  "orig_w":  1080,
-                                                                  "orig_h":  1920,
-                                                                  "is_group":  true
-                                                              },
-                  "Sprites/UI/LevelComplete/grey_stars":  {
-                                                              "x":  205,
-                                                              "y":  299,
-                                                              "w":  661,
-                                                              "h":  344,
-                                                              "orig_w":  1080,
-                                                              "orig_h":  1920
-                                                          },
-                  "Sprites/UI/LevelComplete/hard_levelcomplete_overlay":  {
-                                                                              "x":  299,
-                                                                              "y":  0,
-                                                                              "w":  512,
-                                                                              "h":  716,
-                                                                              "orig_w":  1080,
-                                                                              "orig_h":  1920
-                                                                          },
-                  "Sprites/UI/LevelComplete/level_UI":  {
-                                                            "x":  155,
-                                                            "y":  988,
-                                                            "w":  387,
-                                                            "h":  133,
-                                                            "orig_w":  1080,
-                                                            "orig_h":  1920
-                                                        },
-                  "Sprites/UI/LevelComplete/moves_UI":  {
-                                                            "x":  150,
-                                                            "y":  1191,
-                                                            "w":  387,
-                                                            "h":  133,
-                                                            "orig_w":  1080,
-                                                            "orig_h":  1920
-                                                        },
-                  "Sprites/UI/LevelComplete/new_record_UI":  {
-                                                                 "x":  293,
-                                                                 "y":  665,
-                                                                 "w":  480,
-                                                                 "h":  91,
-                                                                 "orig_w":  1080,
-                                                                 "orig_h":  1920
-                                                             },
-                  "Sprites/UI/LevelComplete/timer_bar_UI":  {
-                                                                "x":  346,
-                                                                "y":  752,
-                                                                "w":  387,
-                                                                "h":  109,
-                                                                "orig_w":  1080,
-                                                                "orig_h":  1920
-                                                            },
-                  "Sprites/UI/LevelComplete/timer_icon":  {
-                                                              "x":  336,
-                                                              "y":  212,
-                                                              "w":  378,
-                                                              "h":  455,
-                                                              "orig_w":  1080,
-                                                              "orig_h":  1920
-                                                          },
-                  "Sprites/UI/LevelComplete/Star1/star 1_1":  {
-                                                                  "x":  207,
-                                                                  "y":  419,
-                                                                  "w":  234,
-                                                                  "h":  225,
-                                                                  "orig_w":  1080,
-                                                                  "orig_h":  1920
-                                                              },
-                  "Sprites/UI/LevelComplete/Star1/star 1_2":  {
-                                                                  "x":  207,
-                                                                  "y":  419,
-                                                                  "w":  234,
-                                                                  "h":  225,
-                                                                  "orig_w":  1080,
-                                                                  "orig_h":  1920
-                                                              },
-                  "Sprites/UI/LevelComplete/Star1/star 1_3":  {
-                                                                  "x":  207,
-                                                                  "y":  419,
-                                                                  "w":  234,
-                                                                  "h":  225,
-                                                                  "orig_w":  1080,
-                                                                  "orig_h":  1920
-                                                              },
-                  "Sprites/UI/LevelComplete/Star1/star 1_4":  {
-                                                                  "x":  207,
-                                                                  "y":  419,
-                                                                  "w":  234,
-                                                                  "h":  225,
-                                                                  "orig_w":  1080,
-                                                                  "orig_h":  1920
-                                                              },
-                  "Sprites/UI/LevelComplete/Star1/star 1_5":  {
-                                                                  "x":  207,
-                                                                  "y":  419,
-                                                                  "w":  234,
-                                                                  "h":  225,
-                                                                  "orig_w":  1080,
-                                                                  "orig_h":  1920
-                                                              },
-                  "Sprites/UI/LevelComplete/Star1/star 1_6":  {
-                                                                  "x":  207,
-                                                                  "y":  419,
-                                                                  "w":  234,
-                                                                  "h":  225,
-                                                                  "orig_w":  1080,
-                                                                  "orig_h":  1920
-                                                              },
-                  "Sprites/UI/LevelComplete/Star1/star 1_7":  {
-                                                                  "x":  207,
-                                                                  "y":  419,
-                                                                  "w":  234,
-                                                                  "h":  225,
-                                                                  "orig_w":  1080,
-                                                                  "orig_h":  1920
-                                                              },
-                  "Sprites/UI/LevelComplete/Star1/star 1_8":  {
-                                                                  "x":  207,
-                                                                  "y":  419,
-                                                                  "w":  234,
-                                                                  "h":  225,
-                                                                  "orig_w":  1080,
-                                                                  "orig_h":  1920
-                                                              },
-                  "Sprites/UI/LevelComplete/Star1/star 1_9":  {
-                                                                  "x":  207,
-                                                                  "y":  419,
-                                                                  "w":  234,
-                                                                  "h":  225,
-                                                                  "orig_w":  1080,
-                                                                  "orig_h":  1920
-                                                              },
-                  "Sprites/UI/LevelComplete/Star2/star2_1":  {
-                                                                 "x":  643,
-                                                                 "y":  442,
-                                                                 "w":  194,
-                                                                 "h":  200,
-                                                                 "orig_w":  1080,
-                                                                 "orig_h":  1920
-                                                             },
-                  "Sprites/UI/LevelComplete/Star2/star2_2":  {
-                                                                 "x":  631,
-                                                                 "y":  419,
-                                                                 "w":  235,
-                                                                 "h":  225,
-                                                                 "orig_w":  1080,
-                                                                 "orig_h":  1920
-                                                             },
-                  "Sprites/UI/LevelComplete/Star2/star2_3":  {
-                                                                 "x":  631,
-                                                                 "y":  419,
-                                                                 "w":  235,
-                                                                 "h":  225,
-                                                                 "orig_w":  1080,
-                                                                 "orig_h":  1920
-                                                             },
-                  "Sprites/UI/LevelComplete/Star2/star2_4":  {
-                                                                 "x":  631,
-                                                                 "y":  419,
-                                                                 "w":  235,
-                                                                 "h":  225,
-                                                                 "orig_w":  1080,
-                                                                 "orig_h":  1920
-                                                             },
-                  "Sprites/UI/LevelComplete/Star2/star2_5":  {
-                                                                 "x":  631,
-                                                                 "y":  419,
-                                                                 "w":  235,
-                                                                 "h":  225,
-                                                                 "orig_w":  1080,
-                                                                 "orig_h":  1920
-                                                             },
-                  "Sprites/UI/LevelComplete/Star2/star2_6":  {
-                                                                 "x":  631,
-                                                                 "y":  419,
-                                                                 "w":  235,
-                                                                 "h":  225,
-                                                                 "orig_w":  1080,
-                                                                 "orig_h":  1920
-                                                             },
-                  "Sprites/UI/LevelComplete/Star2/star2_7":  {
-                                                                 "x":  631,
-                                                                 "y":  419,
-                                                                 "w":  235,
-                                                                 "h":  225,
-                                                                 "orig_w":  1080,
-                                                                 "orig_h":  1920
-                                                             },
-                  "Sprites/UI/LevelComplete/Star2/star2_8":  {
-                                                                 "x":  631,
-                                                                 "y":  419,
-                                                                 "w":  235,
-                                                                 "h":  225,
-                                                                 "orig_w":  1080,
-                                                                 "orig_h":  1920
-                                                             },
-                  "Sprites/UI/LevelComplete/Star2/star2_9":  {
-                                                                 "x":  631,
-                                                                 "y":  419,
-                                                                 "w":  235,
-                                                                 "h":  225,
-                                                                 "orig_w":  1080,
-                                                                 "orig_h":  1920
-                                                             },
-                  "Sprites/UI/LevelComplete/Star3/star3_1":  {
-                                                                 "x":  444,
-                                                                 "y":  373,
-                                                                 "w":  194,
-                                                                 "h":  199,
-                                                                 "orig_w":  1080,
-                                                                 "orig_h":  1920
-                                                             },
-                  "Sprites/UI/LevelComplete/Star3/star3_2":  {
-                                                                 "x":  444,
-                                                                 "y":  373,
-                                                                 "w":  195,
-                                                                 "h":  197,
-                                                                 "orig_w":  1080,
-                                                                 "orig_h":  1920
-                                                             },
-                  "Sprites/UI/LevelComplete/Star3/star3_3":  {
-                                                                 "x":  458,
-                                                                 "y":  373,
-                                                                 "w":  172,
-                                                                 "h":  196,
-                                                                 "orig_w":  1080,
-                                                                 "orig_h":  1920
-                                                             },
-                  "Sprites/UI/LevelComplete/Star3/star3_4":  {
-                                                                 "x":  376,
-                                                                 "y":  299,
-                                                                 "w":  325,
-                                                                 "h":  310,
-                                                                 "orig_w":  1080,
-                                                                 "orig_h":  1920
-                                                             },
-                  "Sprites/UI/LevelComplete/Star3/star3_5":  {
-                                                                 "x":  376,
-                                                                 "y":  299,
-                                                                 "w":  325,
-                                                                 "h":  310,
-                                                                 "orig_w":  1080,
-                                                                 "orig_h":  1920
-                                                             },
-                  "Sprites/UI/LevelComplete/Star3/star3_6":  {
-                                                                 "x":  376,
-                                                                 "y":  299,
-                                                                 "w":  325,
-                                                                 "h":  310,
-                                                                 "orig_w":  1080,
-                                                                 "orig_h":  1920
-                                                             },
-                  "Sprites/UI/LevelComplete/Star3/star3_7":  {
-                                                                 "x":  376,
-                                                                 "y":  299,
-                                                                 "w":  325,
-                                                                 "h":  310,
-                                                                 "orig_w":  1080,
-                                                                 "orig_h":  1920
-                                                             },
-                  "Sprites/UI/LevelComplete/Star3/star3_8":  {
-                                                                 "x":  376,
-                                                                 "y":  299,
-                                                                 "w":  325,
-                                                                 "h":  310,
-                                                                 "orig_w":  1080,
-                                                                 "orig_h":  1920
-                                                             },
-                  "Sprites/UI/LevelComplete/Star3/star3_9":  {
-                                                                 "x":  376,
-                                                                 "y":  299,
-                                                                 "w":  325,
-                                                                 "h":  310,
-                                                                 "orig_w":  1080,
-                                                                 "orig_h":  1920
-                                                             },
-                  "Sprites/UI/LevelComplete/VictoryBoard/farm_board_victory_screen":  {
-                                                                                          "x":  4,
-                                                                                          "y":  675,
-                                                                                          "w":  1069,
-                                                                                          "h":  905,
-                                                                                          "orig_w":  1080,
-                                                                                          "orig_h":  1920
-                                                                                      },
-                  "Sprites/UI/LevelComplete/VictoryBoard/island_board_victory_screen":  {
-                                                                                            "x":  18,
-                                                                                            "y":  757,
-                                                                                            "w":  1044,
-                                                                                            "h":  795,
-                                                                                            "orig_w":  1080,
-                                                                                            "orig_h":  1920
-                                                                                        },
-                  "Sprites/UI/LevelComplete/VictoryBoard/supermarket_board_victory_screen":  {
-                                                                                                 "x":  61,
-                                                                                                 "y":  851,
-                                                                                                 "w":  958,
-                                                                                                 "h":  729,
-                                                                                                 "orig_w":  1080,
-                                                                                                 "orig_h":  1920
-                                                                                             },
-                  "Sprites/UI/Overlays/dialogbox":  {
-                                                        "x":  0,
-                                                        "y":  1462,
-                                                        "w":  1080,
-                                                        "h":  458,
-                                                        "orig_w":  1080,
-                                                        "orig_h":  1920
-                                                    },
-                  "Sprites/UI/Overlays/topbar":  {
-                                                     "x":  0,
-                                                     "y":  0,
-                                                     "w":  1080,
-                                                     "h":  238,
-                                                     "orig_w":  1080,
-                                                     "orig_h":  1920
-                                                 },
-                  "Sprites/UI/PauseMenu/pause_board":  {
-                                                           "x":  58,
-                                                           "y":  287,
-                                                           "w":  967,
-                                                           "h":  1340,
-                                                           "orig_w":  1080,
-                                                           "orig_h":  1920
-                                                       },
-                  "Sprites/UI/PauseMenu/pause_quit":  {
-                                                          "x":  303,
-                                                          "y":  1331,
-                                                          "w":  462,
-                                                          "h":  146,
-                                                          "orig_w":  1080,
-                                                          "orig_h":  1920
-                                                      },
-                  "Sprites/UI/PauseMenu/pause_quit_pressed":  {
-                                                                  "x":  316,
-                                                                  "y":  1333,
-                                                                  "w":  433,
-                                                                  "h":  137,
-                                                                  "orig_w":  1080,
-                                                                  "orig_h":  1920
-                                                              },
-                  "Sprites/UI/PauseMenu/pause_restart":  {
-                                                             "x":  303,
-                                                             "y":  983,
-                                                             "w":  462,
-                                                             "h":  145,
-                                                             "orig_w":  1080,
-                                                             "orig_h":  1920
-                                                         },
-                  "Sprites/UI/PauseMenu/pause_restart_pressed":  {
-                                                                     "x":  315,
-                                                                     "y":  986,
-                                                                     "w":  434,
-                                                                     "h":  136,
-                                                                     "orig_w":  1080,
-                                                                     "orig_h":  1920
-                                                                 },
-                  "Sprites/UI/PauseMenu/pause_resume":  {
-                                                            "x":  303,
-                                                            "y":  805,
-                                                            "w":  462,
-                                                            "h":  145,
-                                                            "orig_w":  1080,
-                                                            "orig_h":  1920
-                                                        },
-                  "Sprites/UI/PauseMenu/pause_resume_pressed":  {
-                                                                    "x":  315,
-                                                                    "y":  809,
-                                                                    "w":  440,
-                                                                    "h":  138,
-                                                                    "orig_w":  1080,
-                                                                    "orig_h":  1920
-                                                                },
-                  "Sprites/UI/PauseMenu/pause_settings":  {
-                                                              "x":  303,
-                                                              "y":  1156,
-                                                              "w":  462,
-                                                              "h":  146,
-                                                              "orig_w":  1080,
-                                                              "orig_h":  1920
-                                                          },
-                  "Sprites/UI/PauseMenu/pause_settings_pressed":  {
-                                                                      "x":  318,
-                                                                      "y":  1161,
-                                                                      "w":  427,
-                                                                      "h":  134,
-                                                                      "orig_w":  1080,
-                                                                      "orig_h":  1920
-                                                                  },
-                  "Sprites/UI/Worlds/farm_locked_background":  {
-                                                                   "x":  0,
-                                                                   "y":  1000,
-                                                                   "w":  1080,
-                                                                   "h":  920,
-                                                                   "orig_w":  1080,
-                                                                   "orig_h":  1920
-                                                               },
-                  "Sprites/UI/Worlds/level_select_board":  {
-                                                               "x":  52,
-                                                               "y":  1005,
-                                                               "w":  977,
-                                                               "h":  834,
-                                                               "orig_w":  1080,
-                                                               "orig_h":  1920
-                                                           },
-                  "Sprites/UI/Worlds/supermarket_locked_background":  {
-                                                                          "x":  0,
-                                                                          "y":  854,
-                                                                          "w":  1080,
-                                                                          "h":  1066,
-                                                                          "orig_w":  1080,
-                                                                          "orig_h":  1920
-                                                                      },
-                  "Sprites/UI/Worlds/space_locked_background":  {
-                                                                    "x":  0,
-                                                                    "y":  906,
-                                                                    "w":  1080,
-                                                                    "h":  1014,
-                                                                    "orig_w":  1080,
-                                                                    "orig_h":  1920
-                                                                },
-                  "Sprites/UI/Worlds/tavern_locked_background":  {
-                                                                     "x":  0,
-                                                                     "y":  899,
-                                                                     "w":  1080,
-                                                                     "h":  1021,
-                                                                     "orig_w":  1080,
-                                                                     "orig_h":  1920
-                                                                 },
-                  "Sprites/UI/Stats/stats_title_bar":  {
-                                                           "x":  278,
-                                                           "y":  110,
-                                                           "w":  524,
-                                                           "h":  152,
-                                                           "orig_w":  1080,
-                                                           "orig_h":  1920
-                                                       }
-              },
-    "Sprites/UI/LevelFailed/mara_level_failed":  {
-                                                     "x":  97,
-                                                     "y":  715,
-                                                     "w":  844,
-                                                     "h":  857,
-                                                     "orig_w":  1080,
-                                                     "orig_h":  1920
-                                                 },
-    "Sprites/UI/LevelFailed/tom_level_failed":  {
-                                                    "x":  83,
-                                                    "y":  802,
-                                                    "w":  871,
-                                                    "h":  789,
-                                                    "orig_w":  1080,
-                                                    "orig_h":  1920
-                                                },
-    "Sprites/UI/HUD/freeze_timer_overlay":  {
-                                                "x":  14,
-                                                "y":  12,
-                                                "w":  236,
-                                                "h":  219,
-                                                "orig_w":  250,
-                                                "orig_h":  250
-                                            },
-    "Sprites/UI/LevelFailed/whiskers_level_failed":  {
-                                                         "x":  97,
-                                                         "y":  785,
-                                                         "w":  844,
-                                                         "h":  787,
-                                                         "orig_w":  1080,
-                                                         "orig_h":  1920
-                                                     },
-    "Sprites/UI/LevelFailed/level_failed_board":  {
-                                                      "x":  213,
-                                                      "y":  133,
-                                                      "w":  639,
-                                                      "h":  637,
-                                                      "orig_w":  1080,
-                                                      "orig_h":  1920
-                                                  },
-    "Sprites/UI/LevelFailed/mason_level_failed":  {
-                                                      "x":  97,
-                                                      "y":  774,
-                                                      "w":  844,
-                                                      "h":  788,
-                                                      "orig_w":  1080,
-                                                      "orig_h":  1920
-                                                  },
-    "Sprites/UI/LevelFailed/leika_level_failed":  {
-                                                      "x":  97,
-                                                      "y":  831,
-                                                      "w":  844,
-                                                      "h":  731,
-                                                      "orig_w":  1080,
-                                                      "orig_h":  1920
-                                                  }
+{
+  "version": 1,
+  "crops": {
+    "Sprites/Mascots/Animations/Farm": {
+      "x": 123,
+      "y": 671,
+      "w": 840,
+      "h": 797,
+      "orig_w": 1080,
+      "orig_h": 1920,
+      "is_group": true
+    },
+    "Sprites/Mascots/Animations/Supermarket": {
+      "x": 119,
+      "y": 832,
+      "w": 840,
+      "h": 634,
+      "orig_w": 1080,
+      "orig_h": 1920,
+      "is_group": true
+    },
+    "Sprites/Mascots/Animations/Island": {
+      "x": 119,
+      "y": 849,
+      "w": 840,
+      "h": 617,
+      "orig_w": 1080,
+      "orig_h": 1920,
+      "is_group": true
+    },
+    "Sprites/Mascots/Animations/Tavern": {
+      "x": 120,
+      "y": 789,
+      "w": 840,
+      "h": 677,
+      "orig_w": 1080,
+      "orig_h": 1920,
+      "is_group": true
+    },
+    "Sprites/Mascots/Animations/Space": {
+      "x": 119,
+      "y": 856,
+      "w": 840,
+      "h": 612,
+      "orig_w": 1080,
+      "orig_h": 1920,
+      "is_group": true
+    },
+    "Sprites/UI/LevelComplete/BottomBoard": {
+      "x": 0,
+      "y": 1618,
+      "w": 1080,
+      "h": 302,
+      "orig_w": 1080,
+      "orig_h": 1920,
+      "is_group": true
+    },
+    "Sprites/UI/LevelComplete/Curtains": {
+      "x": 0,
+      "y": 0,
+      "w": 1080,
+      "h": 597,
+      "orig_w": 1080,
+      "orig_h": 1920,
+      "is_group": true
+    },
+    "Sprites/UI/LevelComplete/DancingStars": {
+      "x": 209,
+      "y": 281,
+      "w": 656,
+      "h": 368,
+      "orig_w": 1080,
+      "orig_h": 1920,
+      "is_group": true
+    },
+    "Sprites/UI/LevelComplete/LevelBoard": {
+      "x": 346,
+      "y": 657,
+      "w": 387,
+      "h": 133,
+      "orig_w": 1080,
+      "orig_h": 1920,
+      "is_group": true
+    },
+    "Sprites/UI/LevelComplete/LevelCompleteText": {
+      "x": 236,
+      "y": 529,
+      "w": 608,
+      "h": 291,
+      "orig_w": 1080,
+      "orig_h": 1920,
+      "is_group": true
+    },
+    "Sprites/UI/LevelComplete/StarRibbon": {
+      "x": 108,
+      "y": 427,
+      "w": 864,
+      "h": 370,
+      "orig_w": 1080,
+      "orig_h": 1920,
+      "is_group": true
+    },
+    "Sprites/UI/WorldUnlock": {
+      "x": 101,
+      "y": 139,
+      "w": 917,
+      "h": 882,
+      "orig_w": 1080,
+      "orig_h": 1920,
+      "is_group": true
+    },
+    "Sprites/UI/Achievements/achv_bg_yellow": {
+      "x": 130,
+      "y": 518,
+      "w": 811,
+      "h": 1287,
+      "orig_w": 1080,
+      "orig_h": 1920
+    },
+    "Sprites/UI/Achievements/achv_board": {
+      "x": 51,
+      "y": 184,
+      "w": 972,
+      "h": 1678,
+      "orig_w": 1080,
+      "orig_h": 1920
+    },
+    "Sprites/UI/Achievements/achv_close_button": {
+      "x": 913,
+      "y": 154,
+      "w": 122,
+      "h": 122,
+      "orig_w": 1080,
+      "orig_h": 1920
+    },
+    "Sprites/UI/Achievements/achv_title": {
+      "x": 222,
+      "y": 37,
+      "w": 636,
+      "h": 298,
+      "orig_w": 1080,
+      "orig_h": 1920
+    },
+    "Sprites/UI/Achievements/achv_title_bar": {
+      "x": 245,
+      "y": 300,
+      "w": 656,
+      "h": 197,
+      "orig_w": 1080,
+      "orig_h": 1920
+    },
+    "Sprites/UI/HUD/free_ui_top": {
+      "x": 0,
+      "y": 0,
+      "w": 1080,
+      "h": 1920,
+      "orig_w": 1080,
+      "orig_h": 1920
+    },
+    "Sprites/UI/HUD/hard_mode_UI_top": {
+      "x": 0,
+      "y": 0,
+      "w": 1080,
+      "h": 1920,
+      "orig_w": 1080,
+      "orig_h": 1920
+    },
+    "Sprites/UI/HUD/island_icon_UI_top": {
+      "x": 21,
+      "y": 21,
+      "w": 164,
+      "h": 140,
+      "orig_w": 1080,
+      "orig_h": 1920
+    },
+    "Sprites/UI/HUD/stars_ui_top": {
+      "x": 0,
+      "y": 0,
+      "w": 1080,
+      "h": 1920,
+      "orig_w": 1080,
+      "orig_h": 1920
+    },
+    "Sprites/UI/HUD/timer_ui_top": {
+      "x": 0,
+      "y": 0,
+      "w": 1080,
+      "h": 1920,
+      "orig_w": 1080,
+      "orig_h": 1920
+    },
+    "Sprites/UI/LevelComplete/Buttons/level_label": {
+      "x": 154,
+      "y": 701,
+      "w": 387,
+      "h": 133,
+      "orig_w": 1080,
+      "orig_h": 1920
+    },
+    "Sprites/UI/LevelComplete/Buttons/moves_label": {
+      "x": 555,
+      "y": 701,
+      "w": 387,
+      "h": 133,
+      "orig_w": 1080,
+      "orig_h": 1920
+    },
+    "Sprites/UI/LevelComplete/free_levelcomplete_overlay": {
+      "x": 108,
+      "y": 0,
+      "w": 864,
+      "h": 746,
+      "orig_w": 1080,
+      "orig_h": 1920
+    },
+    "Sprites/UI/LevelComplete/MedalAnimation": {
+      "x": 246,
+      "y": 0,
+      "w": 588,
+      "h": 717,
+      "orig_w": 1080,
+      "orig_h": 1920,
+      "is_group": true
+    },
+    "Sprites/UI/LevelComplete/grey_stars": {
+      "x": 205,
+      "y": 299,
+      "w": 661,
+      "h": 344,
+      "orig_w": 1080,
+      "orig_h": 1920
+    },
+    "Sprites/UI/LevelComplete/hard_levelcomplete_overlay": {
+      "x": 299,
+      "y": 0,
+      "w": 512,
+      "h": 716,
+      "orig_w": 1080,
+      "orig_h": 1920
+    },
+    "Sprites/UI/LevelComplete/level_UI": {
+      "x": 155,
+      "y": 988,
+      "w": 387,
+      "h": 133,
+      "orig_w": 1080,
+      "orig_h": 1920
+    },
+    "Sprites/UI/LevelComplete/moves_UI": {
+      "x": 150,
+      "y": 1191,
+      "w": 387,
+      "h": 133,
+      "orig_w": 1080,
+      "orig_h": 1920
+    },
+    "Sprites/UI/LevelComplete/new_record_UI": {
+      "x": 293,
+      "y": 665,
+      "w": 480,
+      "h": 91,
+      "orig_w": 1080,
+      "orig_h": 1920
+    },
+    "Sprites/UI/LevelComplete/timer_bar_UI": {
+      "x": 346,
+      "y": 752,
+      "w": 387,
+      "h": 109,
+      "orig_w": 1080,
+      "orig_h": 1920
+    },
+    "Sprites/UI/LevelComplete/timer_icon": {
+      "x": 336,
+      "y": 212,
+      "w": 378,
+      "h": 455,
+      "orig_w": 1080,
+      "orig_h": 1920
+    },
+    "Sprites/UI/LevelComplete/Star1/star 1_1": {
+      "x": 207,
+      "y": 419,
+      "w": 234,
+      "h": 225,
+      "orig_w": 1080,
+      "orig_h": 1920
+    },
+    "Sprites/UI/LevelComplete/Star1/star 1_2": {
+      "x": 207,
+      "y": 419,
+      "w": 234,
+      "h": 225,
+      "orig_w": 1080,
+      "orig_h": 1920
+    },
+    "Sprites/UI/LevelComplete/Star1/star 1_3": {
+      "x": 207,
+      "y": 419,
+      "w": 234,
+      "h": 225,
+      "orig_w": 1080,
+      "orig_h": 1920
+    },
+    "Sprites/UI/LevelComplete/Star1/star 1_4": {
+      "x": 207,
+      "y": 419,
+      "w": 234,
+      "h": 225,
+      "orig_w": 1080,
+      "orig_h": 1920
+    },
+    "Sprites/UI/LevelComplete/Star1/star 1_5": {
+      "x": 207,
+      "y": 419,
+      "w": 234,
+      "h": 225,
+      "orig_w": 1080,
+      "orig_h": 1920
+    },
+    "Sprites/UI/LevelComplete/Star1/star 1_6": {
+      "x": 207,
+      "y": 419,
+      "w": 234,
+      "h": 225,
+      "orig_w": 1080,
+      "orig_h": 1920
+    },
+    "Sprites/UI/LevelComplete/Star1/star 1_7": {
+      "x": 207,
+      "y": 419,
+      "w": 234,
+      "h": 225,
+      "orig_w": 1080,
+      "orig_h": 1920
+    },
+    "Sprites/UI/LevelComplete/Star1/star 1_8": {
+      "x": 207,
+      "y": 419,
+      "w": 234,
+      "h": 225,
+      "orig_w": 1080,
+      "orig_h": 1920
+    },
+    "Sprites/UI/LevelComplete/Star1/star 1_9": {
+      "x": 207,
+      "y": 419,
+      "w": 234,
+      "h": 225,
+      "orig_w": 1080,
+      "orig_h": 1920
+    },
+    "Sprites/UI/LevelComplete/Star2/star2_1": {
+      "x": 643,
+      "y": 442,
+      "w": 194,
+      "h": 200,
+      "orig_w": 1080,
+      "orig_h": 1920
+    },
+    "Sprites/UI/LevelComplete/Star2/star2_2": {
+      "x": 631,
+      "y": 419,
+      "w": 235,
+      "h": 225,
+      "orig_w": 1080,
+      "orig_h": 1920
+    },
+    "Sprites/UI/LevelComplete/Star2/star2_3": {
+      "x": 631,
+      "y": 419,
+      "w": 235,
+      "h": 225,
+      "orig_w": 1080,
+      "orig_h": 1920
+    },
+    "Sprites/UI/LevelComplete/Star2/star2_4": {
+      "x": 631,
+      "y": 419,
+      "w": 235,
+      "h": 225,
+      "orig_w": 1080,
+      "orig_h": 1920
+    },
+    "Sprites/UI/LevelComplete/Star2/star2_5": {
+      "x": 631,
+      "y": 419,
+      "w": 235,
+      "h": 225,
+      "orig_w": 1080,
+      "orig_h": 1920
+    },
+    "Sprites/UI/LevelComplete/Star2/star2_6": {
+      "x": 631,
+      "y": 419,
+      "w": 235,
+      "h": 225,
+      "orig_w": 1080,
+      "orig_h": 1920
+    },
+    "Sprites/UI/LevelComplete/Star2/star2_7": {
+      "x": 631,
+      "y": 419,
+      "w": 235,
+      "h": 225,
+      "orig_w": 1080,
+      "orig_h": 1920
+    },
+    "Sprites/UI/LevelComplete/Star2/star2_8": {
+      "x": 631,
+      "y": 419,
+      "w": 235,
+      "h": 225,
+      "orig_w": 1080,
+      "orig_h": 1920
+    },
+    "Sprites/UI/LevelComplete/Star2/star2_9": {
+      "x": 631,
+      "y": 419,
+      "w": 235,
+      "h": 225,
+      "orig_w": 1080,
+      "orig_h": 1920
+    },
+    "Sprites/UI/LevelComplete/Star3/star3_1": {
+      "x": 444,
+      "y": 373,
+      "w": 194,
+      "h": 199,
+      "orig_w": 1080,
+      "orig_h": 1920
+    },
+    "Sprites/UI/LevelComplete/Star3/star3_2": {
+      "x": 444,
+      "y": 373,
+      "w": 195,
+      "h": 197,
+      "orig_w": 1080,
+      "orig_h": 1920
+    },
+    "Sprites/UI/LevelComplete/Star3/star3_3": {
+      "x": 458,
+      "y": 373,
+      "w": 172,
+      "h": 196,
+      "orig_w": 1080,
+      "orig_h": 1920
+    },
+    "Sprites/UI/LevelComplete/Star3/star3_4": {
+      "x": 376,
+      "y": 299,
+      "w": 325,
+      "h": 310,
+      "orig_w": 1080,
+      "orig_h": 1920
+    },
+    "Sprites/UI/LevelComplete/Star3/star3_5": {
+      "x": 376,
+      "y": 299,
+      "w": 325,
+      "h": 310,
+      "orig_w": 1080,
+      "orig_h": 1920
+    },
+    "Sprites/UI/LevelComplete/Star3/star3_6": {
+      "x": 376,
+      "y": 299,
+      "w": 325,
+      "h": 310,
+      "orig_w": 1080,
+      "orig_h": 1920
+    },
+    "Sprites/UI/LevelComplete/Star3/star3_7": {
+      "x": 376,
+      "y": 299,
+      "w": 325,
+      "h": 310,
+      "orig_w": 1080,
+      "orig_h": 1920
+    },
+    "Sprites/UI/LevelComplete/Star3/star3_8": {
+      "x": 376,
+      "y": 299,
+      "w": 325,
+      "h": 310,
+      "orig_w": 1080,
+      "orig_h": 1920
+    },
+    "Sprites/UI/LevelComplete/Star3/star3_9": {
+      "x": 376,
+      "y": 299,
+      "w": 325,
+      "h": 310,
+      "orig_w": 1080,
+      "orig_h": 1920
+    },
+    "Sprites/UI/LevelComplete/VictoryBoard/farm_board_victory_screen": {
+      "x": 4,
+      "y": 675,
+      "w": 1069,
+      "h": 905,
+      "orig_w": 1080,
+      "orig_h": 1920
+    },
+    "Sprites/UI/LevelComplete/VictoryBoard/island_board_victory_screen": {
+      "x": 18,
+      "y": 757,
+      "w": 1044,
+      "h": 795,
+      "orig_w": 1080,
+      "orig_h": 1920
+    },
+    "Sprites/UI/LevelComplete/VictoryBoard/supermarket_board_victory_screen": {
+      "x": 61,
+      "y": 851,
+      "w": 958,
+      "h": 729,
+      "orig_w": 1080,
+      "orig_h": 1920
+    },
+    "Sprites/UI/Overlays/dialogbox": {
+      "x": 0,
+      "y": 1462,
+      "w": 1080,
+      "h": 458,
+      "orig_w": 1080,
+      "orig_h": 1920
+    },
+    "Sprites/UI/Overlays/topbar": {
+      "x": 0,
+      "y": 0,
+      "w": 1080,
+      "h": 238,
+      "orig_w": 1080,
+      "orig_h": 1920
+    },
+    "Sprites/UI/PauseMenu/pause_board": {
+      "x": 58,
+      "y": 287,
+      "w": 967,
+      "h": 1340,
+      "orig_w": 1080,
+      "orig_h": 1920
+    },
+    "Sprites/UI/PauseMenu/pause_quit": {
+      "x": 303,
+      "y": 1331,
+      "w": 462,
+      "h": 146,
+      "orig_w": 1080,
+      "orig_h": 1920
+    },
+    "Sprites/UI/PauseMenu/pause_quit_pressed": {
+      "x": 316,
+      "y": 1333,
+      "w": 433,
+      "h": 137,
+      "orig_w": 1080,
+      "orig_h": 1920
+    },
+    "Sprites/UI/PauseMenu/pause_restart": {
+      "x": 303,
+      "y": 983,
+      "w": 462,
+      "h": 145,
+      "orig_w": 1080,
+      "orig_h": 1920
+    },
+    "Sprites/UI/PauseMenu/pause_restart_pressed": {
+      "x": 315,
+      "y": 986,
+      "w": 434,
+      "h": 136,
+      "orig_w": 1080,
+      "orig_h": 1920
+    },
+    "Sprites/UI/PauseMenu/pause_resume": {
+      "x": 303,
+      "y": 805,
+      "w": 462,
+      "h": 145,
+      "orig_w": 1080,
+      "orig_h": 1920
+    },
+    "Sprites/UI/PauseMenu/pause_resume_pressed": {
+      "x": 315,
+      "y": 809,
+      "w": 440,
+      "h": 138,
+      "orig_w": 1080,
+      "orig_h": 1920
+    },
+    "Sprites/UI/PauseMenu/pause_settings": {
+      "x": 303,
+      "y": 1156,
+      "w": 462,
+      "h": 146,
+      "orig_w": 1080,
+      "orig_h": 1920
+    },
+    "Sprites/UI/PauseMenu/pause_settings_pressed": {
+      "x": 318,
+      "y": 1161,
+      "w": 427,
+      "h": 134,
+      "orig_w": 1080,
+      "orig_h": 1920
+    },
+    "Sprites/UI/Worlds/farm_locked_background": {
+      "x": 0,
+      "y": 1000,
+      "w": 1080,
+      "h": 920,
+      "orig_w": 1080,
+      "orig_h": 1920
+    },
+    "Sprites/UI/Worlds/level_select_board": {
+      "x": 52,
+      "y": 1005,
+      "w": 977,
+      "h": 834,
+      "orig_w": 1080,
+      "orig_h": 1920
+    },
+    "Sprites/UI/Worlds/supermarket_locked_background": {
+      "x": 0,
+      "y": 854,
+      "w": 1080,
+      "h": 1066,
+      "orig_w": 1080,
+      "orig_h": 1920
+    },
+    "Sprites/UI/Worlds/space_locked_background": {
+      "x": 0,
+      "y": 906,
+      "w": 1080,
+      "h": 1014,
+      "orig_w": 1080,
+      "orig_h": 1920
+    },
+    "Sprites/UI/Worlds/tavern_locked_background": {
+      "x": 0,
+      "y": 899,
+      "w": 1080,
+      "h": 1021,
+      "orig_w": 1080,
+      "orig_h": 1920
+    },
+    "Sprites/UI/Stats/stats_title_bar": {
+      "x": 278,
+      "y": 110,
+      "w": 524,
+      "h": 152,
+      "orig_w": 1080,
+      "orig_h": 1920
+    },
+    "Sprites/UI/LevelComplete/VictoryBoard/space_board_victory_screen": {
+      "x": 33,
+      "y": 834,
+      "w": 1014,
+      "h": 751,
+      "orig_w": 1080,
+      "orig_h": 1920
+    },
+    "Sprites/UI/LevelComplete/VictoryBoard/tavern_board_victory_screen": {
+      "x": 29,
+      "y": 832,
+      "w": 1022,
+      "h": 710,
+      "orig_w": 1080,
+      "orig_h": 1920
+    },
+    "Sprites/UI/LuckySpin/accept_button": {
+      "x": 361,
+      "y": 1340,
+      "w": 339,
+      "h": 156,
+      "orig_w": 1080,
+      "orig_h": 1920
+    },
+    "Sprites/UI/LuckySpin/accept_button_pressed": {
+      "x": 369,
+      "y": 1343,
+      "w": 323,
+      "h": 149,
+      "orig_w": 1080,
+      "orig_h": 1920
+    },
+    "Sprites/UI/LuckySpin/coins_icon": {
+      "x": 429,
+      "y": 848,
+      "w": 239,
+      "h": 237,
+      "orig_w": 1080,
+      "orig_h": 1920
+    },
+    "Sprites/UI/LuckySpin/congrats_text": {
+      "x": 93,
+      "y": 508,
+      "w": 887,
+      "h": 227,
+      "orig_w": 1080,
+      "orig_h": 1920
+    },
+    "Sprites/UI/LuckySpin/daily_spin_wheel": {
+      "x": 83,
+      "y": 537,
+      "w": 897,
+      "h": 899,
+      "orig_w": 1080,
+      "orig_h": 1920
+    },
+    "Sprites/UI/LuckySpin/normal_present_box": {
+      "x": 196,
+      "y": 783,
+      "w": 618,
+      "h": 653,
+      "orig_w": 1080,
+      "orig_h": 1920
+    }
+  }
 }

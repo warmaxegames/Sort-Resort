@@ -79,16 +79,22 @@ namespace SortResort
         private int powerUpsUsedTimeFreeze;
         private int dailyLoginCount;
         private string lastLoginDate; // yyyy-MM-dd
+        private int totalCoinsSpent;
+        private int totalPresentBoxesOpened;
 
         // Per-level session stats (reset on level start)
         private int powerUpsUsedThisLevel;
         private float comboTimerBonusThisLevel;
         private int comboTimerChainThisLevel;
 
+        // World completion coin bonuses (50 coins per world per mode)
+        private HashSet<string> worldModeCompletionBonuses = new HashSet<string>();
+
         // Events
         public event Action<Achievement> OnAchievementUnlocked;
         public event Action<Achievement, int, int> OnAchievementProgress; // achievement, current, target
         public event Action<RewardType, int> OnRewardEarned;
+        public event Action<int> OnCoinsChanged; // fires with new balance
 
         // Properties
         public int Coins => coins;
@@ -123,6 +129,8 @@ namespace SortResort
         public int PowerUpsUsedMoveFreeze => powerUpsUsedMoveFreeze;
         public int PowerUpsUsedTimeFreeze => powerUpsUsedTimeFreeze;
         public int DailyLoginCount => dailyLoginCount;
+        public int TotalCoinsSpent => totalCoinsSpent;
+        public int TotalPresentBoxesOpened => totalPresentBoxesOpened;
 
         private void Awake()
         {
@@ -274,7 +282,7 @@ namespace SortResort
                 AddAchievement(new Achievement(
                     $"3star_levels_total_{milestones[i]}", names[i], $"3 Star {milestones[i]} Levels",
                     AchievementCategory.Mastery, tiers[i], milestones[i],
-                    new[] { new AchievementReward(RewardType.Coins, milestones[i] * 2) },
+                    new[] { new AchievementReward(RewardType.Coins, new[] { 5, 15, 30 }[i]) },
                     AchievementTrackingType.Unique,
                     groupId: "3star_levels_total", groupOrder: i + 1, tab: Achievement.TAB_STAR_MODE
                 ));
@@ -295,7 +303,7 @@ namespace SortResort
                 AddAchievement(new Achievement(
                     $"levels_total_{milestones[i]}", names[i], $"Complete {milestones[i]} Levels",
                     AchievementCategory.Progression, tiers[i], milestones[i],
-                    new[] { new AchievementReward(RewardType.Coins, milestones[i] * 5) },
+                    new[] { new AchievementReward(RewardType.Coins, new[] { 5, 10, 25 }[i]) },
                     AchievementTrackingType.Unique,
                     groupId: "levels_total", groupOrder: i + 1, tab: Achievement.TAB_GENERAL
                 ));
@@ -316,7 +324,7 @@ namespace SortResort
                 AddAchievement(new Achievement(
                     $"matches_total_{milestones[i]}", names[i], $"Make {milestones[i]} Matches",
                     AchievementCategory.Milestone, tiers[i], milestones[i],
-                    new[] { new AchievementReward(RewardType.Coins, milestones[i] / 2) },
+                    new[] { new AchievementReward(RewardType.Coins, new[] { 5, 10, 20 }[i]) },
                     AchievementTrackingType.Total,
                     groupId: "matches_total", groupOrder: i + 1, tab: Achievement.TAB_GENERAL
                 ));
@@ -337,7 +345,7 @@ namespace SortResort
                 AddAchievement(new Achievement(
                     $"stars_total_{milestones[i]}", names[i], $"Earn {milestones[i]} Stars",
                     AchievementCategory.Mastery, tiers[i], milestones[i],
-                    new[] { new AchievementReward(RewardType.Coins, milestones[i]) },
+                    new[] { new AchievementReward(RewardType.Coins, new[] { 5, 10, 20 }[i]) },
                     AchievementTrackingType.Total,
                     groupId: "stars_total", groupOrder: i + 1, tab: Achievement.TAB_STAR_MODE
                 ));
@@ -353,7 +361,7 @@ namespace SortResort
             AddAchievement(new Achievement(
                 "worlds_visited_1", "First Explorer", "Visit 1 World",
                 AchievementCategory.Exploration, AchievementTier.Bronze, 1,
-                new[] { new AchievementReward(RewardType.Coins, 10) },
+                new[] { new AchievementReward(RewardType.Coins, 5) },
                 AchievementTrackingType.Unique,
                 groupId: "world_explorer", groupOrder: 1, tab: Achievement.TAB_GENERAL
             ));
@@ -361,7 +369,7 @@ namespace SortResort
             AddAchievement(new Achievement(
                 "worlds_visited_3", "Globe Trotter", "Visit 3 Worlds",
                 AchievementCategory.Exploration, AchievementTier.Silver, 3,
-                new[] { new AchievementReward(RewardType.Coins, 50) },
+                new[] { new AchievementReward(RewardType.Coins, 10) },
                 AchievementTrackingType.Unique,
                 groupId: "world_explorer", groupOrder: 2, tab: Achievement.TAB_GENERAL
             ));
@@ -369,7 +377,7 @@ namespace SortResort
             AddAchievement(new Achievement(
                 "worlds_visited_all", "World Champion", $"Visit All {RegisteredWorlds.Length} Worlds",
                 AchievementCategory.Exploration, AchievementTier.Gold, RegisteredWorlds.Length,
-                new[] { new AchievementReward(RewardType.Coins, 100) },
+                new[] { new AchievementReward(RewardType.Coins, 20) },
                 AchievementTrackingType.Unique,
                 groupId: "world_explorer", groupOrder: 3, tab: Achievement.TAB_GENERAL
             ));
@@ -393,7 +401,7 @@ namespace SortResort
                 AddAchievement(new Achievement(
                     $"combo_master_{milestones[i]}", names[i], $"Get {milestones[i]} Combos",
                     AchievementCategory.Milestone, tiers[i], milestones[i],
-                    new[] { new AchievementReward(RewardType.Coins, milestones[i] * 2) },
+                    new[] { new AchievementReward(RewardType.Coins, new[] { 5, 15, 30 }[i]) },
                     AchievementTrackingType.Total,
                     groupId: "combo_master", groupOrder: i + 1, tab: Achievement.TAB_GENERAL
                 ));
@@ -414,7 +422,7 @@ namespace SortResort
                 AddAchievement(new Achievement(
                     $"power_user_{milestones[i]}", names[i], $"Use {milestones[i]} Power-Ups",
                     AchievementCategory.Milestone, tiers[i], milestones[i],
-                    new[] { new AchievementReward(RewardType.Coins, milestones[i] * 3) },
+                    new[] { new AchievementReward(RewardType.Coins, new[] { 5, 10, 25 }[i]) },
                     AchievementTrackingType.Total,
                     groupId: "power_user", groupOrder: i + 1, tab: Achievement.TAB_GENERAL
                 ));
@@ -435,7 +443,7 @@ namespace SortResort
                 AddAchievement(new Achievement(
                     $"power_frenzy_{milestones[i]}", names[i], $"Use {milestones[i]} Power-Ups in One Level",
                     AchievementCategory.Challenge, tiers[i], milestones[i],
-                    new[] { new AchievementReward(RewardType.Coins, milestones[i] * 20) },
+                    new[] { new AchievementReward(RewardType.Coins, new[] { 10, 25, 45 }[i]) },
                     AchievementTrackingType.BestValue,
                     groupId: "power_frenzy", groupOrder: i + 1, tab: Achievement.TAB_GENERAL
                 ));
@@ -457,7 +465,7 @@ namespace SortResort
                 AddAchievement(new Achievement(
                     $"double_power_{milestones[i]}", names[i], descs[i],
                     AchievementCategory.Challenge, tiers[i], milestones[i],
-                    new[] { new AchievementReward(RewardType.Coins, milestones[i] * 15) },
+                    new[] { new AchievementReward(RewardType.Coins, new[] { 10, 25, 50 }[i]) },
                     AchievementTrackingType.Total,
                     groupId: "double_power", groupOrder: i + 1, tab: Achievement.TAB_GENERAL
                 ));
@@ -482,7 +490,7 @@ namespace SortResort
                 AddAchievement(new Achievement(
                     $"star_streak_{milestones[i]}", names[i], $"3 Star {milestones[i]} Levels in a Row",
                     AchievementCategory.Mastery, tiers[i], milestones[i],
-                    new[] { new AchievementReward(RewardType.Coins, milestones[i] * 10) },
+                    new[] { new AchievementReward(RewardType.Coins, new[] { 10, 25, 45 }[i]) },
                     AchievementTrackingType.BestValue,
                     groupId: "star_streak", groupOrder: i + 1, tab: Achievement.TAB_STAR_MODE
                 ));
@@ -504,7 +512,7 @@ namespace SortResort
                 AddAchievement(new Achievement(
                     $"perfect_world_{milestones[i]}", names[i], descs[i],
                     AchievementCategory.Mastery, tiers[i], milestones[i],
-                    new[] { new AchievementReward(RewardType.Coins, milestones[i] * 100) },
+                    new[] { new AchievementReward(RewardType.Coins, new[] { 15, 35, 50 }[i]) },
                     AchievementTrackingType.Unique,
                     groupId: "perfect_world", groupOrder: i + 1, tab: Achievement.TAB_STAR_MODE
                 ));
@@ -526,7 +534,7 @@ namespace SortResort
                 AddAchievement(new Achievement(
                     $"under_par_{milestones[i]}", names[i], descs[i],
                     AchievementCategory.Efficiency, tiers[i], milestones[i],
-                    new[] { new AchievementReward(RewardType.Coins, milestones[i] * 20) },
+                    new[] { new AchievementReward(RewardType.Coins, new[] { 5, 20, 40 }[i]) },
                     AchievementTrackingType.Unique,
                     groupId: "under_par", groupOrder: i + 1, tab: Achievement.TAB_STAR_MODE
                 ));
@@ -551,7 +559,7 @@ namespace SortResort
                 AddAchievement(new Achievement(
                     $"timer_levels_{milestones[i]}", names[i], $"Complete {milestones[i]} Levels in Timer Mode",
                     AchievementCategory.Progression, tiers[i], milestones[i],
-                    new[] { new AchievementReward(RewardType.Coins, milestones[i] * 3) },
+                    new[] { new AchievementReward(RewardType.Coins, new[] { 5, 10, 25 }[i]) },
                     AchievementTrackingType.Unique,
                     requiresTimer: true,
                     groupId: "timer_levels", groupOrder: i + 1, tab: Achievement.TAB_TIMER_MODE
@@ -574,7 +582,7 @@ namespace SortResort
                 AddAchievement(new Achievement(
                     $"speed_demon_{milestones[i]}", names[i], descs[i],
                     AchievementCategory.Speed, tiers[i], milestones[i],
-                    new[] { new AchievementReward(RewardType.Coins, (31 - milestones[i]) * 10) },
+                    new[] { new AchievementReward(RewardType.Coins, new[] { 10, 25, 50 }[i]) },
                     AchievementTrackingType.BestValue,
                     requiresTimer: true,
                     groupId: "speed_demon", groupOrder: i + 1, tab: Achievement.TAB_TIMER_MODE
@@ -597,7 +605,7 @@ namespace SortResort
                 AddAchievement(new Achievement(
                     $"time_saver_{milestones[i]}", names[i], descs[i],
                     AchievementCategory.Speed, tiers[i], milestones[i],
-                    new[] { new AchievementReward(RewardType.Coins, milestones[i] * 2) },
+                    new[] { new AchievementReward(RewardType.Coins, new[] { 5, 15, 35 }[i]) },
                     AchievementTrackingType.BestValue,
                     requiresTimer: true,
                     groupId: "time_saver", groupOrder: i + 1, tab: Achievement.TAB_TIMER_MODE
@@ -619,7 +627,7 @@ namespace SortResort
                 AddAchievement(new Achievement(
                     $"combo_timer_{milestones[i]}", names[i], $"Earn {milestones[i]} Seconds from Matches",
                     AchievementCategory.Milestone, tiers[i], milestones[i],
-                    new[] { new AchievementReward(RewardType.Coins, milestones[i]) },
+                    new[] { new AchievementReward(RewardType.Coins, new[] { 5, 10, 20 }[i]) },
                     AchievementTrackingType.Total,
                     requiresTimer: true,
                     groupId: "combo_timer", groupOrder: i + 1, tab: Achievement.TAB_TIMER_MODE
@@ -646,7 +654,7 @@ namespace SortResort
                 AddAchievement(new Achievement(
                     $"photo_finish_{milestones[i]}", names[i], descs[i],
                     AchievementCategory.Challenge, tiers[i], milestones[i],
-                    new[] { new AchievementReward(RewardType.Coins, milestones[i] * 25) },
+                    new[] { new AchievementReward(RewardType.Coins, new[] { 10, 20, 40 }[i]) },
                     AchievementTrackingType.Total,
                     requiresTimer: true,
                     groupId: "photo_finish", groupOrder: i + 1, tab: Achievement.TAB_TIMER_MODE
@@ -673,7 +681,7 @@ namespace SortResort
                 AddAchievement(new Achievement(
                     $"negative_time_{milestones[i]}", names[i], descs[i],
                     AchievementCategory.Challenge, tiers[i], milestones[i],
-                    new[] { new AchievementReward(RewardType.Coins, milestones[i] * 50) },
+                    new[] { new AchievementReward(RewardType.Coins, new[] { 15, 30, 50 }[i]) },
                     AchievementTrackingType.Total,
                     requiresTimer: true,
                     groupId: "negative_time", groupOrder: i + 1, tab: Achievement.TAB_TIMER_MODE
@@ -700,7 +708,7 @@ namespace SortResort
                 AddAchievement(new Achievement(
                     $"combo_chain_{milestones[i]}", names[i], descs[i],
                     AchievementCategory.Challenge, tiers[i], milestones[i],
-                    new[] { new AchievementReward(RewardType.Coins, milestones[i] * 15) },
+                    new[] { new AchievementReward(RewardType.Coins, new[] { 10, 20, 40 }[i]) },
                     AchievementTrackingType.BestValue,
                     requiresTimer: true,
                     groupId: "combo_chain", groupOrder: i + 1, tab: Achievement.TAB_TIMER_MODE
@@ -726,7 +734,7 @@ namespace SortResort
                 AddAchievement(new Achievement(
                     $"hard_levels_{milestones[i]}", names[i], $"Complete {milestones[i]} Levels in Hard Mode",
                     AchievementCategory.Progression, tiers[i], milestones[i],
-                    new[] { new AchievementReward(RewardType.Coins, milestones[i] * 5) },
+                    new[] { new AchievementReward(RewardType.Coins, new[] { 5, 15, 30 }[i]) },
                     AchievementTrackingType.Unique,
                     groupId: "hard_levels", groupOrder: i + 1, tab: Achievement.TAB_HARD_MODE
                 ));
@@ -747,7 +755,7 @@ namespace SortResort
                 AddAchievement(new Achievement(
                     $"hard_perfection_{milestones[i]}", names[i], $"3 Star {milestones[i]} Levels in Hard Mode",
                     AchievementCategory.Mastery, tiers[i], milestones[i],
-                    new[] { new AchievementReward(RewardType.Coins, milestones[i] * 8) },
+                    new[] { new AchievementReward(RewardType.Coins, new[] { 10, 25, 45 }[i]) },
                     AchievementTrackingType.Unique,
                     groupId: "hard_perfection", groupOrder: i + 1, tab: Achievement.TAB_HARD_MODE
                 ));
@@ -773,7 +781,7 @@ namespace SortResort
                 AddAchievement(new Achievement(
                     $"hard_unlock_{milestones[i]}", names[i], descs[i],
                     AchievementCategory.Progression, tiers[i], milestones[i],
-                    new[] { new AchievementReward(RewardType.Coins, milestones[i] * 50) },
+                    new[] { new AchievementReward(RewardType.Coins, new[] { 5, 15, 30 }[i]) },
                     AchievementTrackingType.Unique,
                     groupId: "hard_unlock", groupOrder: i + 1, tab: Achievement.TAB_HARD_MODE
                 ));
@@ -799,7 +807,7 @@ namespace SortResort
                 AddAchievement(new Achievement(
                     $"hard_ironclad_{milestones[i]}", names[i], descs[i],
                     AchievementCategory.Challenge, tiers[i], milestones[i],
-                    new[] { new AchievementReward(RewardType.Coins, milestones[i] * 15) },
+                    new[] { new AchievementReward(RewardType.Coins, new[] { 10, 25, 50 }[i]) },
                     AchievementTrackingType.BestValue,
                     groupId: "hard_ironclad", groupOrder: i + 1, tab: Achievement.TAB_HARD_MODE
                 ));
@@ -825,7 +833,7 @@ namespace SortResort
                 AddAchievement(new Achievement(
                     $"hard_world_{milestones[i]}", names[i], descs[i],
                     AchievementCategory.Mastery, tiers[i], milestones[i],
-                    new[] { new AchievementReward(RewardType.Coins, milestones[i] * 100) },
+                    new[] { new AchievementReward(RewardType.Coins, new[] { 15, 35, 50 }[i]) },
                     AchievementTrackingType.Unique,
                     groupId: "hard_world", groupOrder: i + 1, tab: Achievement.TAB_HARD_MODE
                 ));
@@ -852,7 +860,7 @@ namespace SortResort
                     $"{worldId}_levels_{levelMilestones[i]}", $"{worldName}: {levelNames[i]}",
                     $"Complete {levelMilestones[i]} Levels in this World",
                     AchievementCategory.Progression, levelTiers[i], levelMilestones[i],
-                    new[] { new AchievementReward(RewardType.Coins, levelMilestones[i] * 3) },
+                    new[] { new AchievementReward(RewardType.Coins, new[] { 5, 10, 20 }[i]) },
                     AchievementTrackingType.Unique,
                     targetWorldId: worldId,
                     groupId: $"{worldId}_levels", groupOrder: i + 1, tab: worldId
@@ -872,7 +880,7 @@ namespace SortResort
                     $"{worldId}_stars_{starMilestones[i]}", $"{worldName}: {starNames[i]}",
                     $"Earn {starMilestones[i]} Stars in this World",
                     AchievementCategory.Mastery, starTiers[i], starMilestones[i],
-                    new[] { new AchievementReward(RewardType.Coins, starMilestones[i]) },
+                    new[] { new AchievementReward(RewardType.Coins, new[] { 5, 10, 25 }[i]) },
                     AchievementTrackingType.Total,
                     targetWorldId: worldId,
                     groupId: $"{worldId}_stars", groupOrder: i + 1, tab: worldId
@@ -1254,6 +1262,24 @@ namespace SortResort
 
             // Hard mode unlock tracking (fires when HardMode is unlocked for any world)
             // This is handled separately via CheckHardModeUnlocks()
+
+            // ==========================================
+            // WORLD COMPLETION COIN BONUS (50 coins per world per mode)
+            // ==========================================
+            if (SaveManager.Instance != null)
+            {
+                string bonusKey = $"{worldId}_{data.mode}";
+                if (!worldModeCompletionBonuses.Contains(bonusKey))
+                {
+                    int highest = SaveManager.Instance.GetHighestLevelCompleted(worldId);
+                    if (highest >= LEVELS_PER_WORLD)
+                    {
+                        worldModeCompletionBonuses.Add(bonusKey);
+                        AddCoins(50);
+                        Debug.Log($"[AchievementManager] World completion bonus: +50 coins for {bonusKey}");
+                    }
+                }
+            }
 
             SaveProgress();
         }
@@ -1652,6 +1678,7 @@ namespace SortResort
             {
                 case RewardType.Coins:
                     coins += reward.amount;
+                    OnCoinsChanged?.Invoke(coins);
                     break;
                 case RewardType.UndoToken:
                     undoTokens += reward.amount;
@@ -1730,32 +1757,63 @@ namespace SortResort
         }
 
         /// <summary>
-        /// Get total points earned from unlocked achievements
+        /// Get total coins earned from unlocked achievements (sum of coin rewards)
         /// </summary>
-        public int GetEarnedPoints()
+        public int GetTotalCoinsEarned()
         {
-            int points = 0;
+            int total = 0;
             foreach (var a in achievements.Values)
             {
                 if (IsUnlocked(a.id))
-                {
-                    points += a.points;
-                }
+                    total += a.GetCoinReward();
             }
-            return points;
+            return total;
         }
 
         /// <summary>
-        /// Get total possible points from all achievements
+        /// Get total possible coins from all achievements
         /// </summary>
-        public int GetTotalPoints()
+        public int GetTotalCoinsPossible()
         {
-            int points = 0;
+            int total = 0;
             foreach (var a in achievements.Values)
             {
-                points += a.points;
+                total += a.GetCoinReward();
             }
-            return points;
+            return total;
+        }
+
+        /// <summary>
+        /// Add coins from non-achievement sources (e.g., world completion bonus)
+        /// </summary>
+        public void AddCoins(int amount)
+        {
+            if (amount <= 0) return;
+            coins += amount;
+            OnCoinsChanged?.Invoke(coins);
+            SaveProgress();
+        }
+
+        /// <summary>
+        /// Spend coins. Returns false if insufficient balance.
+        /// </summary>
+        public bool SpendCoins(int amount)
+        {
+            if (amount <= 0 || coins < amount) return false;
+            coins -= amount;
+            totalCoinsSpent += amount;
+            OnCoinsChanged?.Invoke(coins);
+            SaveProgress();
+            return true;
+        }
+
+        /// <summary>
+        /// Increment the present boxes opened counter.
+        /// </summary>
+        public void RecordPresentBoxOpened()
+        {
+            totalPresentBoxesOpened++;
+            SaveProgress();
         }
 
         /// <summary>
@@ -2073,7 +2131,10 @@ namespace SortResort
                 powerUpsUsedMoveFreeze = powerUpsUsedMoveFreeze,
                 powerUpsUsedTimeFreeze = powerUpsUsedTimeFreeze,
                 dailyLoginCount = dailyLoginCount,
-                lastLoginDate = lastLoginDate
+                lastLoginDate = lastLoginDate,
+                totalCoinsSpent = totalCoinsSpent,
+                totalPresentBoxesOpened = totalPresentBoxesOpened,
+                claimedWorldCompletionBonuses = new List<string>(worldModeCompletionBonuses)
             };
 
             string json = JsonUtility.ToJson(saveData);
@@ -2144,6 +2205,11 @@ namespace SortResort
                 powerUpsUsedTimeFreeze = saveData.powerUpsUsedTimeFreeze;
                 dailyLoginCount = saveData.dailyLoginCount;
                 lastLoginDate = saveData.lastLoginDate ?? "";
+                totalCoinsSpent = saveData.totalCoinsSpent;
+                totalPresentBoxesOpened = saveData.totalPresentBoxesOpened;
+
+                if (saveData.claimedWorldCompletionBonuses != null)
+                    worldModeCompletionBonuses = new HashSet<string>(saveData.claimedWorldCompletionBonuses);
 
                 Debug.Log($"[AchievementManager] Loaded {progress.Count} achievement progress entries");
             }
@@ -2191,6 +2257,9 @@ namespace SortResort
             powerUpsUsedTimeFreeze = 0;
             dailyLoginCount = 0;
             lastLoginDate = "";
+            totalCoinsSpent = 0;
+            totalPresentBoxesOpened = 0;
+            worldModeCompletionBonuses.Clear();
 
             PlayerPrefs.DeleteKey(ACHIEVEMENT_SAVE_KEY);
             Debug.Log("[AchievementManager] All achievements reset");
@@ -2238,6 +2307,9 @@ namespace SortResort
             public int powerUpsUsedTimeFreeze;
             public int dailyLoginCount;
             public string lastLoginDate;
+            public int totalCoinsSpent;
+            public int totalPresentBoxesOpened;
+            public List<string> claimedWorldCompletionBonuses;
         }
 
         #endregion

@@ -102,7 +102,7 @@ namespace SortResort
             if (unlockClip == null)
                 unlockClip = Resources.Load<AudioClip>("Audio/SFX/unlock_sound");
             if (victoryClip == null)
-                victoryClip = Resources.Load<AudioClip>("Audio/SFX/victory");
+                victoryClip = Resources.Load<AudioClip>("Audio/SFX/mascot_fanfare");
             if (starEarnedClip == null)
                 starEarnedClip = Resources.Load<AudioClip>("Audio/SFX/3star");
             if (star1Clip == null)
@@ -112,7 +112,7 @@ namespace SortResort
             if (star3Clip == null)
                 star3Clip = Resources.Load<AudioClip>("Audio/SFX/3star");
             if (levelCompleteClip == null)
-                levelCompleteClip = Resources.Load<AudioClip>("Audio/SFX/levelcompletesound");
+                levelCompleteClip = Resources.Load<AudioClip>("Audio/SFX/mascot_chime");
             if (timerCountUpClip == null)
                 timerCountUpClip = Resources.Load<AudioClip>("Audio/SFX/timer");
 
@@ -128,7 +128,7 @@ namespace SortResort
             if (tickTockClip == null)
                 tickTockClip = Resources.Load<AudioClip>("Audio/SFX/tick_tock");
             if (levelCompleteVictoryClip == null)
-                levelCompleteVictoryClip = Resources.Load<AudioClip>("Audio/SFX/level_complete_victory");
+                levelCompleteVictoryClip = Resources.Load<AudioClip>("Audio/SFX/victory_music");
             if (freezeClip == null)
                 freezeClip = Resources.Load<AudioClip>("Audio/SFX/freeze");
             if (unfreezeClip == null)

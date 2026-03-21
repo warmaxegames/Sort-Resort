@@ -201,9 +201,6 @@ namespace SortResort.UI
             // Layer 7: Close Button
             CreateCloseButton(panel.transform);
 
-            // Layer 8: Whiskers mascot (bottom-right corner)
-            CreateMascotDecoration(panel.transform);
-
             panel.SetActive(false);
             Debug.Log("[StatsScreen] Stats panel created");
         }
@@ -299,6 +296,10 @@ namespace SortResort.UI
             AddStatRow("Levels Completed", FormatNumber(totalCompleted));
             AddStatRow("Levels Failed", FormatNumber(am.TotalLevelsFailed));
             AddStatRow("Levels Restarted", FormatNumber(am.TotalLevelsRestarted));
+            AddSeparator();
+            AddStatRow("Coins Earned", FormatNumber(am.GetTotalCoinsEarned()));
+            AddStatRow("Coins Spent", FormatNumber(am.TotalCoinsSpent));
+            AddStatRow("Present Boxes Opened", FormatNumber(am.TotalPresentBoxesOpened));
         }
 
         private void PopulateMatching()
@@ -732,23 +733,6 @@ namespace SortResort.UI
             pointerUp.eventID = UnityEngine.EventSystems.EventTriggerType.PointerUp;
             pointerUp.callback.AddListener((data) => { closeBtnImg.sprite = normalSprite; });
             trigger.triggers.Add(pointerUp);
-        }
-
-        private static void CreateMascotDecoration(Transform parent)
-        {
-            var go = new GameObject("WhiskersMascot");
-            go.transform.SetParent(parent, false);
-            var r = go.AddComponent<RectTransform>();
-            // Anchor bottom-right: right edge of screen, bottom of viewport
-            r.anchorMin = new Vector2(1, 0);
-            r.anchorMax = new Vector2(1, 0);
-            r.pivot = new Vector2(1, 0); // pivot at bottom-right so it doesn't hang off
-            r.anchoredPosition = new Vector2(-20, 0); // 20px padding from right edge
-            r.sizeDelta = new Vector2(450, 510); // scaled to fit nicely
-            var img = go.AddComponent<Image>();
-            img.sprite = LoadFullRectSprite("Sprites/UI/Stats/whiskers_stats_screen");
-            img.preserveAspect = true;
-            img.raycastTarget = false;
         }
 
         /// <summary>
