@@ -371,6 +371,27 @@ namespace SortResort
             }
         }
 
+        // Presents
+        public int GetNormalPresentCount()
+        {
+            return currentSaveData.normalPresentCount;
+        }
+
+        public void AddNormalPresent(int count = 1)
+        {
+            currentSaveData.normalPresentCount += count;
+            SaveGame();
+        }
+
+        public void UseNormalPresent()
+        {
+            if (currentSaveData.normalPresentCount > 0)
+            {
+                currentSaveData.normalPresentCount--;
+                SaveGame();
+            }
+        }
+
         // Reset All Progress
         public void ResetAllProgress()
         {
@@ -480,6 +501,9 @@ namespace SortResort
         // Power-ups
         public List<PowerUpSaveEntry> powerUpInventory = new List<PowerUpSaveEntry>();
         public List<int> unlockedPowerUps = new List<int>();
+
+        // Presents
+        public int normalPresentCount = 0;
 
         public SaveData()
         {

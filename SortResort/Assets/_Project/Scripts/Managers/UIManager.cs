@@ -209,6 +209,7 @@ namespace SortResort
         private Dictionary<string, Image> achievementTabSpriteImages = new Dictionary<string, Image>();
         private Transform achievementTabsContainer;
         private Image achievementWorldIconImage;
+        private Image achievementTrophyOverlay;
         private TextMeshProUGUI achievementTitleBarText;
         private TextMeshProUGUI achievementCoinsText;
         private Sprite achvTabSprite;
@@ -219,6 +220,12 @@ namespace SortResort
 
         // Lucky Spin screen
         private SortResort.UI.LuckySpinScreen luckySpinScreen;
+
+        // Present screen
+        private SortResort.UI.PresentScreen presentScreen;
+        private GameObject presentBadgeGO;
+        private TextMeshProUGUI presentBadgeText;
+        private Coroutine presentBadgeGlowCoroutine;
         private bool luckySpinPendingCheck;
 
         // Achievement frame + icon compositing system
@@ -399,6 +406,7 @@ namespace SortResort
             CreateAchievementNotificationPanel();
             CreateAchievementsPanel();
             CreateStatsPanel();
+            CreatePresentPanel();
             CreateLuckySpinPanel();
             CreateDialoguePanel();
             CreatePowerUpBar();
@@ -853,6 +861,118 @@ namespace SortResort
             }
             statsBtn.onClick.AddListener(OnStatsClicked);
 
+            // Present button - to the left of stats button
+            var presentBtnGO = new GameObject("PresentButton");
+            presentBtnGO.transform.SetParent(topBar.transform, false);
+            var presentBtnRect = presentBtnGO.AddComponent<RectTransform>();
+            presentBtnRect.anchorMin = new Vector2(1, 0.5f);
+            presentBtnRect.anchorMax = new Vector2(1, 0.5f);
+            presentBtnRect.pivot = new Vector2(1, 0.5f);
+            presentBtnRect.anchoredPosition = new Vector2(-380, 0);
+            presentBtnRect.sizeDelta = new Vector2(100, 100);
+
+            var presentBtnImg = presentBtnGO.AddComponent<Image>();
+            var presentNormalSprite = LoadFullRectSprite("Sprites/UI/Buttons/present_button");
+            var presentPressedSprite = LoadFullRectSprite("Sprites/UI/Buttons/present_button_pressed");
+            if (presentNormalSprite != null)
+            {
+                presentBtnImg.sprite = presentNormalSprite;
+                presentBtnImg.preserveAspect = true;
+                presentBtnImg.color = Color.white;
+            }
+            else
+            {
+                presentBtnImg.color = new Color(0.8f, 0.4f, 0.8f, 1f);
+            }
+
+            var presentBtn = presentBtnGO.AddComponent<Button>();
+            presentBtn.transition = Selectable.Transition.SpriteSwap;
+            presentBtn.targetGraphic = presentBtnImg;
+            if (presentPressedSprite != null)
+            {
+                var presentSpriteState = new SpriteState();
+                presentSpriteState.pressedSprite = presentPressedSprite;
+                presentBtn.spriteState = presentSpriteState;
+            }
+            presentBtn.onClick.AddListener(OnPresentClicked);
+
+            // Notification badge (red circle with count, upper-right corner)
+            presentBadgeGO = new GameObject("PresentBadge");
+            presentBadgeGO.transform.SetParent(presentBtnGO.transform, false);
+            var badgeRect = presentBadgeGO.AddComponent<RectTransform>();
+            badgeRect.anchorMin = new Vector2(1, 1);
+            badgeRect.anchorMax = new Vector2(1, 1);
+            badgeRect.pivot = new Vector2(0.5f, 0.5f);
+            badgeRect.anchoredPosition = new Vector2(-8, -8);
+            badgeRect.sizeDelta = new Vector2(36, 36);
+
+            // Red glow background (larger, semi-transparent)
+            var glowGO = new GameObject("BadgeGlow");
+            glowGO.transform.SetParent(presentBadgeGO.transform, false);
+            var glowRect = glowGO.AddComponent<RectTransform>();
+            glowRect.anchorMin = new Vector2(0.5f, 0.5f);
+            glowRect.anchorMax = new Vector2(0.5f, 0.5f);
+            glowRect.pivot = new Vector2(0.5f, 0.5f);
+            glowRect.sizeDelta = new Vector2(52, 52);
+            var glowImg = glowGO.AddComponent<Image>();
+            glowImg.sprite = CreateCircleSprite(64);
+            glowImg.color = new Color(1f, 0.15f, 0.1f, 0.4f);
+            glowImg.raycastTarget = false;
+
+            // Solid red circle
+            var circleImg = presentBadgeGO.AddComponent<Image>();
+            circleImg.sprite = CreateCircleSprite(64);
+            circleImg.color = new Color(0.9f, 0.1f, 0.1f, 1f);
+            circleImg.raycastTarget = false;
+
+            // Count text
+            var badgeTextGO = new GameObject("BadgeText");
+            badgeTextGO.transform.SetParent(presentBadgeGO.transform, false);
+            var badgeTextRect = badgeTextGO.AddComponent<RectTransform>();
+            badgeTextRect.anchorMin = Vector2.zero;
+            badgeTextRect.anchorMax = Vector2.one;
+            badgeTextRect.offsetMin = Vector2.zero;
+            badgeTextRect.offsetMax = Vector2.zero;
+            presentBadgeText = badgeTextGO.AddComponent<TextMeshProUGUI>();
+            presentBadgeText.text = "0";
+            presentBadgeText.fontSize = 22;
+            presentBadgeText.fontStyle = FontStyles.Bold;
+            presentBadgeText.alignment = TextAlignmentOptions.Center;
+            presentBadgeText.color = Color.white;
+            presentBadgeText.raycastTarget = false;
+            if (FontManager.Bold != null)
+                presentBadgeText.font = FontManager.Bold;
+
+            UpdatePresentBadge();
+            presentBadgeGlowCoroutine = StartCoroutine(PulsePresentBadgeGlow(glowImg));
+
+            // Debug: +1 present button beneath present button
+            var debugPresentGO = new GameObject("DebugAddPresent");
+            debugPresentGO.transform.SetParent(presentBtnGO.transform, false);
+            var debugPresentRect = debugPresentGO.AddComponent<RectTransform>();
+            debugPresentRect.anchorMin = new Vector2(0.5f, 0);
+            debugPresentRect.anchorMax = new Vector2(0.5f, 0);
+            debugPresentRect.pivot = new Vector2(0.5f, 1);
+            debugPresentRect.anchoredPosition = new Vector2(0, -5);
+            debugPresentRect.sizeDelta = new Vector2(80, 30);
+            var debugPresentImg = debugPresentGO.AddComponent<Image>();
+            debugPresentImg.color = new Color(0.2f, 0.7f, 0.2f, 0.9f);
+            var debugPresentBtn = debugPresentGO.AddComponent<Button>();
+            debugPresentBtn.targetGraphic = debugPresentImg;
+            debugPresentBtn.onClick.AddListener(() => { SaveManager.Instance?.AddNormalPresent(); UpdatePresentBadge(); Debug.Log("[UIManager] Debug: Added 1 present"); });
+            var debugPresentTextGO = new GameObject("Text");
+            debugPresentTextGO.transform.SetParent(debugPresentGO.transform, false);
+            var debugPresentTextRect = debugPresentTextGO.AddComponent<RectTransform>();
+            debugPresentTextRect.anchorMin = Vector2.zero;
+            debugPresentTextRect.anchorMax = Vector2.one;
+            debugPresentTextRect.offsetMin = Vector2.zero;
+            debugPresentTextRect.offsetMax = Vector2.zero;
+            var debugPresentText = debugPresentTextGO.AddComponent<TextMeshProUGUI>();
+            debugPresentText.text = "+1";
+            debugPresentText.fontSize = 20;
+            debugPresentText.alignment = TextAlignmentOptions.Center;
+            debugPresentText.color = Color.white;
+
             // Coin counter - positioned top-left of level select screen
             var coinCounterGO = new GameObject("CoinCounter");
             coinCounterGO.transform.SetParent(levelSelectPanel.transform, false);
@@ -860,7 +980,7 @@ namespace SortResort
             coinCounterRect.anchorMin = new Vector2(0, 1);
             coinCounterRect.anchorMax = new Vector2(0, 1);
             coinCounterRect.pivot = new Vector2(0, 1);
-            coinCounterRect.anchoredPosition = new Vector2(10, -20);
+            coinCounterRect.anchoredPosition = new Vector2(35, -20);
             coinCounterRect.sizeDelta = new Vector2(318, 98);
 
             var coinCounterImg = coinCounterGO.AddComponent<Image>();
@@ -1302,10 +1422,89 @@ namespace SortResort
             statsScreen?.Show();
         }
 
+        private void OnPresentClicked()
+        {
+            Debug.Log("[UIManager] Present button clicked");
+            AudioManager.Instance?.PlayButtonClick();
+            if (SaveManager.Instance == null || SaveManager.Instance.GetNormalPresentCount() <= 0) return;
+            presentScreen?.Show();
+        }
+
+        public void UpdatePresentBadge()
+        {
+            if (presentBadgeGO == null) return;
+            int count = SaveManager.Instance?.GetNormalPresentCount() ?? 0;
+            if (count <= 0)
+            {
+                presentBadgeGO.SetActive(false);
+            }
+            else
+            {
+                presentBadgeGO.SetActive(true);
+                if (presentBadgeText != null)
+                    presentBadgeText.text = count.ToString();
+            }
+        }
+
+        private IEnumerator PulsePresentBadgeGlow(Image glowImg)
+        {
+            while (true)
+            {
+                if (glowImg == null) yield break;
+                if (!presentBadgeGO.activeSelf)
+                {
+                    yield return null;
+                    continue;
+                }
+                float t = Time.time * 2.5f;
+                float alpha = 0.25f + 0.25f * Mathf.Sin(t);
+                float scale = 1f + 0.15f * Mathf.Sin(t);
+                glowImg.color = new Color(1f, 0.15f, 0.1f, alpha);
+                glowImg.rectTransform.localScale = new Vector3(scale, scale, 1f);
+                yield return null;
+            }
+        }
+
+        private static Sprite CreateCircleSprite(int size)
+        {
+            var tex = new Texture2D(size, size, TextureFormat.RGBA32, false);
+            var pixels = new Color32[size * size];
+            float center = size / 2f;
+            float radius = center - 1f;
+            for (int y = 0; y < size; y++)
+            {
+                for (int x = 0; x < size; x++)
+                {
+                    float dx = x - center + 0.5f;
+                    float dy = y - center + 0.5f;
+                    float dist = Mathf.Sqrt(dx * dx + dy * dy);
+                    if (dist <= radius)
+                        pixels[y * size + x] = new Color32(255, 255, 255, 255);
+                    else if (dist <= radius + 1f)
+                    {
+                        byte a = (byte)(255 * (1f - (dist - radius)));
+                        pixels[y * size + x] = new Color32(255, 255, 255, a);
+                    }
+                    else
+                        pixels[y * size + x] = new Color32(0, 0, 0, 0);
+                }
+            }
+            tex.SetPixels32(pixels);
+            tex.Apply();
+            return Sprite.Create(tex, new Rect(0, 0, size, size), new Vector2(0.5f, 0.5f), 100f);
+        }
+
         private void CreateStatsPanel()
         {
             statsScreen = new SortResort.UI.StatsScreen();
             statsScreen.Create(mainCanvas.transform);
+        }
+
+        private void CreatePresentPanel()
+        {
+            presentScreen = new SortResort.UI.PresentScreen();
+            presentScreen.Create(mainCanvas.transform, this);
+            presentScreen.OnClosed += () => UpdatePresentBadge();
         }
 
         private void CreateLuckySpinPanel()
@@ -1358,6 +1557,7 @@ namespace SortResort
         private void OnLuckySpinClosed()
         {
             Debug.Log("[UIManager] Lucky Spin closed, returning to level select");
+            UpdatePresentBadge();
         }
 
         /// <summary>
@@ -6034,6 +6234,22 @@ Antonia and Joakim Engfors
             achievementWorldIconImage.preserveAspect = true;
             achievementWorldIconImage.raycastTarget = false;
 
+            // Trophy icon overlay (shown inside the circle on General tab only)
+            var trophyGO = new GameObject("TrophyOverlay");
+            trophyGO.transform.SetParent(worldIconGO.transform, false);
+            var trophyRect = trophyGO.AddComponent<RectTransform>();
+            trophyRect.anchorMin = new Vector2(0.5f, 0.5f);
+            trophyRect.anchorMax = new Vector2(0.5f, 0.5f);
+            trophyRect.pivot = new Vector2(0.5f, 0.5f);
+            trophyRect.sizeDelta = new Vector2(117, 117);
+            trophyRect.anchoredPosition = new Vector2(1, -4);
+            achievementTrophyOverlay = trophyGO.AddComponent<Image>();
+            var trophySprite = LoadFullRectSprite("Sprites/UI/Achievements/trophy_icon");
+            if (trophySprite != null)
+                achievementTrophyOverlay.sprite = trophySprite;
+            achievementTrophyOverlay.preserveAspect = true;
+            achievementTrophyOverlay.raycastTarget = false;
+
             // ============================================
             // Layer 8: Coins text - positioned below/beside icon
             // Same area as icon: x(171-370), y(303-504)
@@ -6271,6 +6487,10 @@ Antonia and Joakim Engfors
             // Hide coin counter on all tabs (coins shown on level select top bar instead)
             if (achievementCoinsText != null)
                 achievementCoinsText.gameObject.SetActive(false);
+
+            // Trophy overlay only visible on General tab
+            if (achievementTrophyOverlay != null)
+                achievementTrophyOverlay.gameObject.SetActive(isGeneral);
 
             if (isGeneral)
             {

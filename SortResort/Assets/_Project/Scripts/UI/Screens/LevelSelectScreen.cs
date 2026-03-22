@@ -1109,29 +1109,19 @@ namespace SortResort.UI
 #if UNITY_EDITOR
         private void CreateDebugUnlockLevelsButton()
         {
-            Transform parent = topBarTransform ?? modeTabContainer?.parent;
+            // Parent to the level select panel (outside scroll area), anchored at bottom
+            Transform parent = levelScrollRect != null ? levelScrollRect.transform.parent : (levelGridParent ?? modeTabContainer?.parent);
             if (parent == null) return;
 
             var btnGO = new GameObject("DebugUnlockLevelsBtn");
             btnGO.transform.SetParent(parent, false);
             var rect = btnGO.AddComponent<RectTransform>();
 
-            if (topBarTransform != null)
-            {
-                // Position to the left of the hard mode button
-                rect.anchorMin = new Vector2(1, 0.5f);
-                rect.anchorMax = new Vector2(1, 0.5f);
-                rect.pivot = new Vector2(1, 0.5f);
-                rect.anchoredPosition = new Vector2(-445, 0);
-                rect.sizeDelta = new Vector2(90, 90);
-            }
-            else
-            {
-                rect.anchorMin = new Vector2(0.35f, 0.96f);
-                rect.anchorMax = new Vector2(0.64f, 0.995f);
-                rect.offsetMin = Vector2.zero;
-                rect.offsetMax = Vector2.zero;
-            }
+            rect.anchorMin = new Vector2(0.35f, 0);
+            rect.anchorMax = new Vector2(0.65f, 0);
+            rect.pivot = new Vector2(0.5f, 0);
+            rect.anchoredPosition = new Vector2(0, 10);
+            rect.sizeDelta = new Vector2(0, 40);
 
             var bg = btnGO.AddComponent<Image>();
             bg.color = new Color(0.4f, 0.4f, 0.4f, 0.8f);
@@ -1178,30 +1168,18 @@ namespace SortResort.UI
 
         private void CreateDebugButton()
         {
-            // Place in topBar if available, otherwise fall back to level select panel
-            Transform parent = topBarTransform ?? modeTabContainer?.parent;
+            Transform parent = levelScrollRect != null ? levelScrollRect.transform.parent : (levelGridParent ?? modeTabContainer?.parent);
             if (parent == null) return;
 
             var debugBtnGO = new GameObject("DebugHardModeBtn");
             debugBtnGO.transform.SetParent(parent, false);
             var debugRect = debugBtnGO.AddComponent<RectTransform>();
 
-            if (topBarTransform != null)
-            {
-                // Position to the left of the achievement button
-                debugRect.anchorMin = new Vector2(1, 0.5f);
-                debugRect.anchorMax = new Vector2(1, 0.5f);
-                debugRect.pivot = new Vector2(1, 0.5f);
-                debugRect.anchoredPosition = new Vector2(-345, 0);
-                debugRect.sizeDelta = new Vector2(90, 90);
-            }
-            else
-            {
-                debugRect.anchorMin = new Vector2(0.65f, 0.96f);
-                debugRect.anchorMax = new Vector2(0.98f, 0.995f);
-                debugRect.offsetMin = Vector2.zero;
-                debugRect.offsetMax = Vector2.zero;
-            }
+            debugRect.anchorMin = new Vector2(0.67f, 0);
+            debugRect.anchorMax = new Vector2(0.97f, 0);
+            debugRect.pivot = new Vector2(0.5f, 0);
+            debugRect.anchoredPosition = new Vector2(0, 10);
+            debugRect.sizeDelta = new Vector2(0, 40);
 
             var debugBg = debugBtnGO.AddComponent<Image>();
             debugBg.color = new Color(0.4f, 0.4f, 0.4f, 0.8f);
@@ -1267,28 +1245,18 @@ namespace SortResort.UI
 
         private void CreateDebugWorldLockButton()
         {
-            Transform parent = topBarTransform ?? modeTabContainer?.parent;
+            Transform parent = levelScrollRect != null ? levelScrollRect.transform.parent : (levelGridParent ?? modeTabContainer?.parent);
             if (parent == null) return;
 
             var btnGO = new GameObject("DebugWorldLockBtn");
             btnGO.transform.SetParent(parent, false);
             var rect = btnGO.AddComponent<RectTransform>();
 
-            if (topBarTransform != null)
-            {
-                rect.anchorMin = new Vector2(1, 0.5f);
-                rect.anchorMax = new Vector2(1, 0.5f);
-                rect.pivot = new Vector2(1, 0.5f);
-                rect.anchoredPosition = new Vector2(-545, 0);
-                rect.sizeDelta = new Vector2(90, 90);
-            }
-            else
-            {
-                rect.anchorMin = new Vector2(0.05f, 0.96f);
-                rect.anchorMax = new Vector2(0.34f, 0.995f);
-                rect.offsetMin = Vector2.zero;
-                rect.offsetMax = Vector2.zero;
-            }
+            rect.anchorMin = new Vector2(0.03f, 0);
+            rect.anchorMax = new Vector2(0.33f, 0);
+            rect.pivot = new Vector2(0.5f, 0);
+            rect.anchoredPosition = new Vector2(0, 10);
+            rect.sizeDelta = new Vector2(0, 40);
 
             var bg = btnGO.AddComponent<Image>();
             bg.color = new Color(0.4f, 0.4f, 0.4f, 0.8f);

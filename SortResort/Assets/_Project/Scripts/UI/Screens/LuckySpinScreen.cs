@@ -28,13 +28,13 @@ namespace SortResort.UI
         private static readonly SpinReward[] SectionRewards = new SpinReward[]
         {
             new SpinReward { type = SpinRewardType.Coins, coinAmount = 5, iconPath = "Sprites/UI/LuckySpin/coins_icon", displayName = "5 Coins" },
-            new SpinReward { type = SpinRewardType.PowerUp, powerUpType = PowerUpType.TimeFreeze, iconPath = "Sprites/UI/PowerUps/time_freeze", displayName = "Time Freeze" },
+            new SpinReward { type = SpinRewardType.PowerUp, powerUpType = PowerUpType.TimeFreeze, iconPath = "Sprites/UI/PowerUps/time_freeze_intro", displayName = "Time Freeze" },
             new SpinReward { type = SpinRewardType.Coins, coinAmount = 10, iconPath = "Sprites/UI/LuckySpin/coins_icon", displayName = "10 Coins" },
-            new SpinReward { type = SpinRewardType.PowerUp, powerUpType = PowerUpType.MoveFreeze, iconPath = "Sprites/UI/PowerUps/moves_freeze", displayName = "Move Freeze" },
+            new SpinReward { type = SpinRewardType.PowerUp, powerUpType = PowerUpType.MoveFreeze, iconPath = "Sprites/UI/PowerUps/moves_freeze_intro", displayName = "Move Freeze" },
             new SpinReward { type = SpinRewardType.Coins, coinAmount = 20, iconPath = "Sprites/UI/LuckySpin/coins_icon", displayName = "20 Coins" },
             new SpinReward { type = SpinRewardType.PresentBox, iconPath = "Sprites/UI/LuckySpin/normal_present_box", displayName = "Present Box" },
-            new SpinReward { type = SpinRewardType.PowerUp, powerUpType = PowerUpType.DestroyLocker, iconPath = "Sprites/UI/PowerUps/destroy_locker", displayName = "Destroy Lock" },
-            new SpinReward { type = SpinRewardType.PowerUp, powerUpType = PowerUpType.SwapItems, iconPath = "Sprites/UI/PowerUps/swap_items", displayName = "Swap Items" },
+            new SpinReward { type = SpinRewardType.PowerUp, powerUpType = PowerUpType.DestroyLocker, iconPath = "Sprites/UI/PowerUps/destroy_locker_intro", displayName = "Destroy Lock" },
+            new SpinReward { type = SpinRewardType.PowerUp, powerUpType = PowerUpType.SwapItems, iconPath = "Sprites/UI/PowerUps/swap_items_intro", displayName = "Swap Items" },
         };
 
         private GameObject panel;
@@ -544,7 +544,7 @@ namespace SortResort.UI
                     }
                     break;
                 case SpinRewardType.PresentBox:
-                    AchievementManager.Instance?.RecordPresentBoxOpened();
+                    SaveManager.Instance?.AddNormalPresent();
                     Debug.Log($"[LuckySpin] Granted present box");
                     break;
             }
@@ -584,8 +584,18 @@ namespace SortResort.UI
             AudioManager.Instance?.PlayButtonClick();
             spinButton.interactable = false;
 
-            // Determine reward immediately
-            int rewardSection = UnityEngine.Random.Range(0, 8);
+            // Determine reward immediately (skip locked powerups)
+            var eligibleSections = new System.Collections.Generic.List<int>();
+            for (int i = 0; i < SectionRewards.Length; i++)
+            {
+                var r = SectionRewards[i];
+                if (r.type == SpinRewardType.PowerUp &&
+                    SaveManager.Instance != null &&
+                    !SaveManager.Instance.IsPowerUpUnlocked(r.powerUpType))
+                    continue;
+                eligibleSections.Add(i);
+            }
+            int rewardSection = eligibleSections[UnityEngine.Random.Range(0, eligibleSections.Count)];
             Debug.Log($"[LuckySpin] Reward determined: Section {rewardSection} ({SectionRewards[rewardSection].displayName})");
 
             // Mark spin used
@@ -861,6 +871,9 @@ namespace SortResort.UI
             glowPulseCoroutine = coroutineHost.StartCoroutine(PulseGlow());
 
             rewardOverlay.SetActive(true);
+
+            // Play the powerup unlock sound
+            AudioManager.Instance?.PlaySpecialItemUnlockSound();
         }
 
         private IEnumerator PulseCongrats()
