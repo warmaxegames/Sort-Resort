@@ -2,19 +2,19 @@
   "mascots": [
     {
       "id": "cat",
-      "displayName": "Whiskers",
+      "displayName": "Lala",
       "worldId": "island",
       "basePitch": 1.45,
       "speakSpeed": 27,
-      "spriteFolder": "Sprites/Mascots/island_whiskers"
+      "spriteFolder": "Sprites/Mascots/island_lala"
     },
     {
-      "id": "tommy",
-      "displayName": "Tommy",
+      "id": "talon",
+      "displayName": "Talon",
       "worldId": "supermarket",
       "basePitch": 1.35,
       "speakSpeed": 24,
-      "spriteFolder": "Sprites/Mascots/supermarket_tommy"
+      "spriteFolder": "Sprites/Mascots/supermarket_talon"
     },
     {
       "id": "chicken",
@@ -50,7 +50,7 @@
         {
           "mascotId": "cat",
           "expression": "happy",
-          "text": "Welcome to Sort Resort! I'm Professor Whiskers."
+          "text": "Welcome to Sort Resort! I'm Professor Lala."
         },
         {
           "mascotId": "cat",
@@ -312,17 +312,17 @@
       "playOnce": true,
       "lines": [
         {
-          "mascotId": "tommy",
+          "mascotId": "talon",
           "expression": "suspicious",
           "text": "Whoa whoa whoa. Who are you and why are you in my store?"
         },
         {
-          "mascotId": "tommy",
+          "mascotId": "talon",
           "expression": "default",
-          "text": "...Whiskers sent you? That old furball is still alive?"
+          "text": "...Lala sent you? That old furball is still alive?"
         },
         {
-          "mascotId": "tommy",
+          "mascotId": "talon",
           "expression": "default",
           "text": "Fine. Help me sort this mess and maybe I'll talk."
         }
@@ -334,17 +334,17 @@
       "playOnce": true,
       "lines": [
         {
-          "mascotId": "tommy",
+          "mascotId": "talon",
           "expression": "default",
           "text": "Yeah, I was in Dr. Miller's lab too. The raccoon in cage three."
         },
         {
-          "mascotId": "tommy",
+          "mascotId": "talon",
           "expression": "suspicious",
           "text": "Woke up here surrounded by groceries and dimensional junk."
         },
         {
-          "mascotId": "tommy",
+          "mascotId": "talon",
           "expression": "default",
           "text": "So I did what any raccoon would do. I organized everything."
         }
@@ -356,17 +356,17 @@
       "playOnce": true,
       "lines": [
         {
-          "mascotId": "tommy",
+          "mascotId": "talon",
           "expression": "default",
           "text": "These shelves keep restocking with random stuff from other worlds."
         },
         {
-          "mascotId": "tommy",
+          "mascotId": "talon",
           "expression": "suspicious",
           "text": "Alien fruit, medieval cheese, space rations... it never stops."
         },
         {
-          "mascotId": "tommy",
+          "mascotId": "talon",
           "expression": "happy",
           "text": "But I gotta admit, the variety IS pretty great."
         }
@@ -378,17 +378,17 @@
       "playOnce": true,
       "lines": [
         {
-          "mascotId": "tommy",
+          "mascotId": "talon",
           "expression": "default",
-          "text": "The transformation hit me different than Whiskers."
+          "text": "The transformation hit me different than Lala."
         },
         {
-          "mascotId": "tommy",
+          "mascotId": "talon",
           "expression": "default",
-          "text": "He got the big brain. I got... instincts. Amplified."
+          "text": "She got the big brain. I got... instincts. Amplified."
         },
         {
-          "mascotId": "tommy",
+          "mascotId": "talon",
           "expression": "happy",
           "text": "I can sense when something's out of place from three aisles away. Drives me crazy till it's sorted."
         }
@@ -400,17 +400,17 @@
       "playOnce": true,
       "lines": [
         {
-          "mascotId": "tommy",
+          "mascotId": "talon",
           "expression": "suspicious",
-          "text": "Whiskers thinks this is all about science. Typical cat."
+          "text": "Lala thinks this is all about science. Typical cat."
         },
         {
-          "mascotId": "tommy",
+          "mascotId": "talon",
           "expression": "default",
           "text": "But I've been watching these portals for years."
         },
         {
-          "mascotId": "tommy",
+          "mascotId": "talon",
           "expression": "default",
           "text": "They're not random. Something is pulling them open."
         }
@@ -422,22 +422,22 @@
       "playOnce": true,
       "lines": [
         {
-          "mascotId": "tommy",
+          "mascotId": "talon",
           "expression": "default",
           "text": "Alright, I trust you enough to tell you something."
         },
         {
-          "mascotId": "tommy",
+          "mascotId": "talon",
           "expression": "default",
           "text": "A few months back, I saw something come through a rift."
         },
         {
-          "mascotId": "tommy",
+          "mascotId": "talon",
           "expression": "default",
           "text": "A glowing figure. Human-shaped. Moving with purpose."
         },
         {
-          "mascotId": "tommy",
+          "mascotId": "talon",
           "expression": "suspicious",
           "text": "Gone before I could get close. But it felt... familiar."
         }
@@ -449,17 +449,17 @@
       "playOnce": true,
       "lines": [
         {
-          "mascotId": "tommy",
+          "mascotId": "talon",
           "expression": "default",
           "text": "After that figure passed through, the portals here calmed down."
         },
         {
-          "mascotId": "tommy",
+          "mascotId": "talon",
           "expression": "default",
           "text": "Just for a few hours. Like someone had tuned them."
         },
         {
-          "mascotId": "tommy",
+          "mascotId": "talon",
           "expression": "happy",
           "text": "Whoever - or whatever - that was, they knew what they were doing."
         }
@@ -471,17 +471,17 @@
       "playOnce": true,
       "lines": [
         {
-          "mascotId": "tommy",
+          "mascotId": "talon",
           "expression": "default",
           "text": "I found something in aisle seven after the figure left."
         },
         {
-          "mascotId": "tommy",
+          "mascotId": "talon",
           "expression": "default",
           "text": "A scorch mark on the floor. Same pattern as Dr. Miller's lab equipment used to leave."
         },
         {
-          "mascotId": "tommy",
+          "mascotId": "talon",
           "expression": "suspicious",
           "text": "Coincidence? Maybe. But my gut says no."
         }
@@ -493,17 +493,17 @@
       "playOnce": true,
       "lines": [
         {
-          "mascotId": "tommy",
+          "mascotId": "talon",
           "expression": "default",
           "text": "You know what I miss most about the lab? Routine."
         },
         {
-          "mascotId": "tommy",
+          "mascotId": "talon",
           "expression": "default",
           "text": "Dr. Miller fed us at the same time every day. Like clockwork."
         },
         {
-          "mascotId": "tommy",
+          "mascotId": "talon",
           "expression": "happy",
           "text": "That woman ran a tight ship. Wherever she is, I bet she's got a schedule pinned to the wall."
         }
@@ -515,17 +515,17 @@
       "playOnce": true,
       "lines": [
         {
-          "mascotId": "tommy",
+          "mascotId": "talon",
           "expression": "happy",
           "text": "We're almost done here! My shelves haven't been this neat in years."
         },
         {
-          "mascotId": "tommy",
+          "mascotId": "talon",
           "expression": "default",
           "text": "I'm picking up portal signatures leading somewhere rural."
         },
         {
-          "mascotId": "tommy",
+          "mascotId": "talon",
           "expression": "default",
           "text": "Smells like hay and... alpaca? No way."
         }
@@ -537,19 +537,19 @@
       "playOnce": true,
       "lines": [
         {
-          "mascotId": "tommy",
+          "mascotId": "talon",
           "expression": "happy",
           "text": "Store's sorted! I haven't felt this good since cage three!"
         },
         {
-          "mascotId": "tommy",
+          "mascotId": "talon",
           "expression": "default",
           "text": "Listen - that energy trail from the glowing figure? It leads to the next world. A farm."
         },
         {
-          "mascotId": "tommy",
+          "mascotId": "talon",
           "expression": "suspicious",
-          "text": "If Mara's there... you tell her Tommy says hi. And that I'm still mad she ate my lettuce that one time."
+          "text": "If Mara's there... you tell her Talon says hi. And that I'm still mad she ate my lettuce that one time."
         }
       ]
     },
@@ -627,7 +627,7 @@
         {
           "mascotId": "chicken",
           "expression": "eggs",
-          "text": "Tommy sent his regards? That grumpy raccoon!"
+          "text": "Talon sent his regards? That grumpy raccoon!"
         },
         {
           "mascotId": "chicken",
@@ -850,12 +850,12 @@
         {
           "mascotId": "bartender",
           "expression": "welcome",
-          "text": "So Whiskers is running an operation now? Good for him."
+          "text": "So Lala is running an operation now? Good for her."
         },
         {
           "mascotId": "bartender",
           "expression": "gruff",
-          "text": "I always figured that cat would land on his feet. Literally."
+          "text": "I always figured that cat would land on her feet. Literally."
         },
         {
           "mascotId": "bartender",
@@ -1105,7 +1105,7 @@
         {
           "mascotId": "alien",
           "expression": "excited",
-          "text": "Whiskers sent you?! Tommy! Mara! Mason! They're all okay?!"
+          "text": "Lala sent you?! Talon! Mara! Mason! They're all okay?!"
         }
       ]
     },
@@ -1455,12 +1455,12 @@
       "playOnce": true,
       "lines": [
         {
-          "mascotId": "tommy",
+          "mascotId": "talon",
           "expression": "happy",
           "text": "No way! You cleaned out Star AND Timer for my store?"
         },
         {
-          "mascotId": "tommy",
+          "mascotId": "talon",
           "expression": "default",
           "text": "Hard Mode unlocked. Good luck keeping up!"
         }

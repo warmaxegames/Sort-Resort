@@ -221,7 +221,7 @@ namespace SortResort
         {
             if (string.IsNullOrEmpty(currentMascotFolder)) return;
 
-            // Sprite format: {spriteFolder}_neutral (e.g., Sprites/Mascots/island_whiskers_neutral)
+            // Sprite format: {spriteFolder}_neutral (e.g., Sprites/Mascots/island_lala_neutral)
             defaultMascotSprite = Resources.Load<Sprite>($"{currentMascotFolder}_neutral");
             if (defaultMascotSprite == null)
             {
@@ -266,7 +266,7 @@ namespace SortResort
 
             if (!string.IsNullOrEmpty(mappedExpression))
             {
-                // Sprite format: {spriteFolder}_{expression} (e.g., Sprites/Mascots/island_whiskers_happy)
+                // Sprite format: {spriteFolder}_{expression} (e.g., Sprites/Mascots/island_lala_happy)
                 expressionSprite = Resources.Load<Sprite>($"{currentMascotFolder}_{mappedExpression}");
             }
 

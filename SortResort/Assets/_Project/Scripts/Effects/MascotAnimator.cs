@@ -309,7 +309,7 @@ namespace SortResort
             return worldId?.ToLower() switch
             {
                 "island" => "whiskerthumbsup",
-                "supermarket" => "tommythumbsup",
+                "supermarket" => "talonthumbsup",
                 "farm" => "marathumbsup",
                 "tavern" => "hogthumbsup",
                 "space" => "leikathumbsup",

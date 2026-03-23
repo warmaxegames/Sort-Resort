@@ -15,12 +15,14 @@ namespace SortResort.UI
         {
             public string id;
             public string displayName;
-            public string spritePath;
+            public string animFolder; // Resources path to animation frames folder
+            public string framePrefix; // e.g. "present_open_", "farm_open_"
             public System.Func<int> getCount;
             public System.Action useOne;
+            public Sprite[] openFrames; // Per-type animation frames
+            public float displayScale; // Scale correction vs standard box (1.0 = no change)
+            public Vector2 displayOffset; // Position offset to center content
         }
-
-        private static readonly string[] BoxTypeIds = { "normal" };
 
         private GameObject panel;
         private MonoBehaviour coroutineHost;
@@ -35,7 +37,6 @@ namespace SortResort.UI
         private Image rightArrowImage;
         private Button leftArrowButton;
         private Button rightArrowButton;
-        private Sprite[] openFrames;
         private Sprite[] smokeFrames;
         private Image smokeImage;
         private bool isAnimating;
@@ -46,10 +47,11 @@ namespace SortResort.UI
         // Box type cycling
         private List<PresentBoxType> boxTypes = new List<PresentBoxType>();
         private int currentBoxIndex;
-        private Dictionary<string, Sprite> boxSprites = new Dictionary<string, Sprite>();
 
         // Grey color for disabled arrows
         private static readonly Color ArrowGreyColor = new Color(0.4f, 0.4f, 0.4f, 0.5f);
+        // Present box resting position (centered in glow)
+        private static readonly Vector2 PresentRestPos = new Vector2(0, 40);
 
         public GameObject Panel => panel;
         public bool IsVisible => panel != null && panel.activeSelf;
@@ -155,7 +157,8 @@ namespace SortResort.UI
             presentRect.anchorMin = new Vector2(0.5f, 0.5f);
             presentRect.anchorMax = new Vector2(0.5f, 0.5f);
             presentRect.pivot = new Vector2(0.5f, 0.5f);
-            presentRect.sizeDelta = new Vector2(400, 400);
+            presentRect.anchoredPosition = PresentRestPos;
+            presentRect.sizeDelta = new Vector2(480, 480);
             presentImage = presentGO.AddComponent<Image>();
             presentImage.preserveAspect = true;
             presentImage.raycastTarget = true;
@@ -213,28 +216,84 @@ namespace SortResort.UI
         private void InitBoxTypes()
         {
             boxTypes.Clear();
-            boxSprites.Clear();
 
-            // Normal present box
-            var normalTex = Resources.Load<Texture2D>("Sprites/UI/LuckySpin/normal_present_box");
-            Sprite normalSprite = null;
-            if (normalTex != null)
-                normalSprite = Sprite.Create(normalTex, new Rect(0, 0, normalTex.width, normalTex.height), new Vector2(0.5f, 0.5f), 100f);
-
+            // Normal present box (default/Island style) - 628x800, content fills canvas
             boxTypes.Add(new PresentBoxType
             {
                 id = "normal",
                 displayName = "Present Box",
-                spritePath = "Sprites/UI/LuckySpin/normal_present_box",
-                getCount = () => SaveManager.Instance?.GetNormalPresentCount() ?? 0,
-                useOne = () => { SaveManager.Instance?.UseNormalPresent(); AchievementManager.Instance?.RecordPresentBoxOpened(); }
+                animFolder = "Sprites/UI/PresentOpen",
+                framePrefix = "present_open_",
+                getCount = () => SaveManager.Instance?.GetPresentCount("normal") ?? 0,
+                useOne = () => { SaveManager.Instance?.UsePresent("normal"); AchievementManager.Instance?.RecordPresentBoxOpened(); },
+                displayScale = 1f,
+                displayOffset = Vector2.zero
             });
 
-            if (normalSprite != null)
-                boxSprites["normal"] = normalSprite;
+            // Island box - 800x800 (scaled from 250x250), content bbox ~(50,140)-(561,740)
+            boxTypes.Add(new PresentBoxType
+            {
+                id = "island",
+                displayName = "Island Box",
+                animFolder = "Sprites/UI/PresentOpen/Island",
+                framePrefix = "island_open_",
+                getCount = () => SaveManager.Instance?.GetPresentCount("island") ?? 0,
+                useOne = () => { SaveManager.Instance?.UsePresent("island"); AchievementManager.Instance?.RecordPresentBoxOpened(); },
+                displayScale = 1.15f,
+                displayOffset = new Vector2(68f, -14f)
+            });
 
-            // Future box types can be added here:
-            // boxTypes.Add(new PresentBoxType { id = "gold", ... });
+            // Supermarket box - 800x800 (scaled from 250x250), content bbox ~(76,245)-(548,737)
+            boxTypes.Add(new PresentBoxType
+            {
+                id = "supermarket",
+                displayName = "Supermarket Box",
+                animFolder = "Sprites/UI/PresentOpen/Supermarket",
+                framePrefix = "supermarket_open_",
+                getCount = () => SaveManager.Instance?.GetPresentCount("supermarket") ?? 0,
+                useOne = () => { SaveManager.Instance?.UsePresent("supermarket"); AchievementManager.Instance?.RecordPresentBoxOpened(); },
+                displayScale = 1.28f,
+                displayOffset = new Vector2(68f, 19f)
+            });
+
+            // Farm box - 800x800, content bbox ~(6,198)-(673,800), hay at bottom takes extra space
+            boxTypes.Add(new PresentBoxType
+            {
+                id = "farm",
+                displayName = "Farm Box",
+                animFolder = "Sprites/UI/PresentOpen/Farm",
+                framePrefix = "farm_open_",
+                getCount = () => SaveManager.Instance?.GetPresentCount("farm") ?? 0,
+                useOne = () => { SaveManager.Instance?.UsePresent("farm"); AchievementManager.Instance?.RecordPresentBoxOpened(); },
+                displayScale = 1.15f,
+                displayOffset = new Vector2(56f, 2f)
+            });
+
+            // Space box - 800x800, content bbox ~(57,220)-(558,746), smaller & left-shifted
+            boxTypes.Add(new PresentBoxType
+            {
+                id = "space",
+                displayName = "Space Box",
+                animFolder = "Sprites/UI/PresentOpen/Space",
+                framePrefix = "space_open_",
+                getCount = () => SaveManager.Instance?.GetPresentCount("space") ?? 0,
+                useOne = () => { SaveManager.Instance?.UsePresent("space"); AchievementManager.Instance?.RecordPresentBoxOpened(); },
+                displayScale = 1.20f,
+                displayOffset = new Vector2(66f, 8f)
+            });
+
+            // Tavern box - 800x800, content bbox ~(57,249)-(567,740), smaller & left-shifted
+            boxTypes.Add(new PresentBoxType
+            {
+                id = "tavern",
+                displayName = "Tavern Box",
+                animFolder = "Sprites/UI/PresentOpen/Tavern",
+                framePrefix = "tavern_open_",
+                getCount = () => SaveManager.Instance?.GetPresentCount("tavern") ?? 0,
+                useOne = () => { SaveManager.Instance?.UsePresent("tavern"); AchievementManager.Instance?.RecordPresentBoxOpened(); },
+                displayScale = 1.23f,
+                displayOffset = new Vector2(65f, 11f)
+            });
 
             currentBoxIndex = 0;
         }
@@ -333,29 +392,14 @@ namespace SortResort.UI
 
         private void LoadAnimationFrames()
         {
-            var textures = Resources.LoadAll<Texture2D>("Sprites/UI/PresentOpen");
-
-            // Sort textures by name first, then create sprites
-            var openTextures = new List<Texture2D>();
+            // Load smoke frames (shared across all box types)
             var smokeTextures = new List<Texture2D>();
-            foreach (var tex in textures)
+            foreach (var tex in Resources.LoadAll<Texture2D>("Sprites/UI/PresentOpen"))
             {
-                if (tex.name.StartsWith("present_open_"))
-                    openTextures.Add(tex);
-                else if (tex.name.StartsWith("smoke_"))
+                if (tex.name.StartsWith("smoke_"))
                     smokeTextures.Add(tex);
             }
-
-            openTextures.Sort((a, b) => a.name.CompareTo(b.name));
             smokeTextures.Sort((a, b) => a.name.CompareTo(b.name));
-
-            openFrames = new Sprite[openTextures.Count];
-            for (int i = 0; i < openTextures.Count; i++)
-            {
-                var tex = openTextures[i];
-                openFrames[i] = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), new Vector2(0.5f, 0.5f), 100f);
-            }
-
             smokeFrames = new Sprite[smokeTextures.Count];
             for (int i = 0; i < smokeTextures.Count; i++)
             {
@@ -363,7 +407,28 @@ namespace SortResort.UI
                 smokeFrames[i] = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), new Vector2(0.5f, 0.5f), 100f);
             }
 
-            Debug.Log($"[PresentScreen] Loaded {openFrames.Length} present open frames, {smokeFrames.Length} smoke frames");
+            // Load per-type open animation frames
+            for (int b = 0; b < boxTypes.Count; b++)
+            {
+                var bt = boxTypes[b];
+                var openTextures = new List<Texture2D>();
+                foreach (var tex in Resources.LoadAll<Texture2D>(bt.animFolder))
+                {
+                    if (tex.name.StartsWith(bt.framePrefix))
+                        openTextures.Add(tex);
+                }
+                openTextures.Sort((a, b2) => a.name.CompareTo(b2.name));
+                bt.openFrames = new Sprite[openTextures.Count];
+                for (int i = 0; i < openTextures.Count; i++)
+                {
+                    var tex = openTextures[i];
+                    bt.openFrames[i] = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), new Vector2(0.5f, 0.5f), 100f);
+                }
+                boxTypes[b] = bt;
+                Debug.Log($"[PresentScreen] Loaded {bt.openFrames.Length} frames for {bt.id}");
+            }
+
+            Debug.Log($"[PresentScreen] Loaded {smokeFrames.Length} smoke frames, {boxTypes.Count} box types");
         }
 
         public void Show()
@@ -402,17 +467,20 @@ namespace SortResort.UI
             OnClosed?.Invoke();
         }
 
+        private Vector3 CurrentBaseScale => Vector3.one * boxTypes[currentBoxIndex].displayScale;
+        private Vector2 CurrentRestPos => PresentRestPos + boxTypes[currentBoxIndex].displayOffset;
+
         private void ResetToPresent()
         {
             var boxType = boxTypes[currentBoxIndex];
 
-            // Show present box
-            if (boxSprites.TryGetValue(boxType.id, out var sprite))
-                presentImage.sprite = sprite;
+            // Show present box using first animation frame for seamless transition
+            if (boxType.openFrames != null && boxType.openFrames.Length > 0)
+                presentImage.sprite = boxType.openFrames[0];
             presentImage.color = Color.white;
-            presentRect.localScale = Vector3.one;
+            presentRect.localScale = CurrentBaseScale;
             presentRect.localEulerAngles = Vector3.zero;
-            presentRect.anchoredPosition = Vector2.zero;
+            presentRect.anchoredPosition = CurrentRestPos;
             presentImage.gameObject.SetActive(true);
             if (presentGlowImage != null)
             {
@@ -515,8 +583,8 @@ namespace SortResort.UI
                 shakeCoroutine = null;
             }
             presentRect.localEulerAngles = Vector3.zero;
-            presentRect.anchoredPosition = Vector2.zero;
-            presentRect.localScale = Vector3.one;
+            presentRect.anchoredPosition = CurrentRestPos;
+            presentRect.localScale = CurrentBaseScale;
 
             // Hide count text and arrows during animation
             if (countText != null) countText.gameObject.SetActive(false);
@@ -525,8 +593,9 @@ namespace SortResort.UI
 
             // Phase 1: Play present open + smoke animations simultaneously
             float frameDuration = 1f / 24f;
+            var currentOpenFrames = boxTypes[currentBoxIndex].openFrames;
             int maxFrames = Mathf.Max(
-                openFrames != null ? openFrames.Length : 0,
+                currentOpenFrames != null ? currentOpenFrames.Length : 0,
                 smokeFrames != null ? smokeFrames.Length : 0);
 
             // Play open present sound at start of animation
@@ -544,8 +613,8 @@ namespace SortResort.UI
 
             for (int i = 0; i < maxFrames; i++)
             {
-                if (openFrames != null && i < openFrames.Length)
-                    presentImage.sprite = openFrames[i];
+                if (currentOpenFrames != null && i < currentOpenFrames.Length)
+                    presentImage.sprite = currentOpenFrames[i];
                 if (smokeFrames != null && i < smokeFrames.Length)
                     smokeImage.sprite = smokeFrames[i];
 
@@ -678,6 +747,9 @@ namespace SortResort.UI
             // Intermittent shake bursts: short rapid wobble, then pause, repeat
             while (true)
             {
+                float baseScale = boxTypes[currentBoxIndex].displayScale;
+                Vector2 restPos = CurrentRestPos;
+
                 // Wait 1.5-3s between shake bursts
                 yield return new WaitForSeconds(UnityEngine.Random.Range(1.5f, 3f));
 
@@ -688,7 +760,7 @@ namespace SortResort.UI
                 {
                     bulgeElapsed += Time.deltaTime;
                     float t = bulgeElapsed / bulgeUpTime;
-                    float s = 1f + 0.08f * Mathf.Sin(t * Mathf.PI * 0.5f);
+                    float s = baseScale * (1f + 0.08f * Mathf.Sin(t * Mathf.PI * 0.5f));
                     presentRect.localScale = new Vector3(s, s, 1f);
                     // Pulse glow brighter during burst
                     if (presentGlowImage != null)
@@ -708,7 +780,7 @@ namespace SortResort.UI
                     float maxOffset = 4f * intensity + 1f;
 
                     // Bulge pulses with each shake
-                    float bulgeScale = 1f + 0.06f * intensity;
+                    float bulgeScale = baseScale * (1f + 0.06f * intensity);
 
                     // Quick tilt one direction
                     float angle = maxAngle * (i % 2 == 0 ? 1f : -1f);
@@ -725,8 +797,8 @@ namespace SortResort.UI
                         float smooth = Mathf.SmoothStep(0f, 1f, t);
                         presentRect.localEulerAngles = new Vector3(0, 0, Mathf.Lerp(0, angle, smooth));
                         presentRect.anchoredPosition = new Vector2(
-                            Mathf.Lerp(0, offsetX, smooth),
-                            Mathf.Lerp(0, offsetY, smooth));
+                            restPos.x + Mathf.Lerp(0, offsetX, smooth),
+                            restPos.y + Mathf.Lerp(0, offsetY, smooth));
                         // Squash and stretch: slightly wider when tilting
                         float squash = 1f + 0.03f * Mathf.Abs(Mathf.Sin(smooth * Mathf.PI));
                         presentRect.localScale = new Vector3(
@@ -752,10 +824,10 @@ namespace SortResort.UI
                     float decay = 1f - t;
                     float bounce = Mathf.Sin(t * Mathf.PI * 2f) * decay * 0.3f;
                     presentRect.localEulerAngles = new Vector3(0, 0, startAngle * (1f - t + bounce));
-                    presentRect.anchoredPosition = Vector2.Lerp(settleStartPos, Vector2.zero, t);
-                    // Scale settles back to 1
+                    presentRect.anchoredPosition = Vector2.Lerp(settleStartPos, restPos, t);
+                    // Scale settles back to base
                     float scaleT = Mathf.SmoothStep(0f, 1f, t);
-                    presentRect.localScale = Vector3.Lerp(settleStartScale, Vector3.one, scaleT);
+                    presentRect.localScale = Vector3.Lerp(settleStartScale, CurrentBaseScale, scaleT);
                     // Glow fades back
                     if (presentGlowImage != null)
                         presentGlowImage.color = new Color(1f, 0.8f, 0.2f, Mathf.Lerp(0.85f, 0.3f, t));
@@ -763,8 +835,8 @@ namespace SortResort.UI
                 }
 
                 presentRect.localEulerAngles = Vector3.zero;
-                presentRect.anchoredPosition = Vector2.zero;
-                presentRect.localScale = Vector3.one;
+                presentRect.anchoredPosition = restPos;
+                presentRect.localScale = CurrentBaseScale;
                 if (presentGlowImage != null)
                     presentGlowImage.color = new Color(1f, 0.8f, 0.2f, 0.3f);
             }

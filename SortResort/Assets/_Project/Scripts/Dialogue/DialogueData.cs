@@ -10,8 +10,8 @@ namespace SortResort
     [Serializable]
     public class MascotData
     {
-        public string id;           // e.g., "cat", "alpaca", "tommy"
-        public string displayName;  // e.g., "Whiskers", "Alfonso", "Tommy"
+        public string id;           // e.g., "cat", "alpaca", "talon"
+        public string displayName;  // e.g., "Lala", "Alfonso", "Talon"
         public string worldId;      // Which world this mascot belongs to
         public float basePitch;     // Voice pitch multiplier (0.7 = deep, 1.4 = high)
         public float speakSpeed;    // Letters per second (default ~15-20)
@@ -159,20 +159,20 @@ namespace SortResort
             // Default mascots for each world
             db.mascots.Add(new MascotData {
                 id = "cat",
-                displayName = "Whiskers",
+                displayName = "Lala",
                 worldId = "island",
                 basePitch = 1.45f,
                 speakSpeed = 27f,
-                spriteFolder = "Sprites/Mascots/island_whiskers"
+                spriteFolder = "Sprites/Mascots/island_lala"
             });
 
             db.mascots.Add(new MascotData {
-                id = "tommy",
-                displayName = "Tommy",
+                id = "talon",
+                displayName = "Talon",
                 worldId = "supermarket",
                 basePitch = 1.35f,
                 speakSpeed = 24f,
-                spriteFolder = "Sprites/Mascots/supermarket_tommy"
+                spriteFolder = "Sprites/Mascots/supermarket_talon"
             });
 
             db.mascots.Add(new MascotData {

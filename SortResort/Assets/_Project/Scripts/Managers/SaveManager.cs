@@ -392,6 +392,48 @@ namespace SortResort
             }
         }
 
+        // World-specific presents
+        public int GetPresentCount(string boxId)
+        {
+            switch (boxId)
+            {
+                case "normal": return currentSaveData.normalPresentCount;
+                case "island": return currentSaveData.islandPresentCount;
+                case "supermarket": return currentSaveData.supermarketPresentCount;
+                case "farm": return currentSaveData.farmPresentCount;
+                case "space": return currentSaveData.spacePresentCount;
+                case "tavern": return currentSaveData.tavernPresentCount;
+                default: return 0;
+            }
+        }
+
+        public void AddPresent(string boxId, int count = 1)
+        {
+            switch (boxId)
+            {
+                case "normal": currentSaveData.normalPresentCount += count; break;
+                case "island": currentSaveData.islandPresentCount += count; break;
+                case "supermarket": currentSaveData.supermarketPresentCount += count; break;
+                case "farm": currentSaveData.farmPresentCount += count; break;
+                case "space": currentSaveData.spacePresentCount += count; break;
+                case "tavern": currentSaveData.tavernPresentCount += count; break;
+            }
+            SaveGame();
+        }
+
+        public void UsePresent(string boxId)
+        {
+            switch (boxId)
+            {
+                case "normal": if (currentSaveData.normalPresentCount > 0) { currentSaveData.normalPresentCount--; SaveGame(); } break;
+                case "island": if (currentSaveData.islandPresentCount > 0) { currentSaveData.islandPresentCount--; SaveGame(); } break;
+                case "supermarket": if (currentSaveData.supermarketPresentCount > 0) { currentSaveData.supermarketPresentCount--; SaveGame(); } break;
+                case "farm": if (currentSaveData.farmPresentCount > 0) { currentSaveData.farmPresentCount--; SaveGame(); } break;
+                case "space": if (currentSaveData.spacePresentCount > 0) { currentSaveData.spacePresentCount--; SaveGame(); } break;
+                case "tavern": if (currentSaveData.tavernPresentCount > 0) { currentSaveData.tavernPresentCount--; SaveGame(); } break;
+            }
+        }
+
         // Reset All Progress
         public void ResetAllProgress()
         {
@@ -504,6 +546,11 @@ namespace SortResort
 
         // Presents
         public int normalPresentCount = 0;
+        public int islandPresentCount = 0;
+        public int supermarketPresentCount = 0;
+        public int farmPresentCount = 0;
+        public int spacePresentCount = 0;
+        public int tavernPresentCount = 0;
 
         public SaveData()
         {

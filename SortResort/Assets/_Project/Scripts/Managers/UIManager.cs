@@ -946,32 +946,68 @@ namespace SortResort
             UpdatePresentBadge();
             presentBadgeGlowCoroutine = StartCoroutine(PulsePresentBadgeGlow(glowImg));
 
-            // Debug: +1 present button beneath present button
-            var debugPresentGO = new GameObject("DebugAddPresent");
-            debugPresentGO.transform.SetParent(presentBtnGO.transform, false);
-            var debugPresentRect = debugPresentGO.AddComponent<RectTransform>();
-            debugPresentRect.anchorMin = new Vector2(0.5f, 0);
-            debugPresentRect.anchorMax = new Vector2(0.5f, 0);
-            debugPresentRect.pivot = new Vector2(0.5f, 1);
-            debugPresentRect.anchoredPosition = new Vector2(0, -5);
-            debugPresentRect.sizeDelta = new Vector2(80, 30);
-            var debugPresentImg = debugPresentGO.AddComponent<Image>();
-            debugPresentImg.color = new Color(0.2f, 0.7f, 0.2f, 0.9f);
-            var debugPresentBtn = debugPresentGO.AddComponent<Button>();
-            debugPresentBtn.targetGraphic = debugPresentImg;
-            debugPresentBtn.onClick.AddListener(() => { SaveManager.Instance?.AddNormalPresent(); UpdatePresentBadge(); Debug.Log("[UIManager] Debug: Added 1 present"); });
-            var debugPresentTextGO = new GameObject("Text");
-            debugPresentTextGO.transform.SetParent(debugPresentGO.transform, false);
-            var debugPresentTextRect = debugPresentTextGO.AddComponent<RectTransform>();
-            debugPresentTextRect.anchorMin = Vector2.zero;
-            debugPresentTextRect.anchorMax = Vector2.one;
-            debugPresentTextRect.offsetMin = Vector2.zero;
-            debugPresentTextRect.offsetMax = Vector2.zero;
-            var debugPresentText = debugPresentTextGO.AddComponent<TextMeshProUGUI>();
-            debugPresentText.text = "+1";
-            debugPresentText.fontSize = 20;
-            debugPresentText.alignment = TextAlignmentOptions.Center;
-            debugPresentText.color = Color.white;
+            // Debug: +1 present buttons for each box type
+            // Parented to levelSelectPanel (not presentBtnGO) and set as last sibling
+            // so they render and receive raycasts on top of the world area
+            var debugPresentContainer = new GameObject("DebugPresentButtons");
+            debugPresentContainer.transform.SetParent(levelSelectPanel.transform, false);
+            var debugContainerRect = debugPresentContainer.AddComponent<RectTransform>();
+            // Position to align below the present button (present button is at anchor (1,0.5) on topBar, x=-380, topBar is 150px tall)
+            debugContainerRect.anchorMin = new Vector2(1, 1);
+            debugContainerRect.anchorMax = new Vector2(1, 1);
+            debugContainerRect.pivot = new Vector2(0.5f, 1);
+            debugContainerRect.anchoredPosition = new Vector2(-380, -155);
+            debugContainerRect.sizeDelta = new Vector2(80, 180);
+
+            string[] debugBoxTypes = { "normal", "island", "super", "farm", "space", "tavern" };
+            string[] debugBoxIds = { "normal", "island", "supermarket", "farm", "space", "tavern" };
+            Color[] debugBoxColors = {
+                new Color(0.2f, 0.7f, 0.2f, 0.9f),
+                new Color(0.2f, 0.6f, 0.8f, 0.9f),
+                new Color(0.8f, 0.5f, 0.2f, 0.9f),
+                new Color(0.6f, 0.4f, 0.2f, 0.9f),
+                new Color(0.4f, 0.4f, 0.7f, 0.9f),
+                new Color(0.7f, 0.3f, 0.3f, 0.9f)
+            };
+            for (int di = 0; di < debugBoxTypes.Length; di++)
+            {
+                string boxLabel = debugBoxTypes[di];
+                string boxId = debugBoxIds[di];
+                var dgo = new GameObject($"DebugAdd_{boxId}");
+                dgo.transform.SetParent(debugPresentContainer.transform, false);
+                var dRect = dgo.AddComponent<RectTransform>();
+                dRect.anchorMin = new Vector2(0.5f, 1);
+                dRect.anchorMax = new Vector2(0.5f, 1);
+                dRect.pivot = new Vector2(0.5f, 1);
+                dRect.anchoredPosition = new Vector2(0, -di * 28);
+                dRect.sizeDelta = new Vector2(80, 26);
+                var dImg = dgo.AddComponent<Image>();
+                dImg.color = debugBoxColors[di];
+                var dBtn = dgo.AddComponent<Button>();
+                dBtn.targetGraphic = dImg;
+                // Color tint transition for visual press feedback
+                dBtn.transition = Selectable.Transition.ColorTint;
+                var colors = dBtn.colors;
+                colors.normalColor = Color.white;
+                colors.highlightedColor = new Color(0.9f, 0.9f, 0.9f, 1f);
+                colors.pressedColor = new Color(0.5f, 0.5f, 0.5f, 1f);
+                colors.fadeDuration = 0.08f;
+                dBtn.colors = colors;
+                string capturedId = boxId;
+                dBtn.onClick.AddListener(() => { SaveManager.Instance?.AddPresent(capturedId); UpdatePresentBadge(); Debug.Log($"[UIManager] Debug: Added 1 {capturedId} present"); });
+                var dTextGO = new GameObject("Text");
+                dTextGO.transform.SetParent(dgo.transform, false);
+                var dTextRect = dTextGO.AddComponent<RectTransform>();
+                dTextRect.anchorMin = Vector2.zero;
+                dTextRect.anchorMax = Vector2.one;
+                dTextRect.offsetMin = Vector2.zero;
+                dTextRect.offsetMax = Vector2.zero;
+                var dText = dTextGO.AddComponent<TextMeshProUGUI>();
+                dText.text = $"+{boxLabel}";
+                dText.fontSize = 14;
+                dText.alignment = TextAlignmentOptions.Center;
+                dText.color = Color.white;
+            }
 
             // Coin counter - positioned top-left of level select screen
             var coinCounterGO = new GameObject("CoinCounter");
@@ -1391,6 +1427,9 @@ namespace SortResort
             // Connect level selected callback
             levelSelectScreen.OnLevelSelected += OnLevelSelectedFromMenu;
 
+            // Bring debug present buttons to front so they render on top of world area
+            debugPresentContainer.transform.SetAsLastSibling();
+
             Debug.Log("[UIManager] Level select panel created");
         }
 
@@ -1426,14 +1465,24 @@ namespace SortResort
         {
             Debug.Log("[UIManager] Present button clicked");
             AudioManager.Instance?.PlayButtonClick();
-            if (SaveManager.Instance == null || SaveManager.Instance.GetNormalPresentCount() <= 0) return;
+            if (SaveManager.Instance == null) return;
+            // Check total across all box types, not just normal
+            int total = 0;
+            foreach (var id in new[] { "normal", "island", "supermarket", "farm", "space", "tavern" })
+                total += SaveManager.Instance.GetPresentCount(id);
+            if (total <= 0) return;
             presentScreen?.Show();
         }
 
         public void UpdatePresentBadge()
         {
             if (presentBadgeGO == null) return;
-            int count = SaveManager.Instance?.GetNormalPresentCount() ?? 0;
+            int count = 0;
+            if (SaveManager.Instance != null)
+            {
+                foreach (var id in new[] { "normal", "island", "supermarket", "farm", "space", "tavern" })
+                    count += SaveManager.Instance.GetPresentCount(id);
+            }
             if (count <= 0)
             {
                 presentBadgeGO.SetActive(false);
@@ -2929,7 +2978,7 @@ namespace SortResort
             failedBoardCanvasGroup.alpha = 0f;
             boardGO.transform.localScale = Vector3.one * 0.3f;
 
-            // World-specific mascot overlay (replaces Whiskers for non-Island worlds)
+            // World-specific mascot overlay (replaces Lala for non-Island worlds)
             var mascotOverlayGO = new GameObject("Mascot Overlay");
             mascotOverlayGO.transform.SetParent(levelFailedPanel.transform, false);
             var mascotRect = mascotOverlayGO.AddComponent<RectTransform>();
@@ -5015,7 +5064,7 @@ Antonia and Joakim Engfors
             switch (worldId)
             {
                 case "island":
-                    mascotPath = "Sprites/UI/LevelFailed/whiskers_level_failed";
+                    mascotPath = "Sprites/UI/LevelFailed/lala_level_failed";
                     break;
                 case "farm":
                     mascotPath = "Sprites/UI/LevelFailed/mara_level_failed";
