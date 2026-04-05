@@ -228,6 +228,15 @@ namespace SortResort
         private Coroutine presentBadgeGlowCoroutine;
         private bool luckySpinPendingCheck;
 
+        // Milestone present reward overlay
+        private GameObject milestoneRewardOverlay;
+        private Image milestoneRewardGlowImage;
+        private Image milestoneRewardIconImage;
+        private Image milestoneCongratsImage;
+        private Coroutine milestoneGlowPulse;
+        private Coroutine milestoneCongratsPulse;
+        private bool milestoneRewardPending;
+
         // Achievement frame + icon compositing system
         private static Sprite cachedFrameBronze;
         private static Sprite cachedFrameSilver;
@@ -1274,10 +1283,11 @@ namespace SortResort
             var modeTabContainerGO = new GameObject("ModeTabContainer");
             modeTabContainerGO.transform.SetParent(levelSelectPanel.transform, false);
             var modeTabRect = modeTabContainerGO.AddComponent<RectTransform>();
-            modeTabRect.anchorMin = new Vector2(0, 0.468f);
-            modeTabRect.anchorMax = new Vector2(1, 0.51f);
-            modeTabRect.offsetMin = new Vector2(70, 0);
-            modeTabRect.offsetMax = new Vector2(-70, 0);
+            modeTabRect.anchorMin = new Vector2(0.5f, 0.5f);
+            modeTabRect.anchorMax = new Vector2(0.5f, 0.5f);
+            modeTabRect.pivot = new Vector2(0.5f, 0.5f);
+            modeTabRect.sizeDelta = new Vector2(940, 80);
+            modeTabRect.anchoredPosition = new Vector2(0, -12);
 
             var modeTabLayout = modeTabContainerGO.AddComponent<HorizontalLayoutGroup>();
             modeTabLayout.spacing = 0;
@@ -3264,7 +3274,7 @@ namespace SortResort
             hapticsLabelText.alignment = TextAlignmentOptions.MidlineLeft;
             hapticsLabelText.color = Color.white;
             var hapticsLabelLE = hapticsLabelGO.AddComponent<LayoutElement>();
-            hapticsLabelLE.preferredWidth = 400;
+            hapticsLabelLE.preferredWidth = 500;
             hapticsLabelLE.preferredHeight = 60;
 
             // Haptics toggle (Google-style switch)
@@ -3292,17 +3302,51 @@ namespace SortResort
             var voiceLabelGO = new GameObject("VoiceLabel");
             voiceLabelGO.transform.SetParent(voiceRowGO.transform, false);
             var voiceLabelText = voiceLabelGO.AddComponent<TextMeshProUGUI>();
-            voiceLabelText.text = "Mascot Voices";
+            voiceLabelText.text = "Character Voices";
             voiceLabelText.fontSize = 36;
             voiceLabelText.fontStyle = FontStyles.Bold;
             voiceLabelText.alignment = TextAlignmentOptions.MidlineLeft;
             voiceLabelText.color = Color.white;
             var voiceLabelLE = voiceLabelGO.AddComponent<LayoutElement>();
-            voiceLabelLE.preferredWidth = 400;
+            voiceLabelLE.preferredWidth = 500;
             voiceLabelLE.preferredHeight = 60;
 
             // Voice toggle (Google-style switch)
             var (voiceToggle, voiceCheckmark) = CreateGoogleSwitch(voiceRowGO.transform);
+
+            // ============================================
+            // DIALOGUE TOGGLE ROW
+            // ============================================
+            var dialogueRowGO = new GameObject("DialogueRow");
+            dialogueRowGO.transform.SetParent(contentGO.transform, false);
+            var dialogueRowRect = dialogueRowGO.AddComponent<RectTransform>();
+            dialogueRowRect.anchorMin = new Vector2(0.5f, 1);
+            dialogueRowRect.anchorMax = new Vector2(0.5f, 1);
+            dialogueRowRect.pivot = new Vector2(0.5f, 1);
+            dialogueRowRect.anchoredPosition = new Vector2(0, -890);
+            dialogueRowRect.sizeDelta = new Vector2(700, 80);
+
+            var dialogueLayout = dialogueRowGO.AddComponent<HorizontalLayoutGroup>();
+            dialogueLayout.spacing = 20;
+            dialogueLayout.childAlignment = TextAnchor.MiddleCenter;
+            dialogueLayout.childForceExpandWidth = false;
+            dialogueLayout.childForceExpandHeight = false;
+
+            // Dialogue label
+            var dialogueLabelGO = new GameObject("DialogueLabel");
+            dialogueLabelGO.transform.SetParent(dialogueRowGO.transform, false);
+            var dialogueLabelText = dialogueLabelGO.AddComponent<TextMeshProUGUI>();
+            dialogueLabelText.text = "Dialogue";
+            dialogueLabelText.fontSize = 36;
+            dialogueLabelText.fontStyle = FontStyles.Bold;
+            dialogueLabelText.alignment = TextAlignmentOptions.MidlineLeft;
+            dialogueLabelText.color = Color.white;
+            var dialogueLabelLE = dialogueLabelGO.AddComponent<LayoutElement>();
+            dialogueLabelLE.preferredWidth = 500;
+            dialogueLabelLE.preferredHeight = 60;
+
+            // Dialogue toggle (Google-style switch)
+            var (dialogueToggle, dialogueCheckmark) = CreateGoogleSwitch(dialogueRowGO.transform);
 
             // ============================================
             // BUTTONS (Reset Progress, Credits)
@@ -3313,7 +3357,7 @@ namespace SortResort
             buttonsContainerRect.anchorMin = new Vector2(0.5f, 1);
             buttonsContainerRect.anchorMax = new Vector2(0.5f, 1);
             buttonsContainerRect.pivot = new Vector2(0.5f, 1);
-            buttonsContainerRect.anchoredPosition = new Vector2(0, -920);
+            buttonsContainerRect.anchoredPosition = new Vector2(0, -1010);
             buttonsContainerRect.sizeDelta = new Vector2(700, 200);
 
             var buttonsLayout = buttonsContainer.AddComponent<VerticalLayoutGroup>();
@@ -3388,6 +3432,7 @@ namespace SortResort
                 masterLabel, musicLabel, sfxLabel,
                 hapticsToggle, hapticsCheckmark,
                 voiceToggle, voiceCheckmark,
+                dialogueToggle, dialogueCheckmark,
                 resetBtn, creditsBtn,
                 confirmDialog, confirmYes, confirmNo,
                 creditsPanel, creditsClose,
@@ -3802,32 +3847,19 @@ namespace SortResort
             var boxImg = boxGO.AddComponent<Image>();
             boxImg.color = new Color(0.2f, 0.15f, 0.1f, 0.95f);
 
-            var boxLayout = boxGO.AddComponent<VerticalLayoutGroup>();
-            boxLayout.padding = new RectOffset(50, 50, 50, 50);
-            boxLayout.spacing = 25;
-            boxLayout.childAlignment = TextAnchor.UpperCenter;
-            boxLayout.childForceExpandWidth = true;
-            boxLayout.childForceExpandHeight = false;
-
-            // Title
-            var titleGO = new GameObject("Title");
-            titleGO.transform.SetParent(boxGO.transform, false);
-            var titleTMP = titleGO.AddComponent<TextMeshProUGUI>();
-            titleTMP.text = "CREDITS";
-            titleTMP.fontSize = 48;
-            titleTMP.fontStyle = FontStyles.Bold;
-            titleTMP.alignment = TextAlignmentOptions.Center;
-            titleTMP.color = new Color(1f, 0.85f, 0.5f, 1f); // Gold
-            var titleLE = titleGO.AddComponent<LayoutElement>();
-            titleLE.preferredHeight = 70;
-
-            // Credits content
+            // Credits content (no layout group — manually positioned)
             var contentGO = new GameObject("Content");
             contentGO.transform.SetParent(boxGO.transform, false);
+            var contentRect = contentGO.AddComponent<RectTransform>();
+            contentRect.anchorMin = new Vector2(0, 0);
+            contentRect.anchorMax = new Vector2(1, 1);
+            contentRect.offsetMin = new Vector2(50, 50);
+            contentRect.offsetMax = new Vector2(-50, -50);
             var contentTMP = contentGO.AddComponent<TextMeshProUGUI>();
-            contentTMP.text = @"<size=48><b>Sort Resort</b></size>
-<size=36>A Casual Puzzle Game</size>
+            contentTMP.text = @"<size=48><color=#FFD980><b>CREDITS</b></color></size>
 
+<size=48><b>Sort Resort</b></size>
+<size=36>A Casual Puzzle Game</size>
 
 <b>Game Design & Development</b>
 Wilson Warmack
@@ -3838,44 +3870,50 @@ Filipe Sabino
 <b>Music & Sound</b>
 Filipe Sabino
 
-
 <b>Special Thanks</b>
 Antonia and Joakim Engfors
+
+<b>Dedicated to</b>
+Mara, Mason, Talon, and Landry
 
 <size=20>Version 1.0</size>";
             contentTMP.fontSize = 28;
             contentTMP.alignment = TextAlignmentOptions.Center;
             contentTMP.color = Color.white;
             contentTMP.richText = true;
-            var contentLE = contentGO.AddComponent<LayoutElement>();
-            contentLE.preferredHeight = 650;
+            contentTMP.overflowMode = TextOverflowModes.Overflow;
+            contentTMP.textWrappingMode = TextWrappingModes.Normal;
 
-            // Close button
+            // Close X button (upper-right corner)
             var closeBtnGO = new GameObject("CloseButton");
             closeBtnGO.transform.SetParent(boxGO.transform, false);
-            var closeBtnLE = closeBtnGO.AddComponent<LayoutElement>();
-            closeBtnLE.preferredWidth = 200;
-            closeBtnLE.preferredHeight = 60;
+            var closeBtnRect = closeBtnGO.AddComponent<RectTransform>();
+            closeBtnRect.anchorMin = new Vector2(1f, 1f);
+            closeBtnRect.anchorMax = new Vector2(1f, 1f);
+            closeBtnRect.pivot = new Vector2(0.5f, 0.5f);
+            closeBtnRect.anchoredPosition = new Vector2(-30, -30);
+            closeBtnRect.sizeDelta = new Vector2(100, 100);
 
+            var closeBtnNormalSprite = Resources.Load<Sprite>("Sprites/UI/Achievements/closebutton_2");
+            var closeBtnPressedSprite = Resources.Load<Sprite>("Sprites/UI/Achievements/closebutton_pressed");
             var closeBtnImg = closeBtnGO.AddComponent<Image>();
-            closeBtnImg.color = new Color(0.4f, 0.6f, 0.8f, 1f);
+            closeBtnImg.sprite = closeBtnNormalSprite;
+            closeBtnImg.raycastTarget = true;
 
             var closeBtn = closeBtnGO.AddComponent<Button>();
             closeBtn.targetGraphic = closeBtnImg;
+            closeBtn.transition = Selectable.Transition.None;
 
-            var closeTextGO = new GameObject("Text");
-            closeTextGO.transform.SetParent(closeBtnGO.transform, false);
-            var closeTextRect = closeTextGO.AddComponent<RectTransform>();
-            closeTextRect.anchorMin = Vector2.zero;
-            closeTextRect.anchorMax = Vector2.one;
-            closeTextRect.offsetMin = Vector2.zero;
-            closeTextRect.offsetMax = Vector2.zero;
-            var closeTextTMP = closeTextGO.AddComponent<TextMeshProUGUI>();
-            closeTextTMP.text = "Close";
-            closeTextTMP.fontSize = 28;
-            closeTextTMP.fontStyle = FontStyles.Bold;
-            closeTextTMP.alignment = TextAlignmentOptions.Center;
-            closeTextTMP.color = Color.white;
+            // Swap sprite on press
+            var closePressHandler = closeBtnGO.AddComponent<UnityEngine.EventSystems.EventTrigger>();
+            var closePointerDown = new UnityEngine.EventSystems.EventTrigger.Entry();
+            closePointerDown.eventID = UnityEngine.EventSystems.EventTriggerType.PointerDown;
+            closePointerDown.callback.AddListener((data) => { closeBtnImg.sprite = closeBtnPressedSprite ?? closeBtnNormalSprite; });
+            closePressHandler.triggers.Add(closePointerDown);
+            var closePointerUp = new UnityEngine.EventSystems.EventTrigger.Entry();
+            closePointerUp.eventID = UnityEngine.EventSystems.EventTriggerType.PointerUp;
+            closePointerUp.callback.AddListener((data) => { closeBtnImg.sprite = closeBtnNormalSprite; });
+            closePressHandler.triggers.Add(closePointerUp);
 
             panelGO.SetActive(false);
             return (panelGO, closeBtn);
@@ -4807,8 +4845,192 @@ Antonia and Joakim Engfors
             yield return StartCoroutine(PlayBottomBoardAnimation());
             if (buttonsContainerGO != null) buttonsContainerGO.SetActive(true);
 
+            // Check for milestone present reward (every 10 levels, once per world across all modes)
+            yield return StartCoroutine(CheckAndShowMilestoneReward(levelNumber));
+
             Debug.Log("[UIManager] LevelComplete sequence: COMPLETE");
             levelCompleteSequence = null;
+        }
+
+        private IEnumerator CheckAndShowMilestoneReward(int levelNumber)
+        {
+            if (levelNumber % 10 != 0 || levelNumber < 10 || levelNumber > 100) yield break;
+
+            string worldId = GameManager.Instance?.CurrentWorldId;
+            if (string.IsNullOrEmpty(worldId)) yield break;
+            if (SaveManager.Instance == null) yield break;
+            if (SaveManager.Instance.HasClaimedPresentMilestone(worldId, levelNumber)) yield break;
+
+            // Claim the milestone and award the present
+            SaveManager.Instance.ClaimPresentMilestone(worldId, levelNumber);
+
+            // Show the reward overlay
+            ShowMilestoneRewardOverlay(worldId);
+
+            // Wait until player accepts
+            milestoneRewardPending = true;
+            while (milestoneRewardPending)
+                yield return null;
+        }
+
+        private void ShowMilestoneRewardOverlay(string worldId)
+        {
+            if (milestoneRewardOverlay != null)
+            {
+                UnityEngine.Object.Destroy(milestoneRewardOverlay);
+                milestoneRewardOverlay = null;
+            }
+
+            // Create overlay on the level complete panel so it sits on top
+            Transform parent = levelCompletePanel != null ? levelCompletePanel.transform : mainCanvas.transform;
+
+            milestoneRewardOverlay = new GameObject("MilestoneRewardOverlay");
+            milestoneRewardOverlay.transform.SetParent(parent, false);
+            var overlayRect = milestoneRewardOverlay.AddComponent<RectTransform>();
+            overlayRect.anchorMin = Vector2.zero;
+            overlayRect.anchorMax = Vector2.one;
+            overlayRect.offsetMin = Vector2.zero;
+            overlayRect.offsetMax = Vector2.zero;
+
+            // Dark overlay
+            var dimGO = new GameObject("DarkOverlay");
+            dimGO.transform.SetParent(milestoneRewardOverlay.transform, false);
+            var dimRect = dimGO.AddComponent<RectTransform>();
+            dimRect.anchorMin = Vector2.zero;
+            dimRect.anchorMax = Vector2.one;
+            dimRect.offsetMin = Vector2.zero;
+            dimRect.offsetMax = Vector2.zero;
+            var dimImg = dimGO.AddComponent<Image>();
+            dimImg.color = new Color(0, 0, 0, 0.90f);
+
+            // Glow behind reward icon
+            var glowGO = new GameObject("Glow");
+            glowGO.transform.SetParent(milestoneRewardOverlay.transform, false);
+            var glowRect = glowGO.AddComponent<RectTransform>();
+            glowRect.anchorMin = new Vector2(0.5f, 0.5f);
+            glowRect.anchorMax = new Vector2(0.5f, 0.5f);
+            glowRect.pivot = new Vector2(0.5f, 0.5f);
+            glowRect.sizeDelta = new Vector2(500, 500);
+            milestoneRewardGlowImage = glowGO.AddComponent<Image>();
+            milestoneRewardGlowImage.sprite = LuckySpinScreen.CreateGlowSpritePublic();
+            milestoneRewardGlowImage.color = new Color(1f, 0.9f, 0.5f, 0.5f);
+            milestoneRewardGlowImage.raycastTarget = false;
+
+            // Reward icon (present box)
+            var iconGO = new GameObject("RewardIcon");
+            iconGO.transform.SetParent(milestoneRewardOverlay.transform, false);
+            var iconRect = iconGO.AddComponent<RectTransform>();
+            iconRect.anchorMin = new Vector2(0.5f, 0.5f);
+            iconRect.anchorMax = new Vector2(0.5f, 0.5f);
+            iconRect.pivot = new Vector2(0.5f, 0.5f);
+            iconRect.sizeDelta = new Vector2(300, 300);
+            milestoneRewardIconImage = iconGO.AddComponent<Image>();
+            milestoneRewardIconImage.preserveAspect = true;
+            milestoneRewardIconImage.raycastTarget = false;
+
+            // Load world-specific present icon, fall back to normal
+            string iconPath = $"Sprites/UI/PresentOpen/{char.ToUpper(worldId[0])}{worldId.Substring(1)}/{worldId}_open_00";
+            var tex = Resources.Load<Texture2D>(iconPath);
+            if (tex == null)
+                tex = Resources.Load<Texture2D>("Sprites/UI/LuckySpin/normal_present_box");
+            if (tex != null)
+                milestoneRewardIconImage.sprite = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), new Vector2(0.5f, 0.5f), 100f);
+
+            // Congrats text
+            var congratsGO = new GameObject("CongratsText");
+            congratsGO.transform.SetParent(milestoneRewardOverlay.transform, false);
+            var congratsRect = congratsGO.AddComponent<RectTransform>();
+            milestoneCongratsImage = congratsGO.AddComponent<Image>();
+            var congratsTex = Resources.Load<Texture2D>("Sprites/UI/LuckySpin/congrats_text");
+            if (congratsTex != null)
+            {
+                milestoneCongratsImage.sprite = Sprite.Create(congratsTex, new Rect(0, 0, congratsTex.width, congratsTex.height), new Vector2(0.5f, 0.5f), 100f);
+                milestoneCongratsImage.preserveAspect = true;
+            }
+            milestoneCongratsImage.raycastTarget = false;
+            CropMetadata.ApplyCropAnchors(congratsRect, "Sprites/UI/LuckySpin/congrats_text");
+
+            // Accept button
+            var acceptGO = new GameObject("AcceptButton");
+            acceptGO.transform.SetParent(milestoneRewardOverlay.transform, false);
+            var acceptRect = acceptGO.AddComponent<RectTransform>();
+            var acceptImg = acceptGO.AddComponent<Image>();
+            var acceptNormal = LoadFullRectSprite("Sprites/UI/LuckySpin/accept_button");
+            var acceptPressed = LoadFullRectSprite("Sprites/UI/LuckySpin/accept_button_pressed");
+            if (acceptNormal != null)
+                acceptImg.sprite = acceptNormal;
+            acceptImg.preserveAspect = true;
+            CropMetadata.ApplyCropAnchors(acceptRect, "Sprites/UI/LuckySpin/accept_button");
+            acceptRect.offsetMin = new Vector2(10, acceptRect.offsetMin.y);
+            acceptRect.offsetMax = new Vector2(10, acceptRect.offsetMax.y);
+
+            var acceptBtn = acceptGO.AddComponent<Button>();
+            acceptBtn.targetGraphic = acceptImg;
+            acceptBtn.transition = Selectable.Transition.None;
+            acceptBtn.onClick.AddListener(OnMilestoneRewardAccepted);
+
+            // Press visual
+            var acceptTrigger = acceptGO.AddComponent<UnityEngine.EventSystems.EventTrigger>();
+            var acceptDown = new UnityEngine.EventSystems.EventTrigger.Entry();
+            acceptDown.eventID = UnityEngine.EventSystems.EventTriggerType.PointerDown;
+            acceptDown.callback.AddListener((_) => { if (acceptPressed != null) acceptImg.sprite = acceptPressed; });
+            acceptTrigger.triggers.Add(acceptDown);
+            var acceptUp = new UnityEngine.EventSystems.EventTrigger.Entry();
+            acceptUp.eventID = UnityEngine.EventSystems.EventTriggerType.PointerUp;
+            acceptUp.callback.AddListener((_) => { if (acceptNormal != null) acceptImg.sprite = acceptNormal; });
+            acceptTrigger.triggers.Add(acceptUp);
+
+            // Start pulse animations
+            milestoneGlowPulse = StartCoroutine(PulseMilestoneGlow());
+            milestoneCongratsPulse = StartCoroutine(PulseMilestoneCongrats());
+
+            AudioManager.Instance?.PlaySpecialItemUnlockSound();
+            Debug.Log($"[UIManager] Showing milestone present reward for {worldId}");
+        }
+
+        private void OnMilestoneRewardAccepted()
+        {
+            AudioManager.Instance?.PlayButtonClick();
+
+            if (milestoneGlowPulse != null) { StopCoroutine(milestoneGlowPulse); milestoneGlowPulse = null; }
+            if (milestoneCongratsPulse != null) { StopCoroutine(milestoneCongratsPulse); milestoneCongratsPulse = null; }
+
+            if (milestoneRewardOverlay != null)
+            {
+                Destroy(milestoneRewardOverlay);
+                milestoneRewardOverlay = null;
+            }
+
+            milestoneRewardPending = false;
+            UpdatePresentBadge();
+        }
+
+        private IEnumerator PulseMilestoneGlow()
+        {
+            if (milestoneRewardGlowImage == null) yield break;
+            float time = 0f;
+            while (true)
+            {
+                time += Time.unscaledDeltaTime;
+                float alpha = 0.4f + 0.3f * Mathf.Sin(time * 3f);
+                milestoneRewardGlowImage.color = new Color(1f, 0.9f, 0.5f, alpha);
+                yield return null;
+            }
+        }
+
+        private IEnumerator PulseMilestoneCongrats()
+        {
+            if (milestoneCongratsImage == null) yield break;
+            var rt = milestoneCongratsImage.GetComponent<RectTransform>();
+            if (rt == null) yield break;
+            float time = 0f;
+            while (true)
+            {
+                time += Time.unscaledDeltaTime;
+                float scale = 1f + 0.085f * Mathf.Sin(time * 5f);
+                rt.localScale = Vector3.one * scale;
+                yield return null;
+            }
         }
 
         private IEnumerator PlayStarSequence(int stars)
@@ -6968,8 +7190,8 @@ Antonia and Joakim Engfors
             mascotRect.anchorMin = new Vector2(0.5f, 0);
             mascotRect.anchorMax = new Vector2(0.5f, 0);
             mascotRect.pivot = new Vector2(0.5f, 0);
-            mascotRect.anchoredPosition = new Vector2(0, 160); // Centered horizontally, positioned so feet overlap box
-            mascotRect.sizeDelta = new Vector2(480, 750); // Large mascot visible above box
+            mascotRect.anchoredPosition = new Vector2(0, 110); // Centered horizontally, positioned so feet overlap box
+            mascotRect.sizeDelta = new Vector2(576, 900); // Large mascot visible above box (20% bigger)
 
             dialogueMascotImage = mascotContainer.AddComponent<Image>();
             dialogueMascotImage.preserveAspect = true;
@@ -6983,8 +7205,8 @@ Antonia and Joakim Engfors
             boxRect.anchorMin = new Vector2(0, 0);
             boxRect.anchorMax = new Vector2(1, 0);
             boxRect.pivot = new Vector2(0.5f, 0);
-            boxRect.anchoredPosition = new Vector2(0, 50);
-            boxRect.sizeDelta = new Vector2(-60, 300); // Full width minus margins, 300px tall
+            boxRect.anchoredPosition = new Vector2(0, 0);
+            boxRect.sizeDelta = new Vector2(0, 350); // Full width, flush to left/right/bottom edges
 
             // Dialogue box background
             dialogueBoxImage = dialogueBox.AddComponent<Image>();
@@ -7005,8 +7227,8 @@ Antonia and Joakim Engfors
             var textRect = textArea.AddComponent<RectTransform>();
             textRect.anchorMin = new Vector2(0, 0);
             textRect.anchorMax = new Vector2(1, 1);
-            textRect.offsetMin = new Vector2(40, 30);   // Close to left edge
-            textRect.offsetMax = new Vector2(-30, -80); // Right and top padding (push text below border, +10px down)
+            textRect.offsetMin = new Vector2(60, 50);    // Left and bottom padding (inside dialogue box border)
+            textRect.offsetMax = new Vector2(-50, -80); // Right and top padding (push text below border)
 
             // Dialogue text
             var dialogueTextGO = new GameObject("Dialogue Text");
@@ -7034,7 +7256,7 @@ Antonia and Joakim Engfors
             continueRect.anchorMin = new Vector2(1, 0);
             continueRect.anchorMax = new Vector2(1, 0);
             continueRect.pivot = new Vector2(1, 0);
-            continueRect.anchoredPosition = new Vector2(-20, 15);
+            continueRect.anchoredPosition = new Vector2(-40, 30);
             continueRect.sizeDelta = new Vector2(137, 78);
 
             var skipImg = continueGO.AddComponent<Image>();

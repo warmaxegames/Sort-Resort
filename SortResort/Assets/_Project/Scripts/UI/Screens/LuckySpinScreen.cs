@@ -550,6 +550,8 @@ namespace SortResort.UI
             }
         }
 
+        public static Sprite CreateGlowSpritePublic() => CreateGlowSprite();
+
         private static Sprite CreateGlowSprite()
         {
             int size = 128;

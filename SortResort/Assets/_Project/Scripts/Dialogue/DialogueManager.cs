@@ -172,6 +172,12 @@ namespace SortResort
                 return false;
             }
 
+            // Check if dialogue is disabled in settings
+            if (SaveManager.Instance != null && !SaveManager.Instance.IsDialogueEnabled())
+            {
+                return false;
+            }
+
             // Check if already played (for playOnce dialogues)
             bool alreadyPlayed = HasDialogueBeenPlayed(sequence.id);
             Debug.Log($"[DialogueManager] Dialogue '{sequence.id}': playOnce={sequence.playOnce}, alreadyPlayed={alreadyPlayed}");

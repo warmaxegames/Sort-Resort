@@ -10,7 +10,7 @@ namespace SortResort
         public static SaveManager Instance { get; private set; }
 
         private const string SAVE_KEY = "SortResortSaveData";
-        private const int CURRENT_SAVE_VERSION = 2;
+        private const int CURRENT_SAVE_VERSION = 3;
 
         [SerializeField] private SaveData currentSaveData;
 
@@ -333,6 +333,18 @@ namespace SortResort
             SaveGame();
         }
 
+        // Dialogue Setting
+        public bool IsDialogueEnabled()
+        {
+            return currentSaveData.dialogueEnabled;
+        }
+
+        public void SetDialogueEnabled(bool enabled)
+        {
+            currentSaveData.dialogueEnabled = enabled;
+            SaveGame();
+        }
+
         // Power-Up Inventory
         public int GetPowerUpCount(PowerUpType type)
         {
@@ -434,6 +446,24 @@ namespace SortResort
             }
         }
 
+        // Present Milestones (every 10 levels per world, once across all modes)
+        public bool HasClaimedPresentMilestone(string worldId, int level)
+        {
+            string key = $"{worldId}_{level}";
+            return currentSaveData.claimedPresentMilestones.Contains(key);
+        }
+
+        public void ClaimPresentMilestone(string worldId, int level)
+        {
+            string key = $"{worldId}_{level}";
+            if (!currentSaveData.claimedPresentMilestones.Contains(key))
+            {
+                currentSaveData.claimedPresentMilestones.Add(key);
+                AddPresent(worldId);
+                Debug.Log($"[SaveManager] Claimed present milestone: {key}");
+            }
+        }
+
         // Reset All Progress
         public void ResetAllProgress()
         {
@@ -524,7 +554,7 @@ namespace SortResort
     [Serializable]
     public class SaveData
     {
-        public int saveVersion = 2;
+        public int saveVersion = 3;
         public string playerId;
         public int totalStars;
         public GameMode activeGameMode = GameMode.FreePlay;
@@ -536,6 +566,7 @@ namespace SortResort
         // Settings
         public bool hapticsEnabled = true;
         public bool voiceEnabled = true;
+        public bool dialogueEnabled = true;
 
         // Lucky Spin
         public string lastLuckySpinDate = ""; // yyyy-MM-dd
@@ -552,14 +583,18 @@ namespace SortResort
         public int spacePresentCount = 0;
         public int tavernPresentCount = 0;
 
+        // Present milestones claimed (e.g., "island_10", "farm_20")
+        public List<string> claimedPresentMilestones = new List<string>();
+
         public SaveData()
         {
-            saveVersion = 2;
+            saveVersion = 3;
             playerId = System.Guid.NewGuid().ToString();
             lastPlayedTime = DateTime.Now;
             activeGameMode = GameMode.FreePlay;
             hapticsEnabled = true;
             voiceEnabled = true;
+            dialogueEnabled = true;
         }
     }
 

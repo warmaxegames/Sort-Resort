@@ -10,7 +10,7 @@ namespace SortResort
     [Serializable]
     public class MascotData
     {
-        public string id;           // e.g., "cat", "alpaca", "talon"
+        public string id;           // e.g., "cat", "raccoon", "alpaca", "pig", "dog"
         public string displayName;  // e.g., "Lala", "Alfonso", "Talon"
         public string worldId;      // Which world this mascot belongs to
         public float basePitch;     // Voice pitch multiplier (0.7 = deep, 1.4 = high)
@@ -167,7 +167,7 @@ namespace SortResort
             });
 
             db.mascots.Add(new MascotData {
-                id = "talon",
+                id = "raccoon",
                 displayName = "Talon",
                 worldId = "supermarket",
                 basePitch = 1.35f,
@@ -176,7 +176,7 @@ namespace SortResort
             });
 
             db.mascots.Add(new MascotData {
-                id = "chicken",
+                id = "alpaca",
                 displayName = "Mara",
                 worldId = "farm",
                 basePitch = 1.5f,
@@ -185,8 +185,8 @@ namespace SortResort
             });
 
             db.mascots.Add(new MascotData {
-                id = "bartender",
-                displayName = "Hog",
+                id = "pig",
+                displayName = "Mason",
                 worldId = "tavern",
                 basePitch = 1.3f,
                 speakSpeed = 21f,
@@ -194,8 +194,8 @@ namespace SortResort
             });
 
             db.mascots.Add(new MascotData {
-                id = "alien",
-                displayName = "Leika",
+                id = "dog",
+                displayName = "Leela",
                 worldId = "space",
                 basePitch = 1.55f,
                 speakSpeed = 33f,

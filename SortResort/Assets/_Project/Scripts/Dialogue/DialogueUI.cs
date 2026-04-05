@@ -242,7 +242,7 @@ namespace SortResort
             }
         }
 
-        private const float TARGET_MASCOT_HEIGHT = 750f;
+        private const float TARGET_MASCOT_HEIGHT = 900f;
 
         private void ScaleMascotToFitHeight()
         {
@@ -288,9 +288,16 @@ namespace SortResort
             // Adjust text area position per-world (some dialogue boxes have different layouts)
             if (textAreaRect != null)
             {
-                float yOffset = (worldId == "space" || worldId == "tavern") ? 50f : 0f;
-                textAreaRect.offsetMin = new Vector2(40, 30 + yOffset);
-                textAreaRect.offsetMax = new Vector2(-30, -80 + yOffset);
+                float yOffset = worldId switch
+                {
+                    "island" or "farm" => -15f,
+                    "supermarket" => 25f,
+                    "tavern" => 40f,
+                    "space" => 50f,
+                    _ => 0f
+                };
+                textAreaRect.offsetMin = new Vector2(60, 50 + yOffset);
+                textAreaRect.offsetMax = new Vector2(-50, -80 + yOffset);
             }
         }
 

@@ -9,7 +9,7 @@
       "spriteFolder": "Sprites/Mascots/island_lala"
     },
     {
-      "id": "talon",
+      "id": "raccoon",
       "displayName": "Talon",
       "worldId": "supermarket",
       "basePitch": 1.35,
@@ -17,7 +17,7 @@
       "spriteFolder": "Sprites/Mascots/supermarket_talon"
     },
     {
-      "id": "chicken",
+      "id": "alpaca",
       "displayName": "Mara",
       "worldId": "farm",
       "basePitch": 1.5,
@@ -25,7 +25,7 @@
       "spriteFolder": "Sprites/Mascots/farm_mara"
     },
     {
-      "id": "bartender",
+      "id": "pig",
       "displayName": "Mason",
       "worldId": "tavern",
       "basePitch": 1.3,
@@ -33,8 +33,8 @@
       "spriteFolder": "Sprites/Mascots/tavern_hog"
     },
     {
-      "id": "alien",
-      "displayName": "Leika",
+      "id": "dog",
+      "displayName": "Leela",
       "worldId": "space",
       "basePitch": 1.55,
       "speakSpeed": 33,
@@ -182,7 +182,7 @@
         {
           "mascotId": "cat",
           "expression": "sad",
-          "text": "I knocked over the dimensional calibrator. A cat wanting attention."
+          "text": "I accidentally knocked over the dimensional calibrator! I just wanted attention!"
         },
         {
           "mascotId": "cat",
@@ -221,7 +221,7 @@
         {
           "mascotId": "cat",
           "expression": "happy",
-          "text": "You know, Dr. Miller had other animals in the lab too."
+          "text": "You know, Dr. Miller had other animals too."
         },
         {
           "mascotId": "cat",
@@ -312,17 +312,17 @@
       "playOnce": true,
       "lines": [
         {
-          "mascotId": "talon",
+          "mascotId": "raccoon",
           "expression": "suspicious",
           "text": "Whoa whoa whoa. Who are you and why are you in my store?"
         },
         {
-          "mascotId": "talon",
+          "mascotId": "raccoon",
           "expression": "default",
           "text": "...Lala sent you? That old furball is still alive?"
         },
         {
-          "mascotId": "talon",
+          "mascotId": "raccoon",
           "expression": "default",
           "text": "Fine. Help me sort this mess and maybe I'll talk."
         }
@@ -334,19 +334,19 @@
       "playOnce": true,
       "lines": [
         {
-          "mascotId": "talon",
+          "mascotId": "raccoon",
           "expression": "default",
-          "text": "Yeah, I was in Dr. Miller's lab too. The raccoon in cage three."
+          "text": "Yeah, I was in Dr. Miller's lab too. Pretty sure I was the favorite."
         },
         {
-          "mascotId": "talon",
+          "mascotId": "raccoon",
           "expression": "suspicious",
           "text": "Woke up here surrounded by groceries and dimensional junk."
         },
         {
-          "mascotId": "talon",
+          "mascotId": "raccoon",
           "expression": "default",
-          "text": "So I did what any raccoon would do. I organized everything."
+          "text": "So I did what any raccoon would do. I started organizing!"
         }
       ]
     },
@@ -356,17 +356,17 @@
       "playOnce": true,
       "lines": [
         {
-          "mascotId": "talon",
+          "mascotId": "raccoon",
           "expression": "default",
           "text": "These shelves keep restocking with random stuff from other worlds."
         },
         {
-          "mascotId": "talon",
+          "mascotId": "raccoon",
           "expression": "suspicious",
-          "text": "Alien fruit, medieval cheese, space rations... it never stops."
+          "text": "Drinks, foods, condiments, sauces..."
         },
         {
-          "mascotId": "talon",
+          "mascotId": "raccoon",
           "expression": "happy",
           "text": "But I gotta admit, the variety IS pretty great."
         }
@@ -378,17 +378,17 @@
       "playOnce": true,
       "lines": [
         {
-          "mascotId": "talon",
+          "mascotId": "raccoon",
           "expression": "default",
           "text": "The transformation hit me different than Lala."
         },
         {
-          "mascotId": "talon",
+          "mascotId": "raccoon",
           "expression": "default",
           "text": "She got the big brain. I got... instincts. Amplified."
         },
         {
-          "mascotId": "talon",
+          "mascotId": "raccoon",
           "expression": "happy",
           "text": "I can sense when something's out of place from three aisles away. Drives me crazy till it's sorted."
         }
@@ -400,17 +400,17 @@
       "playOnce": true,
       "lines": [
         {
-          "mascotId": "talon",
+          "mascotId": "raccoon",
           "expression": "suspicious",
           "text": "Lala thinks this is all about science. Typical cat."
         },
         {
-          "mascotId": "talon",
+          "mascotId": "raccoon",
           "expression": "default",
           "text": "But I've been watching these portals for years."
         },
         {
-          "mascotId": "talon",
+          "mascotId": "raccoon",
           "expression": "default",
           "text": "They're not random. Something is pulling them open."
         }
@@ -422,22 +422,22 @@
       "playOnce": true,
       "lines": [
         {
-          "mascotId": "talon",
+          "mascotId": "raccoon",
           "expression": "default",
           "text": "Alright, I trust you enough to tell you something."
         },
         {
-          "mascotId": "talon",
+          "mascotId": "raccoon",
           "expression": "default",
           "text": "A few months back, I saw something come through a rift."
         },
         {
-          "mascotId": "talon",
+          "mascotId": "raccoon",
           "expression": "default",
           "text": "A glowing figure. Human-shaped. Moving with purpose."
         },
         {
-          "mascotId": "talon",
+          "mascotId": "raccoon",
           "expression": "suspicious",
           "text": "Gone before I could get close. But it felt... familiar."
         }
@@ -449,17 +449,17 @@
       "playOnce": true,
       "lines": [
         {
-          "mascotId": "talon",
+          "mascotId": "raccoon",
           "expression": "default",
           "text": "After that figure passed through, the portals here calmed down."
         },
         {
-          "mascotId": "talon",
+          "mascotId": "raccoon",
           "expression": "default",
-          "text": "Just for a few hours. Like someone had tuned them."
+          "text": "It was like the person tuned them or something."
         },
         {
-          "mascotId": "talon",
+          "mascotId": "raccoon",
           "expression": "happy",
           "text": "Whoever - or whatever - that was, they knew what they were doing."
         }
@@ -471,17 +471,17 @@
       "playOnce": true,
       "lines": [
         {
-          "mascotId": "talon",
+          "mascotId": "raccoon",
           "expression": "default",
           "text": "I found something in aisle seven after the figure left."
         },
         {
-          "mascotId": "talon",
+          "mascotId": "raccoon",
           "expression": "default",
-          "text": "A scorch mark on the floor. Same pattern as Dr. Miller's lab equipment used to leave."
+          "text": "It was a pair of latex gloves, size XS, just like Dr. Miller wore!"
         },
         {
-          "mascotId": "talon",
+          "mascotId": "raccoon",
           "expression": "suspicious",
           "text": "Coincidence? Maybe. But my gut says no."
         }
@@ -493,17 +493,17 @@
       "playOnce": true,
       "lines": [
         {
-          "mascotId": "talon",
+          "mascotId": "raccoon",
           "expression": "default",
           "text": "You know what I miss most about the lab? Routine."
         },
         {
-          "mascotId": "talon",
+          "mascotId": "raccoon",
           "expression": "default",
           "text": "Dr. Miller fed us at the same time every day. Like clockwork."
         },
         {
-          "mascotId": "talon",
+          "mascotId": "raccoon",
           "expression": "happy",
           "text": "That woman ran a tight ship. Wherever she is, I bet she's got a schedule pinned to the wall."
         }
@@ -515,17 +515,17 @@
       "playOnce": true,
       "lines": [
         {
-          "mascotId": "talon",
+          "mascotId": "raccoon",
           "expression": "happy",
           "text": "We're almost done here! My shelves haven't been this neat in years."
         },
         {
-          "mascotId": "talon",
+          "mascotId": "raccoon",
           "expression": "default",
           "text": "I'm picking up portal signatures leading somewhere rural."
         },
         {
-          "mascotId": "talon",
+          "mascotId": "raccoon",
           "expression": "default",
           "text": "Smells like hay and... alpaca? No way."
         }
@@ -537,19 +537,19 @@
       "playOnce": true,
       "lines": [
         {
-          "mascotId": "talon",
+          "mascotId": "raccoon",
           "expression": "happy",
-          "text": "Store's sorted! I haven't felt this good since cage three!"
+          "text": "Nice one! Things haven't been this clean since... well, ever!"
         },
         {
-          "mascotId": "talon",
+          "mascotId": "raccoon",
           "expression": "default",
           "text": "Listen - that energy trail from the glowing figure? It leads to the next world. A farm."
         },
         {
-          "mascotId": "talon",
+          "mascotId": "raccoon",
           "expression": "suspicious",
-          "text": "If Mara's there... you tell her Talon says hi. And that I'm still mad she ate my lettuce that one time."
+          "text": "If Mara's there... you tell her Talon says hi. And that I'm still mad she ate my carrot that one time."
         }
       ]
     },
@@ -559,19 +559,19 @@
       "playOnce": true,
       "lines": [
         {
-          "mascotId": "chicken",
+          "mascotId": "alpaca",
           "expression": "eggs",
           "text": "Oh! A visitor! I'm sorry everything's such a mess!"
         },
         {
-          "mascotId": "chicken",
+          "mascotId": "alpaca",
           "expression": "default",
           "text": "I'm Mara. This was a lovely farm before the portals started mixing everything up."
         },
         {
-          "mascotId": "chicken",
+          "mascotId": "alpaca",
           "expression": "worried",
-          "text": "Dimensional turnips in the wheat field, space rocks in the chicken coop... please, can you help?"
+          "text": "I haven't seen anyone in so long! Dr. Miller use to tell me she would love me even if I was a worm! Ha!"
         }
       ]
     },
@@ -581,17 +581,17 @@
       "playOnce": true,
       "lines": [
         {
-          "mascotId": "chicken",
+          "mascotId": "alpaca",
           "expression": "eggs",
           "text": "Oh, that's so much better! Thank you!"
         },
         {
-          "mascotId": "chicken",
+          "mascotId": "alpaca",
           "expression": "default",
-          "text": "Yes, I was in Dr. Miller's lab. The alpaca by the window."
+          "text": "Yes, I was always hanging out in the lab looking for carrot treats."
         },
         {
-          "mascotId": "chicken",
+          "mascotId": "alpaca",
           "expression": "worried",
           "text": "I still have nightmares about that day. Everything just... tore apart."
         }
@@ -603,19 +603,19 @@
       "playOnce": true,
       "lines": [
         {
-          "mascotId": "chicken",
+          "mascotId": "alpaca",
           "expression": "default",
           "text": "I landed here and the farm sort of... grew around me."
         },
         {
-          "mascotId": "chicken",
+          "mascotId": "alpaca",
           "expression": "tired",
           "text": "The dimensional energy made everything fertile. Too fertile."
         },
         {
-          "mascotId": "chicken",
+          "mascotId": "alpaca",
           "expression": "worried",
-          "text": "Things grow where they shouldn't. Crops from worlds I've never seen."
+          "text": "Things grow where they shouldn't. Have they never heard of growing zones?!"
         }
       ]
     },
@@ -625,17 +625,17 @@
       "playOnce": true,
       "lines": [
         {
-          "mascotId": "chicken",
+          "mascotId": "alpaca",
           "expression": "eggs",
           "text": "Talon sent his regards? That grumpy raccoon!"
         },
         {
-          "mascotId": "chicken",
+          "mascotId": "alpaca",
           "expression": "default",
-          "text": "We used to share a wall in the lab. He'd steal food through the bars."
+          "text": "We used to compete for Dr. Miller's attention in the lab. I was the favorite."
         },
         {
-          "mascotId": "chicken",
+          "mascotId": "alpaca",
           "expression": "worried",
           "text": "I hope he's eating properly. Raccoons are terrible at nutrition."
         }
@@ -647,17 +647,17 @@
       "playOnce": true,
       "lines": [
         {
-          "mascotId": "chicken",
+          "mascotId": "alpaca",
           "expression": "tired",
           "text": "I need to show you something. I found it in the north field."
         },
         {
-          "mascotId": "chicken",
+          "mascotId": "alpaca",
           "expression": "default",
           "text": "A notebook. It drifted through a portal about a year ago."
         },
         {
-          "mascotId": "chicken",
+          "mascotId": "alpaca",
           "expression": "default",
           "text": "It's Dr. Miller's handwriting. I'd recognize it anywhere."
         }
@@ -669,24 +669,24 @@
       "playOnce": true,
       "lines": [
         {
-          "mascotId": "chicken",
+          "mascotId": "alpaca",
           "expression": "default",
           "text": "The notebook has partial equations. I can't understand the math."
         },
         {
-          "mascotId": "chicken",
+          "mascotId": "alpaca",
           "expression": "default",
           "text": "But the notes in the margins are clear enough."
         },
         {
-          "mascotId": "chicken",
+          "mascotId": "alpaca",
           "expression": "worried",
           "text": "She wrote: \"Closing rifts may trigger cascade resonance. Each repair stresses adjacent dimensions.\""
         },
         {
-          "mascotId": "chicken",
+          "mascotId": "alpaca",
           "expression": "default",
-          "text": "She's alive. And she's worried about what we're doing."
+          "text": "She's alive! But I'm worried about her!"
         }
       ]
     },
@@ -696,24 +696,24 @@
       "playOnce": true,
       "lines": [
         {
-          "mascotId": "chicken",
+          "mascotId": "alpaca",
           "expression": "default",
           "text": "There's more in the notebook. She wrote about us."
         },
         {
-          "mascotId": "chicken",
+          "mascotId": "alpaca",
           "expression": "default",
-          "text": "\"If my animals survived, they'll try to help. They always did.\""
+          "text": "\"If my animals survived, I will find them and bring them home.\""
         },
         {
-          "mascotId": "chicken",
+          "mascotId": "alpaca",
           "expression": "eggs",
-          "text": "She knew we'd come looking for her."
+          "text": "I think she got it backwards! We have to save her!"
         },
         {
-          "mascotId": "chicken",
+          "mascotId": "alpaca",
           "expression": "worried",
-          "text": "But she also wrote \"Don't rush. The multiverse is fragile.\""
+          "text": "Hurry, we have to return things back to normal!"
         }
       ]
     },
@@ -723,24 +723,24 @@
       "playOnce": true,
       "lines": [
         {
-          "mascotId": "chicken",
+          "mascotId": "alpaca",
           "expression": "default",
           "text": "The last entry in the notebook is just coordinates."
         },
         {
-          "mascotId": "chicken",
+          "mascotId": "alpaca",
           "expression": "default",
           "text": "Not for here. Not for the island or supermarket either."
         },
         {
-          "mascotId": "chicken",
+          "mascotId": "alpaca",
           "expression": "worried",
           "text": "Somewhere else entirely. And a note: \"Find Mason. He'll know.\""
         },
         {
-          "mascotId": "chicken",
+          "mascotId": "alpaca",
           "expression": "default",
-          "text": "Mason? That was the pig from the lab!"
+          "text": "Mason? That was her pig! I always thought he was a bit grumpy."
         }
       ]
     },
@@ -750,17 +750,17 @@
       "playOnce": true,
       "lines": [
         {
-          "mascotId": "chicken",
+          "mascotId": "alpaca",
           "expression": "eggs",
           "text": "The farm is really coming together! Look at those fields!"
         },
         {
-          "mascotId": "chicken",
+          "mascotId": "alpaca",
           "expression": "worried",
           "text": "But I've noticed the portals are changing. Getting... organized."
         },
         {
-          "mascotId": "chicken",
+          "mascotId": "alpaca",
           "expression": "default",
           "text": "Almost like something is guiding them into patterns."
         }
@@ -772,22 +772,22 @@
       "playOnce": true,
       "lines": [
         {
-          "mascotId": "chicken",
+          "mascotId": "alpaca",
           "expression": "default",
           "text": "I can feel new portal signatures forming."
         },
         {
-          "mascotId": "chicken",
+          "mascotId": "alpaca",
           "expression": "default",
           "text": "One of them smells like old wood and spilled ale."
         },
         {
-          "mascotId": "chicken",
+          "mascotId": "alpaca",
           "expression": "happy",
           "text": "A tavern! Mason always did love the kitchen at the lab."
         },
         {
-          "mascotId": "chicken",
+          "mascotId": "alpaca",
           "expression": "tired",
           "text": "Be careful. The portals ahead feel stronger than anything we've seen."
         }
@@ -799,24 +799,24 @@
       "playOnce": true,
       "lines": [
         {
-          "mascotId": "chicken",
+          "mascotId": "alpaca",
           "expression": "eggs",
           "text": "The farm is saved! Thank you, truly."
         },
         {
-          "mascotId": "chicken",
+          "mascotId": "alpaca",
           "expression": "default",
           "text": "Take the notebook. You'll need it more than me."
         },
         {
-          "mascotId": "chicken",
+          "mascotId": "alpaca",
           "expression": "worried",
           "text": "And please... find Dr. Miller. Tell her we're okay."
         },
         {
-          "mascotId": "chicken",
+          "mascotId": "alpaca",
           "expression": "happy",
-          "text": "Tell her the alpaca by the window still misses her."
+          "text": "Tell her Mara misses her head scratches!"
         }
       ]
     },
@@ -826,19 +826,19 @@
       "playOnce": true,
       "lines": [
         {
-          "mascotId": "bartender",
+          "mascotId": "pig",
           "expression": "welcome",
           "text": "Another portal traveler. Take a seat."
         },
         {
-          "mascotId": "bartender",
+          "mascotId": "pig",
           "expression": "default",
           "text": "Name's Mason. I run this place."
         },
         {
-          "mascotId": "bartender",
+          "mascotId": "pig",
           "expression": "gruff",
-          "text": "You want to sort my tavern? Fine. But don't touch my personal collection behind the bar."
+          "text": "You want to sort my tavern? I don't like people touching my stuff..."
         }
       ]
     },
@@ -848,19 +848,19 @@
       "playOnce": true,
       "lines": [
         {
-          "mascotId": "bartender",
+          "mascotId": "pig",
           "expression": "welcome",
           "text": "So Lala is running an operation now? Good for her."
         },
         {
-          "mascotId": "bartender",
+          "mascotId": "pig",
           "expression": "gruff",
           "text": "I always figured that cat would land on her feet. Literally."
         },
         {
-          "mascotId": "bartender",
+          "mascotId": "pig",
           "expression": "default",
-          "text": "Yeah, I was one of Miller's lab animals. The handsome one."
+          "text": "Yeah, I was one of Miller's pets. I was the favorite!"
         }
       ]
     },
@@ -870,17 +870,17 @@
       "playOnce": true,
       "lines": [
         {
-          "mascotId": "bartender",
+          "mascotId": "pig",
           "expression": "default",
           "text": "This tavern sits at a crossroads between dimensions."
         },
         {
-          "mascotId": "bartender",
+          "mascotId": "pig",
           "expression": "default",
           "text": "Travelers come through all the time. Swap stories, trade goods."
         },
         {
-          "mascotId": "bartender",
+          "mascotId": "pig",
           "expression": "gruff",
           "text": "I hear things. Rumors from worlds you can't imagine."
         }
@@ -892,17 +892,17 @@
       "playOnce": true,
       "lines": [
         {
-          "mascotId": "bartender",
+          "mascotId": "pig",
           "expression": "default",
           "text": "Mara's notebook, eh? Let me see those coordinates."
         },
         {
-          "mascotId": "bartender",
+          "mascotId": "pig",
           "expression": "default",
           "text": "...Interesting. These point toward the dimensional deep."
         },
         {
-          "mascotId": "bartender",
+          "mascotId": "pig",
           "expression": "gruff",
           "text": "Only someone who really understood portal physics could navigate there."
         }
@@ -914,17 +914,17 @@
       "playOnce": true,
       "lines": [
         {
-          "mascotId": "bartender",
+          "mascotId": "pig",
           "expression": "default",
           "text": "I've heard whispers from travelers. About a \"ghost woman.\""
         },
         {
-          "mascotId": "bartender",
+          "mascotId": "pig",
           "expression": "default",
           "text": "Shows up in different worlds, adjusts the portals, disappears."
         },
         {
-          "mascotId": "bartender",
+          "mascotId": "pig",
           "expression": "gruff",
           "text": "They say she leaves things more organized than she found them. Sound like anyone we know?"
         }
@@ -936,22 +936,22 @@
       "playOnce": true,
       "lines": [
         {
-          "mascotId": "bartender",
+          "mascotId": "pig",
           "expression": "welcome",
           "text": "Alright. Cards on the table."
         },
         {
-          "mascotId": "bartender",
+          "mascotId": "pig",
           "expression": "default",
           "text": "About six months ago, a woman walked into my tavern."
         },
         {
-          "mascotId": "bartender",
+          "mascotId": "pig",
           "expression": "default",
           "text": "Human. Lab coat. Tired eyes. Asked for water and a quiet corner."
         },
         {
-          "mascotId": "bartender",
+          "mascotId": "pig",
           "expression": "gruff",
           "text": "I knew who she was the moment I smelled her. You never forget the person who fed you every day for three years."
         }
@@ -963,17 +963,17 @@
       "playOnce": true,
       "lines": [
         {
-          "mascotId": "bartender",
+          "mascotId": "pig",
           "expression": "welcome",
           "text": "She recognized me too. Cried a bit. Hugged my big stupid head."
         },
         {
-          "mascotId": "bartender",
+          "mascotId": "pig",
           "expression": "default",
           "text": "Said she's been moving between dimensions, trying to build something. A stabilizer."
         },
         {
-          "mascotId": "bartender",
+          "mascotId": "pig",
           "expression": "gruff",
           "text": "Said she's \"almost there\" but needs the background chaos cleared first. That's us. We're clearing the background chaos."
         }
@@ -985,22 +985,22 @@
       "playOnce": true,
       "lines": [
         {
-          "mascotId": "bartender",
+          "mascotId": "pig",
           "expression": "default",
           "text": "She told me something else. About why the portals keep forming."
         },
         {
-          "mascotId": "bartender",
+          "mascotId": "pig",
           "expression": "default",
           "text": "It's not just entropy. The original accident created a feedback loop."
         },
         {
-          "mascotId": "bartender",
+          "mascotId": "pig",
           "expression": "gruff",
           "text": "Every portal that opens makes the next one easier to form."
         },
         {
-          "mascotId": "bartender",
+          "mascotId": "pig",
           "expression": "default",
           "text": "Unless someone stabilizes them from both sides. Her from the deep, us from out here."
         }
@@ -1012,24 +1012,24 @@
       "playOnce": true,
       "lines": [
         {
-          "mascotId": "bartender",
+          "mascotId": "pig",
           "expression": "default",
-          "text": "Miller said there's one more of us out there. Leika."
+          "text": "Miller said we all survived and she was going to fix everything back to how it was."
         },
         {
-          "mascotId": "bartender",
+          "mascotId": "pig",
           "expression": "default",
-          "text": "The dog ended up on a space station near the nexus point."
+          "text": "I'm worried she may be stuck and needs our help."
         },
         {
-          "mascotId": "bartender",
+          "mascotId": "pig",
           "expression": "gruff",
-          "text": "If anyone can find Miller's exact location, it's her."
+          "text": "You should visit Leela, the dog."
         },
         {
-          "mascotId": "bartender",
+          "mascotId": "pig",
           "expression": "default",
-          "text": "That dog always could track a scent across a room. Imagine what she can do across dimensions."
+          "text": "If anyone can follow Dr. Miller's scent through the portals, it will be her."
         }
       ]
     },
@@ -1039,24 +1039,24 @@
       "playOnce": true,
       "lines": [
         {
-          "mascotId": "bartender",
+          "mascotId": "pig",
           "expression": "default",
           "text": "She left me something before she went. A small device."
         },
         {
-          "mascotId": "bartender",
+          "mascotId": "pig",
           "expression": "default",
           "text": "Said to give it to whoever came looking for her."
         },
         {
-          "mascotId": "bartender",
+          "mascotId": "pig",
           "expression": "gruff",
-          "text": "It's a beacon. Should help Leika lock onto her signal."
+          "text": "It's a beacon. Should help Leela lock onto her signal."
         },
         {
-          "mascotId": "bartender",
+          "mascotId": "pig",
           "expression": "default",
-          "text": "Take it. Go find our girl."
+          "text": "Hurry! We may not have much time!"
         }
       ]
     },
@@ -1066,24 +1066,24 @@
       "playOnce": true,
       "lines": [
         {
-          "mascotId": "bartender",
+          "mascotId": "pig",
           "expression": "default",
           "text": "Tavern's shipshape. First time in years."
         },
         {
-          "mascotId": "bartender",
+          "mascotId": "pig",
           "expression": "gruff",
           "text": "Listen. When you find Miller... tell her Mason's doing alright."
         },
         {
-          "mascotId": "bartender",
+          "mascotId": "pig",
           "expression": "default",
-          "text": "Tell her the pig learned to cook."
+          "text": "Turns out I am pretty good at tending bar."
         },
         {
-          "mascotId": "bartender",
+          "mascotId": "pig",
           "expression": "welcome",
-          "text": "And tell her she still owes me for that water. Now get going. The stars are waiting."
+          "text": "I'm ready for things to go back to how they were. Hopefully she can do it with your help."
         }
       ]
     },
@@ -1093,17 +1093,17 @@
       "playOnce": true,
       "lines": [
         {
-          "mascotId": "alien",
+          "mascotId": "dog",
           "expression": "excited",
           "text": "A PERSON! An actual person! Up here! In SPACE!"
         },
         {
-          "mascotId": "alien",
+          "mascotId": "dog",
           "expression": "happy",
-          "text": "I'm Leika! I've been monitoring dimensional frequencies for years! Alone! In space! It's been a LOT!"
+          "text": "I'm Leela! I've been monitoring dimensional frequencies for years! Alone! In space! It's been a LOT!"
         },
         {
-          "mascotId": "alien",
+          "mascotId": "dog",
           "expression": "excited",
           "text": "Lala sent you?! Talon! Mara! Mason! They're all okay?!"
         }
@@ -1115,17 +1115,17 @@
       "playOnce": true,
       "lines": [
         {
-          "mascotId": "alien",
+          "mascotId": "dog",
           "expression": "happy",
           "text": "Sorry, I get excited. It's been quiet up here."
         },
         {
-          "mascotId": "alien",
+          "mascotId": "dog",
           "expression": "default",
-          "text": "I was Dr. Miller's dog. Lab security, she called me."
+          "text": "I was Dr. Miller's dog. She told me I was the favorite."
         },
         {
-          "mascotId": "alien",
+          "mascotId": "dog",
           "expression": "happy",
           "text": "Mostly I just followed her everywhere and barked at the equipment."
         }
@@ -1137,17 +1137,17 @@
       "playOnce": true,
       "lines": [
         {
-          "mascotId": "alien",
+          "mascotId": "dog",
           "expression": "default",
           "text": "The space station was already here when I arrived."
         },
         {
-          "mascotId": "alien",
+          "mascotId": "dog",
           "expression": "default",
           "text": "Some kind of automated research outpost. I figured out the controls eventually."
         },
         {
-          "mascotId": "alien",
+          "mascotId": "dog",
           "expression": "happy",
           "text": "Turns out being hyper-intelligent AND a good girl is a winning combination!"
         }
@@ -1159,17 +1159,17 @@
       "playOnce": true,
       "lines": [
         {
-          "mascotId": "alien",
+          "mascotId": "dog",
           "expression": "default",
           "text": "From up here, I can see the whole dimensional web."
         },
         {
-          "mascotId": "alien",
+          "mascotId": "dog",
           "expression": "default",
           "text": "It's beautiful. And broken. Threads fraying everywhere."
         },
         {
-          "mascotId": "alien",
+          "mascotId": "dog",
           "expression": "worried",
           "text": "But since you started sorting... some threads are reconnecting."
         }
@@ -1181,17 +1181,17 @@
       "playOnce": true,
       "lines": [
         {
-          "mascotId": "alien",
+          "mascotId": "dog",
           "expression": "excited",
           "text": "You have Mason's beacon?! Let me plug that in!"
         },
         {
-          "mascotId": "alien",
+          "mascotId": "dog",
           "expression": "default",
           "text": "...Processing... triangulating..."
         },
         {
-          "mascotId": "alien",
+          "mascotId": "dog",
           "expression": "happy",
           "text": "I'm getting a signal! Faint, but it's definitely her frequency!"
         }
@@ -1203,22 +1203,22 @@
       "playOnce": true,
       "lines": [
         {
-          "mascotId": "alien",
+          "mascotId": "dog",
           "expression": "default",
           "text": "The signal is coming from the convergence point."
         },
         {
-          "mascotId": "alien",
+          "mascotId": "dog",
           "expression": "default",
           "text": "It's where all dimensional threads meet. The center of everything."
         },
         {
-          "mascotId": "alien",
+          "mascotId": "dog",
           "expression": "worried",
           "text": "Dr. Miller has been there this whole time. Building something massive."
         },
         {
-          "mascotId": "alien",
+          "mascotId": "dog",
           "expression": "default",
           "text": "A dimensional stabilizer. One big enough to fix everything."
         }
@@ -1230,17 +1230,17 @@
       "playOnce": true,
       "lines": [
         {
-          "mascotId": "alien",
+          "mascotId": "dog",
           "expression": "default",
           "text": "I can see her work from here. She's been closing micro-rifts around the convergence point, one by one."
         },
         {
-          "mascotId": "alien",
+          "mascotId": "dog",
           "expression": "happy",
           "text": "We've been working the same problem from opposite ends!"
         },
         {
-          "mascotId": "alien",
+          "mascotId": "dog",
           "expression": "default",
           "text": "Her from the center out, us from the edges in."
         }
@@ -1252,17 +1252,17 @@
       "playOnce": true,
       "lines": [
         {
-          "mascotId": "alien",
+          "mascotId": "dog",
           "expression": "default",
           "text": "The stabilizer is almost complete. But she needs the outer dimensions clear first."
         },
         {
-          "mascotId": "alien",
+          "mascotId": "dog",
           "expression": "worried",
           "text": "If she activates it while there's still too much chaos... the feedback loop could overload everything."
         },
         {
-          "mascotId": "alien",
+          "mascotId": "dog",
           "expression": "default",
           "text": "We're not just sorting for fun. We're clearing the path for her."
         }
@@ -1274,17 +1274,17 @@
       "playOnce": true,
       "lines": [
         {
-          "mascotId": "alien",
+          "mascotId": "dog",
           "expression": "happy",
           "text": "I sent her a message through the dimensional frequencies!"
         },
         {
-          "mascotId": "alien",
+          "mascotId": "dog",
           "expression": "excited",
           "text": "And she responded! Just two words: \"Good girl.\""
         },
         {
-          "mascotId": "alien",
+          "mascotId": "dog",
           "expression": "happy",
           "text": "...I'm not crying. Dogs don't cry. It's space allergies."
         }
@@ -1296,22 +1296,22 @@
       "playOnce": true,
       "lines": [
         {
-          "mascotId": "alien",
+          "mascotId": "dog",
           "expression": "default",
           "text": "Almost there! The dimensional web is stabilizing beautifully."
         },
         {
-          "mascotId": "alien",
+          "mascotId": "dog",
           "expression": "excited",
           "text": "I can see the convergence point getting brighter!"
         },
         {
-          "mascotId": "alien",
+          "mascotId": "dog",
           "expression": "default",
           "text": "When you finish here, the path to Dr. Miller should be clear."
         },
         {
-          "mascotId": "alien",
+          "mascotId": "dog",
           "expression": "happy",
           "text": "We're going to find her. We're really going to find her!"
         }
@@ -1323,27 +1323,27 @@
       "playOnce": true,
       "lines": [
         {
-          "mascotId": "alien",
+          "mascotId": "dog",
           "expression": "excited",
           "text": "Station sorted! Dimensions stabilizing! Signal locked!"
         },
         {
-          "mascotId": "alien",
+          "mascotId": "dog",
           "expression": "happy",
           "text": "I can see her! On my instruments - Dr. Miller, alive and working!"
         },
         {
-          "mascotId": "alien",
+          "mascotId": "dog",
           "expression": "default",
           "text": "The path to the convergence point is open. But it won't be easy. New worlds, new challenges."
         },
         {
-          "mascotId": "alien",
+          "mascotId": "dog",
           "expression": "happy",
           "text": "She's waiting for us. All of us. Her whole little family."
         },
         {
-          "mascotId": "alien",
+          "mascotId": "dog",
           "expression": "excited",
           "text": "This isn't the end. It's the beginning of bringing her home!"
         }
@@ -1455,12 +1455,12 @@
       "playOnce": true,
       "lines": [
         {
-          "mascotId": "talon",
+          "mascotId": "raccoon",
           "expression": "happy",
           "text": "No way! You cleaned out Star AND Timer for my store?"
         },
         {
-          "mascotId": "talon",
+          "mascotId": "raccoon",
           "expression": "default",
           "text": "Hard Mode unlocked. Good luck keeping up!"
         }
@@ -1472,12 +1472,12 @@
       "playOnce": true,
       "lines": [
         {
-          "mascotId": "chicken",
+          "mascotId": "alpaca",
           "expression": "eggs",
           "text": "Oh my! You've completed both Star and Timer modes!"
         },
         {
-          "mascotId": "chicken",
+          "mascotId": "alpaca",
           "expression": "default",
           "text": "Hard Mode is unlocked. I believe in you!"
         }
@@ -1489,12 +1489,12 @@
       "playOnce": true,
       "lines": [
         {
-          "mascotId": "bartender",
+          "mascotId": "pig",
           "expression": "gruff",
           "text": "Well well. Star Mode AND Timer Mode, done and dusted."
         },
         {
-          "mascotId": "bartender",
+          "mascotId": "pig",
           "expression": "default",
           "text": "Hard Mode's open. This one's not for the faint of heart."
         }
@@ -1506,12 +1506,12 @@
       "playOnce": true,
       "lines": [
         {
-          "mascotId": "alien",
+          "mascotId": "dog",
           "expression": "excited",
           "text": "You did BOTH Star AND Timer?! All 100 levels?!"
         },
         {
-          "mascotId": "alien",
+          "mascotId": "dog",
           "expression": "happy",
           "text": "Hard Mode activated! Maximum challenge! Let's GOOO!"
         }

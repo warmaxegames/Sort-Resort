@@ -13,6 +13,7 @@ namespace SortResort
         [SerializeField] private AudioSource ambientSource;  // For background/ambient loops
         [SerializeField] private AudioSource sfxSource;
         [SerializeField] private AudioSource uiSource;
+        private AudioSource timerCountUpSource;
 
         [Header("Volume Settings")]
         [SerializeField, Range(0f, 1f)] private float masterVolume = 1f;
@@ -194,6 +195,14 @@ namespace SortResort
                 uiSource.playOnAwake = false;
             }
 
+            if (timerCountUpSource == null)
+            {
+                var timerObj = new GameObject("TimerCountUpSource");
+                timerObj.transform.SetParent(transform);
+                timerCountUpSource = timerObj.AddComponent<AudioSource>();
+                timerCountUpSource.playOnAwake = false;
+            }
+
             if (tickTockSource == null)
             {
                 var tickTockObj = new GameObject("TickTockSource");
@@ -289,6 +298,8 @@ namespace SortResort
             sfxSource.volume = masterVolume * sfxVolume;
             if (tickTockSource != null)
                 tickTockSource.volume = masterVolume * sfxVolume;
+            if (timerCountUpSource != null)
+                timerCountUpSource.volume = masterVolume * sfxVolume;
         }
 
         private void UpdateUIVolume()
@@ -650,8 +661,14 @@ namespace SortResort
         public void PlayButtonClick() => PlayUI(buttonClickClip);
         public void PlayStarEarned() => PlaySFX(starEarnedClip);
         public void PlayLevelCompleteSound() => PlaySFX(levelCompleteClip);
-        public void PlayTimerCountUp() => PlaySFX(timerCountUpClip);
-        public void StopTimerCountUp() => sfxSource?.Stop();
+        public void PlayTimerCountUp()
+        {
+            if (timerCountUpClip == null || timerCountUpSource == null) return;
+            timerCountUpSource.clip = timerCountUpClip;
+            timerCountUpSource.volume = masterVolume * sfxVolume;
+            timerCountUpSource.Play();
+        }
+        public void StopTimerCountUp() => timerCountUpSource?.Stop();
         public void PlayStarEarned(int starNumber)
         {
             switch (starNumber)

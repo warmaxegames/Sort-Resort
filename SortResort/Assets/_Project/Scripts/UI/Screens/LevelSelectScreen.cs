@@ -222,7 +222,6 @@ namespace SortResort.UI
             {
                 tabImage.sprite = modeTabSprites[index];
                 tabImage.color = Color.white;
-                tabImage.preserveAspect = true;
             }
             else
             {

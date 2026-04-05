@@ -28,6 +28,8 @@ namespace SortResort.UI
         [SerializeField] private Image hapticsCheckmark;
         [SerializeField] private Toggle voiceToggle;
         [SerializeField] private Image voiceCheckmark;
+        [SerializeField] private Toggle dialogueToggle;
+        [SerializeField] private Image dialogueCheckmark;
 
         [Header("Buttons")]
         [SerializeField] private Button resetProgressButton;
@@ -160,6 +162,10 @@ namespace SortResort.UI
             {
                 voiceToggle.onValueChanged.AddListener(OnVoiceToggled);
             }
+            if (dialogueToggle != null)
+            {
+                dialogueToggle.onValueChanged.AddListener(OnDialogueToggled);
+            }
         }
 
         protected override void SubscribeToEvents()
@@ -224,6 +230,14 @@ namespace SortResort.UI
                 bool voiceEnabled = SaveManager.Instance.IsVoiceEnabled();
                 voiceToggle.SetIsOnWithoutNotify(voiceEnabled);
                 UpdateVoiceCheckmark(voiceEnabled);
+            }
+
+            // Load dialogue setting
+            if (SaveManager.Instance != null && dialogueToggle != null)
+            {
+                bool dialogueEnabled = SaveManager.Instance.IsDialogueEnabled();
+                dialogueToggle.SetIsOnWithoutNotify(dialogueEnabled);
+                UpdateDialogueCheckmark(dialogueEnabled);
             }
         }
 
@@ -330,6 +344,25 @@ namespace SortResort.UI
                 if (switchBehavior == null)
                 {
                     voiceCheckmark.enabled = isOn;
+                }
+            }
+        }
+
+        private void OnDialogueToggled(bool isOn)
+        {
+            SaveManager.Instance?.SetDialogueEnabled(isOn);
+            UpdateDialogueCheckmark(isOn);
+            AudioManager.Instance?.PlayButtonClick();
+        }
+
+        private void UpdateDialogueCheckmark(bool isOn)
+        {
+            if (dialogueCheckmark != null && dialogueToggle != null)
+            {
+                var switchBehavior = dialogueToggle.GetComponent<GoogleSwitchBehavior>();
+                if (switchBehavior == null)
+                {
+                    dialogueCheckmark.enabled = isOn;
                 }
             }
         }
@@ -452,6 +485,7 @@ namespace SortResort.UI
             TextMeshProUGUI masterLabel, TextMeshProUGUI musicLabel, TextMeshProUGUI sfxLabel,
             Toggle haptics, Image hapticsCheck,
             Toggle voice, Image voiceCheck,
+            Toggle dialogue, Image dialogueCheck,
             Button resetBtn, Button creditsBtn,
             GameObject confirmDialog, Button confirmYes, Button confirmNo,
             GameObject credits, Button creditsClose,
@@ -470,6 +504,8 @@ namespace SortResort.UI
             hapticsCheckmark = hapticsCheck;
             voiceToggle = voice;
             voiceCheckmark = voiceCheck;
+            dialogueToggle = dialogue;
+            dialogueCheckmark = dialogueCheck;
             resetProgressButton = resetBtn;
             creditsButton = creditsBtn;
             confirmationDialog = confirmDialog;
@@ -522,6 +558,7 @@ namespace SortResort.UI
             if (sfxVolumeSlider != null) sfxVolumeSlider.onValueChanged.RemoveAllListeners();
             if (hapticsToggle != null) hapticsToggle.onValueChanged.RemoveAllListeners();
             if (voiceToggle != null) voiceToggle.onValueChanged.RemoveAllListeners();
+            if (dialogueToggle != null) dialogueToggle.onValueChanged.RemoveAllListeners();
             if (resetProgressButton != null) resetProgressButton.onClick.RemoveAllListeners();
             if (creditsButton != null) creditsButton.onClick.RemoveAllListeners();
             if (confirmYesButton != null) confirmYesButton.onClick.RemoveAllListeners();
