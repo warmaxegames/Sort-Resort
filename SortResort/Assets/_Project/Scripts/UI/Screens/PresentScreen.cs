@@ -201,6 +201,9 @@ namespace SortResort.UI
             if (FontManager.Bold != null)
                 countText.font = FontManager.Bold;
 
+            // Info button (shows loot table contents)
+            CreateInfoButton(panel.transform);
+
             // Layer 5: Navigation arrows (same as world select arrows)
             CreateNavigationArrows(panel.transform);
 
@@ -390,6 +393,329 @@ namespace SortResort.UI
             pressHandler.triggers.Add(pointerUp);
         }
 
+        // --- Info Panel ---
+
+        private GameObject infoOverlay;
+
+        private void CreateInfoButton(Transform parent)
+        {
+            var infoBtnGO = new GameObject("InfoButton");
+            infoBtnGO.transform.SetParent(parent, false);
+            var infoRect = infoBtnGO.AddComponent<RectTransform>();
+            infoRect.anchorMin = new Vector2(0.5f, 0.5f);
+            infoRect.anchorMax = new Vector2(0.5f, 0.5f);
+            infoRect.anchoredPosition = new Vector2(0, -370);
+            infoRect.sizeDelta = new Vector2(200, 50);
+
+            var infoImg = infoBtnGO.AddComponent<Image>();
+            infoImg.color = new Color(0.2f, 0.15f, 0.1f, 0.8f);
+
+            var infoBtn = infoBtnGO.AddComponent<Button>();
+            infoBtn.targetGraphic = infoImg;
+            infoBtn.transition = Selectable.Transition.ColorTint;
+            infoBtn.onClick.AddListener(OnInfoClicked);
+
+            var infoTextGO = new GameObject("Text");
+            infoTextGO.transform.SetParent(infoBtnGO.transform, false);
+            var infoTextRect = infoTextGO.AddComponent<RectTransform>();
+            infoTextRect.anchorMin = Vector2.zero;
+            infoTextRect.anchorMax = Vector2.one;
+            infoTextRect.offsetMin = Vector2.zero;
+            infoTextRect.offsetMax = Vector2.zero;
+            var infoTMP = infoTextGO.AddComponent<TextMeshProUGUI>();
+            infoTMP.text = "View Items";
+            infoTMP.fontSize = 24;
+            infoTMP.fontStyle = FontStyles.Bold;
+            infoTMP.alignment = TextAlignmentOptions.Center;
+            infoTMP.color = Color.white;
+            infoTMP.raycastTarget = false;
+        }
+
+        private void OnInfoClicked()
+        {
+            AudioManager.Instance?.PlayButtonClick();
+            ShowInfoOverlay();
+        }
+
+        private void ShowInfoOverlay()
+        {
+            if (infoOverlay != null)
+                UnityEngine.Object.Destroy(infoOverlay);
+
+            var boxType = boxTypes[currentBoxIndex];
+            var pool = LootTable.GetLootPool(boxType.id);
+            var ownedItems = SaveManager.Instance?.GetOwnedRoomItems() ?? new List<string>();
+
+            int ownedCount = 0;
+            foreach (var itemId in pool)
+            {
+                if (ownedItems.Contains(itemId)) ownedCount++;
+            }
+
+            // Fullscreen overlay
+            infoOverlay = new GameObject("InfoOverlay");
+            infoOverlay.transform.SetParent(panel.transform, false);
+            var overlayRect = infoOverlay.AddComponent<RectTransform>();
+            overlayRect.anchorMin = Vector2.zero;
+            overlayRect.anchorMax = Vector2.one;
+            overlayRect.offsetMin = Vector2.zero;
+            overlayRect.offsetMax = Vector2.zero;
+
+            // Dark bg
+            var dimImg = infoOverlay.AddComponent<Image>();
+            dimImg.color = new Color(0, 0, 0, 0.92f);
+
+            // Title
+            var titleGO = new GameObject("Title");
+            titleGO.transform.SetParent(infoOverlay.transform, false);
+            var titleRect = titleGO.AddComponent<RectTransform>();
+            titleRect.anchorMin = new Vector2(0.5f, 1);
+            titleRect.anchorMax = new Vector2(0.5f, 1);
+            titleRect.pivot = new Vector2(0.5f, 1);
+            titleRect.anchoredPosition = new Vector2(0, -40);
+            titleRect.sizeDelta = new Vector2(600, 50);
+            var titleTMP = titleGO.AddComponent<TextMeshProUGUI>();
+            titleTMP.text = $"{boxType.displayName} Items";
+            titleTMP.fontSize = 36;
+            titleTMP.fontStyle = FontStyles.Bold;
+            titleTMP.alignment = TextAlignmentOptions.Center;
+            titleTMP.color = new Color(1f, 0.85f, 0.5f, 1f);
+
+            // Subtitle - collection progress
+            var subGO = new GameObject("Subtitle");
+            subGO.transform.SetParent(infoOverlay.transform, false);
+            var subRect = subGO.AddComponent<RectTransform>();
+            subRect.anchorMin = new Vector2(0.5f, 1);
+            subRect.anchorMax = new Vector2(0.5f, 1);
+            subRect.pivot = new Vector2(0.5f, 1);
+            subRect.anchoredPosition = new Vector2(0, -95);
+            subRect.sizeDelta = new Vector2(600, 35);
+            var subTMP = subGO.AddComponent<TextMeshProUGUI>();
+            subTMP.text = $"Collected: {ownedCount} / {pool.Count}";
+            subTMP.fontSize = 26;
+            subTMP.alignment = TextAlignmentOptions.Center;
+            subTMP.color = Color.white;
+
+            // Scroll view with grid
+            var scrollGO = new GameObject("ScrollView");
+            scrollGO.transform.SetParent(infoOverlay.transform, false);
+            var scrollTransform = scrollGO.AddComponent<RectTransform>();
+            scrollTransform.anchorMin = new Vector2(0, 0);
+            scrollTransform.anchorMax = new Vector2(1, 1);
+            scrollTransform.offsetMin = new Vector2(30, 80);
+            scrollTransform.offsetMax = new Vector2(-30, -140);
+
+            var scrollView = scrollGO.AddComponent<ScrollRect>();
+            scrollView.horizontal = false;
+            scrollView.vertical = true;
+            scrollView.movementType = ScrollRect.MovementType.Elastic;
+
+            var viewportGO = new GameObject("Viewport");
+            viewportGO.transform.SetParent(scrollGO.transform, false);
+            var viewportRect = viewportGO.AddComponent<RectTransform>();
+            viewportRect.anchorMin = Vector2.zero;
+            viewportRect.anchorMax = Vector2.one;
+            viewportRect.offsetMin = Vector2.zero;
+            viewportRect.offsetMax = Vector2.zero;
+            viewportGO.AddComponent<RectMask2D>();
+            var vpImg = viewportGO.AddComponent<Image>();
+            vpImg.color = Color.clear;
+            scrollView.viewport = viewportRect;
+
+            var contentGO = new GameObject("Content");
+            contentGO.transform.SetParent(viewportGO.transform, false);
+            var contentRect = contentGO.AddComponent<RectTransform>();
+            contentRect.anchorMin = new Vector2(0, 1);
+            contentRect.anchorMax = new Vector2(1, 1);
+            contentRect.pivot = new Vector2(0.5f, 1);
+            contentRect.anchoredPosition = Vector2.zero;
+
+            var grid = contentGO.AddComponent<GridLayoutGroup>();
+            grid.cellSize = new Vector2(180, 200);
+            grid.spacing = new Vector2(15, 15);
+            grid.padding = new RectOffset(10, 10, 10, 10);
+            grid.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
+            grid.constraintCount = 4;
+            grid.childAlignment = TextAnchor.UpperCenter;
+
+            var fitter = contentGO.AddComponent<ContentSizeFitter>();
+            fitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+
+            scrollView.content = contentRect;
+
+            // Populate grid
+            foreach (var itemId in pool)
+            {
+                bool owned = ownedItems.Contains(itemId);
+                CreateInfoCell(contentGO.transform, itemId, owned);
+            }
+
+            // Close button (same size as main close button: 100x100)
+            var closeGO = new GameObject("CloseInfoBtn");
+            closeGO.transform.SetParent(infoOverlay.transform, false);
+            var closeRect = closeGO.AddComponent<RectTransform>();
+            closeRect.anchorMin = new Vector2(1, 1);
+            closeRect.anchorMax = new Vector2(1, 1);
+            closeRect.pivot = new Vector2(0.5f, 0.5f);
+            closeRect.anchoredPosition = new Vector2(-60, -60);
+            closeRect.sizeDelta = new Vector2(100, 100);
+
+            var closeImg = closeGO.AddComponent<Image>();
+            var closeSpr = Resources.Load<Sprite>("Sprites/UI/Achievements/closebutton_2");
+            var closeSprPressed = Resources.Load<Sprite>("Sprites/UI/Achievements/closebutton_pressed");
+            if (closeSpr != null) closeImg.sprite = closeSpr;
+            else closeImg.color = new Color(0.8f, 0.2f, 0.2f, 1f);
+
+            var closeBtn = closeGO.AddComponent<Button>();
+            closeBtn.targetGraphic = closeImg;
+            closeBtn.transition = Selectable.Transition.None;
+            closeBtn.onClick.AddListener(() => {
+                AudioManager.Instance?.PlayButtonClick();
+                UnityEngine.Object.Destroy(infoOverlay);
+                infoOverlay = null;
+            });
+
+            if (closeSpr != null && closeSprPressed != null)
+            {
+                var pressTrigger = closeGO.AddComponent<EventTrigger>();
+                var down = new EventTrigger.Entry { eventID = EventTriggerType.PointerDown };
+                down.callback.AddListener((_) => closeImg.sprite = closeSprPressed);
+                pressTrigger.triggers.Add(down);
+                var up = new EventTrigger.Entry { eventID = EventTriggerType.PointerUp };
+                up.callback.AddListener((_) => closeImg.sprite = closeSpr);
+                pressTrigger.triggers.Add(up);
+            }
+
+            // Navigation arrows to cycle through box types while viewing items
+            var leftNavGO = new GameObject("InfoLeftArrow");
+            leftNavGO.transform.SetParent(infoOverlay.transform, false);
+            var leftNavRect = leftNavGO.AddComponent<RectTransform>();
+            leftNavRect.anchorMin = new Vector2(0, 0.5f);
+            leftNavRect.anchorMax = new Vector2(0, 0.5f);
+            leftNavRect.pivot = new Vector2(0, 0.5f);
+            leftNavRect.anchoredPosition = new Vector2(25, 0);
+            leftNavRect.sizeDelta = new Vector2(153, 176);
+            var leftNavImg = leftNavGO.AddComponent<Image>();
+            var leftNavSprite = Resources.Load<Sprite>("Sprites/UI/Buttons/button_left");
+            var leftNavPressed = Resources.Load<Sprite>("Sprites/UI/Buttons/button_left_pressed");
+            if (leftNavSprite != null)
+            {
+                leftNavImg.sprite = leftNavSprite;
+                leftNavImg.preserveAspect = true;
+            }
+            var leftNavBtn = leftNavGO.AddComponent<Button>();
+            leftNavBtn.targetGraphic = leftNavImg;
+            if (leftNavSprite != null && leftNavPressed != null)
+            {
+                leftNavBtn.transition = Selectable.Transition.SpriteSwap;
+                leftNavBtn.spriteState = new SpriteState { pressedSprite = leftNavPressed };
+            }
+            leftNavBtn.onClick.AddListener(() => {
+                AudioManager.Instance?.PlayButtonClick();
+                OnLeftArrowClicked();
+                ShowInfoOverlay(); // Rebuild for new box type
+            });
+
+            var rightNavGO = new GameObject("InfoRightArrow");
+            rightNavGO.transform.SetParent(infoOverlay.transform, false);
+            var rightNavRect = rightNavGO.AddComponent<RectTransform>();
+            rightNavRect.anchorMin = new Vector2(1, 0.5f);
+            rightNavRect.anchorMax = new Vector2(1, 0.5f);
+            rightNavRect.pivot = new Vector2(1, 0.5f);
+            rightNavRect.anchoredPosition = new Vector2(-25, 0);
+            rightNavRect.sizeDelta = new Vector2(153, 176);
+            var rightNavImg = rightNavGO.AddComponent<Image>();
+            var rightNavSprite = Resources.Load<Sprite>("Sprites/UI/Buttons/button_right");
+            var rightNavPressed = Resources.Load<Sprite>("Sprites/UI/Buttons/button_right_pressed");
+            if (rightNavSprite != null)
+            {
+                rightNavImg.sprite = rightNavSprite;
+                rightNavImg.preserveAspect = true;
+            }
+            var rightNavBtn = rightNavGO.AddComponent<Button>();
+            rightNavBtn.targetGraphic = rightNavImg;
+            if (rightNavSprite != null && rightNavPressed != null)
+            {
+                rightNavBtn.transition = Selectable.Transition.SpriteSwap;
+                rightNavBtn.spriteState = new SpriteState { pressedSprite = rightNavPressed };
+            }
+            rightNavBtn.onClick.AddListener(() => {
+                AudioManager.Instance?.PlayButtonClick();
+                OnRightArrowClicked();
+                ShowInfoOverlay(); // Rebuild for new box type
+            });
+        }
+
+        private void CreateInfoCell(Transform parent, string itemId, bool owned)
+        {
+            var cellGO = new GameObject($"Cell_{itemId}");
+            cellGO.transform.SetParent(parent, false);
+
+            var cellImg = cellGO.AddComponent<Image>();
+            cellImg.color = new Color(0.15f, 0.12f, 0.1f, 0.6f);
+
+            // Thumbnail
+            var thumbGO = new GameObject("Thumb");
+            thumbGO.transform.SetParent(cellGO.transform, false);
+            var thumbRect = thumbGO.AddComponent<RectTransform>();
+            thumbRect.anchorMin = new Vector2(0.1f, 0.25f);
+            thumbRect.anchorMax = new Vector2(0.9f, 0.95f);
+            thumbRect.offsetMin = Vector2.zero;
+            thumbRect.offsetMax = Vector2.zero;
+
+            var thumbImg = thumbGO.AddComponent<Image>();
+            thumbImg.preserveAspect = true;
+            thumbImg.raycastTarget = false;
+
+            var itemData = RoomData.GetItemById(itemId);
+            if (itemData != null)
+            {
+                var sprite = UIManager.LoadFullRectSprite(itemData.resourcePath);
+                if (sprite != null)
+                {
+                    thumbImg.sprite = sprite;
+                    if (!owned)
+                        thumbImg.color = Color.black; // Black silhouette for unowned
+                }
+            }
+
+            // Name or "?"
+            var nameGO = new GameObject("Name");
+            nameGO.transform.SetParent(cellGO.transform, false);
+            var nameRect = nameGO.AddComponent<RectTransform>();
+            nameRect.anchorMin = new Vector2(0, 0);
+            nameRect.anchorMax = new Vector2(1, 0.25f);
+            nameRect.offsetMin = new Vector2(4, 0);
+            nameRect.offsetMax = new Vector2(-4, 0);
+            var nameTMP = nameGO.AddComponent<TextMeshProUGUI>();
+            nameTMP.text = owned ? (itemData?.displayName ?? itemId) : "???";
+            nameTMP.fontSize = 14;
+            nameTMP.alignment = TextAlignmentOptions.Center;
+            nameTMP.color = owned ? Color.white : new Color(0.5f, 0.5f, 0.5f, 1f);
+            nameTMP.raycastTarget = false;
+            nameTMP.overflowMode = TextOverflowModes.Ellipsis;
+
+            // Checkmark for owned items
+            if (owned)
+            {
+                var checkGO = new GameObject("Check");
+                checkGO.transform.SetParent(cellGO.transform, false);
+                var checkRect = checkGO.AddComponent<RectTransform>();
+                checkRect.anchorMin = new Vector2(1, 1);
+                checkRect.anchorMax = new Vector2(1, 1);
+                checkRect.pivot = new Vector2(1, 1);
+                checkRect.anchoredPosition = new Vector2(-5, -5);
+                checkRect.sizeDelta = new Vector2(30, 30);
+                var checkTMP = checkGO.AddComponent<TextMeshProUGUI>();
+                checkTMP.text = "OK";
+                checkTMP.fontSize = 16;
+                checkTMP.fontStyle = FontStyles.Bold;
+                checkTMP.alignment = TextAlignmentOptions.Center;
+                checkTMP.color = new Color(0.2f, 0.9f, 0.3f, 1f);
+                checkTMP.raycastTarget = false;
+            }
+        }
+
         private void LoadAnimationFrames()
         {
             // Load smoke frames (shared across all box types)
@@ -500,9 +826,10 @@ namespace SortResort.UI
             UpdateCountText();
             UpdateArrows();
 
-            // Start idle shake animation
+            // Start idle shake animation only if there are presents to open
             if (shakeCoroutine != null) coroutineHost.StopCoroutine(shakeCoroutine);
-            shakeCoroutine = coroutineHost.StartCoroutine(IdleShakeAnimation());
+            if (boxType.getCount() > 0)
+                shakeCoroutine = coroutineHost.StartCoroutine(IdleShakeAnimation());
         }
 
         private void UpdateCountText()
@@ -551,6 +878,9 @@ namespace SortResort.UI
             Hide();
         }
 
+        private string lastRewardItemId;
+        private bool lastRewardWasDuplicate;
+
         private void OnPresentClicked()
         {
             if (isAnimating) return;
@@ -560,8 +890,28 @@ namespace SortResort.UI
             // Consume the present
             boxType.useOne();
 
-            // Determine reward (for now always middlefinger)
-            string rewardSpritePath = "Sprites/UI/PresentOpen/middlefinger";
+            // Roll from loot table
+            string itemId = LootTable.GetRandomReward(boxType.id);
+            string rewardSpritePath;
+
+            if (itemId != null)
+            {
+                lastRewardItemId = itemId;
+                lastRewardWasDuplicate = SaveManager.Instance != null && SaveManager.Instance.OwnsRoomItem(itemId);
+
+                if (!lastRewardWasDuplicate && SaveManager.Instance != null)
+                    SaveManager.Instance.UnlockRoomItem(itemId);
+
+                var itemData = RoomData.GetItemById(itemId);
+                rewardSpritePath = itemData?.resourcePath ?? "Sprites/UI/PresentOpen/middlefinger";
+            }
+            else
+            {
+                // Fallback if pool is empty
+                rewardSpritePath = "Sprites/UI/PresentOpen/middlefinger";
+                lastRewardItemId = null;
+                lastRewardWasDuplicate = false;
+            }
 
             animCoroutine = coroutineHost.StartCoroutine(PlayOpenAnimation(rewardSpritePath));
         }
@@ -678,9 +1028,151 @@ namespace SortResort.UI
             }
             rewardRect.localScale = Vector3.one;
 
-            // Now wait for player to tap anywhere to dismiss
-            dismissOverlay.SetActive(true);
+            if (lastRewardWasDuplicate)
+            {
+                // Duplicate sequence: stamp → spin → coins
+                yield return coroutineHost.StartCoroutine(PlayDuplicateRecycleAnimation());
+            }
+            else
+            {
+                // Normal: wait for player to tap anywhere to dismiss
+                dismissOverlay.SetActive(true);
+                isAnimating = false;
+            }
+        }
+
+        private IEnumerator PlayDuplicateRecycleAnimation()
+        {
+            // 1. Show "DUPLICATE" stamp
+            var stampGO = new GameObject("DuplicateStamp");
+            stampGO.transform.SetParent(rewardImage.transform.parent, false);
+            var stampRect = stampGO.AddComponent<RectTransform>();
+            stampRect.anchorMin = new Vector2(0.5f, 0.5f);
+            stampRect.anchorMax = new Vector2(0.5f, 0.5f);
+            stampRect.sizeDelta = new Vector2(400, 80);
+            stampRect.localRotation = Quaternion.Euler(0, 0, -15);
+
+            var stampImg = stampGO.AddComponent<Image>();
+            stampImg.color = new Color(0.8f, 0.15f, 0.1f, 0.85f);
+
+            var stampTextGO = new GameObject("Text");
+            stampTextGO.transform.SetParent(stampGO.transform, false);
+            var stampTextRect = stampTextGO.AddComponent<RectTransform>();
+            stampTextRect.anchorMin = Vector2.zero;
+            stampTextRect.anchorMax = Vector2.one;
+            stampTextRect.offsetMin = Vector2.zero;
+            stampTextRect.offsetMax = Vector2.zero;
+            var stampTMP = stampTextGO.AddComponent<TMPro.TextMeshProUGUI>();
+            stampTMP.text = "DUPLICATE";
+            stampTMP.fontSize = 48;
+            stampTMP.fontStyle = TMPro.FontStyles.Bold;
+            stampTMP.alignment = TMPro.TextAlignmentOptions.Center;
+            stampTMP.color = Color.white;
+
+            // Stamp scales in
+            stampRect.localScale = new Vector3(2f, 2f, 1f);
+            float stampDuration = 0.3f;
+            float elapsed = 0f;
+            while (elapsed < stampDuration)
+            {
+                elapsed += Time.deltaTime;
+                float t = Mathf.Clamp01(elapsed / stampDuration);
+                float scale = Mathf.Lerp(2f, 1f, t * t);
+                stampRect.localScale = new Vector3(scale, scale, 1f);
+                yield return null;
+            }
+
+            // 2. Pause
+            yield return new WaitForSeconds(0.5f);
+
+            // 3. Shrink and spin both reward + stamp together
+            float spinDuration = 0.6f;
+            elapsed = 0f;
+            Vector3 rewardStartScale = rewardRect.localScale;
+            while (elapsed < spinDuration)
+            {
+                elapsed += Time.deltaTime;
+                float t = Mathf.Clamp01(elapsed / spinDuration);
+                float scale = Mathf.Lerp(1f, 0f, t * t);
+                float rotation = t * 720f;
+                rewardRect.localScale = new Vector3(scale, scale, 1f);
+                rewardRect.localRotation = Quaternion.Euler(0, 0, rotation);
+                stampRect.localScale = new Vector3(scale, scale, 1f);
+                stampRect.localRotation = Quaternion.Euler(0, 0, -15 + rotation);
+                yield return null;
+            }
+
+            rewardImage.gameObject.SetActive(false);
+            rewardRect.localRotation = Quaternion.identity;
+            rewardRect.localScale = Vector3.one;
+            UnityEngine.Object.Destroy(stampGO);
+
+            // 4. Show "+5" coins text
+            var coinsGO = new GameObject("CoinsReward");
+            coinsGO.transform.SetParent(rewardImage.transform.parent, false);
+            var coinsRect = coinsGO.AddComponent<RectTransform>();
+            coinsRect.anchorMin = new Vector2(0.5f, 0.5f);
+            coinsRect.anchorMax = new Vector2(0.5f, 0.5f);
+            coinsRect.sizeDelta = new Vector2(300, 80);
+            var coinsTMP = coinsGO.AddComponent<TMPro.TextMeshProUGUI>();
+            coinsTMP.text = "+5 COINS";
+            coinsTMP.fontSize = 56;
+            coinsTMP.fontStyle = TMPro.FontStyles.Bold;
+            coinsTMP.alignment = TMPro.TextAlignmentOptions.Center;
+            coinsTMP.color = new Color(1f, 0.85f, 0.2f, 1f);
+
+            // Bounce up animation
+            float bounceDuration = 0.4f;
+            elapsed = 0f;
+            while (elapsed < bounceDuration)
+            {
+                elapsed += Time.deltaTime;
+                float t = Mathf.Clamp01(elapsed / bounceDuration);
+                float y = EaseOutBack(t) * 30f;
+                coinsRect.anchoredPosition = new Vector2(0, y);
+                coinsRect.localScale = Vector3.one * EaseOutBack(t);
+                yield return null;
+            }
+
+            // Award coins
+            if (AchievementManager.Instance != null)
+                AchievementManager.Instance.AddCoins(5);
+
+            // Wait then auto-dismiss
+            yield return new WaitForSeconds(0.8f);
+
+            UnityEngine.Object.Destroy(coinsGO);
+
+            // Continue to next box or close
             isAnimating = false;
+            coroutineHost.StartCoroutine(AfterDuplicateDismiss());
+        }
+
+        private IEnumerator AfterDuplicateDismiss()
+        {
+            yield return null;
+            // Check if there are more presents
+            var boxType = boxTypes[currentBoxIndex];
+            if (boxType.getCount() > 0)
+            {
+                ResetToPresent();
+            }
+            else
+            {
+                // Find next box type with presents
+                bool found = false;
+                for (int i = 0; i < boxTypes.Count; i++)
+                {
+                    if (boxTypes[i].getCount() > 0)
+                    {
+                        currentBoxIndex = i;
+                        ResetToPresent();
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found) Hide();
+            }
         }
 
         private IEnumerator DismissRewardAnimation()

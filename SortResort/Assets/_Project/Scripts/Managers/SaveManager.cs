@@ -28,6 +28,7 @@ namespace SortResort
             if (transform.parent == null) DontDestroyOnLoad(gameObject);
 
             LoadGame();
+            SeedDefaultRoomItems();
         }
 
         // Save/Load Operations
@@ -464,6 +465,87 @@ namespace SortResort
             }
         }
 
+        // Room Customization
+        public string GetRoomEquippedItem(string slotId)
+        {
+            var entry = currentSaveData.roomEquippedItems.Find(e => e.slotId == slotId);
+            return entry?.itemId;
+        }
+
+        public void SetRoomEquippedItem(string slotId, string itemId)
+        {
+            var entry = currentSaveData.roomEquippedItems.Find(e => e.slotId == slotId);
+            if (entry != null)
+            {
+                entry.itemId = itemId;
+            }
+            else
+            {
+                currentSaveData.roomEquippedItems.Add(new RoomSlotSave { slotId = slotId, itemId = itemId });
+            }
+            SaveGame();
+        }
+
+        // Room Item Ownership
+        public bool OwnsRoomItem(string itemId)
+        {
+            return currentSaveData.ownedRoomItems.Contains(itemId);
+        }
+
+        public void UnlockRoomItem(string itemId)
+        {
+            if (!currentSaveData.ownedRoomItems.Contains(itemId))
+            {
+                currentSaveData.ownedRoomItems.Add(itemId);
+                SaveGame();
+                Debug.Log($"[SaveManager] Unlocked room item: {itemId}");
+            }
+        }
+
+        public List<string> GetOwnedRoomItems()
+        {
+            return currentSaveData.ownedRoomItems;
+        }
+
+        public void SeedDefaultRoomItems()
+        {
+            // Reset all players to only the default items
+            var defaults = LootTable.GetDefaultOwnedItems();
+            bool needsReset = currentSaveData.ownedRoomItems.Count == 0;
+
+            // Also reset if player has items not in defaults (migration)
+            if (!needsReset)
+            {
+                foreach (var item in currentSaveData.ownedRoomItems)
+                {
+                    if (!defaults.Contains(item))
+                    {
+                        needsReset = true;
+                        break;
+                    }
+                }
+            }
+
+            if (needsReset)
+            {
+                currentSaveData.ownedRoomItems.Clear();
+                currentSaveData.ownedRoomItems.AddRange(defaults);
+
+                // Reset equipped items for slots where the equipped item is no longer owned
+                var toRemove = new List<RoomSlotSave>();
+                foreach (var equipped in currentSaveData.roomEquippedItems)
+                {
+                    if (!defaults.Contains(equipped.itemId) && !equipped.itemId.StartsWith("none"))
+                        toRemove.Add(equipped);
+                }
+                foreach (var r in toRemove)
+                    currentSaveData.roomEquippedItems.Remove(r);
+
+                SaveGame();
+                Debug.Log($"[SaveManager] Reset room items to {defaults.Count} defaults");
+            }
+        }
+
         // Reset All Progress
         public void ResetAllProgress()
         {
@@ -586,6 +668,10 @@ namespace SortResort
         // Present milestones claimed (e.g., "island_10", "farm_20")
         public List<string> claimedPresentMilestones = new List<string>();
 
+        // Room customization
+        public List<RoomSlotSave> roomEquippedItems = new List<RoomSlotSave>();
+        public List<string> ownedRoomItems = new List<string>();
+
         public SaveData()
         {
             saveVersion = 3;
@@ -596,6 +682,13 @@ namespace SortResort
             voiceEnabled = true;
             dialogueEnabled = true;
         }
+    }
+
+    [Serializable]
+    public class RoomSlotSave
+    {
+        public string slotId;
+        public string itemId;
     }
 
     [Serializable]

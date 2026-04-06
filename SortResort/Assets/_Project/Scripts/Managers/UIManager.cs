@@ -223,6 +223,7 @@ namespace SortResort
 
         // Present screen
         private SortResort.UI.PresentScreen presentScreen;
+        private SortResort.UI.MyRoomScreen myRoomScreen;
         private GameObject presentBadgeGO;
         private TextMeshProUGUI presentBadgeText;
         private Coroutine presentBadgeGlowCoroutine;
@@ -417,6 +418,7 @@ namespace SortResort
             CreateStatsPanel();
             CreatePresentPanel();
             CreateLuckySpinPanel();
+            CreateMyRoomPanel();
             CreateDialoguePanel();
             CreatePowerUpBar();
 
@@ -955,6 +957,41 @@ namespace SortResort
             UpdatePresentBadge();
             presentBadgeGlowCoroutine = StartCoroutine(PulsePresentBadgeGlow(glowImg));
 
+            // Bedroom button - to the left of present button
+            var bedroomBtnGO = new GameObject("BedroomButton");
+            bedroomBtnGO.transform.SetParent(topBar.transform, false);
+            var bedroomBtnRect = bedroomBtnGO.AddComponent<RectTransform>();
+            bedroomBtnRect.anchorMin = new Vector2(1, 0.5f);
+            bedroomBtnRect.anchorMax = new Vector2(1, 0.5f);
+            bedroomBtnRect.pivot = new Vector2(1, 0.5f);
+            bedroomBtnRect.anchoredPosition = new Vector2(-495, 0);
+            bedroomBtnRect.sizeDelta = new Vector2(100, 100);
+
+            var bedroomBtnImg = bedroomBtnGO.AddComponent<Image>();
+            var bedroomNormalSprite = LoadFullRectSprite("Sprites/UI/Buttons/bedroom_button");
+            var bedroomPressedSprite = LoadFullRectSprite("Sprites/UI/Buttons/bedroom_button_pressed");
+            if (bedroomNormalSprite != null)
+            {
+                bedroomBtnImg.sprite = bedroomNormalSprite;
+                bedroomBtnImg.preserveAspect = true;
+                bedroomBtnImg.color = Color.white;
+            }
+            else
+            {
+                bedroomBtnImg.color = new Color(0.6f, 0.4f, 0.8f, 1f);
+            }
+
+            var bedroomBtn = bedroomBtnGO.AddComponent<Button>();
+            bedroomBtn.transition = Selectable.Transition.SpriteSwap;
+            bedroomBtn.targetGraphic = bedroomBtnImg;
+            if (bedroomPressedSprite != null)
+            {
+                var bedroomSpriteState = new SpriteState();
+                bedroomSpriteState.pressedSprite = bedroomPressedSprite;
+                bedroomBtn.spriteState = bedroomSpriteState;
+            }
+            bedroomBtn.onClick.AddListener(OnBedroomClicked);
+
             // Debug: +1 present buttons for each box type
             // Parented to levelSelectPanel (not presentBtnGO) and set as last sibling
             // so they render and receive raycasts on top of the world area
@@ -1471,16 +1508,17 @@ namespace SortResort
             statsScreen?.Show();
         }
 
+        private void OnBedroomClicked()
+        {
+            Debug.Log("[UIManager] Bedroom button clicked");
+            AudioManager.Instance?.PlayButtonClick();
+            myRoomScreen?.Show();
+        }
+
         private void OnPresentClicked()
         {
             Debug.Log("[UIManager] Present button clicked");
             AudioManager.Instance?.PlayButtonClick();
-            if (SaveManager.Instance == null) return;
-            // Check total across all box types, not just normal
-            int total = 0;
-            foreach (var id in new[] { "normal", "island", "supermarket", "farm", "space", "tavern" })
-                total += SaveManager.Instance.GetPresentCount(id);
-            if (total <= 0) return;
             presentScreen?.Show();
         }
 
@@ -1564,6 +1602,20 @@ namespace SortResort
             presentScreen = new SortResort.UI.PresentScreen();
             presentScreen.Create(mainCanvas.transform, this);
             presentScreen.OnClosed += () => UpdatePresentBadge();
+        }
+
+        private void CreateMyRoomPanel()
+        {
+            try
+            {
+                myRoomScreen = new SortResort.UI.MyRoomScreen();
+                myRoomScreen.Create(mainCanvas.transform, this);
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogError($"[UIManager] Failed to create MyRoomPanel: {e}");
+                myRoomScreen = null;
+            }
         }
 
         private void CreateLuckySpinPanel()
@@ -4213,7 +4265,7 @@ Mara, Mason, Talon, and Landry
         /// Loads a texture and creates a sprite covering the full texture rect.
         /// Use for fullscreen overlay sprites (1080x1920) where the import may trim transparent areas.
         /// </summary>
-        private static Sprite LoadFullRectSprite(string resourcePath)
+        internal static Sprite LoadFullRectSprite(string resourcePath)
         {
             var tex = Resources.Load<Texture2D>(resourcePath);
             if (tex != null)
@@ -4228,7 +4280,7 @@ Mara, Mason, Talon, and Landry
         /// Creates a greyscale copy of a texture by averaging RGB channels.
         /// Used to generate the grey (locked) achievement frame from the bronze frame at runtime.
         /// </summary>
-        private static Texture2D CreateGreyscaleTexture(Texture2D source)
+        internal static Texture2D CreateGreyscaleTexture(Texture2D source)
         {
             // Need readable texture — create a copy via RenderTexture if not readable
             Texture2D readable = source;
