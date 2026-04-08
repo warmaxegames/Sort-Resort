@@ -565,193 +565,559 @@
     "original_filename": "space left decoration 01.png",
     "slot": "LeftDecorationItem",
     "output_path": "LeftDecorationItem/space_left_decoration_01.png",
-    "crop_rect": {"x": 67, "y": 913, "width": 190, "height": 229}
+    "crop_rect": {
+      "x": 67,
+      "y": 913,
+      "width": 190,
+      "height": 229
+    }
   },
   "space_bed": {
     "original_filename": "space bed.png",
     "slot": "Bed",
     "output_path": "Bed/space_bed.png",
-    "crop_rect": {"x": 158, "y": 1291, "width": 780, "height": 378}
+    "crop_rect": {
+      "x": 158,
+      "y": 1291,
+      "width": 780,
+      "height": 378
+    }
   },
   "space_carpet": {
     "original_filename": "space carpet.png",
     "slot": "Rug",
     "output_path": "Rug/space_carpet.png",
-    "crop_rect": {"x": 46, "y": 1386, "width": 988, "height": 324}
+    "crop_rect": {
+      "x": 46,
+      "y": 1386,
+      "width": 988,
+      "height": 324
+    }
   },
   "space_curtains": {
     "original_filename": "space curtains.png",
     "slot": "Curtains",
     "output_path": "Curtains/space_curtains.png",
-    "crop_rect": {"x": 212, "y": 554, "width": 658, "height": 582}
+    "crop_rect": {
+      "x": 212,
+      "y": 554,
+      "width": 658,
+      "height": 582
+    }
   },
   "space_floor": {
     "original_filename": "space floor.png",
     "slot": "Floor",
     "output_path": "Floor/space_floor.png",
-    "crop_rect": {"x": 0, "y": 1290, "width": 1080, "height": 630}
+    "crop_rect": {
+      "x": 0,
+      "y": 1290,
+      "width": 1080,
+      "height": 630
+    }
   },
   "space_lamps": {
     "original_filename": "space lamps.png",
     "slot": "CeilingLight",
     "output_path": "CeilingLight/space_lamps.png",
-    "crop_rect": {"x": 55, "y": 41, "width": 966, "height": 321}
+    "crop_rect": {
+      "x": 55,
+      "y": 41,
+      "width": 966,
+      "height": 321
+    }
   },
   "space_right_decoration_01": {
     "original_filename": "space right decoration 01.png",
     "slot": "RightDecoration",
     "output_path": "RightDecoration/space_right_decoration_01.png",
-    "crop_rect": {"x": 564, "y": 782, "width": 477, "height": 633}
+    "crop_rect": {
+      "x": 564,
+      "y": 782,
+      "width": 477,
+      "height": 633
+    }
   },
   "space_right_decoration_02": {
     "original_filename": "space right decoration 02.png",
     "slot": "RightDecoration",
     "output_path": "RightDecoration/space_right_decoration_02.png",
-    "crop_rect": {"x": 776, "y": 701, "width": 270, "height": 697}
+    "crop_rect": {
+      "x": 776,
+      "y": 701,
+      "width": 270,
+      "height": 697
+    }
   },
   "space_roof": {
     "original_filename": "space roof.png",
     "slot": "Ceiling",
     "output_path": "Ceiling/space_roof.png",
-    "crop_rect": {"x": 0, "y": 0, "width": 1080, "height": 417}
+    "crop_rect": {
+      "x": 0,
+      "y": 0,
+      "width": 1080,
+      "height": 417
+    }
   },
   "space_walls": {
     "original_filename": "space walls.png",
     "slot": "Wall",
     "output_path": "Wall/space_walls.png",
-    "crop_rect": {"x": 0, "y": 322, "width": 1080, "height": 1023}
+    "crop_rect": {
+      "x": 0,
+      "y": 322,
+      "width": 1080,
+      "height": 1023
+    }
   },
   "space_left_decoration_02": {
     "original_filename": "space_left_decoration_02.png",
     "slot": "LeftDecorationItem",
     "output_path": "LeftDecorationItem/space_left_decoration_02.png",
-    "crop_rect": {"x": 73, "y": 834, "width": 166, "height": 299}
+    "crop_rect": {
+      "x": 73,
+      "y": 834,
+      "width": 166,
+      "height": 299
+    }
   },
   "farm_bed": {
     "original_filename": "farm bed.png",
     "slot": "Bed",
     "output_path": "Bed/farm_bed.png",
-    "crop_rect": {"x": 111, "y": 1286, "width": 873, "height": 386}
+    "crop_rect": {
+      "x": 111,
+      "y": 1286,
+      "width": 873,
+      "height": 386
+    }
   },
   "farm_bed_02": {
     "original_filename": "farm bed 02.png",
     "slot": "Bed",
     "output_path": "Bed/farm_bed_02.png",
-    "crop_rect": {"x": 162, "y": 1242, "width": 726, "height": 395}
+    "crop_rect": {
+      "x": 162,
+      "y": 1242,
+      "width": 726,
+      "height": 395
+    }
   },
   "farm_carpet": {
     "original_filename": "farm carpet.png",
     "slot": "Rug",
     "output_path": "Rug/farm_carpet.png",
-    "crop_rect": {"x": 68, "y": 1344, "width": 936, "height": 386}
+    "crop_rect": {
+      "x": 68,
+      "y": 1344,
+      "width": 936,
+      "height": 386
+    }
   },
   "farm_curtains_01": {
     "original_filename": "farm curtains 01.png",
     "slot": "Curtains",
     "output_path": "Curtains/farm_curtains_01.png",
-    "crop_rect": {"x": 116, "y": 440, "width": 852, "height": 781}
+    "crop_rect": {
+      "x": 116,
+      "y": 440,
+      "width": 852,
+      "height": 781
+    }
   },
   "farm_curtains_02": {
     "original_filename": "farm curtains 02.png",
     "slot": "Curtains",
     "output_path": "Curtains/farm_curtains_02.png",
-    "crop_rect": {"x": 111, "y": 439, "width": 863, "height": 814}
+    "crop_rect": {
+      "x": 111,
+      "y": 439,
+      "width": 863,
+      "height": 814
+    }
   },
   "farm_floor": {
     "original_filename": "farm floor.png",
     "slot": "Floor",
     "output_path": "Floor/farm_floor.png",
-    "crop_rect": {"x": 0, "y": 1288, "width": 1080, "height": 632}
+    "crop_rect": {
+      "x": 0,
+      "y": 1288,
+      "width": 1080,
+      "height": 632
+    }
   },
   "farm_light": {
     "original_filename": "farm light.png",
     "slot": "CeilingLight",
     "output_path": "CeilingLight/farm_light.png",
-    "crop_rect": {"x": 405, "y": 77, "width": 288, "height": 407}
+    "crop_rect": {
+      "x": 405,
+      "y": 77,
+      "width": 288,
+      "height": 407
+    }
   },
   "farm_right_decoration": {
     "original_filename": "farm right decoration.png",
     "slot": "RightDecoration",
     "output_path": "RightDecoration/farm_right_decoration.png",
-    "crop_rect": {"x": 427, "y": 1054, "width": 638, "height": 386}
+    "crop_rect": {
+      "x": 427,
+      "y": 1054,
+      "width": 638,
+      "height": 386
+    }
   },
   "farm_right_decoration_02": {
     "original_filename": "farm right decoration 02.png",
     "slot": "RightDecoration",
     "output_path": "RightDecoration/farm_right_decoration_02.png",
-    "crop_rect": {"x": 713, "y": 957, "width": 341, "height": 462}
+    "crop_rect": {
+      "x": 713,
+      "y": 957,
+      "width": 341,
+      "height": 462
+    }
   },
   "farm_roof": {
     "original_filename": "farm roof.png",
     "slot": "Ceiling",
     "output_path": "Ceiling/farm_roof.png",
-    "crop_rect": {"x": 0, "y": 0, "width": 1080, "height": 419}
+    "crop_rect": {
+      "x": 0,
+      "y": 0,
+      "width": 1080,
+      "height": 419
+    }
   },
   "farm_walls": {
     "original_filename": "farm walls.png",
     "slot": "Wall",
     "output_path": "Wall/farm_walls.png",
-    "crop_rect": {"x": 0, "y": 322, "width": 1080, "height": 1023}
+    "crop_rect": {
+      "x": 0,
+      "y": 322,
+      "width": 1080,
+      "height": 1023
+    }
   },
   "farm_windmill": {
     "original_filename": "windmill.png",
     "slot": "LeftDecorationItem",
     "output_path": "LeftDecorationItem/farm_windmill.png",
-    "crop_rect": {"x": 80, "y": 877, "width": 165, "height": 253}
+    "crop_rect": {
+      "x": 80,
+      "y": 877,
+      "width": 165,
+      "height": 253
+    }
   },
   "tavern_crown": {
     "original_filename": "crown.png",
     "slot": "LeftDecorationItem",
     "output_path": "LeftDecorationItem/tavern_crown.png",
-    "crop_rect": {"x": 29, "y": 997, "width": 262, "height": 131}
+    "crop_rect": {
+      "x": 29,
+      "y": 997,
+      "width": 262,
+      "height": 131
+    }
   },
   "tavern_knight_armor": {
     "original_filename": "knight armor.png",
     "slot": "RightDecoration",
     "output_path": "RightDecoration/tavern_knight_armor.png",
-    "crop_rect": {"x": 573, "y": 855, "width": 507, "height": 564}
+    "crop_rect": {
+      "x": 573,
+      "y": 855,
+      "width": 507,
+      "height": 564
+    }
   },
   "tavern_carpet": {
     "original_filename": "tavern carpet.png",
     "slot": "Rug",
     "output_path": "Rug/tavern_carpet.png",
-    "crop_rect": {"x": 63, "y": 1344, "width": 941, "height": 378}
+    "crop_rect": {
+      "x": 63,
+      "y": 1344,
+      "width": 941,
+      "height": 378
+    }
   },
   "tavern_chandelier": {
     "original_filename": "tavern chandelear.png",
     "slot": "CeilingLight",
     "output_path": "CeilingLight/tavern_chandelier.png",
-    "crop_rect": {"x": 212, "y": 76, "width": 673, "height": 505}
+    "crop_rect": {
+      "x": 212,
+      "y": 76,
+      "width": 673,
+      "height": 505
+    }
   },
   "tavern_curtains": {
     "original_filename": "tavern curtains.png",
     "slot": "Curtains",
     "output_path": "Curtains/tavern_curtains.png",
-    "crop_rect": {"x": 96, "y": 440, "width": 901, "height": 823}
+    "crop_rect": {
+      "x": 96,
+      "y": 440,
+      "width": 901,
+      "height": 823
+    }
   },
   "tavern_floor": {
     "original_filename": "tavern floor.png",
     "slot": "Floor",
     "output_path": "Floor/tavern_floor.png",
-    "crop_rect": {"x": 0, "y": 1291, "width": 1080, "height": 629}
+    "crop_rect": {
+      "x": 0,
+      "y": 1291,
+      "width": 1080,
+      "height": 629
+    }
   },
   "tavern_roof": {
     "original_filename": "tavern roof.png",
     "slot": "Ceiling",
     "output_path": "Ceiling/tavern_roof.png",
-    "crop_rect": {"x": 0, "y": 0, "width": 1080, "height": 421}
+    "crop_rect": {
+      "x": 0,
+      "y": 0,
+      "width": 1080,
+      "height": 421
+    }
   },
   "tavern_walls": {
     "original_filename": "tavern walls.png",
     "slot": "Wall",
     "output_path": "Wall/tavern_walls.png",
-    "crop_rect": {"x": 0, "y": 322, "width": 1080, "height": 1023}
+    "crop_rect": {
+      "x": 0,
+      "y": 322,
+      "width": 1080,
+      "height": 1023
+    }
   },
   "tavern_throne": {
     "original_filename": "throne.png",
     "slot": "Bed",
     "output_path": "Bed/tavern_throne.png",
-    "crop_rect": {"x": 162, "y": 679, "width": 770, "height": 1074}
+    "crop_rect": {
+      "x": 162,
+      "y": 679,
+      "width": 770,
+      "height": 1074
+    }
+  },
+  "island_bed": {
+    "original_filename": "hut bed.png",
+    "slot": "Bed",
+    "output_path": "D:\\Games\\Video Game Dev\\SortResort\\Unity Redo\\SortResort\\Assets\\_Project\\Resources\\Sprites\\UI\\MyRoom\\Bed\\island_bed.png",
+    "crop_rect": {
+      "x": 156,
+      "y": 1220,
+      "width": 768,
+      "height": 449
+    },
+    "unity_position": [
+      0.0,
+      -4.845
+    ],
+    "unity_size": [
+      7.68,
+      4.49
+    ],
+    "center_screen_px": [
+      540.0,
+      1444.5
+    ]
+  },
+  "island_carpet": {
+    "original_filename": "hut carpet.png",
+    "slot": "Rug",
+    "output_path": "D:\\Games\\Video Game Dev\\SortResort\\Unity Redo\\SortResort\\Assets\\_Project\\Resources\\Sprites\\UI\\MyRoom\\Rug\\island_carpet.png",
+    "crop_rect": {
+      "x": 30,
+      "y": 1335,
+      "width": 1003,
+      "height": 463
+    },
+    "unity_position": [
+      -0.085,
+      -6.065
+    ],
+    "unity_size": [
+      10.03,
+      4.63
+    ],
+    "center_screen_px": [
+      531.5,
+      1566.5
+    ]
+  },
+  "island_curtains": {
+    "original_filename": "hut curtains.png",
+    "slot": "Curtains",
+    "output_path": "D:\\Games\\Video Game Dev\\SortResort\\Unity Redo\\SortResort\\Assets\\_Project\\Resources\\Sprites\\UI\\MyRoom\\Curtains\\island_curtains.png",
+    "crop_rect": {
+      "x": 144,
+      "y": 483,
+      "width": 800,
+      "height": 866
+    },
+    "unity_position": [
+      0.04,
+      0.44
+    ],
+    "unity_size": [
+      8.0,
+      8.66
+    ],
+    "center_screen_px": [
+      544.0,
+      916.0
+    ]
+  },
+  "island_floor": {
+    "original_filename": "hut floor.png",
+    "slot": "Floor",
+    "output_path": "D:\\Games\\Video Game Dev\\SortResort\\Unity Redo\\SortResort\\Assets\\_Project\\Resources\\Sprites\\UI\\MyRoom\\Floor\\island_floor.png",
+    "crop_rect": {
+      "x": 0,
+      "y": 1279,
+      "width": 1080,
+      "height": 641
+    },
+    "unity_position": [
+      0.0,
+      -6.395
+    ],
+    "unity_size": [
+      10.8,
+      6.41
+    ],
+    "center_screen_px": [
+      540.0,
+      1599.5
+    ]
+  },
+  "island_lamp": {
+    "original_filename": "hut lamp.png",
+    "slot": "CeilingLight",
+    "output_path": "D:\\Games\\Video Game Dev\\SortResort\\Unity Redo\\SortResort\\Assets\\_Project\\Resources\\Sprites\\UI\\MyRoom\\CeilingLight\\island_lamp.png",
+    "crop_rect": {
+      "x": 281,
+      "y": 171,
+      "width": 501,
+      "height": 630
+    },
+    "unity_position": [
+      -0.085,
+      4.74
+    ],
+    "unity_size": [
+      5.01,
+      6.3
+    ],
+    "center_screen_px": [
+      531.5,
+      486.0
+    ]
+  },
+  "island_roof": {
+    "original_filename": "hut roof.png",
+    "slot": "Ceiling",
+    "output_path": "D:\\Games\\Video Game Dev\\SortResort\\Unity Redo\\SortResort\\Assets\\_Project\\Resources\\Sprites\\UI\\MyRoom\\Ceiling\\island_roof.png",
+    "crop_rect": {
+      "x": 0,
+      "y": 0,
+      "width": 1080,
+      "height": 427
+    },
+    "unity_position": [
+      0.0,
+      7.465
+    ],
+    "unity_size": [
+      10.8,
+      4.27
+    ],
+    "center_screen_px": [
+      540.0,
+      213.5
+    ]
+  },
+  "island_walls": {
+    "original_filename": "hut walls.png",
+    "slot": "Wall",
+    "output_path": "D:\\Games\\Video Game Dev\\SortResort\\Unity Redo\\SortResort\\Assets\\_Project\\Resources\\Sprites\\UI\\MyRoom\\Wall\\island_walls.png",
+    "crop_rect": {
+      "x": 0,
+      "y": 312,
+      "width": 1080,
+      "height": 1043
+    },
+    "unity_position": [
+      0.0,
+      1.265
+    ],
+    "unity_size": [
+      10.8,
+      10.43
+    ],
+    "center_screen_px": [
+      540.0,
+      833.5
+    ]
+  },
+  "island_window_frame": {
+    "original_filename": "hut window frame.png",
+    "slot": "Window",
+    "output_path": "D:\\Games\\Video Game Dev\\SortResort\\Unity Redo\\SortResort\\Assets\\_Project\\Resources\\Sprites\\UI\\MyRoom\\Window\\island_window_frame.png",
+    "crop_rect": {
+      "x": 148,
+      "y": 510,
+      "width": 788,
+      "height": 670
+    },
+    "unity_position": [
+      0.02,
+      1.15
+    ],
+    "unity_size": [
+      7.88,
+      6.7
+    ],
+    "center_screen_px": [
+      542.0,
+      845.0
+    ]
+  },
+  "island_surfboard": {
+    "original_filename": "surfboard 02.png",
+    "slot": "RightDecoration",
+    "output_path": "D:\\Games\\Video Game Dev\\SortResort\\Unity Redo\\SortResort\\Assets\\_Project\\Resources\\Sprites\\UI\\MyRoom\\RightDecoration\\island_surfboard.png",
+    "crop_rect": {
+      "x": 830,
+      "y": 659,
+      "width": 210,
+      "height": 733
+    },
+    "unity_position": [
+      3.95,
+      -0.655
+    ],
+    "unity_size": [
+      2.1,
+      7.33
+    ],
+    "center_screen_px": [
+      935.0,
+      1025.5
+    ]
   }
-}
 }

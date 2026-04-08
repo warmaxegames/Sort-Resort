@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using System.Collections.Generic;
 
 namespace SortResort
@@ -15,6 +15,7 @@ namespace SortResort
             { "farm_", "farm" },
             { "tavern_", "tavern" },
             { "beach_", "island" },    // beach items go in island box
+            { "island_", "island" },   // island items go in island box
             { "supermarket_", "supermarket" },
         };
 
